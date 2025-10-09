@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDM86 - Dashboard</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* Navbar Style - Same as promotions page */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 800;
+        }
+        
+        .brand-icon {
+            font-size: 28px;
+        }
+        
+        .nav-actions {
+            position: relative;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-btn i {
+            font-size: 16px;
+        }
+        
+        .chevron-icon {
+            font-size: 12px !important;
+        }
+        
+        .content-hidden {
+            display: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .welcome-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .referrer-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .referrer-card h4 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .referrer-card .name {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .referrer-card .code {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        
+        .referral-code-card {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .referral-code-card .code {
+            font-size: 32px;
+            font-weight: 900;
+            color: #f59e0b;
+            letter-spacing: 2px;
+            margin: 15px 0;
+        }
+        
+        .referral-link-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #666;
+            word-break: break-all;
+            border: 1px solid #f59e0b;
+        }
+        
+        .qr-code-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+        }
+        
+        .qr-code-container #qr-canvas {
+            display: inline-block;
+        }
+        
+        .qr-code-container img,
+        .qr-code-container canvas {
+            border: 4px solid white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: block;
+        }
+        
+        .btn-copy {
+            padding: 12px 30px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .btn-copy:hover {
+            background: #d97706;
+        }
+        
+        .referred-users {
+            list-style: none;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        
+        .user-details h4 {
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .user-details p {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .user-code {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar - Same as promotions -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <h1 class="brand-name">CDM86</h1>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="nav-btn" id="user-btn">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-nav">Caricamento...</span>
+                    <i class="fas fa-chevron-down chevron-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Caricamento dati...</p>
+        </div>
+        
+        <div id="content" class="content-hidden">
+            <!-- Welcome Card -->
+            <div class="welcome-card">
+                <h2 id="welcome-text">Benvenuto!</h2>
+                <p id="user-email"></p>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon">🎯</div>
+                    <div class="value" id="stat-points">0</div>
+                    <div class="label">Punti Totali</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">👥</div>
+                    <div class="value" id="stat-referrals">0</div>
+                    <div class="label">Persone Invitate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🎫</div>
+                    <div class="value" id="stat-code">---</div>
+                    <div class="label">Tuo Codice</div>
+                </div>
+            </div>
+            
+            <!-- Chi ti ha invitato -->
+            <div class="section">
+                <h3>👤 Chi ti ha invitato</h3>
+                <div id="referrer-content"></div>
+            </div>
+            
+            <!-- Tuo codice referral -->
+            <div class="section">
+                <h3>🎁 Il Tuo Codice Referral</h3>
+                <div class="referral-code-card">
+                    <p>Condividi il tuo codice e guadagna punti!</p>
+                    <div class="code" id="my-code">LOADING...</div>
+                    
+                    <!-- Referral Link -->
+                    <div class="referral-link-box" id="referral-link">
+                        Caricamento link...
+                    </div>
+                    
+                    <!-- QR Code -->
+                    <div class="qr-code-container">
+                        <div id="qr-canvas"></div>
+                    </div>
+                    
+                    <button class="btn-copy" onclick="copyCode()">📋 Copia Codice</button>
+                    <button class="btn-copy" onclick="copyLink()">🔗 Copia Link</button>
+                    <button class="btn-copy" onclick="downloadQR()">⬇️ Scarica QR</button>
+                </div>
+            </div>
+            
+            <!-- Lista persone invitate -->
+            <div class="section">
+                <h3>📋 Persone che hai invitato (<span id="count-invited">0</span>)</h3>
+                <ul id="referred-users" class="referred-users"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let myReferralCode = '';
+        
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/public/login.html';
+        }
+        
+        // Fetch dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/users/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Session expired');
+                }
+                
+                const result = await response.json();
+                const data = result.data;
+                
+                // Update welcome
+                document.getElementById('welcome-text').textContent = 
+                    `Benvenuto, ${data.user.first_name || 'Utente'}!`;
+                document.getElementById('user-email').textContent = data.user.email || '';
+                
+                // Update stats
+                document.getElementById('stat-points').textContent = data.user.points || 0;
+                document.getElementById('stat-referrals').textContent = data.user.referralCount || 0;
+                document.getElementById('stat-code').textContent = data.user.referralCode || '---';
+                document.getElementById('my-code').textContent = data.user.referralCode || '---';
+                
+                myReferralCode = data.user.referralCode;
+                
+                // Generate referral link and QR code
+                if (data.user.referralCode) {
+                    const referralLink = `${window.location.origin}/public/login.html?ref=${data.user.referralCode}`;
+                    document.getElementById('referral-link').textContent = referralLink;
+                    
+                    // Generate QR Code
+                    generateQRCode(referralLink);
+                }
+                
+                // Show who referred you
+                const referrerContent = document.getElementById('referrer-content');
+                if (data.referredBy) {
+                    referrerContent.innerHTML = `
+                        <div class="referrer-card">
+                            <h4>SEI STATO INVITATO DA:</h4>
+                            <div class="name">${data.referredBy.name}</div>
+                            <div>${data.referredBy.email}</div>
+                            <div class="code">Codice usato: ${data.referredBy.code}</div>
+                        </div>
+                    `;
+                } else {
+                    referrerContent.innerHTML = `
+                        <div class="empty-state">
+                            <p>🌟 Sei un utente originale! Nessuno ti ha invitato.</p>
+                        </div>
+                    `;
+                }
+                
+                // Show referred users
+                const referredList = document.getElementById('referred-users');
+                const countInvited = document.getElementById('count-invited');
+                
+                if (data.referredUsers && data.referredUsers.length > 0) {
+                    countInvited.textContent = data.referredUsers.length;
+                    
+                    referredList.innerHTML = data.referredUsers.map(user => {
+                        const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+                        const verified = user.isVerified ? '<span class="badge badge-verified">✓ Verificato</span>' : '';
+                        
+                        return `
+                            <li class="user-item">
+                                <div class="user-info">
+                                    <div class="user-avatar">${initials}</div>
+                                    <div class="user-details">
+                                        <h4>${user.name} ${verified}</h4>
+                                        <p>${user.email} • ${user.points || 0} punti</p>
+                                    </div>
+                                </div>
+                                <div class="user-code">${user.referralCode}</div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    countInvited.textContent = '0';
+                    referredList.innerHTML = `
+                        <div class="empty-state">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <p>Non hai ancora invitato nessuno.</p>
+                            <p>Condividi il tuo codice per iniziare!</p>
+                        </div>
+                    `;
+                }
+                
+                // Show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').classList.remove('content-hidden');
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Sessione scaduta. Effettua di nuovo il login.');
+                logout();
+            }
+        }
+        
+        // Copy code
+        function copyCode() {
+            navigator.clipboard.writeText(myReferralCode);
+            alert('✅ Codice copiato: ' + myReferralCode);
+        }
+        
+        // Copy link
+        function copyLink() {
+            const link = `${window.location.origin}/public/login.html?ref=${myReferralCode}`;
+            navigator.clipboard.writeText(link);
+            alert('✅ Link copiato negli appunti!');
+        }
+        
+        // Generate QR Code
+        let qrCodeInstance = null;
+        function generateQRCode(url) {
+            const qrContainer = document.getElementById('qr-canvas');
+            if (!qrContainer) {
+                console.error('QR container not found');
+                return;
+            }
+            
+            // Clear previous QR code
+            qrContainer.innerHTML = '';
+            
+            // Generate new QR code using QRCode.js
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: "#f59e0b",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            console.log('✅ QR Code generated for:', url);
+        }
+        
+        // Download QR Code
+        function downloadQR() {
+            // QRCode.js creates an img tag inside the container
+            const qrImg = document.querySelector('#qr-canvas img');
+            if (!qrImg) {
+                alert('❌ QR Code non disponibile');
+                return;
+            }
+            
+            // Create download link
+            const a = document.createElement('a');
+            a.href = qrImg.src;
+            a.download = `CDM86-Referral-${myReferralCode}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert('✅ QR Code scaricato!');
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+        
+        // Load on page load
+        loadDashboard();
+        
+        // ===================================
+        // USER MENU DROPDOWN
+        // ===================================
+        const userBtn = document.getElementById('user-btn');
+        
+        // Create dropdown menu
+        const dropdown = document.createElement('div');
+        dropdown.style.cssText = `
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        `;
+        
+        dropdown.innerHTML = `
+            <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                <span>🎫</span><span>Promozioni</span>
+            </a>
+            <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #667eea; text-decoration: none; border-bottom: 1px solid #f0f0f0; font-weight: 600;">
+                <span>📊</span><span>Dashboard</span>
+            </a>
+            <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                <span>❤️</span><span>Preferiti</span>
+            </a>
+            <div onclick="logout()" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
+                <span>🚪</span><span>Esci</span>
+            </div>
+        `;
+        
+        userBtn.parentElement.style.position = 'relative';
+        userBtn.parentElement.appendChild(dropdown);
+        
+        // Toggle dropdown
+        userBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdown.style.display = 'none';
+        });
+        
+        // Update nav with user name
+        async function updateNav() {
+            try {
+                const response = await fetch(`${API_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const firstName = result.data.first_name || 'User';
+                    document.getElementById('user-name-nav').textContent = firstName;
+                }
+            } catch (error) {
+                console.error('Error loading user nav:', error);
+            }
+        }
+        
+        updateNav();
+    </script>
+</body>
+</html>

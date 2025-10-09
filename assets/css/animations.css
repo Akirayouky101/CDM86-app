@@ -1,0 +1,407 @@
+/* CDM86 Animations and Transitions */
+
+/* Keyframe Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes progressFill {
+    from {
+        width: 0%;
+    }
+    to {
+        width: var(--target-width);
+    }
+}
+
+@keyframes rotateIcon {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Page Load Animations */
+.header {
+    animation: slideInFromTop 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0s both;
+}
+
+.logo-section {
+    animation: fadeInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.main-nav {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+}
+
+.user-profile {
+    animation: fadeInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+}
+
+/* Panel Transitions */
+.panel {
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.panel.active {
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Staggered Card Animations */
+.stat-card {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.stat-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.stat-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Project Item Animations */
+.project-item {
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.project-item:nth-child(1) {
+    animation-delay: 0.5s;
+}
+
+.project-item:nth-child(2) {
+    animation-delay: 0.6s;
+}
+
+.project-item:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+/* Widget Animations */
+.widget {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.8s both;
+}
+
+.sidebar-widgets .widget:nth-child(2) {
+    animation-delay: 0.9s;
+}
+
+/* Hover Animations */
+.stat-card:hover .stat-icon {
+    animation: pulse 0.6s ease-in-out;
+}
+
+.logo-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+.nav-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.nav-btn:hover::before {
+    left: 100%;
+}
+
+/* Progress Bar Animation */
+.progress-fill {
+    animation: progressFill 1.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 1s;
+}
+
+/* Button Animations */
+.action-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.action-btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Loading States */
+.loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0px,
+        #e0e0e0 40px,
+        #f0f0f0 80px
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+/* Icon Animations */
+.stat-icon i {
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-icon i {
+    transform: scale(1.1);
+}
+
+.notification-icon {
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.3s ease;
+}
+
+.notification-item:hover .notification-icon::before {
+    transform: scale(1);
+}
+
+/* Panel Switch Animation */
+.panel-switch-enter {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.panel-switch-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel-switch-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.panel-switch-exit-active {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Micro-interactions */
+.project-avatar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-item:hover .project-avatar {
+    transform: rotate(5deg) scale(1.1);
+}
+
+.user-avatar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-profile:hover .user-avatar {
+    transform: scale(1.1);
+}
+
+/* Status Badge Animations */
+.project-status {
+    position: relative;
+    overflow: hidden;
+}
+
+.project-status::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.project-item:hover .project-status::before {
+    left: 100%;
+}
+
+/* Scrollbar Animations */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #2563eb, #3b82f6);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #1d4ed8, #2563eb);
+}
+
+/* Focus States */
+.nav-btn:focus,
+.action-btn:focus,
+.btn-secondary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .logo-icon {
+        animation: none;
+    }
+    
+    .progress-fill {
+        animation: none;
+    }
+}

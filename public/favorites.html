@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDM86 - Preferiti</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/assets/css/promotions.css">
+    <link rel="stylesheet" href="/assets/css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        .nav-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .chevron-icon {
+            font-size: 12px !important;
+        }
+        
+        .hero-section-favorites {
+            padding: 40px 0;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .favorites-grid-hidden {
+            display: none;
+        }
+        
+        .empty-state-hidden {
+            display: none;
+        }
+        
+        .empty-favorites {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .empty-favorites i {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-favorites h2 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .empty-favorites p {
+            color: #999;
+            margin-bottom: 30px;
+        }
+        
+        .btn-browse {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn-browse:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body class="promotions-page">
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <h1 class="brand-name">CDM86</h1>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="nav-btn" id="user-btn">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-nav">Caricamento...</span>
+                    <i class="fas fa-chevron-down chevron-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section hero-section-favorites">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    ❤️ I Tuoi <span class="highlight">Preferiti</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Tutte le promozioni che hai salvato
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Grid -->
+    <section class="promotions-section">
+        <div class="container">
+            <div id="loading" class="loading loading-container">
+                <div class="loading-spinner"></div>
+                <p>Caricamento preferiti...</p>
+            </div>
+
+            <div class="promotions-grid favorites-grid-hidden" id="favorites-grid">
+                <!-- Favorites will be loaded here -->
+            </div>
+            
+            <div id="empty-state" class="empty-favorites empty-state-hidden">
+                <i class="far fa-heart"></i>
+                <h2>Nessun preferito ancora</h2>
+                <p>Inizia ad aggiungere promozioni ai tuoi preferiti!</p>
+                <button class="btn-browse" onclick="window.location.href='/public/promotions.html'">
+                    Sfoglia Promozioni
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        
+        // Check authentication
+        if (!token) {
+            window.location.href = '/public/login.html';
+        }
+        
+        // Load favorites
+        async function loadFavorites() {
+            try {
+                const response = await fetch(`${API_URL}/promotions/user/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load favorites');
+                
+                const result = await response.json();
+                const favorites = result.data || [];
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (favorites.length === 0) {
+                    document.getElementById('empty-state').classList.remove('empty-state-hidden');
+                } else {
+                    displayFavorites(favorites);
+                }
+                
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('empty-state').classList.remove('empty-state-hidden');
+            }
+        }
+        
+        // Display favorites
+        function displayFavorites(favorites) {
+            const grid = document.getElementById('favorites-grid');
+            grid.classList.remove('favorites-grid-hidden');
+            
+            grid.innerHTML = favorites.map(promo => {
+                const discount = promo.discount_type === 'percentage' 
+                    ? `-${promo.discount_value}%`
+                    : `-€${promo.discount_value}`;
+                
+                return `
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <img src="${promo.image_main}" alt="${promo.title}" onerror="this.src='https://via.placeholder.com/400x200?text=CDM86'">
+                            <div class="promo-badge">${discount}</div>
+                            <button class="promo-favorite active" onclick="toggleFavorite('${promo.id}', event)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="promo-content">
+                            <div class="promo-header">
+                                <h3 class="promo-title">${promo.title}</h3>
+                                <div class="promo-category-badge">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                            </div>
+                            <p class="promo-description">${promo.short_description || promo.description}</p>
+                            <div class="promo-partner">
+                                <i class="fas fa-store"></i>
+                                <span>${promo.partner_name}</span>
+                            </div>
+                            <div class="promo-footer">
+                                <div class="promo-category-badge" style="background: #f3f4f6; color: #666; padding: 6px 12px; border-radius: 6px; font-size: 12px;">
+                                    ${promo.category}
+                                </div>
+                                <button class="btn-promo" onclick="viewPromotion('${promo.id}')">
+                                    <span>Dettagli</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Toggle favorite
+        async function toggleFavorite(promotionId, event) {
+            event.stopPropagation();
+            
+            try {
+                const response = await fetch(`${API_URL}/promotions/${promotionId}/favorite`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Reload favorites
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+            }
+        }
+        
+        // View promotion detail
+        function viewPromotion(id) {
+            // TODO: Create promotion detail page
+            alert('Dettaglio promozione: ' + id);
+        }
+        
+        // User menu dropdown
+        const userBtn = document.getElementById('user-btn');
+        const dropdown = document.createElement('div');
+        dropdown.style.cssText = `
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        `;
+        
+        dropdown.innerHTML = `
+            <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                <span>🎫</span><span>Promozioni</span>
+            </a>
+            <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                <span>📊</span><span>Dashboard</span>
+            </a>
+            <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #667eea; text-decoration: none; border-bottom: 1px solid #f0f0f0; font-weight: 600;">
+                <span>❤️</span><span>Preferiti</span>
+            </a>
+            <div onclick="logout()" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
+                <span>🚪</span><span>Esci</span>
+            </div>
+        `;
+        
+        userBtn.parentElement.style.position = 'relative';
+        userBtn.parentElement.appendChild(dropdown);
+        
+        userBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        document.addEventListener('click', () => {
+            dropdown.style.display = 'none';
+        });
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+        
+        // Load user name
+        async function loadUserName() {
+            try {
+                const response = await fetch(`${API_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('user-name-nav').textContent = result.data.first_name || 'User';
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
+        
+        loadUserName();
+        loadFavorites();
+    </script>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .promo-favorite.active i {
+            color: #ef4444;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+    </style>
+</body>
+</html>

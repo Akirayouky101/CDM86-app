@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDM86 - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            font-weight: 800;
+        }
+        
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .uppercase-input {
+            text-transform: uppercase;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .alert {
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .form-panel {
+            display: none;
+        }
+        
+        .form-panel.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .referral-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .referral-note strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🎫 CDM86</h1>
+            <p>Promozioni Esclusive con Referral</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('login')">Login</button>
+            <button class="tab" onclick="switchTab('register')">Registrati</button>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <!-- LOGIN FORM -->
+        <div id="login-panel" class="form-panel active">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="mario.rossi@test.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Accedi</button>
+            </form>
+            
+            <div class="loading" id="login-loading">
+                <div class="spinner"></div>
+                <p>Accesso in corso...</p>
+            </div>
+        </div>
+        
+        <!-- REGISTER FORM -->
+        <div id="register-panel" class="form-panel">
+            <div class="referral-note">
+                <strong>⚠️ Codice Referral Obbligatorio</strong>
+                Devi avere un codice referral per registrarti!<br>
+                <small>Usa <code>ADMIN001</code> per testare</small>
+            </div>
+            
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-firstname">Nome *</label>
+                    <input type="text" id="reg-firstname" required placeholder="Mario">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-lastname">Cognome *</label>
+                    <input type="text" id="reg-lastname" required placeholder="Rossi">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-email">Email *</label>
+                    <input type="email" id="reg-email" required placeholder="mario.rossi@test.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-password">Password *</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••" minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-referral">Codice Referral * 🎫</label>
+                    <input type="text" id="reg-referral" required placeholder="ADMIN001" class="uppercase-input">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Registrati</button>
+            </form>
+            
+            <div class="loading" id="register-loading">
+                <div class="spinner"></div>
+                <p>Registrazione in corso...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Switch tra login e registrazione
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update panels
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tab + '-panel').classList.add('active');
+            
+            // Hide alert
+            hideAlert();
+        }
+        
+        // Show alert
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+            setTimeout(() => hideAlert(), 5000);
+        }
+        
+        function hideAlert() {
+            document.getElementById('alert').classList.remove('show');
+        }
+        
+        // LOGIN FORM
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const loading = document.getElementById('login-loading');
+            const form = document.getElementById('login-form');
+            
+            form.style.display = 'none';
+            loading.classList.add('show');
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Save token
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
+                    
+                    // Redirect to promotions page
+                    setTimeout(() => {
+                        window.location.href = '/public/promotions.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Credenziali non valide');
+                    form.style.display = 'block';
+                    loading.classList.remove('show');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Errore di connessione. Server attivo?');
+                form.style.display = 'block';
+                loading.classList.remove('show');
+            }
+        });
+        
+        // REGISTER FORM
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('reg-firstname').value;
+            const lastName = document.getElementById('reg-lastname').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const referralCode = document.getElementById('reg-referral').value.toUpperCase();
+            
+            const loading = document.getElementById('register-loading');
+            const form = document.getElementById('register-form');
+            
+            form.style.display = 'none';
+            loading.classList.add('show');
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                        referralCode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showAlert('✅ Registrazione completata! Accedi ora.', 'success');
+                    
+                    // Switch to login tab
+                    setTimeout(() => {
+                        document.querySelectorAll('.tab')[0].click();
+                        document.getElementById('login-email').value = email;
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Errore durante la registrazione');
+                    form.style.display = 'block';
+                    loading.classList.remove('show');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showAlert('Errore di connessione. Server attivo?');
+                form.style.display = 'block';
+                loading.classList.remove('show');
+            }
+        });
+        
+        // Check if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = '/public/promotions.html';
+        }
+    </script>
+</body>
+</html>

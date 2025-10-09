@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scopri promozioni esclusive e risparmia con CDM86">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDM86">
+    
+    <title>CDM86 - Promozioni Esclusive</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icon-72x72.png">
+    <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/assets/css/promotions.css">
+    <link rel="stylesheet" href="/assets/css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Config -->
+    <script src="/assets/js/config.js"></script>
+</head>
+<body class="promotions-page">
+<body class="promotions-page">
+    
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <h1 class="brand-name">CDM86</h1>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="nav-btn" id="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="nav-btn" id="filter-btn">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <button class="nav-btn nav-btn-primary" id="login-btn">
+                    <i class="fas fa-user"></i>
+                    <span>Accedi</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Scopri Promozioni <span class="highlight">Esclusive</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Risparmia con le migliori offerte selezionate per te
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Promozioni</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">10K+</span>
+                        <span class="stat-label">Utenti</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">30%</span>
+                        <span class="stat-label">Risparmio Medio</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Filter -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="categories-scroll">
+                <button class="category-chip active" data-category="all">
+                    <i class="fas fa-th"></i>
+                    <span>Tutte</span>
+                </button>
+                <button class="category-chip" data-category="food">
+                    <i class="fas fa-utensils"></i>
+                    <span>Ristorazione</span>
+                </button>
+                <button class="category-chip" data-category="shopping">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Shopping</span>
+                </button>
+                <button class="category-chip" data-category="services">
+                    <i class="fas fa-concierge-bell"></i>
+                    <span>Servizi</span>
+                </button>
+                <button class="category-chip" data-category="entertainment">
+                    <i class="fas fa-film"></i>
+                    <span>Intrattenimento</span>
+                </button>
+                <button class="category-chip" data-category="wellness">
+                    <i class="fas fa-spa"></i>
+                    <span>Benessere</span>
+                </button>
+                <button class="category-chip" data-category="travel">
+                    <i class="fas fa-plane"></i>
+                    <span>Viaggi</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Grid -->
+    <section class="promotions-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Promozioni Attive</h2>
+                <div class="view-toggle">
+                    <button class="toggle-btn active" data-view="grid" aria-label="Vista griglia">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="toggle-btn" data-view="list" aria-label="Vista lista">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="promotions-grid" id="promotions-grid">
+                
+                <!-- Promotion Card 1 -->
+                <div class="promo-card" data-category="food">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500" alt="Pizza">
+                        <div class="promo-badge">-50%</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Pizza Margherita</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">Due pizze margherita al prezzo di una</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Pizzeria Da Mario</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€20.00</span>
+                                <span class="price-final">€10.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 5 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                234 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Card 2 -->
+                <div class="promo-card" data-category="shopping">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=500" alt="Shopping">
+                        <div class="promo-badge">-30%</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Sconto Shopping</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">30% su tutto l'abbigliamento</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Fashion Store</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€100.00</span>
+                                <span class="price-final">€70.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 10 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                156 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Card 3 -->
+                <div class="promo-card" data-category="services">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500" alt="Wellness">
+                        <div class="promo-badge">2x1</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Massaggio Relax</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-spa"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">Due massaggi al prezzo di uno</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Spa Harmony</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€120.00</span>
+                                <span class="price-final">€60.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 15 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                89 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Card 4 -->
+                <div class="promo-card" data-category="entertainment">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500" alt="Cinema">
+                        <div class="promo-badge">-40%</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Cinema 2x1</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-film"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">Due biglietti cinema al prezzo di uno</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Cinema Multiplex</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€18.00</span>
+                                <span class="price-final">€9.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 7 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                312 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Card 5 -->
+                <div class="promo-card" data-category="food">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500" alt="Sushi">
+                        <div class="promo-badge">-25%</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Menu Sushi</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">25% di sconto su menu completo</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Sushi Bar Zen</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€40.00</span>
+                                <span class="price-final">€30.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 12 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                178 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Card 6 -->
+                <div class="promo-card" data-category="travel">
+                    <div class="promo-image">
+                        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=500" alt="Travel">
+                        <div class="promo-badge">GRATIS</div>
+                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">Weekend Romantico</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-plane"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">Colazione inclusa gratis</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>Hotel Paradise</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€200.00</span>
+                                <span class="price-final">€150.00</span>
+                            </div>
+                            <button class="btn-promo">
+                                <span>Riscatta</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="promo-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                Scade tra 20 giorni
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-users"></i>
+                                45 riscatti
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Load More -->
+            <div class="load-more-section">
+                <button class="btn-load-more">
+                    <span>Carica Altre Promozioni</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <button class="bottom-nav-btn active" onclick="window.location.href='/public/promotions.html'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="bottom-nav-btn">
+            <i class="fas fa-search"></i>
+            <span>Cerca</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="window.location.href='/public/favorites.html'">
+            <i class="fas fa-heart"></i>
+            <span>Preferiti</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="window.location.href='/public/dashboard.html'">
+            <i class="fas fa-user"></i>
+            <span>Profilo</span>
+        </button>
+    </nav>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (confirm('Nuova versione disponibile! Vuoi ricaricare?')) {
+                                        newWorker.postMessage({ action: 'skipWaiting' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+            
+            // Handle controller change
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        }
+        
+        // Install PWA prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button/prompt
+            showInstallPromotion();
+        });
+        
+        function showInstallPromotion() {
+            // You can show a custom install prompt here
+            console.log('📱 PWA can be installed');
+        }
+        
+        // Track install
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installed successfully');
+            deferredPrompt = null;
+        });
+        
+        // ===================================
+        // USER MENU FUNCTIONALITY (LOGGED IN VERSION)
+        // ===================================
+        const API_URL = 'http://localhost:3000/api';
+        const loginBtn = document.getElementById('login-btn');
+        const token = localStorage.getItem('token');
+        
+        // Check if user is logged in
+        if (!token) {
+            window.location.href = '/public/login.html';
+        }
+        
+        // Load user info
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Session expired');
+                
+                const result = await response.json();
+                const user = result.data;
+                const firstName = user.first_name || 'User';
+                
+                // Update button with user name + dropdown
+                loginBtn.innerHTML = `
+                    <i class="fas fa-user-circle"></i>
+                    <span>${firstName}</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px; margin-left: 5px;"></i>
+                `;
+                
+                // Create dropdown menu
+                const dropdown = document.createElement('div');
+                dropdown.id = 'user-dropdown';
+                dropdown.style.cssText = `
+                    position: absolute;
+                    top: 50px;
+                    right: 0;
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                    min-width: 200px;
+                    display: none;
+                    z-index: 1000;
+                `;
+                
+                dropdown.innerHTML = `
+                    <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>📊</span><span>Dashboard</span>
+                    </a>
+                    <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>🎫</span><span>Promozioni</span>
+                    </a>
+                    <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>❤️</span><span>Preferiti</span>
+                    </a>
+                    <div onclick="logout()" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
+                        <span>🚪</span><span>Esci</span>
+                    </div>
+                `;
+                
+                loginBtn.parentElement.style.position = 'relative';
+                loginBtn.parentElement.appendChild(dropdown);
+                
+                // Toggle dropdown
+                loginBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    dropdown.style.display = 'none';
+                });
+                
+            } catch (error) {
+                console.error('Error loading user:', error);
+                localStorage.removeItem('token');
+                window.location.href = '/public/login.html';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+        
+        // Load user info
+        loadUserInfo();
+        
+        // ===================================
+        // LOAD PROMOTIONS FROM DATABASE (WITH PAGINATION)
+        // ===================================
+        let currentOffset = 0;
+        const LIMIT = 12;
+        let allPromotions = [];
+        let userFavorites = new Set();
+        let hasMorePromotions = true;
+        
+        async function loadPromotions(append = false) {
+            try {
+                // Show loading on button
+                const loadMoreBtn = document.querySelector('.btn-load-more');
+                if (loadMoreBtn && append) {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Caricamento...</span>';
+                }
+                
+                const response = await fetch(`${API_URL}/promotions?limit=${LIMIT}&offset=${currentOffset}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load promotions');
+                
+                const result = await response.json();
+                const newPromotions = result.data || [];
+                
+                // Debug pagination
+                console.log('📊 Pagination Info:', {
+                    offset: currentOffset,
+                    limit: LIMIT,
+                    received: newPromotions.length,
+                    total: result.pagination?.total,
+                    hasMore: result.pagination?.hasMore
+                });
+                
+                // Update pagination state
+                hasMorePromotions = result.pagination?.hasMore || false;
+                
+                // Get user favorites (only first time)
+                if (currentOffset === 0) {
+                    const favResponse = await fetch(`${API_URL}/promotions/user/favorites`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const favResult = await favResponse.json();
+                    userFavorites = new Set((favResult.data || []).map(p => p.id));
+                }
+                
+                if (append) {
+                    allPromotions = [...allPromotions, ...newPromotions];
+                    appendPromotions(newPromotions, userFavorites);
+                } else {
+                    allPromotions = newPromotions;
+                    displayPromotions(newPromotions, userFavorites);
+                }
+                
+                // Update button visibility
+                if (loadMoreBtn) {
+                    if (hasMorePromotions) {
+                        loadMoreBtn.style.display = 'flex';
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.innerHTML = '<span>Carica Altre Promozioni</span><i class="fas fa-chevron-down"></i>';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                const loadMoreBtn = document.querySelector('.btn-load-more');
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = '<span>Carica Altre Promozioni</span><i class="fas fa-chevron-down"></i>';
+                }
+            }
+        }
+        
+        function displayPromotions(promotions, favorites) {
+            const grid = document.getElementById('promotions-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = promotions.map(promo => createPromoCard(promo, favorites)).join('');
+        }
+        
+        function appendPromotions(promotions, favorites) {
+            const grid = document.getElementById('promotions-grid');
+            if (!grid) return;
+            
+            const newCards = promotions.map(promo => createPromoCard(promo, favorites)).join('');
+            grid.insertAdjacentHTML('beforeend', newCards);
+        }
+        
+        function createPromoCard(promo, favorites) {
+            const discount = promo.discount_type === 'percentage' 
+                ? `-${promo.discount_value}%`
+                : `-€${promo.discount_value}`;
+            
+            const isFavorite = favorites.has(promo.id);
+            const heartIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+            const heartClass = isFavorite ? 'promo-favorite active' : 'promo-favorite';
+            
+            // Calculate prices
+            const originalPrice = promo.price_original || 0;
+            const discountedPrice = promo.price_discounted || 0;
+            
+            return `
+                <div class="promo-card" data-category="${promo.category}">
+                    <div class="promo-image">
+                        <img src="${promo.image_main}" alt="${promo.title}" onerror="this.src='https://via.placeholder.com/400x200?text=CDM86'">
+                        <div class="promo-badge">${discount}</div>
+                        <button class="${heartClass}" onclick="toggleFavorite('${promo.id}', event)">
+                            <i class="${heartIcon}"></i>
+                        </button>
+                    </div>
+                    <div class="promo-content">
+                        <div class="promo-header">
+                            <h3 class="promo-title">${promo.title}</h3>
+                            <div class="promo-category-badge">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                        </div>
+                        <p class="promo-description">${promo.short_description || promo.description}</p>
+                        <div class="promo-partner">
+                            <i class="fas fa-store"></i>
+                            <span>${promo.partner_name}</span>
+                        </div>
+                        <div class="promo-footer">
+                            <div class="promo-price">
+                                <span class="price-original">€${originalPrice.toFixed(2)}</span>
+                                <span class="price-final">€${discountedPrice.toFixed(2)}</span>
+                            </div>
+                            <button class="btn-promo" onclick="viewPromotion('${promo.id}')">
+                                <span>Dettagli</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Toggle favorite
+        async function toggleFavorite(promotionId, event) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            
+            console.log('Toggle favorite:', promotionId);
+            console.log('Current state:', icon.className, btn.classList.contains('active'));
+            
+            try {
+                const response = await fetch(`${API_URL}/promotions/${promotionId}/favorite`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Server error:', error);
+                    throw new Error('Failed to toggle favorite');
+                }
+                
+                const result = await response.json();
+                console.log('Server response:', result);
+                
+                // Update UI
+                if (result.data.isFavorite) {
+                    console.log('Adding to favorites');
+                    icon.className = 'fas fa-heart';
+                    btn.classList.add('active');
+                } else {
+                    console.log('Removing from favorites');
+                    icon.className = 'far fa-heart';
+                    btn.classList.remove('active');
+                }
+                
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                alert('Errore nel salvare il preferito');
+            }
+        }
+        
+        // View promotion detail
+        function viewPromotion(id) {
+            // TODO: Create promotion detail page
+            alert('Dettaglio promozione: ' + id);
+        }
+        
+        // Load More button handler
+        document.querySelector('.btn-load-more')?.addEventListener('click', function() {
+            currentOffset += LIMIT;
+            loadPromotions(true); // append = true
+        });
+        
+        // Add CSS for active favorite button
+        const style = document.createElement('style');
+        style.textContent = `
+            .promo-favorite.active i {
+                color: #ef4444 !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Load promotions on page load
+        loadPromotions();
+    </script>
+</body>
+</html>
