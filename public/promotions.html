@@ -467,6 +467,8 @@
         })();
         
         // Load user info
+        
+        // Load user info
         async function loadUserInfo() {
             try {
                 const { data: userData, error } = await supabase
@@ -480,6 +482,66 @@
                 const firstName = userData.first_name || 'User';
                 document.getElementById('user-greeting').textContent = `Ciao, ${firstName}!`;
                 document.getElementById('user-points').textContent = userData.points || 0;
+                
+                // Update login button with user name
+                const loginBtn = document.getElementById('login-btn');
+                if (loginBtn) {
+                    loginBtn.innerHTML = `
+                        <i class="fas fa-user-circle"></i>
+                        <span>${firstName}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px; margin-left: 5px;"></i>
+                    `;
+                    
+                    // Create dropdown menu
+                    const dropdown = document.createElement('div');
+                    dropdown.id = 'user-dropdown';
+                    dropdown.style.cssText = `
+                        position: absolute;
+                        top: 50px;
+                        right: 0;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                        min-width: 200px;
+                        display: none;
+                        z-index: 1000;
+                    `;
+                    
+                    dropdown.innerHTML = `
+                        <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>📊</span><span>Dashboard</span>
+                        </a>
+                        <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>🎫</span><span>Promozioni</span>
+                        </a>
+                        <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>❤️</span><span>Preferiti</span>
+                        </a>
+                        <div id="logout-menu-item" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
+                            <span>🚪</span><span>Esci</span>
+                        </div>
+                    `;
+                    
+                    loginBtn.parentElement.style.position = 'relative';
+                    loginBtn.parentElement.appendChild(dropdown);
+                    
+                    // Toggle dropdown
+                    loginBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', () => {
+                        dropdown.style.display = 'none';
+                    });
+                    
+                    // Logout from dropdown
+                    dropdown.querySelector('#logout-menu-item').addEventListener('click', async () => {
+                        await supabase.auth.signOut();
+                        window.location.href = '/public/login.html';
+                    });
+                }
                 
             } catch (error) {
                 console.error('Error loading user:', error);
