@@ -484,6 +484,65 @@
                 const userNameNav = document.getElementById('user-name-nav');
                 if (userNameNav) userNameNav.textContent = userData.first_name || 'User';
                 
+                // Create dropdown menu for user button
+                const userBtn = document.getElementById('user-btn');
+                if (userBtn) {
+                    // Create dropdown
+                    const dropdown = document.createElement('div');
+                    dropdown.id = 'user-dropdown';
+                    dropdown.style.cssText = `
+                        position: absolute;
+                        top: 60px;
+                        right: 20px;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                        min-width: 200px;
+                        display: none;
+                        z-index: 1000;
+                    `;
+                    
+                    dropdown.innerHTML = `
+                        <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>📊</span><span>Dashboard</span>
+                        </a>
+                        <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>🎫</span><span>Promozioni</span>
+                        </a>
+                        <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>❤️</span><span>Preferiti</span>
+                        </a>
+                        <div id="logout-dropdown-item" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
+                            <span>🚪</span><span>Esci</span>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(dropdown);
+                    
+                    // Toggle dropdown
+                    userBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                    });
+                    
+                    // Prevent clicks inside dropdown from closing it
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!userBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+                    
+                    // Logout from dropdown
+                    dropdown.querySelector('#logout-dropdown-item').addEventListener('click', async () => {
+                        await supabase.auth.signOut();
+                        window.location.href = '/public/login.html';
+                    });
+                }
                 const welcomeText = document.getElementById('welcome-text');
                 if (welcomeText) welcomeText.textContent = `Benvenuto, ${userData.first_name}!`;
                 
