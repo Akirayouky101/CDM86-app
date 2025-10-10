@@ -158,6 +158,18 @@
                 return null;
             }
             currentUser = session.user;
+            
+            // Load and update user name in navbar
+            const { data: userData } = await supabase
+                .from('users')
+                .select('first_name')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (userData?.first_name) {
+                document.getElementById('user-name-nav').textContent = userData.first_name;
+            }
+            
             return currentUser;
         }
         
@@ -287,6 +299,69 @@
         window.viewPromotion = function(promotionId) {
             window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
         };
+        
+        // User dropdown menu
+        const userBtn = document.getElementById('userBtn');
+        let dropdown = null;
+        
+        if (userBtn) {
+            userBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                if (dropdown && dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+                
+                if (!dropdown) {
+                    dropdown = document.createElement('div');
+                    dropdown.id = 'user-dropdown';
+                    dropdown.style.cssText = `
+                        position: absolute;
+                        top: 50px;
+                        right: 0;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                        min-width: 200px;
+                        display: none;
+                        z-index: 1000;
+                    `;
+                    
+                    dropdown.innerHTML = `
+                        <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>📊</span><span>Dashboard</span>
+                        </a>
+                        <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>🎫</span><span>Promozioni</span>
+                        </a>
+                        <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <span>❤️</span><span>Preferiti</span>
+                        </a>
+                        <a href="#" id="logout-link" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #e74c3c; text-decoration: none;">
+                            <span>🚪</span><span>Esci</span>
+                        </a>
+                    `;
+                    
+                    userBtn.parentElement.style.position = 'relative';
+                    userBtn.parentElement.appendChild(dropdown);
+                    
+                    // Logout handler
+                    dropdown.querySelector('#logout-link').addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        await supabase.auth.signOut();
+                        window.location.href = '/public/login.html';
+                    });
+                }
+                
+                dropdown.style.display = 'block';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                if (dropdown) dropdown.style.display = 'none';
+            });
+        }
     </script>
 </body>
 </html>
