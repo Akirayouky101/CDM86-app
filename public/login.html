@@ -354,7 +354,25 @@
         });
         
         // REGISTER FORM
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
+
+        // Force uppercase on referral input
+        const referralInput = document.getElementById('reg-referral');
+        if (referralInput) {
+            referralInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+        
+        
+        // Force uppercase on referral input
+        const referralInput = document.getElementById('reg-referral');
+        if (referralInput) {
+            referralInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+        
+                document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const firstName = document.getElementById('reg-firstname').value.trim();
@@ -370,26 +388,7 @@
             loading.classList.add('show');
             
             try {
-                // 1. REGISTER WITH SUPABASE AUTH (trigger creates user in public.users)
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            first_name: firstName,
-                            last_name: lastName,
-                            referral_code_used: referralCode
-                        }
-                    }
-                });
-                
-                if (authError) throw authError;
-                if (!authData.user) throw new Error('Registrazione fallita');
-                
-                // Wait for trigger to create user
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // 2. VALIDATE REFERRAL CODE AND UPDATE referred_by_id
+                // 1. VALIDATE REFERRAL CODE FIRST (check existing users)
                 const { data: referrer, error: referrerError } = await supabase
                     .from('users')
                     .select('id, referral_code, first_name, last_name')
@@ -397,31 +396,37 @@
                     .single();
                 
                 if (referrerError || !referrer) {
-                    // Referral code invalid - delete the just created user
-                    await supabase.auth.admin.deleteUser(authData.user.id);
-                    throw new Error('Codice referral "' + referralCode + '" non valido!');
+                    throw new Error('CODICE REFERRAL NON VALIDO! Il codice "' + referralCode + '" non esiste nel database.');
                 }
                 
-                // 3. UPDATE referred_by_id
-                const { error: updateError } = await supabase
+                console.log('Referral valido:', referrer);
+                
+                // 2. NOW REGISTER (only if referral is valid)
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName,
+                            referral_code_used: referralCode,
+                            referred_by_id: referrer.id
+                        }
+                    }
+                });
+                
+                if (authError) throw authError;
+                if (!authData.user) throw new Error('Registrazione fallita');
+                
+                // 3. Wait for trigger then update referred_by_id
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                await supabase
                     .from('users')
                     .update({ referred_by_id: referrer.id })
                     .eq('id', authData.user.id);
                 
-                if (updateError) {
-                    console.error('Errore aggiornamento referred_by_id:', updateError);
-                }
-                
-                // 4. INCREMENT referrer's referred_count
-                const { error: countError } = await supabase.rpc('increment_referred_count', {
-                    user_id: referrer.id
-                });
-                
-                if (countError) {
-                    console.error('Errore incremento referred_count:', countError);
-                }
-                
-                showAlert('Registrazione completata! Invitato da ' + referrer.first_name + '. Verifica email.', 'success');
+                showAlert('Registrazione completata! Invitato da ' + referrer.first_name + '. Controlla email per conferma.', 'success');
                 
                 setTimeout(() => {
                     switchTab('login');
