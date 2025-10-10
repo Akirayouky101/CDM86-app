@@ -268,8 +268,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="reg-referral">Codice Referral * 🎫</label>
-                    <input type="text" id="reg-referral" required placeholder="ADMIN001" class="uppercase-input">
+                    <label for="reg-referral">Codice Referral (opzionale) 🎫</label>
+                    <input type="text" id="reg-referral" placeholder="ADMIN001" class="uppercase-input">
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Registrati</button>
@@ -379,18 +379,25 @@
             loading.classList.add('show');
             
             try {
-                // 1. VALIDATE REFERRAL CODE FIRST (check existing users)
-                const { data: referrer, error: referrerError } = await supabase
-                    .from('users')
-                    .select('id, referral_code, first_name, last_name')
-                    .eq('referral_code', referralCode)
-                    .single();
+                let referrer = null;
                 
-                if (referrerError || !referrer) {
-                    throw new Error('CODICE REFERRAL NON VALIDO! Il codice "' + referralCode + '" non esiste nel database.');
+                // 1. VALIDATE REFERRAL CODE FIRST (only if provided)
+                if (referralCode) {
+                    const { data: referrerData, error: referrerError } = await supabase
+                        .from('users')
+                        .select('id, referral_code, first_name, last_name')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    
+                    if (referrerError || !referrerData) {
+                        throw new Error('CODICE REFERRAL NON VALIDO! Il codice "' + referralCode + '" non esiste nel database.');
+                    }
+                    
+                    referrer = referrerData;
+                    console.log('Referral valido:', referrer);
+                } else {
+                    console.log('Registrazione senza referral code');
                 }
-                
-                console.log('Referral valido:', referrer);
                 
                 // 2. NOW REGISTER (only if referral is valid)
                 const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -409,15 +416,21 @@
                 if (authError) throw authError;
                 if (!authData.user) throw new Error('Registrazione fallita');
                 
-                // 3. Wait for trigger then update referred_by_id
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // 3. Wait for trigger then update referred_by_id (only if referrer exists)
+                if (referrer) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    await supabase
+                        .from('users')
+                        .update({ referred_by_id: referrer.id })
+                        .eq('id', authData.user.id);
+                }
                 
-                await supabase
-                    .from('users')
-                    .update({ referred_by_id: referrer.id })
-                    .eq('id', authData.user.id);
+                const successMsg = referrer 
+                    ? 'Registrazione completata! Invitato da ' + referrer.first_name + '. Controlla email per conferma.'
+                    : 'Registrazione completata! Controlla email per conferma.';
                 
-                showAlert('Registrazione completata! Invitato da ' + referrer.first_name + '. Controlla email per conferma.', 'success');
+                showAlert(successMsg, 'success');
                 
                 setTimeout(() => {
                     switchTab('login');
