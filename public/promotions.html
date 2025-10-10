@@ -480,8 +480,8 @@
                 if (error) throw error;
                 
                 const firstName = userData.first_name || 'User';
-                document.getElementById('user-greeting').textContent = `Ciao, ${firstName}!`;
-                document.getElementById('user-points').textContent = userData.points || 0;
+                const greetingEl = document.getElementById('user-greeting'); if (greetingEl) greetingEl.textContent = `Ciao, ${firstName}!`;
+                const pointsEl = document.getElementById('user-points'); if (pointsEl) pointsEl.textContent = userData.points || 0;
                 
                 // Update login button with user name
                 const loginBtn = document.getElementById('login-btn');
