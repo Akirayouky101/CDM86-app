@@ -200,9 +200,266 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-yes {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .modal-btn-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .modal-btn-no {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .modal-btn-no:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Wizard Styles */
+        .wizard-container {
+            display: none;
+        }
+        
+        .wizard-container.active {
+            display: block;
+        }
+        
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .wizard-step {
+            flex: 1;
+            height: 4px;
+            background: #e0e0e0;
+            margin: 0 5px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        
+        .wizard-step.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .wizard-step-content {
+            display: none;
+        }
+        
+        .wizard-step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .wizard-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .wizard-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .wizard-btn-back {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .wizard-btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .wizard-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .wizard-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .success-message .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .success-message h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+    <!-- Referral Modal -->
+    <div class="modal-overlay" id="referralModal">
+        <div class="modal-content">
+            <!-- Initial Question -->
+            <div id="modalQuestion">
+                <div class="modal-header">
+                    <h2>🎁 Hai un codice d'invito?</h2>
+                    <p>Per registrarti hai bisogno di un codice referral</p>
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-yes" onclick="handleHasCode()">Sì, ho un codice</button>
+                    <button class="modal-btn modal-btn-no" onclick="showWizard()">No, non ce l'ho</button>
+                </div>
+            </div>
+            
+            <!-- Wizard -->
+            <div class="wizard-container" id="wizardContainer">
+                <div class="modal-header">
+                    <h2>📧 Richiedi un codice referral</h2>
+                    <p>Compila il form per richiedere il tuo codice</p>
+                </div>
+                
+                <div class="wizard-progress">
+                    <div class="wizard-step active" id="progress1"></div>
+                    <div class="wizard-step" id="progress2"></div>
+                    <div class="wizard-step" id="progress3"></div>
+                </div>
+                
+                <!-- Step 1: Nome e Cognome -->
+                <div class="wizard-step-content active" id="step1">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="wizard-firstname" required placeholder="Mario">
+                    </div>
+                    <div class="form-group">
+                        <label>Cognome</label>
+                        <input type="text" id="wizard-lastname" required placeholder="Rossi">
+                    </div>
+                </div>
+                
+                <!-- Step 2: Email -->
+                <div class="wizard-step-content" id="step2">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="wizard-email" required placeholder="mario.rossi@example.com">
+                    </div>
+                </div>
+                
+                <!-- Step 3: Conferma -->
+                <div class="wizard-step-content" id="step3">
+                    <div style="background: #f5f5f5; padding: 20px; border-radius: 10px;">
+                        <p style="margin-bottom: 15px;"><strong>Verifica i tuoi dati:</strong></p>
+                        <p><strong>Nome:</strong> <span id="confirm-name"></span></p>
+                        <p><strong>Email:</strong> <span id="confirm-email"></span></p>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                        Riceverai il codice referral all'indirizzo fornito.
+                    </p>
+                </div>
+                
+                <!-- Success Message -->
+                <div class="wizard-step-content" id="stepSuccess">
+                    <div class="success-message">
+                        <div class="icon">✅</div>
+                        <h3>Richiesta inviata!</h3>
+                        <p>Riceverai il codice referral via email a breve.</p>
+                    </div>
+                </div>
+                
+                <div class="wizard-actions">
+                    <button class="wizard-btn wizard-btn-back" id="btnBack" onclick="wizardBack()">Indietro</button>
+                    <button class="wizard-btn wizard-btn-next" id="btnNext" onclick="wizardNext()">Avanti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="logo">
             <h1>🎫 CDM86</h1>
@@ -210,8 +467,8 @@
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('login')">Login</button>
-            <button class="tab" onclick="switchTab('register')">Registrati</button>
+            <button class="tab active" onclick="switchTab('login', event)">Login</button>
+            <button class="tab" onclick="switchTab('register', event)">Registrati</button>
         </div>
         
         <div id="alert" class="alert"></div>
@@ -286,10 +543,18 @@
         const API_URL = 'http://localhost:3000/api';
         
         // Switch tra login e registrazione
-        function switchTab(tab) {
+        function switchTab(tab, event) {
+            // Se clicchiamo su register, mostra la modale
+            if (tab === 'register') {
+                showReferralModal();
+                return;
+            }
+            
             // Update tabs
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Update panels
             document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
@@ -297,6 +562,131 @@
             
             // Hide alert
             hideAlert();
+        }
+        
+        // Referral Modal Functions
+        let currentWizardStep = 1;
+        
+        function showReferralModal() {
+            document.getElementById('referralModal').classList.add('active');
+            document.getElementById('modalQuestion').style.display = 'block';
+            document.getElementById('wizardContainer').classList.remove('active');
+        }
+        
+        function closeReferralModal() {
+            document.getElementById('referralModal').classList.remove('active');
+        }
+        
+        function handleHasCode() {
+            closeReferralModal();
+            // Mostra il form di registrazione
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('register-panel').classList.add('active');
+        }
+        
+        function showWizard() {
+            document.getElementById('modalQuestion').style.display = 'none';
+            document.getElementById('wizardContainer').classList.add('active');
+            currentWizardStep = 1;
+            updateWizardStep();
+        }
+        
+        function updateWizardStep() {
+            // Update progress bar
+            for (let i = 1; i <= 3; i++) {
+                const progress = document.getElementById(`progress${i}`);
+                if (i <= currentWizardStep) {
+                    progress.classList.add('active');
+                } else {
+                    progress.classList.remove('active');
+                }
+            }
+            
+            // Update step content
+            document.querySelectorAll('.wizard-step-content').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            if (currentWizardStep === 4) {
+                document.getElementById('stepSuccess').classList.add('active');
+                document.getElementById('btnBack').style.display = 'none';
+                document.getElementById('btnNext').textContent = 'Chiudi';
+            } else {
+                document.getElementById(`step${currentWizardStep}`).classList.add('active');
+                document.getElementById('btnBack').style.display = currentWizardStep === 1 ? 'none' : 'block';
+                document.getElementById('btnNext').textContent = currentWizardStep === 3 ? 'Invia' : 'Avanti';
+            }
+        }
+        
+        function wizardBack() {
+            if (currentWizardStep > 1) {
+                currentWizardStep--;
+                updateWizardStep();
+            }
+        }
+        
+        function wizardNext() {
+            if (currentWizardStep === 4) {
+                closeReferralModal();
+                return;
+            }
+            
+            // Validazione
+            if (currentWizardStep === 1) {
+                const firstname = document.getElementById('wizard-firstname').value.trim();
+                const lastname = document.getElementById('wizard-lastname').value.trim();
+                if (!firstname || !lastname) {
+                    alert('Inserisci nome e cognome');
+                    return;
+                }
+            } else if (currentWizardStep === 2) {
+                const email = document.getElementById('wizard-email').value.trim();
+                if (!email || !email.includes('@')) {
+                    alert('Inserisci una email valida');
+                    return;
+                }
+            } else if (currentWizardStep === 3) {
+                // Conferma e invia
+                const firstname = document.getElementById('wizard-firstname').value.trim();
+                const lastname = document.getElementById('wizard-lastname').value.trim();
+                const email = document.getElementById('wizard-email').value.trim();
+                
+                document.getElementById('confirm-name').textContent = `${firstname} ${lastname}`;
+                document.getElementById('confirm-email').textContent = email;
+                
+                // Invia email
+                sendReferralRequest(firstname, lastname, email);
+                currentWizardStep++;
+                updateWizardStep();
+                return;
+            }
+            
+            currentWizardStep++;
+            updateWizardStep();
+            
+            // Se siamo allo step 3, popola i dati di conferma
+            if (currentWizardStep === 3) {
+                const firstname = document.getElementById('wizard-firstname').value.trim();
+                const lastname = document.getElementById('wizard-lastname').value.trim();
+                const email = document.getElementById('wizard-email').value.trim();
+                document.getElementById('confirm-name').textContent = `${firstname} ${lastname}`;
+                document.getElementById('confirm-email').textContent = email;
+            }
+        }
+        
+        function sendReferralRequest(firstName, lastName, email) {
+            // Invia email usando mailto
+            const subject = encodeURIComponent('Richiesta Codice Referral - CDM86');
+            const body = encodeURIComponent(`Nuova richiesta di codice referral:
+
+Nome: ${firstName} ${lastName}
+Email: ${email}
+
+Per favore, invia un codice referral a questo utente.`);
+            
+            window.location.href = `mailto:referralcdm86@appdataconnect.it?subject=${subject}&body=${body}`;
         }
         
         // Show alert
