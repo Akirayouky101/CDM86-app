@@ -174,11 +174,15 @@
         // Load favorites
         async function loadFavorites() {
             try {
+                console.log('Loading favorites for user:', currentUser.id);
+                
                 // Get user's favorite promotion IDs
                 const { data: favorites, error: favError } = await supabase
                     .from('favorites')
                     .select('promotion_id')
                     .eq('user_id', currentUser.id);
+                
+                console.log('Favorites response:', { favorites, favError });
                 
                 if (favError) throw favError;
                 
@@ -189,10 +193,14 @@
                 
                 // Get promotion details
                 const promotionIds = favorites.map(f => f.promotion_id);
+                console.log('Fetching promotions:', promotionIds);
+                
                 const { data: promotions, error: promoError } = await supabase
                     .from('promotions')
                     .select('*')
                     .in('id', promotionIds);
+                
+                console.log('Promotions response:', { promotions, promoError });
                 
                 if (promoError) throw promoError;
                 
@@ -200,8 +208,10 @@
                 
             } catch (error) {
                 console.error('Error loading favorites:', error);
-                document.getElementById('favorites-grid').innerHTML = 
-                    '<p style="text-align:center; padding:2rem;">Errore nel caricamento</p>';
+                const grid = document.getElementById('favorites-grid');
+                if (grid) {
+                    grid.innerHTML = `<p style="text-align:center; padding:2rem; color: red;">Errore: ${error.message}</p>`;
+                }
             }
         }
         
