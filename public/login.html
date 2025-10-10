@@ -407,8 +407,8 @@
                         data: {
                             first_name: firstName,
                             last_name: lastName,
-                            referral_code_used: referralCode,
-                            referred_by_id: referrer.id
+                            referral_code_used: referralCode || null,
+                            referred_by_id: referrer ? referrer.id : null
                         }
                     }
                 });
