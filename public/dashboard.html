@@ -567,11 +567,18 @@
                 }
                 
                 // Get who referred this user (chi ti ha invitato)
-                const { data: referrerData, error: referrerError } = await supabase
-                    .from('users')
-                    .select('id, first_name, last_name, referral_code')
-                    .eq('id', userData.referred_by_id)
-                    .single();
+                let referrerData = null;
+                let referrerError = null;
+                
+                if (userData.referred_by_id) {
+                    const result = await supabase
+                        .from('users')
+                        .select('id, first_name, last_name, referral_code')
+                        .eq('id', userData.referred_by_id)
+                        .single();
+                    referrerData = result.data;
+                    referrerError = result.error;
+                }
                 
                 const referrerContent = document.getElementById('referrer-content');
                 if (referrerContent) {
