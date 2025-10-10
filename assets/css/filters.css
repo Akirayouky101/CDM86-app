@@ -380,12 +380,12 @@
     }
     
     .search-container {
-        width: 100%;
-        max-width: 100%;
-        margin-bottom: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
         padding: 10px 16px;
         order: 10;
-        flex-basis: 100%;
+        flex: 0 0 100%;
     }
     
     .search-input {
