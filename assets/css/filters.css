@@ -347,8 +347,20 @@
     font-size: 14px;
 }
 
+/* Desktop: hide search outside nav-actions, show inside */
+@media (min-width: 769px) {
+    .nav-container > .search-container {
+        display: none;
+    }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    /* Hide search inside nav-actions, show outside */
+    .nav-actions .search-container {
+        display: none;
+    }
+    
     /* Navbar mobile layout */
     .nav-container {
         flex-wrap: wrap;
@@ -370,6 +382,7 @@
         align-items: center;
         gap: 10px;
         justify-content: flex-end;
+        order: 1;
     }
     
     /* Hide text on mobile, keep icons only */
@@ -381,6 +394,8 @@
     .search-container {
         width: 100%;
         padding: 10px 16px;
+        order: 2;
+        margin: 0;
     }
     
     .search-input {
