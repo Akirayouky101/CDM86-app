@@ -528,12 +528,20 @@
                     // Toggle dropdown
                     loginBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                        const isVisible = dropdown.style.display === 'block';
+                        dropdown.style.display = isVisible ? 'none' : 'block';
+                    });
+                    
+                    // Prevent clicks inside dropdown from propagating
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
                     });
                     
                     // Close dropdown when clicking outside
-                    document.addEventListener('click', () => {
-                        dropdown.style.display = 'none';
+                    document.addEventListener('click', (e) => {
+                        if (!loginBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                            dropdown.style.display = 'none';
+                        }
                     });
                     
                     // Logout from dropdown
@@ -544,6 +552,9 @@
                 }
                 
             } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
                 console.error('Error loading user:', error);
             }
         }
