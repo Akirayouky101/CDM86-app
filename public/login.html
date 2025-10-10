@@ -357,11 +357,11 @@
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const firstName = document.getElementById('reg-firstname').value;
-            const lastName = document.getElementById('reg-lastname').value;
-            const email = document.getElementById('reg-email').value;
+            const firstName = document.getElementById('reg-firstname').value.trim();
+            const lastName = document.getElementById('reg-lastname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
-            const referralCode = document.getElementById('reg-referral').value.toUpperCase();
+            const referralCode = document.getElementById('reg-referral').value.toUpperCase().trim();
             
             const loading = document.getElementById('register-loading');
             const form = document.getElementById('register-form');
@@ -370,34 +370,67 @@
             loading.classList.add('show');
             
             try {
-                // Register with Supabase Auth
-                const { data, error } = await supabase.auth.signUp({
+                // 1. VALIDATE REFERRAL CODE EXISTS
+                const { data: referrer, error: referrerError } = await supabase
+                    .from('users')
+                    .select('id, referral_code, first_name, last_name')
+                    .eq('referral_code', referralCode)
+                    .single();
+                
+                if (referrerError || !referrer) {
+                    throw new Error(`❌ Codice referral "${referralCode}" non valido! Verifica con chi ti ha invitato.`);
+                }
+                
+                console.log('✅ Referral valido:', referrer.first_name, referrer.last_name, '(' + referrer.referral_code + ')');
+                
+                // 2. REGISTER WITH SUPABASE AUTH
+                const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
                         data: {
                             first_name: firstName,
                             last_name: lastName,
-                            referral_code_used: referralCode || null
+                            referral_code_used: referralCode,
+                            referred_by_id: referrer.id
                         }
                     }
                 });
                 
-                if (error) throw error;
+                if (authError) throw authError;
                 
-                showAlert('✅ Registrazione completata! Passa al login.', 'success');
+                if (!authData.user) {
+                    throw new Error('Registrazione fallita: nessun utente creato');
+                }
                 
-                // Switch to login tab and pre-fill email
+                // 3. UPDATE USER TABLE WITH referred_by_id
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ 
+                        referred_by_id: referrer.id 
+                    })
+                    .eq('id', authData.user.id);
+                
+                if (updateError) {
+                    console.error('⚠️ Errore aggiornamento referred_by_id:', updateError);
+                }
+                
+                showAlert(`✅ Registrazione completata! Sei stato invitato da ${referrer.first_name}. Verifica la tua email.`, 'success');
+                
                 setTimeout(() => {
                     switchTab('login');
                     document.getElementById('login-email').value = email;
                     form.style.display = 'block';
                     loading.classList.remove('show');
-                }, 2000);
+                }, 3000);
                 
             } catch (error) {
                 console.error('Register error:', error);
                 showAlert(error.message || 'Errore durante la registrazione');
+                form.style.display = 'block';
+                loading.classList.remove('show');
+            }
+        });
                 form.style.display = 'block';
                 loading.classList.remove('show');
             }
