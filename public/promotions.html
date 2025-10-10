@@ -435,85 +435,84 @@
     </nav>
 
     <!-- PWA Service Worker Registration -->
-    <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then((registration) => {
-                        console.log('✅ Service Worker registered:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New service worker available
-                                    if (confirm('Nuova versione disponibile! Vuoi ricaricare?')) {
-                                        newWorker.postMessage({ action: 'skipWaiting' });
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('❌ Service Worker registration failed:', error);
-                    });
-            });
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        
+        let currentUser = null;
+        
+        // Check authentication
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
             
-            // Handle controller change
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                window.location.reload();
-            });
-        }
-        
-        // Install PWA prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
+            if (!session) {
+                window.location.href = '/public/login.html';
+                return null;
+            }
             
-            // Show install button/prompt
-            showInstallPromotion();
-        });
-        
-        function showInstallPromotion() {
-            // You can show a custom install prompt here
-            console.log('📱 PWA can be installed');
+            currentUser = session.user;
+            return currentUser;
         }
         
-        // Track install
-        window.addEventListener('appinstalled', () => {
-            console.log('✅ PWA installed successfully');
-            deferredPrompt = null;
-        });
-        
-        // ===================================
-        // USER MENU FUNCTIONALITY (LOGGED IN VERSION)
-        // ===================================
-        const API_URL = 'http://localhost:3000/api';
-        const loginBtn = document.getElementById('login-btn');
-        const token = localStorage.getItem('token');
-        
-        // Check if user is logged in
-        if (!token) {
-            window.location.href = '/public/login.html';
-        }
+        // Initialize
+        (async () => {
+            const user = await checkAuth();
+            if (!user) return;
+            
+            await loadUserInfo();
+            await loadPromotions();
+            setupEventListeners();
+        })();
         
         // Load user info
         async function loadUserInfo() {
             try {
-                const response = await fetch(`${API_URL}/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const { data: userData, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
                 
-                if (!response.ok) throw new Error('Session expired');
+                if (error) throw error;
                 
-                const result = await response.json();
-                const user = result.data;
-                const firstName = user.first_name || 'User';
+                const firstName = userData.first_name || 'User';
+                document.getElementById('user-greeting').textContent = `Ciao, ${firstName}!`;
+                document.getElementById('user-points').textContent = userData.points || 0;
                 
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
+        
+        // Load promotions
+        async function loadPromotions() {
+            try {
+                const { data: promotions, error } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                // Load favorites
+                const { data: favorites } = await supabase
+                    .from('favorites')
+                    .select('promotion_id')
+                    .eq('user_id', currentUser.id);
+                
+                const favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                
+                displayPromotions(promotions, favoriteIds);
+                
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                document.getElementById('promotions-grid').innerHTML = 
+                    '<p style="text-align:center; padding:2rem;">Errore nel caricamento delle promozioni</p>';
+            }
+        }
         
         // Display promotions
         function displayPromotions(promotions, favoriteIds) {
