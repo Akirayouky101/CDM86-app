@@ -175,12 +175,7 @@
         
         // Initialize
         (async () => {
-            console.log('Initializing favorites page...');
-            const grid = document.getElementById('favorites-grid');
-            console.log('Grid element:', grid);
-            
             const user = await checkAuth();
-            console.log('User authenticated:', user);
             if (!user) return;
             
             await loadFavorites();
@@ -188,34 +183,31 @@
         
         // Load favorites
         async function loadFavorites() {
+            const loading = document.getElementById('loading');
+            const grid = document.getElementById('favorites-grid');
+            
             try {
-                console.log('Loading favorites for user:', currentUser.id);
-                
                 // Get user's favorite promotion IDs
                 const { data: favorites, error: favError } = await supabase
                     .from('favorites')
                     .select('promotion_id')
                     .eq('user_id', currentUser.id);
                 
-                console.log('Favorites response:', { favorites, favError });
-                
                 if (favError) throw favError;
                 
                 if (!favorites || favorites.length === 0) {
+                    if (loading) loading.style.display = 'none';
                     displayFavorites([]);
                     return;
                 }
                 
                 // Get promotion details
                 const promotionIds = favorites.map(f => f.promotion_id);
-                console.log('Fetching promotions:', promotionIds);
                 
                 const { data: promotions, error: promoError } = await supabase
                     .from('promotions')
                     .select('*')
                     .in('id', promotionIds);
-                
-                console.log('Promotions response:', { promotions, promoError });
                 
                 if (promoError) throw promoError;
                 
@@ -223,7 +215,7 @@
                 
             } catch (error) {
                 console.error('Error loading favorites:', error);
-                const grid = document.getElementById('favorites-grid');
+                if (loading) loading.style.display = 'none';
                 if (grid) {
                     grid.innerHTML = `<p style="text-align:center; padding:2rem; color: red;">Errore: ${error.message}</p>`;
                 }
@@ -233,8 +225,16 @@
         // Display favorites
         function displayFavorites(promotions) {
             const grid = document.getElementById('favorites-grid');
+            const loading = document.getElementById('loading');
             
-            // Show the grid
+            // Hide loading spinner
+            if (loading) loading.style.display = 'none';
+            
+            // Check if empty
+            if (!promotions || promotions.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:2rem;">Nessun preferito ancora</p>';
+                return;
+            }
             
             grid.innerHTML = promotions.map(promo => {
                 const originalPrice = parseFloat(promo.original_price) || 0;
@@ -301,7 +301,7 @@
         };
         
         // User dropdown menu
-        const userBtn = document.getElementById('userBtn');
+        const userBtn = document.getElementById('user-btn');
         let dropdown = null;
         
         if (userBtn) {
