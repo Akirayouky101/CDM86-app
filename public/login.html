@@ -282,24 +282,19 @@
         </div>
     </div>
     
-    <script>
-        const API_URL = 'http://localhost:3000/api';
+    
+    <!-- Load config first -->
+    <script src="/assets/js/config.js"></script>
+    
+    <!-- Load Supabase and auth module -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        // Switch tra login e registrazione
-        function switchTab(tab) {
-            // Update tabs
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Update panels
-            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(tab + '-panel').classList.add('active');
-            
-            // Hide alert
-            hideAlert();
-        }
+        // Initialize Supabase
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        window.supabaseClient = supabase;
         
-        // Show alert
+        // Helper functions
         function showAlert(message, type = 'error') {
             const alert = document.getElementById('alert');
             alert.textContent = message;
@@ -311,7 +306,18 @@
             document.getElementById('alert').classList.remove('show');
         }
         
-        // LOGIN FORM
+        // Switch tabs
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tab + '-panel').classList.add('active');
+            
+            hideAlert();
+        }
+        
+        // LOGIN
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -325,47 +331,39 @@
             loading.classList.add('show');
             
             try {
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
                 
-                const data = await response.json();
+                if (error) throw error;
                 
-                if (response.ok && data.success) {
-                    // Save token
-                    localStorage.setItem('token', data.data.token);
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                    
-                    showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
-                    
-                    // Redirect to promotions page
-                    setTimeout(() => {
-                        window.location.href = '/public/promotions.html';
-                    }, 1500);
-                } else {
-                    showAlert(data.message || 'Credenziali non valide');
-                    form.style.display = 'block';
-                    loading.classList.remove('show');
-                }
+                showAlert('✅ Login effettuato!', 'success');
+                setTimeout(() => window.location.href = '/public/promotions.html', 1000);
+                
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert('Errore di connessione. Server attivo?');
+                showAlert(error.message || 'Email o password errati');
                 form.style.display = 'block';
                 loading.classList.remove('show');
             }
         });
         
-        // REGISTER FORM
+        // REGISTER
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const firstName = document.getElementById('reg-firstname').value;
-            const lastName = document.getElementById('reg-lastname').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const referralCode = document.getElementById('reg-referral').value.toUpperCase();
+            const firstName = document.getElementById('register-firstname').value;
+            const lastName = document.getElementById('register-lastname').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const referralCode = document.getElementById('register-referral').value || null;
+            
+            if (password !== confirmPassword) {
+                showAlert('Le password non corrispondono');
+                return;
+            }
             
             const loading = document.getElementById('register-loading');
             const form = document.getElementById('register-form');
@@ -374,45 +372,41 @@
             loading.classList.add('show');
             
             try {
-                const response = await fetch(`${API_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        firstName,
-                        lastName,
-                        email,
-                        password,
-                        referralCode
-                    })
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName,
+                            referral_code_used: referralCode
+                        }
+                    }
                 });
                 
-                const data = await response.json();
+                if (error) throw error;
                 
-                if (response.ok && data.success) {
-                    showAlert('✅ Registrazione completata! Accedi ora.', 'success');
-                    
-                    // Switch to login tab
-                    setTimeout(() => {
-                        document.querySelectorAll('.tab')[0].click();
-                        document.getElementById('login-email').value = email;
-                    }, 2000);
-                } else {
-                    showAlert(data.message || 'Errore durante la registrazione');
-                    form.style.display = 'block';
-                    loading.classList.remove('show');
-                }
+                showAlert('✅ Registrazione completata! Controlla la tua email.', 'success');
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.tab')[0].click();
+                    document.getElementById('login-email').value = email;
+                }, 2000);
+                
             } catch (error) {
                 console.error('Register error:', error);
-                showAlert('Errore di connessione. Server attivo?');
+                showAlert(error.message || 'Errore durante la registrazione');
                 form.style.display = 'block';
                 loading.classList.remove('show');
             }
         });
         
         // Check if already logged in
-        if (localStorage.getItem('token')) {
-            window.location.href = '/public/promotions.html';
-        }
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = '/public/promotions.html';
+            }
+        });
     </script>
 </body>
 </html>
