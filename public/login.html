@@ -311,6 +311,30 @@
         // Make switchTab global
         window.switchTab = switchTab;
         
+        // Check if there's a referral code in URL (from QR code)
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        
+        if (refCode) {
+            // Switch to register tab
+            switchTab('register');
+            
+            // Fill referral code
+            const referralInput = document.getElementById('reg-referral');
+            if (referralInput) {
+                referralInput.value = refCode.toUpperCase();
+                // Make it readonly (can't be changed)
+                referralInput.setAttribute('readonly', true);
+                referralInput.style.backgroundColor = '#f0f0f0';
+                referralInput.style.cursor = 'not-allowed';
+                
+                // Add visual indicator
+                referralInput.insertAdjacentHTML('afterend', 
+                    '<small style="display: block; color: #667eea; margin-top: 4px; font-size: 0.85em;">🎁 Codice referral da invito</small>'
+                );
+            }
+        }
+        
         // Show alert
         function showAlert(message, type = 'error') {
             const alert = document.getElementById('alert');
