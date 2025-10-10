@@ -344,7 +344,16 @@
             
             // Check if empty
             if (!promotions || promotions.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; padding:2rem;">Nessun preferito ancora</p>';
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <i class="far fa-heart" style="font-size: 80px; color: #ddd; margin-bottom: 20px; display: block;"></i>
+                        <h2 style="color: #666; margin-bottom: 10px; font-size: 24px;">Nessun preferito ancora</h2>
+                        <p style="color: #999; margin-bottom: 30px;">Inizia ad aggiungere promozioni ai tuoi preferiti!</p>
+                        <button class="btn-browse" onclick="window.location.href='/public/promotions.html'">
+                            Sfoglia Promozioni
+                        </button>
+                    </div>
+                `;
                 return;
             }
             
