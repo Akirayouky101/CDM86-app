@@ -354,27 +354,22 @@
         flex-wrap: wrap;
         gap: 12px;
         padding: 15px 20px !important;
+        align-items: center;
     }
     
     .nav-brand {
-        flex: 1;
+        flex: 0 0 auto;
         display: flex;
         align-items: center;
         gap: 10px;
     }
     
     .nav-actions {
+        flex: 1;
         display: flex;
         align-items: center;
         gap: 10px;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-    
-    /* Filter and user buttons stay on right */
-    #filter-btn,
-    #login-btn {
-        margin-left: auto;
+        justify-content: flex-end;
     }
     
     .search-container {
