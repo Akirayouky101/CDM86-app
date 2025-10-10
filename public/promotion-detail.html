@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettaglio Promozione - CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .promo-detail-container {
+            max-width: 900px;
+            margin: 100px auto 40px;
+            padding: 0 20px;
+        }
+        
+        .promo-detail-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .promo-detail-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        .promo-detail-content {
+            padding: 40px;
+        }
+        
+        .promo-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .promo-detail-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin: 0;
+        }
+        
+        .promo-favorite-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.3s;
+        }
+        
+        .promo-favorite-btn.active {
+            color: #ff4444;
+        }
+        
+        .promo-partner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .promo-description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 30px;
+        }
+        
+        .promo-price-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+        }
+        
+        .price-label {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+        
+        .price-original {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: line-through;
+        }
+        
+        .price-final {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .promo-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-redeem {
+            flex: 1;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-redeem:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-back {
+            padding: 18px 30px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="/assets/images/logo.png" alt="CDM86" onerror="this.style.display='none'">
+                <span>CDM86</span>
+            </div>
+            <div class="nav-user">
+                <button class="user-btn" id="userBtn">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="user-name-nav">Caricamento...</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="promo-detail-container">
+        <div class="promo-detail-card">
+            <img id="promo-image" class="promo-detail-image" src="/assets/images/placeholder.jpg" alt="Promozione">
+            
+            <div class="promo-detail-content">
+                <div class="promo-detail-header">
+                    <h1 class="promo-detail-title" id="promo-title">Caricamento...</h1>
+                    <button class="promo-favorite-btn" id="favorite-btn" onclick="toggleFavorite()">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+                
+                <div class="promo-partner">
+                    <i class="fas fa-store"></i>
+                    <span id="promo-partner">Partner</span>
+                </div>
+                
+                <p class="promo-description" id="promo-description">
+                    Descrizione della promozione...
+                </p>
+                
+                <div class="promo-price-section">
+                    <div>
+                        <div class="price-label">Prezzo originale</div>
+                        <div class="price-original" id="price-original">€0.00</div>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        <div class="price-label">Prezzo scontato</div>
+                        <div class="price-final" id="price-final">€0.00</div>
+                    </div>
+                </div>
+                
+                <div class="promo-actions">
+                    <button class="btn-back" onclick="history.back()">
+                        <i class="fas fa-arrow-left"></i> Indietro
+                    </button>
+                    <button class="btn-redeem" onclick="redeemPromotion()">
+                        <span>Riscatta Offerta</span>
+                        <i class="fas fa-check-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/js/config.js"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        let currentUser = null;
+        let currentPromotion = null;
+        
+        // Get promotion ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const promotionId = urlParams.get('id');
+        
+        // Check auth
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '/public/login.html';
+                return null;
+            }
+            currentUser = session.user;
+            
+            // Update navbar
+            const { data: userData } = await supabase
+                .from('users')
+                .select('first_name')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (userData) {
+                document.getElementById('user-name-nav').textContent = userData.first_name;
+            }
+            
+            return currentUser;
+        }
+        
+        // Load promotion
+        async function loadPromotion() {
+            if (!promotionId) {
+                alert('Promozione non trovata');
+                history.back();
+                return;
+            }
+            
+            try {
+                // Get promotion details
+                const { data: promotion, error } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .eq('id', promotionId)
+                    .single();
+                
+                if (error) throw error;
+                if (!promotion) throw new Error('Promozione non trovata');
+                
+                currentPromotion = promotion;
+                displayPromotion(promotion);
+                
+                // Check if favorited
+                await checkFavorite();
+                
+            } catch (error) {
+                console.error('Error loading promotion:', error);
+                alert('Errore nel caricamento della promozione');
+                history.back();
+            }
+        }
+        
+        // Display promotion
+        function displayPromotion(promo) {
+            document.getElementById('promo-title').textContent = promo.title;
+            document.getElementById('promo-partner').textContent = promo.partner_name;
+            document.getElementById('promo-description').textContent = promo.description || promo.short_description || '';
+            document.getElementById('price-original').textContent = `€${parseFloat(promo.original_price).toFixed(2)}`;
+            document.getElementById('price-final').textContent = `€${parseFloat(promo.discounted_price).toFixed(2)}`;
+            
+            const img = document.getElementById('promo-image');
+            if (promo.image_url) {
+                img.src = promo.image_url;
+            }
+        }
+        
+        // Check if favorited
+        async function checkFavorite() {
+            try {
+                const { data } = await supabase
+                    .from('favorites')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('promotion_id', promotionId)
+                    .single();
+                
+                const btn = document.getElementById('favorite-btn');
+                if (data) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            } catch (error) {
+                console.log('Not in favorites');
+            }
+        }
+        
+        // Toggle favorite
+        window.toggleFavorite = async function() {
+            try {
+                const btn = document.getElementById('favorite-btn');
+                const isActive = btn.classList.contains('active');
+                
+                if (isActive) {
+                    // Remove favorite
+                    await supabase
+                        .from('favorites')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('promotion_id', promotionId);
+                    
+                    btn.classList.remove('active');
+                } else {
+                    // Add favorite
+                    await supabase
+                        .from('favorites')
+                        .insert({
+                            user_id: currentUser.id,
+                            promotion_id: promotionId
+                        });
+                    
+                    btn.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                alert('Errore nell\'aggiornamento dei preferiti');
+            }
+        };
+        
+        // Redeem promotion
+        window.redeemPromotion = async function() {
+            if (!confirm('Vuoi riscattare questa offerta?')) return;
+            
+            try {
+                // Check if already redeemed
+                const { data: existing } = await supabase
+                    .from('promotion_redemptions')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('promotion_id', promotionId)
+                    .single();
+                
+                if (existing) {
+                    alert('Hai già riscattato questa offerta!');
+                    return;
+                }
+                
+                // Add redemption
+                await supabase
+                    .from('promotion_redemptions')
+                    .insert({
+                        user_id: currentUser.id,
+                        promotion_id: promotionId
+                    });
+                
+                alert('✅ Offerta riscattata con successo!\n\nPresentati dal partner per usufruirne.');
+                
+            } catch (error) {
+                console.error('Error redeeming promotion:', error);
+                alert('Errore nel riscatto dell\'offerta');
+            }
+        };
+        
+        // User dropdown
+        const userBtn = document.getElementById('userBtn');
+        let dropdown = null;
+        
+        userBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            if (dropdown && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            if (!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.id = 'user-dropdown';
+                dropdown.style.cssText = `
+                    position: absolute;
+                    top: 50px;
+                    right: 0;
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                    min-width: 200px;
+                    display: none;
+                    z-index: 1000;
+                `;
+                
+                dropdown.innerHTML = `
+                    <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>📊</span><span>Dashboard</span>
+                    </a>
+                    <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>🎫</span><span>Promozioni</span>
+                    </a>
+                    <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <span>❤️</span><span>Preferiti</span>
+                    </a>
+                    <a href="#" onclick="logout(event)" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #e74c3c; text-decoration: none;">
+                        <span>🚪</span><span>Esci</span>
+                    </a>
+                `;
+                
+                userBtn.parentElement.style.position = 'relative';
+                userBtn.parentElement.appendChild(dropdown);
+            }
+            
+            dropdown.style.display = 'block';
+        });
+        
+        document.addEventListener('click', () => {
+            if (dropdown) dropdown.style.display = 'none';
+        });
+        
+        window.logout = async function(e) {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = '/public/login.html';
+        };
+        
+        // Initialize
+        (async () => {
+            const user = await checkAuth();
+            if (user) {
+                await loadPromotion();
+            }
+        })();
+    </script>
+</body>
+</html>
