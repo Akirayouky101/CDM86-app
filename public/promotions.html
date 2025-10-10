@@ -20,6 +20,7 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/assets/css/promotions.css">
+    <link rel="stylesheet" href="/assets/css/filters.css">
     <link rel="stylesheet" href="/assets/css/animations.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,15 +42,22 @@
             </div>
             
             <div class="nav-actions">
-                <button class="nav-btn" id="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
+                <!-- Search Bar -->
+                <div class="search-container" id="searchContainer">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cerca promozioni...">
+                    <button class="search-clear" id="searchClear" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <button class="nav-btn" id="filter-btn">
                     <i class="fas fa-filter"></i>
+                    <span class="filter-badge" id="filterBadge" style="display: none;">0</span>
                 </button>
                 <button class="nav-btn nav-btn-primary" id="login-btn">
                     <i class="fas fa-user"></i>
-                    <span>Accedi</span>
+                    <span id="user-name-nav">Accedi</span>
                 </button>
             </div>
         </div>
@@ -120,6 +128,80 @@
             </div>
         </div>
     </section>
+
+    <!-- Advanced Filters Panel -->
+    <div class="filters-panel" id="filtersPanel">
+        <div class="filters-header">
+            <h3>Filtri Avanzati</h3>
+            <button class="filters-close" id="filtersClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="filters-content">
+            <!-- Price Range Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-euro-sign"></i>
+                    Fascia di Prezzo
+                </label>
+                <div class="price-inputs">
+                    <input type="number" class="price-input" id="priceMin" placeholder="Min €" min="0">
+                    <span>-</span>
+                    <input type="number" class="price-input" id="priceMax" placeholder="Max €" min="0">
+                </div>
+                <div class="price-range-slider">
+                    <input type="range" id="priceRange" min="0" max="200" value="200" step="5">
+                    <div class="range-values">
+                        <span>€0</span>
+                        <span id="rangeValue">€200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Discount Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-percent"></i>
+                    Sconto Minimo
+                </label>
+                <div class="discount-options">
+                    <button class="discount-btn" data-discount="0">Tutti</button>
+                    <button class="discount-btn" data-discount="10">10%+</button>
+                    <button class="discount-btn" data-discount="20">20%+</button>
+                    <button class="discount-btn" data-discount="30">30%+</button>
+                    <button class="discount-btn" data-discount="50">50%+</button>
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-sort"></i>
+                    Ordina Per
+                </label>
+                <select class="filter-select" id="sortSelect">
+                    <option value="newest">Più Recenti</option>
+                    <option value="price-low">Prezzo: Basso → Alto</option>
+                    <option value="price-high">Prezzo: Alto → Basso</option>
+                    <option value="discount">Sconto Maggiore</option>
+                    <option value="popular">Più Popolari</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="filters-footer">
+            <button class="btn-filter-reset" id="resetFilters">
+                <i class="fas fa-undo"></i>
+                Reset Filtri
+            </button>
+            <button class="btn-filter-apply" id="applyFilters">
+                <i class="fas fa-check"></i>
+                Applica Filtri
+            </button>
+        </div>
+    </div>
+    <div class="filters-overlay" id="filtersOverlay"></div>
 
     <!-- Promotions Grid -->
     <section class="promotions-section">
@@ -567,6 +649,9 @@
                 
                 if (error) throw error;
                 
+                // Store all promotions
+                allPromotions = promotions || [];
+                
                 // Load favorites
                 const { data: favorites } = await supabase
                     .from('favorites')
@@ -575,7 +660,7 @@
                 
                 const favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
                 
-                displayPromotions(promotions, favoriteIds);
+                displayPromotions(allPromotions, favoriteIds);
                 
             } catch (error) {
                 console.error('Error loading promotions:', error);
@@ -684,6 +769,161 @@
             window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
         };
         
+        // Filter state
+        let filterState = {
+            searchQuery: '',
+            category: 'all',
+            priceMin: 0,
+            priceMax: 200,
+            discount: 0,
+            sortBy: 'newest'
+        };
+        
+        let allPromotions = [];
+        let currentFavorites = new Set();
+        
+        // Render promotions (used by filters)
+        async function renderPromotions(promotions) {
+            const grid = document.getElementById('promotions-grid');
+            if (!grid) return;
+            
+            // Refresh favorites
+            const { data: favorites } = await supabase
+                .from('favorites')
+                .select('promotion_id')
+                .eq('user_id', currentUser.id);
+            
+            currentFavorites = new Set(favorites?.map(f => f.promotion_id) || []);
+            
+            if (promotions.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-search" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+                        <h2 style="color: #666; margin-bottom: 10px;">Nessuna promozione trovata</h2>
+                        <p style="color: #999;">Prova a modificare i filtri di ricerca</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = promotions.map(promo => {
+                const isFavorite = currentFavorites.has(promo.id);
+                const heartIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+                const favoriteClass = isFavorite ? 'active' : '';
+                
+                const originalPrice = parseFloat(promo.original_price) || 0;
+                const discountedPrice = parseFloat(promo.discounted_price) || originalPrice;
+                
+                return `
+                    <div class="promo-card" data-id="${promo.id}">
+                        <div class="promo-image">
+                            <img src="${promo.image_url || '/assets/images/placeholder.jpg'}" alt="${promo.title}">
+                            <button class="promo-favorite ${favoriteClass}" onclick="toggleFavorite('${promo.id}', event)" aria-label="Toggle favorite">
+                                <i class="${heartIcon}"></i>
+                            </button>
+                        </div>
+                        <div class="promo-content">
+                            <div class="promo-header">
+                                <h3 class="promo-title">${promo.title}</h3>
+                                <div class="promo-category-badge">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                            </div>
+                            <p class="promo-description">${promo.short_description || promo.description}</p>
+                            <div class="promo-partner">
+                                <i class="fas fa-store"></i>
+                                <span>${promo.partner_name}</span>
+                            </div>
+                            <div class="promo-footer">
+                                <div class="promo-price">
+                                    <span class="price-original">€${originalPrice.toFixed(2)}</span>
+                                    <span class="price-final">€${discountedPrice.toFixed(2)}</span>
+                                </div>
+                                <button class="btn-promo" onclick="viewPromotion('${promo.id}')">
+                                    <span>Dettagli</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Apply filters and render
+        async function applyFiltersAndRender() {
+            let filtered = [...allPromotions];
+            
+            // Search filter
+            if (filterState.searchQuery) {
+                const query = filterState.searchQuery.toLowerCase();
+                filtered = filtered.filter(promo => 
+                    promo.title.toLowerCase().includes(query) ||
+                    promo.description.toLowerCase().includes(query) ||
+                    promo.partner_name.toLowerCase().includes(query)
+                );
+            }
+            
+            // Category filter
+            if (filterState.category !== 'all') {
+                filtered = filtered.filter(promo => promo.category === filterState.category);
+            }
+            
+            // Price filter
+            filtered = filtered.filter(promo => {
+                const price = parseFloat(promo.discounted_price);
+                return price >= filterState.priceMin && price <= filterState.priceMax;
+            });
+            
+            // Discount filter
+            if (filterState.discount > 0) {
+                filtered = filtered.filter(promo => {
+                    const originalPrice = parseFloat(promo.original_price);
+                    const discountedPrice = parseFloat(promo.discounted_price);
+                    const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                    return discountPercent >= filterState.discount;
+                });
+            }
+            
+            // Sort
+            switch (filterState.sortBy) {
+                case 'price-low':
+                    filtered.sort((a, b) => parseFloat(a.discounted_price) - parseFloat(b.discounted_price));
+                    break;
+                case 'price-high':
+                    filtered.sort((a, b) => parseFloat(b.discounted_price) - parseFloat(a.discounted_price));
+                    break;
+                case 'discount':
+                    filtered.sort((a, b) => {
+                        const discountA = ((parseFloat(a.original_price) - parseFloat(a.discounted_price)) / parseFloat(a.original_price)) * 100;
+                        const discountB = ((parseFloat(b.original_price) - parseFloat(b.discounted_price)) / parseFloat(b.original_price)) * 100;
+                        return discountB - discountA;
+                    });
+                    break;
+                case 'newest':
+                default:
+                    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+            
+            await renderPromotions(filtered);
+            updateFilterBadge();
+        }
+        
+        // Update filter badge
+        function updateFilterBadge() {
+            const badge = document.getElementById('filterBadge');
+            let count = 0;
+            
+            if (filterState.searchQuery) count++;
+            if (filterState.category !== 'all') count++;
+            if (filterState.priceMin > 0 || filterState.priceMax < 200) count++;
+            if (filterState.discount > 0) count++;
+            if (filterState.sortBy !== 'newest') count++;
+            
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'block' : 'none';
+        }
+        
         // Setup event listeners
         function setupEventListeners() {
             // Logout
@@ -695,19 +935,137 @@
                 });
             }
             
-            // Search
-            const searchBtn = document.getElementById('search-btn');
-            if (searchBtn) {
-                searchBtn.addEventListener('click', () => {
-                    alert('Funzione di ricerca in arrivo!');
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            const searchClear = document.getElementById('searchClear');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const value = e.target.value;
+                    searchClear.style.display = value ? 'block' : 'none';
+                    
+                    searchTimeout = setTimeout(() => {
+                        filterState.searchQuery = value;
+                        applyFiltersAndRender();
+                    }, 300);
                 });
             }
             
-            // Filter
+            if (searchClear) {
+                searchClear.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchClear.style.display = 'none';
+                    filterState.searchQuery = '';
+                    applyFiltersAndRender();
+                });
+            }
+            
+            // Filter panel toggle
             const filterBtn = document.getElementById('filter-btn');
-            if (filterBtn) {
-                filterBtn.addEventListener('click', () => {
-                    alert('Funzione filtri in arrivo!');
+            const filtersPanel = document.getElementById('filtersPanel');
+            const filtersOverlay = document.getElementById('filtersOverlay');
+            const filtersClose = document.getElementById('filtersClose');
+            
+            const toggleFilters = () => {
+                filtersPanel.classList.toggle('active');
+                filtersOverlay.classList.toggle('active');
+            };
+            
+            if (filterBtn) filterBtn.addEventListener('click', toggleFilters);
+            if (filtersClose) filtersClose.addEventListener('click', toggleFilters);
+            if (filtersOverlay) filtersOverlay.addEventListener('click', toggleFilters);
+            
+            // Price filters
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const priceRange = document.getElementById('priceRange');
+            
+            if (priceMin) {
+                priceMin.addEventListener('change', (e) => {
+                    filterState.priceMin = parseFloat(e.target.value) || 0;
+                });
+            }
+            
+            if (priceMax) {
+                priceMax.addEventListener('change', (e) => {
+                    filterState.priceMax = parseFloat(e.target.value) || 200;
+                    if (priceRange) priceRange.value = filterState.priceMax;
+                });
+            }
+            
+            if (priceRange) {
+                priceRange.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    filterState.priceMax = parseFloat(value);
+                    if (priceMax) priceMax.value = value;
+                });
+            }
+            
+            // Discount buttons
+            document.querySelectorAll('.discount-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.discount-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterState.discount = parseInt(e.target.dataset.discount) || 0;
+                });
+            });
+            
+            // Sort select
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', (e) => {
+                    filterState.sortBy = e.target.value;
+                });
+            }
+            
+            // Category chips
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.addEventListener('click', (e) => {
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterState.category = e.target.dataset.category;
+                    applyFiltersAndRender();
+                });
+            });
+            
+            // Apply filters button
+            const applyBtn = document.getElementById('applyFilters');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    applyFiltersAndRender();
+                    toggleFilters();
+                });
+            }
+            
+            // Reset filters button
+            const resetBtn = document.getElementById('resetFilters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    filterState = {
+                        searchQuery: '',
+                        category: 'all',
+                        priceMin: 0,
+                        priceMax: 200,
+                        discount: 0,
+                        sortBy: 'newest'
+                    };
+                    
+                    // Reset UI
+                    if (searchInput) searchInput.value = '';
+                    if (searchClear) searchClear.style.display = 'none';
+                    if (priceMin) priceMin.value = '0';
+                    if (priceMax) priceMax.value = '200';
+                    if (priceRange) priceRange.value = '200';
+                    if (sortSelect) sortSelect.value = 'newest';
+                    
+                    document.querySelectorAll('.discount-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelector('.discount-btn[data-discount="0"]')?.classList.add('active');
+                    
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    document.querySelector('.category-chip[data-category="all"]')?.classList.add('active');
+                    
+                    applyFiltersAndRender();
                 });
             }
         }
