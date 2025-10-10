@@ -354,12 +354,73 @@
         right: -100%;
     }
     
+    .filters-header {
+        padding: 20px;
+    }
+    
+    .filters-header h3 {
+        font-size: 18px;
+    }
+    
+    .filters-content {
+        padding: 20px;
+    }
+    
+    .filter-group {
+        margin-bottom: 25px;
+    }
+    
+    .filter-label {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .price-inputs {
+        gap: 8px;
+    }
+    
+    .price-input {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .discount-options {
+        gap: 8px;
+    }
+    
+    .discount-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .filter-select {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    
+    .filters-footer {
+        padding: 15px 20px;
+        gap: 10px;
+    }
+    
+    .btn-filter-reset,
+    .btn-filter-apply {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
     .search-container {
         max-width: 100%;
         margin-bottom: 10px;
+        padding: 8px 16px;
+    }
+    
+    .search-input {
+        font-size: 14px;
     }
     
     .nav-actions {
         flex-wrap: wrap;
+        gap: 10px;
     }
 }
