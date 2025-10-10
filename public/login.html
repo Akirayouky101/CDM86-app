@@ -210,8 +210,8 @@
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('login')">Login</button>
-            <button class="tab" onclick="switchTab('register')">Registrati</button>
+            <button class="tab active" onclick="switchTab('login', event)">Login</button>
+            <button class="tab" onclick="switchTab('register', event)">Registrati</button>
         </div>
         
         <div id="alert" class="alert"></div>
@@ -293,9 +293,14 @@
         const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
         
         // Switch tra login e registrazione
-        function switchTab(tab) {
+        function switchTab(tab, event) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Se chiamato programmaticamente, attiva il tab corretto
+                document.querySelector(`.tab[onclick*="${tab}"]`)?.classList.add('active');
+            }
             
             document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
             document.getElementById(tab + '-panel').classList.add('active');
