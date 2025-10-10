@@ -354,15 +354,6 @@
         });
         
         // REGISTER FORM
-
-        // Force uppercase on referral input
-        const referralInput = document.getElementById('reg-referral');
-        if (referralInput) {
-            referralInput.addEventListener('input', (e) => {
-                e.target.value = e.target.value.toUpperCase();
-            });
-        }
-        
         
         // Force uppercase on referral input
         const referralInput = document.getElementById('reg-referral');
@@ -372,7 +363,7 @@
             });
         }
         
-                document.getElementById('register-form').addEventListener('submit', async (e) => {
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const firstName = document.getElementById('reg-firstname').value.trim();
