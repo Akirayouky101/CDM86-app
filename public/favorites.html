@@ -41,9 +41,6 @@
             margin: 0 auto 20px;
         }
         
-        .favorites-grid-hidden {
-            display: none;
-        }
         
         .empty-state-hidden {
             display: none;
@@ -130,8 +127,8 @@
                 <p>Caricamento preferiti...</p>
             </div>
 
-            <div class="promotions-grid favorites-grid-hidden" id="favorites-grid">
-                <!-- Favorites will be loaded here -->
+            <div class="promotions-grid" id="favorites-grid">
+                <p style="text-align:center; padding:2rem;">Caricamento preferiti...</p>
             </div>
             
             <div id="empty-state" class="empty-favorites empty-state-hidden">
@@ -166,8 +163,14 @@
         
         // Initialize
         (async () => {
+            console.log('Initializing favorites page...');
+            const grid = document.getElementById('favorites-grid');
+            console.log('Grid element:', grid);
+            
             const user = await checkAuth();
+            console.log('User authenticated:', user);
             if (!user) return;
+            
             await loadFavorites();
         })();
         
@@ -219,10 +222,7 @@
         function displayFavorites(promotions) {
             const grid = document.getElementById('favorites-grid');
             
-            if (!promotions || promotions.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; padding:2rem;">Nessun preferito ancora</p>';
-                return;
-            }
+            // Show the grid
             
             grid.innerHTML = promotions.map(promo => {
                 const originalPrice = parseFloat(promo.original_price) || 0;
