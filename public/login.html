@@ -282,19 +282,24 @@
         </div>
     </div>
     
-    
-    <!-- Load config first -->
-    <script src="/assets/js/config.js"></script>
-    
-    <!-- Load Supabase and auth module -->
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    <script>
+        const API_URL = 'http://localhost:3000/api';
         
-        // Initialize Supabase
-        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-        window.supabaseClient = supabase;
+        // Switch tra login e registrazione
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update panels
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tab + '-panel').classList.add('active');
+            
+            // Hide alert
+            hideAlert();
+        }
         
-        // Helper functions
+        // Show alert
         function showAlert(message, type = 'error') {
             const alert = document.getElementById('alert');
             alert.textContent = message;
@@ -306,18 +311,7 @@
             document.getElementById('alert').classList.remove('show');
         }
         
-        // Switch tabs
-        window.switchTab = function(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(tab + '-panel').classList.add('active');
-            
-            hideAlert();
-        }
-        
-        // LOGIN
+        // LOGIN FORM
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -331,39 +325,42 @@
             loading.classList.add('show');
             
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
                 
-                if (error) throw error;
+                const data = await response.json();
                 
-                showAlert('✅ Login effettuato!', 'success');
-                setTimeout(() => window.location.href = '/public/promotions.html', 1000);
-                
+                if (response.ok && data.success) {
+                    // Save token
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
+                    
+                    // Redirect to promotions page
+                    setTimeout(() => {
+                        window.location.href = '/public/promotions.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Credenziali non valide');
+                    form.style.display = 'block';
+                    loading.classList.remove('show');
+                }
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert(error.message || 'Email o password errati');
-                form.style.display = 'block';
-                loading.classList.remove('show');
-            }
-        });
         
         // REGISTER
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const firstName = document.getElementById('register-firstname').value;
-            const lastName = document.getElementById('register-lastname').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-            const referralCode = document.getElementById('register-referral').value || null;
-            
-            if (password !== confirmPassword) {
-                showAlert('Le password non corrispondono');
-                return;
-            }
+            const firstName = document.getElementById('reg-firstname').value;
+            const lastName = document.getElementById('reg-lastname').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const referralCode = document.getElementById('reg-referral').value || null;
             
             const loading = document.getElementById('register-loading');
             const form = document.getElementById('register-form');
