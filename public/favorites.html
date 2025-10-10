@@ -145,76 +145,88 @@
         </div>
     </section>
 
-    <script>
-        const API_URL = 'http://localhost:3000/api';
-        const token = localStorage.getItem('token');
+    
+    <script src="/assets/js/config.js"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        // Check authentication
-        if (!token) {
-            window.location.href = '/public/login.html';
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        let currentUser = null;
+        
+        // Check auth
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '/public/login.html';
+                return null;
+            }
+            currentUser = session.user;
+            return currentUser;
         }
+        
+        // Initialize
+        (async () => {
+            const user = await checkAuth();
+            if (!user) return;
+            await loadFavorites();
+        })();
         
         // Load favorites
         async function loadFavorites() {
             try {
-                const response = await fetch(`${API_URL}/promotions/user/favorites`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // Get user's favorites with promotion details
+                const { data: favorites, error } = await supabase
+                    .from('favorites')
+                    .select(`
+                        promotion_id,
+                        promotions (*)
+                    `)
+                    .eq('user_id', currentUser.id);
                 
-                if (!response.ok) throw new Error('Failed to load favorites');
+                if (error) throw error;
                 
-                const result = await response.json();
-                const favorites = result.data || [];
-                
-                document.getElementById('loading').style.display = 'none';
-                
-                if (favorites.length === 0) {
-                    document.getElementById('empty-state').classList.remove('empty-state-hidden');
-                } else {
-                    displayFavorites(favorites);
-                }
+                const promotions = favorites?.map(f => f.promotions).filter(p => p) || [];
+                displayFavorites(promotions);
                 
             } catch (error) {
                 console.error('Error loading favorites:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('empty-state').classList.remove('empty-state-hidden');
+                document.getElementById('favorites-grid').innerHTML = 
+                    '<p style="text-align:center; padding:2rem;">Errore nel caricamento</p>';
             }
         }
         
         // Display favorites
-        function displayFavorites(favorites) {
+        function displayFavorites(promotions) {
             const grid = document.getElementById('favorites-grid');
-            grid.classList.remove('favorites-grid-hidden');
             
-            grid.innerHTML = favorites.map(promo => {
-                const discount = promo.discount_type === 'percentage' 
-                    ? `-${promo.discount_value}%`
-                    : `-€${promo.discount_value}`;
+            if (!promotions || promotions.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:2rem;">Nessun preferito ancora</p>';
+                return;
+            }
+            
+            grid.innerHTML = promotions.map(promo => {
+                const originalPrice = parseFloat(promo.original_price) || 0;
+                const discountedPrice = parseFloat(promo.discounted_price) || originalPrice;
                 
                 return `
-                    <div class="promo-card">
+                    <div class="promo-card" data-id="${promo.id}">
                         <div class="promo-image">
-                            <img src="${promo.image_main}" alt="${promo.title}" onerror="this.src='https://via.placeholder.com/400x200?text=CDM86'">
-                            <div class="promo-badge">${discount}</div>
-                            <button class="promo-favorite active" onclick="toggleFavorite('${promo.id}', event)">
+                            <img src="${promo.image_url || '/assets/images/placeholder.jpg'}" alt="${promo.title}">
+                            <button class="promo-favorite active" onclick="removeFavorite('${promo.id}', event)">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </div>
                         <div class="promo-content">
-                            <div class="promo-header">
-                                <h3 class="promo-title">${promo.title}</h3>
-                                <div class="promo-category-badge">
-                                    <i class="fas fa-tag"></i>
-                                </div>
-                            </div>
+                            <h3 class="promo-title">${promo.title}</h3>
                             <p class="promo-description">${promo.short_description || promo.description}</p>
                             <div class="promo-partner">
                                 <i class="fas fa-store"></i>
                                 <span>${promo.partner_name}</span>
                             </div>
                             <div class="promo-footer">
-                                <div class="promo-category-badge" style="background: #f3f4f6; color: #666; padding: 6px 12px; border-radius: 6px; font-size: 12px;">
-                                    ${promo.category}
+                                <div class="promo-price">
+                                    <span class="price-original">€${originalPrice.toFixed(2)}</span>
+                                    <span class="price-final">€${discountedPrice.toFixed(2)}</span>
                                 </div>
                                 <button class="btn-promo" onclick="viewPromotion('${promo.id}')">
                                     <span>Dettagli</span>
@@ -227,116 +239,34 @@
             }).join('');
         }
         
-        // Toggle favorite
-        async function toggleFavorite(promotionId, event) {
+        // Remove favorite
+        window.removeFavorite = async function(promotionId, event) {
             event.stopPropagation();
             
+            if (!confirm('Rimuovere dai preferiti?')) return;
+            
             try {
-                const response = await fetch(`${API_URL}/promotions/${promotionId}/favorite`, {
-                    method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const { error } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .eq('promotion_id', promotionId);
                 
-                if (response.ok) {
-                    // Reload favorites
-                    location.reload();
-                }
-            } catch (error) {
-                console.error('Error toggling favorite:', error);
-            }
-        }
-        
-        // View promotion detail
-        function viewPromotion(id) {
-            // TODO: Create promotion detail page
-            alert('Dettaglio promozione: ' + id);
-        }
-        
-        // User menu dropdown
-        const userBtn = document.getElementById('user-btn');
-        const dropdown = document.createElement('div');
-        dropdown.style.cssText = `
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            min-width: 200px;
-            display: none;
-            z-index: 1000;
-        `;
-        
-        dropdown.innerHTML = `
-            <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
-                <span>🎫</span><span>Promozioni</span>
-            </a>
-            <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
-                <span>📊</span><span>Dashboard</span>
-            </a>
-            <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #667eea; text-decoration: none; border-bottom: 1px solid #f0f0f0; font-weight: 600;">
-                <span>❤️</span><span>Preferiti</span>
-            </a>
-            <div onclick="logout()" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
-                <span>🚪</span><span>Esci</span>
-            </div>
-        `;
-        
-        userBtn.parentElement.style.position = 'relative';
-        userBtn.parentElement.appendChild(dropdown);
-        
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        document.addEventListener('click', () => {
-            dropdown.style.display = 'none';
-        });
-        
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/';
-        }
-        
-        // Load user name
-        async function loadUserName() {
-            try {
-                const response = await fetch(`${API_URL}/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                if (error) throw error;
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    document.getElementById('user-name-nav').textContent = result.data.first_name || 'User';
-                }
+                // Reload favorites
+                await loadFavorites();
+                
             } catch (error) {
-                console.error('Error loading user:', error);
+                console.error('Error removing favorite:', error);
+                alert('Errore nella rimozione');
             }
-        }
+        };
         
-        loadUserName();
-        loadFavorites();
+        // View promotion
+        window.viewPromotion = function(promotionId) {
+            window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+        };
     </script>
-    
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .promo-favorite.active i {
-            color: #ef4444;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 60px;
-        }
-    </style>
 </body>
 </html>

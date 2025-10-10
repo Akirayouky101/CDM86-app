@@ -492,8 +492,8 @@
                     dropdown.id = 'user-dropdown';
                     dropdown.style.cssText = `
                         position: absolute;
-                        top: 60px;
-                        right: 20px;
+                        top: 50px;
+                        right: 0;
                         background: white;
                         border-radius: 12px;
                         box-shadow: 0 10px 40px rgba(0,0,0,0.15);
@@ -517,7 +517,8 @@
                         </div>
                     `;
                     
-                    document.body.appendChild(dropdown);
+                    userBtn.parentElement.style.position = 'relative';
+                    userBtn.parentElement.appendChild(dropdown);
                     
                     // Toggle dropdown
                     userBtn.addEventListener('click', (e) => {
