@@ -174,19 +174,29 @@
         // Load favorites
         async function loadFavorites() {
             try {
-                // Get user's favorites with promotion details
-                const { data: favorites, error } = await supabase
+                // Get user's favorite promotion IDs
+                const { data: favorites, error: favError } = await supabase
                     .from('favorites')
-                    .select(`
-                        promotion_id,
-                        promotions (*)
-                    `)
+                    .select('promotion_id')
                     .eq('user_id', currentUser.id);
                 
-                if (error) throw error;
+                if (favError) throw favError;
                 
-                const promotions = favorites?.map(f => f.promotions).filter(p => p) || [];
-                displayFavorites(promotions);
+                if (!favorites || favorites.length === 0) {
+                    displayFavorites([]);
+                    return;
+                }
+                
+                // Get promotion details
+                const promotionIds = favorites.map(f => f.promotion_id);
+                const { data: promotions, error: promoError } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .in('id', promotionIds);
+                
+                if (promoError) throw promoError;
+                
+                displayFavorites(promotions || []);
                 
             } catch (error) {
                 console.error('Error loading favorites:', error);
