@@ -378,10 +378,10 @@
                     .single();
                 
                 if (referrerError || !referrer) {
-                    throw new Error(`❌ Codice referral "${referralCode}" non valido! Verifica con chi ti ha invitato.`);
+                    throw new Error('Codice referral "' + referralCode + '" non valido! Verifica con chi ti ha invitato.');
                 }
                 
-                console.log('✅ Referral valido:', referrer.first_name, referrer.last_name, '(' + referrer.referral_code + ')');
+                console.log('Referral valido:', referrer.first_name, referrer.last_name);
                 
                 // 2. REGISTER WITH SUPABASE AUTH
                 const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -400,22 +400,20 @@
                 if (authError) throw authError;
                 
                 if (!authData.user) {
-                    throw new Error('Registrazione fallita: nessun utente creato');
+                    throw new Error('Registrazione fallita');
                 }
                 
                 // 3. UPDATE USER TABLE WITH referred_by_id
                 const { error: updateError } = await supabase
                     .from('users')
-                    .update({ 
-                        referred_by_id: referrer.id 
-                    })
+                    .update({ referred_by_id: referrer.id })
                     .eq('id', authData.user.id);
                 
                 if (updateError) {
-                    console.error('⚠️ Errore aggiornamento referred_by_id:', updateError);
+                    console.error('Errore aggiornamento referred_by_id:', updateError);
                 }
                 
-                showAlert(`✅ Registrazione completata! Sei stato invitato da ${referrer.first_name}. Verifica la tua email.`, 'success');
+                showAlert('Registrazione completata! Sei stato invitato da ' + referrer.first_name + '. Verifica la tua email.', 'success');
                 
                 setTimeout(() => {
                     switchTab('login');
@@ -427,10 +425,6 @@
             } catch (error) {
                 console.error('Register error:', error);
                 showAlert(error.message || 'Errore durante la registrazione');
-                form.style.display = 'block';
-                loading.classList.remove('show');
-            }
-        });
                 form.style.display = 'block';
                 loading.classList.remove('show');
             }
