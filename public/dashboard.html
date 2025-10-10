@@ -435,254 +435,130 @@
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
-    <script>
-        const API_URL = 'http://localhost:3000/api';
-        let myReferralCode = '';
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        let currentUser = null;
         
         // Check authentication
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/public/login.html';
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = '/public/login.html';
+                return null;
+            }
+            
+            currentUser = session.user;
+            return currentUser;
         }
         
-        // Fetch dashboard data
-        async function loadDashboard() {
+        // Initialize
+        (async () => {
+            const user = await checkAuth();
+            if (!user) return;
+            
+            await loadDashboardData();
+        })();
+        
+        // Load dashboard data
+        async function loadDashboardData() {
             try {
-                const response = await fetch(`${API_URL}/users/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                // Get user data
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
                 
-                if (!response.ok) {
-                    throw new Error('Session expired');
+                if (userError) throw userError;
+                
+                // Update UI
+                document.getElementById('user-name').textContent = `${userData.first_name} ${userData.last_name}`;
+                document.getElementById('user-email').textContent = currentUser.email;
+                document.getElementById('user-points').textContent = userData.points || 0;
+                document.getElementById('referral-code').textContent = userData.referral_code || 'N/A';
+                
+                // Generate QR Code for referral
+                generateQRCode(userData.referral_code);
+                
+                // Get referral stats
+                const { data: referrals, error: refError } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('referred_by_id', currentUser.id);
+                
+                if (!refError) {
+                    document.getElementById('referral-count').textContent = referrals?.length || 0;
                 }
                 
-                const result = await response.json();
-                const data = result.data;
+                // Get redemptions count
+                const { data: redemptions, error: redError } = await supabase
+                    .from('promotion_redemptions')
+                    .select('id')
+                    .eq('user_id', currentUser.id);
                 
-                // Update welcome
-                document.getElementById('welcome-text').textContent = 
-                    `Benvenuto, ${data.user.first_name || 'Utente'}!`;
-                document.getElementById('user-email').textContent = data.user.email || '';
-                
-                // Update stats
-                document.getElementById('stat-points').textContent = data.user.points || 0;
-                document.getElementById('stat-referrals').textContent = data.user.referralCount || 0;
-                document.getElementById('stat-code').textContent = data.user.referralCode || '---';
-                document.getElementById('my-code').textContent = data.user.referralCode || '---';
-                
-                myReferralCode = data.user.referralCode;
-                
-                // Generate referral link and QR code
-                if (data.user.referralCode) {
-                    const referralLink = `${window.location.origin}/public/login.html?ref=${data.user.referralCode}`;
-                    document.getElementById('referral-link').textContent = referralLink;
-                    
-                    // Generate QR Code
-                    generateQRCode(referralLink);
+                if (!redError) {
+                    document.getElementById('redemptions-count').textContent = redemptions?.length || 0;
                 }
                 
-                // Show who referred you
-                const referrerContent = document.getElementById('referrer-content');
-                if (data.referredBy) {
-                    referrerContent.innerHTML = `
-                        <div class="referrer-card">
-                            <h4>SEI STATO INVITATO DA:</h4>
-                            <div class="name">${data.referredBy.name}</div>
-                            <div>${data.referredBy.email}</div>
-                            <div class="code">Codice usato: ${data.referredBy.code}</div>
-                        </div>
-                    `;
-                } else {
-                    referrerContent.innerHTML = `
-                        <div class="empty-state">
-                            <p>🌟 Sei un utente originale! Nessuno ti ha invitato.</p>
-                        </div>
-                    `;
+                // Get favorites count
+                const { data: favorites, error: favError } = await supabase
+                    .from('favorites')
+                    .select('id')
+                    .eq('user_id', currentUser.id);
+                
+                if (!favError) {
+                    document.getElementById('favorites-count').textContent = favorites?.length || 0;
                 }
-                
-                // Show referred users
-                const referredList = document.getElementById('referred-users');
-                const countInvited = document.getElementById('count-invited');
-                
-                if (data.referredUsers && data.referredUsers.length > 0) {
-                    countInvited.textContent = data.referredUsers.length;
-                    
-                    referredList.innerHTML = data.referredUsers.map(user => {
-                        const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
-                        const verified = user.isVerified ? '<span class="badge badge-verified">✓ Verificato</span>' : '';
-                        
-                        return `
-                            <li class="user-item">
-                                <div class="user-info">
-                                    <div class="user-avatar">${initials}</div>
-                                    <div class="user-details">
-                                        <h4>${user.name} ${verified}</h4>
-                                        <p>${user.email} • ${user.points || 0} punti</p>
-                                    </div>
-                                </div>
-                                <div class="user-code">${user.referralCode}</div>
-                            </li>
-                        `;
-                    }).join('');
-                } else {
-                    countInvited.textContent = '0';
-                    referredList.innerHTML = `
-                        <div class="empty-state">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <p>Non hai ancora invitato nessuno.</p>
-                            <p>Condividi il tuo codice per iniziare!</p>
-                        </div>
-                    `;
-                }
-                
-                // Show content
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').classList.remove('content-hidden');
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                alert('Sessione scaduta. Effettua di nuovo il login.');
-                logout();
+                alert('Errore nel caricamento dei dati');
             }
-        }
-        
-        // Copy code
-        function copyCode() {
-            navigator.clipboard.writeText(myReferralCode);
-            alert('✅ Codice copiato: ' + myReferralCode);
-        }
-        
-        // Copy link
-        function copyLink() {
-            const link = `${window.location.origin}/public/login.html?ref=${myReferralCode}`;
-            navigator.clipboard.writeText(link);
-            alert('✅ Link copiato negli appunti!');
         }
         
         // Generate QR Code
-        let qrCodeInstance = null;
-        function generateQRCode(url) {
-            const qrContainer = document.getElementById('qr-canvas');
-            if (!qrContainer) {
-                console.error('QR container not found');
-                return;
-            }
+        function generateQRCode(referralCode) {
+            const qrContainer = document.getElementById('qr-code');
+            if (!qrContainer || !referralCode) return;
             
-            // Clear previous QR code
-            qrContainer.innerHTML = '';
+            const referralUrl = `https://cdm86.com/public/login.html?ref=${referralCode}`;
             
-            // Generate new QR code using QRCode.js
-            qrCodeInstance = new QRCode(qrContainer, {
-                text: url,
-                width: 200,
-                height: 200,
-                colorDark: "#f59e0b",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            // Simple QR code using Google Charts API
+            const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(referralUrl)}`;
             
-            console.log('✅ QR Code generated for:', url);
+            qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" style="max-width: 100%; border-radius: 8px;">`;
         }
         
-        // Download QR Code
-        function downloadQR() {
-            // QRCode.js creates an img tag inside the container
-            const qrImg = document.querySelector('#qr-canvas img');
-            if (!qrImg) {
-                alert('❌ QR Code non disponibile');
-                return;
-            }
-            
-            // Create download link
-            const a = document.createElement('a');
-            a.href = qrImg.src;
-            a.download = `CDM86-Referral-${myReferralCode}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            alert('✅ QR Code scaricato!');
-        }
+        // Copy referral code
+        window.copyReferralCode = function() {
+            const code = document.getElementById('referral-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Codice referral copiato!');
+            }).catch(() => {
+                alert('❌ Errore nella copia');
+            });
+        };
+        
+        // Copy referral link
+        window.copyReferralLink = function() {
+            const code = document.getElementById('referral-code').textContent;
+            const link = `https://cdm86.com/public/login.html?ref=${code}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('✅ Link referral copiato!');
+            }).catch(() => {
+                alert('❌ Errore nella copia');
+            });
+        };
         
         // Logout
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/';
-        }
-        
-        // Load on page load
-        loadDashboard();
-        
-        // ===================================
-        // USER MENU DROPDOWN
-        // ===================================
-        const userBtn = document.getElementById('user-btn');
-        
-        // Create dropdown menu
-        const dropdown = document.createElement('div');
-        dropdown.style.cssText = `
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            min-width: 200px;
-            display: none;
-            z-index: 1000;
-        `;
-        
-        dropdown.innerHTML = `
-            <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
-                <span>🎫</span><span>Promozioni</span>
-            </a>
-            <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #667eea; text-decoration: none; border-bottom: 1px solid #f0f0f0; font-weight: 600;">
-                <span>📊</span><span>Dashboard</span>
-            </a>
-            <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
-                <span>❤️</span><span>Preferiti</span>
-            </a>
-            <div onclick="logout()" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #dc2626; cursor: pointer;">
-                <span>🚪</span><span>Esci</span>
-            </div>
-        `;
-        
-        userBtn.parentElement.style.position = 'relative';
-        userBtn.parentElement.appendChild(dropdown);
-        
-        // Toggle dropdown
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-            dropdown.style.display = 'none';
-        });
-        
-        // Update nav with user name
-        async function updateNav() {
-            try {
-                const response = await fetch(`${API_URL}/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    const firstName = result.data.first_name || 'User';
-                    document.getElementById('user-name-nav').textContent = firstName;
-                }
-            } catch (error) {
-                console.error('Error loading user nav:', error);
-            }
-        }
-        
-        updateNav();
+        window.logout = async function() {
+            await supabase.auth.signOut();
+            window.location.href = '/public/login.html';
+        };
     </script>
 </body>
 </html>
