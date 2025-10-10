@@ -636,10 +636,16 @@
                     });
                     
                     // Logout from dropdown
-                    dropdown.querySelector('#logout-menu-item').addEventListener('click', async () => {
-                        await supabase.auth.signOut();
-                        window.location.href = '/public/login.html';
-                    });
+                    const logoutMenuItem = dropdown.querySelector('#logout-menu-item');
+                    if (logoutMenuItem) {
+                        logoutMenuItem.addEventListener('click', async () => {
+                            console.log('Logout clicked');
+                            await supabase.auth.signOut();
+                            window.location.href = '/public/login.html';
+                        });
+                    } else {
+                        console.error('Logout menu item not found');
+                    }
                 }
                 
             } catch (error) {
