@@ -467,6 +467,10 @@
         // Load dashboard data
         async function loadDashboardData() {
             try {
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
                 // Get user data
                 const { data: userData, error: userError } = await supabase
                     .from('users')
@@ -476,67 +480,92 @@
                 
                 if (userError) throw userError;
                 
-                // Update UI
-                document.getElementById('user-name').textContent = `${userData.first_name} ${userData.last_name}`;
-                document.getElementById('user-email').textContent = currentUser.email;
-                document.getElementById('user-points').textContent = userData.points || 0;
-                document.getElementById('referral-code').textContent = userData.referral_code || 'N/A';
+                // Update UI with correct IDs
+                const userEmail = document.getElementById('user-email');
+                if (userEmail) userEmail.textContent = currentUser.email;
+                
+                const welcomeText = document.getElementById('welcome-text');
+                if (welcomeText) welcomeText.textContent = `Benvenuto, ${userData.first_name}!`;
+                
+                const statPoints = document.getElementById('stat-points');
+                if (statPoints) statPoints.textContent = userData.points || 0;
+                
+                const statCode = document.getElementById('stat-code');
+                if (statCode) statCode.textContent = userData.referral_code || 'N/A';
+                
+                const myCode = document.getElementById('my-code');
+                if (myCode) myCode.textContent = userData.referral_code || 'N/A';
                 
                 // Generate QR Code for referral
                 generateQRCode(userData.referral_code);
                 
+                // Update referral link
+                const referralLinkEl = document.getElementById('referral-link');
+                if (referralLinkEl && userData.referral_code) {
+                    const link = `https://cdm86.com/public/login.html?ref=${userData.referral_code}`;
+                    referralLinkEl.textContent = link;
+                }
+                
                 // Get referral stats
                 const { data: referrals, error: refError } = await supabase
                     .from('users')
-                    .select('id')
+                    .select('id, first_name, last_name, created_at')
                     .eq('referred_by_id', currentUser.id);
                 
-                if (!refError) {
-                    document.getElementById('referral-count').textContent = referrals?.length || 0;
+                if (!refError && referrals) {
+                    const statReferrals = document.getElementById('stat-referrals');
+                    if (statReferrals) statReferrals.textContent = referrals.length;
+                    
+                    const countInvited = document.getElementById('count-invited');
+                    if (countInvited) countInvited.textContent = referrals.length;
                 }
                 
-                // Get redemptions count
-                const { data: redemptions, error: redError } = await supabase
-                    .from('promotion_redemptions')
-                    .select('id')
-                    .eq('user_id', currentUser.id);
-                
-                if (!redError) {
-                    document.getElementById('redemptions-count').textContent = redemptions?.length || 0;
-                }
-                
-                // Get favorites count
-                const { data: favorites, error: favError } = await supabase
-                    .from('favorites')
-                    .select('id')
-                    .eq('user_id', currentUser.id);
-                
-                if (!favError) {
-                    document.getElementById('favorites-count').textContent = favorites?.length || 0;
-                }
+                // Hide loading, show content
+                const loading = document.getElementById('loading');
+                const content = document.getElementById('content');
+                if (loading) loading.style.display = 'none';
+                if (content) content.classList.remove('content-hidden');
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                alert('Errore nel caricamento dei dati');
+                alert('Errore nel caricamento dei dati: ' + error.message);
             }
         }
         
         // Generate QR Code
         function generateQRCode(referralCode) {
-            const qrContainer = document.getElementById('qr-code');
+            const qrContainer = document.getElementById('qr-canvas');
             if (!qrContainer || !referralCode) return;
             
             const referralUrl = `https://cdm86.com/public/login.html?ref=${referralCode}`;
             
-            // Simple QR code using Google Charts API
-            const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(referralUrl)}`;
+            // Clear previous QR code
+            qrContainer.innerHTML = '';
             
-            qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" style="max-width: 100%; border-radius: 8px;">`;
+            // Check if QRCode library is loaded
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: referralUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#667eea',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                // Fallback to Google Charts API
+                const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(referralUrl)}`;
+                qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" style="max-width: 100%; border-radius: 8px;">`;
+            }
         }
         
         // Copy referral code
-        window.copyReferralCode = function() {
-            const code = document.getElementById('referral-code').textContent;
+        window.copyCode = function() {
+            const code = document.getElementById('my-code')?.textContent;
+            if (!code || code === 'LOADING...' || code === 'N/A') {
+                alert('❌ Codice non disponibile');
+                return;
+            }
             navigator.clipboard.writeText(code).then(() => {
                 alert('✅ Codice referral copiato!');
             }).catch(() => {
@@ -545,14 +574,31 @@
         };
         
         // Copy referral link
-        window.copyReferralLink = function() {
-            const code = document.getElementById('referral-code').textContent;
-            const link = `https://cdm86.com/public/login.html?ref=${code}`;
+        window.copyLink = function() {
+            const link = document.getElementById('referral-link')?.textContent;
+            if (!link || link === 'Caricamento link...') {
+                alert('❌ Link non disponibile');
+                return;
+            }
             navigator.clipboard.writeText(link).then(() => {
                 alert('✅ Link referral copiato!');
             }).catch(() => {
                 alert('❌ Errore nella copia');
             });
+        };
+        
+        // Download QR code
+        window.downloadQR = function() {
+            const canvas = document.querySelector('#qr-canvas canvas');
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cdm86-referral-qr.png';
+                a.click();
+            } else {
+                alert('⚠️ QR code non disponibile per il download');
+            }
         };
         
         // Logout
