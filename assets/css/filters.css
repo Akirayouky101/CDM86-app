@@ -351,23 +351,30 @@
 @media (max-width: 768px) {
     /* Navbar mobile layout */
     .nav-container {
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 12px;
         padding: 15px 20px !important;
     }
     
     .nav-brand {
-        width: 100%;
+        flex: 1;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 10px;
     }
     
     .nav-actions {
-        width: 100%;
         display: flex;
-        flex-direction: column;
+        align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    
+    /* Filter and user buttons stay on right */
+    #filter-btn,
+    #login-btn {
+        margin-left: auto;
     }
     
     .search-container {
@@ -375,28 +382,12 @@
         max-width: 100%;
         margin-bottom: 0;
         padding: 10px 16px;
-        order: 3;
+        order: 10;
+        flex-basis: 100%;
     }
     
     .search-input {
         font-size: 14px;
-    }
-    
-    /* Filter and user buttons in a row */
-    .nav-btn {
-        order: 1;
-    }
-    
-    #filter-btn {
-        position: absolute;
-        top: 15px;
-        right: 70px;
-    }
-    
-    #login-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
     }
     
     .filters-panel {
