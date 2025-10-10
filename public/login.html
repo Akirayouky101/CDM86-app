@@ -370,20 +370,7 @@
             loading.classList.add('show');
             
             try {
-                // 1. VALIDATE REFERRAL CODE EXISTS
-                const { data: referrer, error: referrerError } = await supabase
-                    .from('users')
-                    .select('id, referral_code, first_name, last_name')
-                    .eq('referral_code', referralCode)
-                    .single();
-                
-                if (referrerError || !referrer) {
-                    throw new Error('Codice referral "' + referralCode + '" non valido! Verifica con chi ti ha invitato.');
-                }
-                
-                console.log('Referral valido:', referrer.first_name, referrer.last_name);
-                
-                // 2. REGISTER WITH SUPABASE AUTH
+                // 1. REGISTER WITH SUPABASE AUTH (trigger creates user in public.users)
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -391,19 +378,31 @@
                         data: {
                             first_name: firstName,
                             last_name: lastName,
-                            referral_code_used: referralCode,
-                            referred_by_id: referrer.id
+                            referral_code_used: referralCode
                         }
                     }
                 });
                 
                 if (authError) throw authError;
+                if (!authData.user) throw new Error('Registrazione fallita');
                 
-                if (!authData.user) {
-                    throw new Error('Registrazione fallita');
+                // Wait for trigger to create user
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // 2. VALIDATE REFERRAL CODE AND UPDATE referred_by_id
+                const { data: referrer, error: referrerError } = await supabase
+                    .from('users')
+                    .select('id, referral_code, first_name, last_name')
+                    .eq('referral_code', referralCode)
+                    .single();
+                
+                if (referrerError || !referrer) {
+                    // Referral code invalid - delete the just created user
+                    await supabase.auth.admin.deleteUser(authData.user.id);
+                    throw new Error('Codice referral "' + referralCode + '" non valido!');
                 }
                 
-                // 3. UPDATE USER TABLE WITH referred_by_id
+                // 3. UPDATE referred_by_id
                 const { error: updateError } = await supabase
                     .from('users')
                     .update({ referred_by_id: referrer.id })
@@ -413,7 +412,16 @@
                     console.error('Errore aggiornamento referred_by_id:', updateError);
                 }
                 
-                showAlert('Registrazione completata! Sei stato invitato da ' + referrer.first_name + '. Verifica la tua email.', 'success');
+                // 4. INCREMENT referrer's referred_count
+                const { error: countError } = await supabase.rpc('increment_referred_count', {
+                    user_id: referrer.id
+                });
+                
+                if (countError) {
+                    console.error('Errore incremento referred_count:', countError);
+                }
+                
+                showAlert('Registrazione completata! Invitato da ' + referrer.first_name + '. Verifica email.', 'success');
                 
                 setTimeout(() => {
                     switchTab('login');
@@ -429,7 +437,6 @@
                 loading.classList.remove('show');
             }
         });
-        
         // Check if already logged in
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
