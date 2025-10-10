@@ -370,8 +370,6 @@
         align-items: center;
         gap: 10px;
         justify-content: flex-end;
-        flex-wrap: nowrap;
-        min-width: 0;
     }
     
     /* Hide text on mobile, keep icons only */
@@ -379,13 +377,10 @@
         display: none;
     }
     
+    /* Search bar takes full width on new row */
     .search-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
+        width: 100%;
         padding: 10px 16px;
-        order: 10;
-        flex: 0 0 100%;
     }
     
     .search-input {
