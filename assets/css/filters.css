@@ -370,6 +370,13 @@
         align-items: center;
         gap: 10px;
         justify-content: flex-end;
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+    
+    /* Hide text on mobile, keep icons only */
+    #login-btn span {
+        display: none;
     }
     
     .search-container {
