@@ -481,6 +481,9 @@
                 const userEmail = document.getElementById('user-email');
                 if (userEmail) userEmail.textContent = currentUser.email;
                 
+                const userNameNav = document.getElementById('user-name-nav');
+                if (userNameNav) userNameNav.textContent = userData.first_name || 'User';
+                
                 const welcomeText = document.getElementById('welcome-text');
                 if (welcomeText) welcomeText.textContent = `Benvenuto, ${userData.first_name}!`;
                 
