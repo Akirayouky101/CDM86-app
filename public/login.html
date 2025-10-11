@@ -566,16 +566,16 @@
         </div>
     </div>
     
-    <!-- Supabase JS -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
         const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc3MDA1MjUsImV4cCI6MjA0MzI3NjUyNX0.4vQaLmGFJn1VEpgDY1lK_SXLKKnRr3OMZMKGRzDOxgM';
-        window.supabase = createClient(supabaseUrl, supabaseKey);
-    </script>
-    
-    <script>
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Rendi supabase globale per debug
+        window.supabase = supabase;
+        
         // Switch tra login e registrazione
         function switchTab(tab, event) {
             // Se clicchiamo su register, mostra la modale
