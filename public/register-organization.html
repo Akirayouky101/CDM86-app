@@ -461,10 +461,24 @@
                     <div class="wizard-step"></div>
                     <div class="wizard-step"></div>
                     <div class="wizard-step"></div>
+                    <div class="wizard-step"></div>
+                </div>
+                
+                <!-- Step 0: Codice d'invito -->
+                <div class="wizard-step-content active" id="step0">
+                    <h3>Codice d'Invito</h3>
+                    <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                        Per richiedere un codice contratto, devi avere un codice d'invito da un utente o organizzazione esistente.
+                    </p>
+                    <div class="form-group">
+                        <label>Codice d'Invito</label>
+                        <input type="text" id="wizard-referral" required placeholder="ABC1234 o ORG1234" class="uppercase-input">
+                    </div>
+                    <div id="wizard-referral-error" style="color: #e74c3c; font-size: 14px; margin-top: 10px; display: none;"></div>
                 </div>
                 
                 <!-- Step 1: Nome Organizzazione -->
-                <div class="wizard-step-content active" id="step1">
+                <div class="wizard-step-content" id="step1">
                     <h3>Nome Organizzazione</h3>
                     <div class="form-group">
                         <label>Nome Azienda/Associazione</label>
@@ -651,7 +665,8 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
         const supabase = createClient(supabaseUrl, supabaseKey);
         
-        let currentWizardStep = 1;
+        let currentWizardStep = 0;
+        let validatedReferralId = null; // Store the referral ID from step 0
         
         // Make functions global
         window.showCodeInput = showCodeInput;
@@ -754,7 +769,7 @@
             const btnBack = document.getElementById('btnBack');
             const btnNext = document.getElementById('btnNext');
             
-            if (currentWizardStep === 1) {
+            if (currentWizardStep === 0) {
                 btnBack.style.display = 'none';
             } else {
                 btnBack.style.display = 'block';
@@ -771,14 +786,68 @@
         }
         
         function wizardBack() {
-            if (currentWizardStep > 1) {
+            if (currentWizardStep > 0) {
                 currentWizardStep--;
                 updateWizardStep();
             }
         }
         
-        function wizardNext() {
+        async function wizardNext() {
             // Validate current step
+            if (currentWizardStep === 0) {
+                // Validate referral code
+                const referralCode = document.getElementById('wizard-referral').value.trim().toUpperCase();
+                const errorDiv = document.getElementById('wizard-referral-error');
+                
+                if (!referralCode) {
+                    errorDiv.textContent = 'Inserisci un codice d\'invito';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    // Check users table
+                    const { data: userData } = await supabase
+                        .from('users')
+                        .select('id, first_name, last_name')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    
+                    if (userData) {
+                        validatedReferralId = userData.id;
+                        errorDiv.style.display = 'none';
+                        currentWizardStep++;
+                        updateWizardStep();
+                        return;
+                    }
+                    
+                    // Check organizations table
+                    const { data: orgData } = await supabase
+                        .from('organizations')
+                        .select('id, name')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    
+                    if (orgData) {
+                        validatedReferralId = orgData.id;
+                        errorDiv.style.display = 'none';
+                        currentWizardStep++;
+                        updateWizardStep();
+                        return;
+                    }
+                    
+                    // Invalid code
+                    errorDiv.textContent = '❌ Codice d\'invito non valido. Verifica e riprova.';
+                    errorDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Referral validation error:', error);
+                    errorDiv.textContent = 'Errore nella verifica del codice. Riprova.';
+                    errorDiv.style.display = 'block';
+                }
+                return;
+            }
+            
             if (currentWizardStep === 1) {
                 const orgname = document.getElementById('wizard-orgname').value.trim();
                 if (!orgname) {
@@ -827,21 +896,25 @@
         }
         
         function sendReferralRequest() {
+            const referralCode = document.getElementById('wizard-referral').value.trim().toUpperCase();
             const orgname = document.getElementById('wizard-orgname').value.trim();
             const firstname = document.getElementById('wizard-firstname').value.trim();
             const lastname = document.getElementById('wizard-lastname').value.trim();
             const email = document.getElementById('wizard-email').value.trim();
             const phone = document.getElementById('wizard-phone').value.trim();
             
-            const subject = encodeURIComponent('Richiesta Codice Referral Organizzazione - CDM86');
-            const body = encodeURIComponent(`Nuova richiesta di codice referral per organizzazione:
+            const subject = encodeURIComponent('Richiesta Codice Contratto Organizzazione - CDM86');
+            const body = encodeURIComponent(`Nuova richiesta di codice contratto per organizzazione:
 
 Organizzazione: ${orgname}
 Referente: ${firstname} ${lastname}
 Email: ${email}
 Telefono: ${phone}
 
-Per favore, invia un codice referral per questa organizzazione.`);
+INVITATO DA CODICE: ${referralCode}
+(Questo utente/organizzazione dovrebbe ricevere il credito per la segnalazione)
+
+Per favore, invia un codice contratto per questa organizzazione.`);
             
             window.open(`mailto:referralcdm86@appdataconnect.it?subject=${subject}&body=${body}`, '_blank');
         }
