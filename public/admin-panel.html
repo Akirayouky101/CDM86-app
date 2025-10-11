@@ -502,6 +502,96 @@
             background: #b91c1c;
         }
         
+        /* Success/Error Modal */
+        .message-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .message-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        .message-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .message-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .message-icon.success {
+            color: #10b981;
+        }
+        
+        .message-icon.error {
+            color: #ef4444;
+        }
+        
+        .message-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+        
+        .message-text {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .btn-message-close {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-message-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         /* Loading */
         .loading {
             text-align: center;
@@ -636,6 +726,16 @@
                 <button class="btn-close" onclick="closeModal()">&times;</button>
             </div>
             <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <!-- Success/Error Message Modal -->
+    <div id="message-modal" class="message-modal">
+        <div class="message-modal-content">
+            <div class="message-icon" id="message-icon"></div>
+            <h3 class="message-title" id="message-title"></h3>
+            <p class="message-text" id="message-text"></p>
+            <button class="btn-message-close" onclick="closeMessageModal()">OK</button>
         </div>
     </div>
     
@@ -895,7 +995,7 @@
             const adminNotes = document.getElementById('admin-notes').value.trim();
             
             if (!contractCode) {
-                alert('Inserisci un codice contratto');
+                showMessage('error', 'Campo Obbligatorio', 'Inserisci un codice contratto prima di approvare.');
                 return;
             }
             
@@ -911,13 +1011,13 @@
                 
                 if (error) throw error;
                 
-                alert('Richiesta approvata con successo!');
                 closeModal();
+                showMessage('success', 'Richiesta Approvata!', `Il codice contratto "${contractCode}" è stato assegnato con successo.`);
                 loadRequests();
                 
             } catch (error) {
                 console.error('Error approving request:', error);
-                alert('Errore: ' + error.message);
+                showMessage('error', 'Errore', error.message);
             }
         };
         
@@ -933,12 +1033,12 @@
                 
                 if (error) throw error;
                 
-                alert('Richiesta completata!');
+                showMessage('success', 'Richiesta Completata!', 'La richiesta è stata contrassegnata come completata.');
                 loadRequests();
                 
             } catch (error) {
                 console.error('Error completing request:', error);
-                alert('Errore: ' + error.message);
+                showMessage('error', 'Errore', error.message);
             }
         };
         
@@ -968,7 +1068,7 @@
             const adminNotes = document.getElementById('admin-notes').value.trim();
             
             if (!adminNotes) {
-                alert('Inserisci un motivo per il rifiuto');
+                showMessage('error', 'Campo Obbligatorio', 'Inserisci un motivo per il rifiuto prima di procedere.');
                 return;
             }
             
@@ -983,13 +1083,13 @@
                 
                 if (error) throw error;
                 
-                alert('Richiesta rifiutata');
                 closeModal();
+                showMessage('success', 'Richiesta Rifiutata', 'La richiesta è stata rifiutata e l\'utente vedrà il motivo.');
                 loadRequests();
                 
             } catch (error) {
                 console.error('Error rejecting request:', error);
-                alert('Errore: ' + error.message);
+                showMessage('error', 'Errore', error.message);
             }
         };
         
@@ -1028,13 +1128,13 @@
                 
                 if (error) throw error;
                 
-                alert('Note salvate!');
                 closeModal();
+                showMessage('success', 'Note Salvate!', 'Le note admin sono state aggiornate con successo.');
                 loadRequests();
                 
             } catch (error) {
                 console.error('Error saving note:', error);
-                alert('Errore: ' + error.message);
+                showMessage('error', 'Errore', error.message);
             }
         };
         
@@ -1088,19 +1188,44 @@
                 
                 if (error) throw error;
                 
-                alert('✅ Richiesta eliminata con successo!');
                 closeModal();
+                showMessage('success', 'Richiesta Eliminata!', 'La richiesta è stata eliminata definitivamente dal database.');
                 loadRequests();
                 
             } catch (error) {
                 console.error('Error deleting request:', error);
-                alert('❌ Errore nell\'eliminazione: ' + error.message);
+                showMessage('error', 'Errore nell\'Eliminazione', error.message);
             }
         };
         
         // Close modal
         window.closeModal = function() {
             document.getElementById('action-modal').classList.remove('show');
+        };
+        
+        // Show message modal
+        function showMessage(type, title, text) {
+            const modal = document.getElementById('message-modal');
+            const icon = document.getElementById('message-icon');
+            const titleEl = document.getElementById('message-title');
+            const textEl = document.getElementById('message-text');
+            
+            if (type === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                icon.className = 'message-icon success';
+            } else {
+                icon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                icon.className = 'message-icon error';
+            }
+            
+            titleEl.textContent = title;
+            textEl.textContent = text;
+            modal.classList.add('show');
+        }
+        
+        // Close message modal
+        window.closeMessageModal = function() {
+            document.getElementById('message-modal').classList.remove('show');
         };
         
         // Logout
