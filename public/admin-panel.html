@@ -825,6 +825,9 @@
                             <button class="btn-action btn-view" onclick="addNote('${request.id}')">
                                 <i class="fas fa-comment"></i> Note
                             </button>
+                            <button class="btn-action btn-reject" onclick="deleteRequest('${request.id}', '${request.organization_name}')">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
                         </div>
                     </div>
                 `;
@@ -1032,6 +1035,66 @@
             } catch (error) {
                 console.error('Error saving note:', error);
                 alert('Errore: ' + error.message);
+            }
+        };
+        
+        // Delete request
+        window.deleteRequest = function(requestId, orgName) {
+            const modal = document.getElementById('action-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalTitle.textContent = '🗑️ Elimina Richiesta';
+            modalBody.innerHTML = `
+                <div style="padding: 20px 0;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b;"></i>
+                    </div>
+                    <p style="font-size: 16px; color: #374151; margin-bottom: 12px; font-weight: 600;">
+                        Sei sicuro di voler eliminare questa richiesta?
+                    </p>
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <p style="color: #92400e; font-size: 14px; margin-bottom: 8px;">
+                            <strong>Organizzazione:</strong> ${orgName}
+                        </p>
+                        <p style="color: #92400e; font-size: 13px;">
+                            ⚠️ Questa azione è <strong>irreversibile</strong>!
+                        </p>
+                    </div>
+                    <p style="font-size: 14px; color: #6b7280;">
+                        La richiesta verrà eliminata definitivamente dal database e non potrà essere recuperata.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-modal btn-cancel" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button class="btn-modal btn-submit" onclick="confirmDelete('${requestId}')" style="background: #ef4444;">
+                        <i class="fas fa-trash"></i> Elimina Definitivamente
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        };
+        
+        // Confirm delete
+        window.confirmDelete = async function(requestId) {
+            try {
+                const { error } = await supabase
+                    .from('organization_requests')
+                    .delete()
+                    .eq('id', requestId);
+                
+                if (error) throw error;
+                
+                alert('✅ Richiesta eliminata con successo!');
+                closeModal();
+                loadRequests();
+                
+            } catch (error) {
+                console.error('Error deleting request:', error);
+                alert('❌ Errore nell\'eliminazione: ' + error.message);
             }
         };
         
