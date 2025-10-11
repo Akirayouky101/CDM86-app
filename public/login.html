@@ -564,6 +564,14 @@
                 <p>Registrazione in corso...</p>
             </div>
         </div>
+        
+        <!-- Organization Registration Link -->
+        <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Sei un'azienda o un'associazione?</p>
+            <a href="/public/register-organization.html" style="color: #667eea; font-weight: 600; text-decoration: none; font-size: 15px;">
+                🏢 Registra la tua Organizzazione →
+            </a>
+        </div>
     </div>
     
     <script type="module">
@@ -759,9 +767,22 @@ Per favore, invia un codice referral a questo utente.`);
                 if (data.user) {
                     showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
                     
-                    // Redirect to promotions page
+                    // Check if user is an organization
+                    const { data: orgData } = await supabase
+                        .from('organizations')
+                        .select('id')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    // Redirect based on user type
                     setTimeout(() => {
-                        window.location.href = '/public/promotions.html';
+                        if (orgData) {
+                            // Organization login -> organization dashboard
+                            window.location.href = '/public/organization-dashboard.html';
+                        } else {
+                            // Normal user -> promotions/dashboard
+                            window.location.href = '/public/promotions.html';
+                        }
                     }, 1500);
                 } else {
                     showAlert('Credenziali non valide');
@@ -795,17 +816,34 @@ Per favore, invia un codice referral a questo utente.`);
             try {
                 // Valida referral code PRIMA della registrazione (se fornito)
                 let referrer = null;
+                let referrerOrgId = null;
+                
                 if (referralCode) {
-                    const { data: referrerData, error: referrerError } = await supabase
-                        .from('users')
-                        .select('id, referral_code, first_name, last_name')
-                        .eq('referral_code', referralCode)
-                        .single();
-                    
-                    if (referrerError || !referrerData) {
-                        throw new Error('CODICE REFERRAL NON VALIDO!');
+                    // Check if it's an organization code (ORG####)
+                    if (referralCode.startsWith('ORG')) {
+                        const { data: orgData, error: orgError } = await supabase
+                            .from('organizations')
+                            .select('id, referral_code, name')
+                            .eq('referral_code', referralCode)
+                            .single();
+                        
+                        if (orgError || !orgData) {
+                            throw new Error('CODICE ORGANIZZAZIONE NON VALIDO!');
+                        }
+                        referrerOrgId = orgData.id;
+                    } else {
+                        // Check users table for normal referral codes
+                        const { data: referrerData, error: referrerError } = await supabase
+                            .from('users')
+                            .select('id, referral_code, first_name, last_name')
+                            .eq('referral_code', referralCode)
+                            .single();
+                        
+                        if (referrerError || !referrerData) {
+                            throw new Error('CODICE REFERRAL NON VALIDO!');
+                        }
+                        referrer = referrerData;
                     }
-                    referrer = referrerData;
                 }
                 
                 // Registra l'utente su Supabase Auth
@@ -822,14 +860,22 @@ Per favore, invia un codice referral a questo utente.`);
                 
                 if (authError) throw authError;
                 
-                // Se c'è un referral code valido, aggiorna referred_by_id
-                if (referrer && authData.user) {
+                // Aggiorna referred_by_id o organization_id
+                if ((referrer || referrerOrgId) && authData.user) {
                     // Aspetta che il trigger crei l'entry in users
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     
+                    const updateData = {};
+                    if (referrer) {
+                        updateData.referred_by_id = referrer.id;
+                    }
+                    if (referrerOrgId) {
+                        updateData.organization_id = referrerOrgId;
+                    }
+                    
                     const { error: updateError } = await supabase
                         .from('users')
-                        .update({ referred_by_id: referrer.id })
+                        .update(updateData)
                         .eq('id', authData.user.id);
                     
                     if (updateError) {
