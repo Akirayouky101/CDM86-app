@@ -341,6 +341,81 @@
             color: #065f46;
         }
         
+        /* Admin Panel Link */
+        .admin-panel-section {
+            display: none;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-panel-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .admin-panel-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        
+        .admin-panel-info h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-panel-info p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .btn-admin-panel {
+            background: white;
+            color: #dc2626;
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-admin-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: #fee;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-panel-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+        }
+        
         /* Segnalazioni Aziende */
         .filter-buttons {
             display: flex;
@@ -494,6 +569,23 @@
             <div class="welcome-card">
                 <h2 id="welcome-text">Benvenuto!</h2>
                 <p id="user-email"></p>
+            </div>
+            
+            <!-- Admin Panel Access (solo per admin) -->
+            <div class="admin-panel-section" id="admin-panel-access">
+                <div class="admin-panel-content">
+                    <div class="admin-panel-info">
+                        <h3>
+                            <i class="fas fa-crown"></i>
+                            Pannello Amministratore
+                        </h3>
+                        <p>Gestisci richieste codici contratto organizzazioni</p>
+                    </div>
+                    <button class="btn-admin-panel" onclick="openAdminPanel()">
+                        <i class="fas fa-shield-alt"></i>
+                        Apri Admin Panel
+                    </button>
+                </div>
             </div>
             
             <!-- Stats -->
@@ -714,9 +806,17 @@
                         window.location.href = '/public/login.html';
                     });
                 }
+                
                 const welcomeText = document.getElementById('welcome-text');
                 if (welcomeText) welcomeText.textContent = `Benvenuto, ${userData.first_name}!`;
                 
+                // Show admin panel link if user is admin
+                if (currentUser.email === 'diegomarruchi@outlook.it') {
+                    const adminSection = document.getElementById('admin-panel-access');
+                    if (adminSection) adminSection.style.display = 'block';
+                }
+                
+                // Update referral code display
                 const statPoints = document.getElementById('stat-points');
                 if (statPoints) statPoints.textContent = userData.points || 0;
                 
@@ -1074,6 +1174,11 @@
         window.logout = async function() {
             await supabase.auth.signOut();
             window.location.href = '/public/login.html';
+        };
+        
+        // Open Admin Panel
+        window.openAdminPanel = function() {
+            window.location.href = '/public/admin-panel.html';
         };
     </script>
 </body>
