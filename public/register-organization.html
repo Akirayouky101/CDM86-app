@@ -417,15 +417,39 @@
             <div id="modalQuestion">
                 <div class="modal-header">
                     <h2>🏢 Registrazione Organizzazione</h2>
-                    <p>Hai un codice di invito per registrare la tua azienda/associazione?</p>
+                    <p>Hai un codice contratto per registrare la tua azienda/associazione?</p>
                 </div>
                 
                 <div class="modal-buttons">
-                    <button class="modal-btn modal-btn-yes" onclick="handleHasCode()">
+                    <button class="modal-btn modal-btn-yes" onclick="showCodeInput()">
                         <i class="fas fa-check"></i> Sì, ce l'ho
                     </button>
                     <button class="modal-btn modal-btn-no" onclick="showWizard()">
                         <i class="fas fa-times"></i> No, richiedi codice
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modale per inserire codice contratto -->
+            <div id="modalCodeInput" style="display: none;">
+                <div class="modal-header">
+                    <h2>📋 Inserisci Codice Contratto</h2>
+                    <p>Inserisci il codice contratto che hai ricevuto</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contract-code-input">Codice Contratto</label>
+                    <input type="text" id="contract-code-input" placeholder="ABC1234 o ORG1234" class="uppercase-input" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; text-transform: uppercase;">
+                </div>
+                
+                <div id="code-error" style="color: #e74c3c; font-size: 14px; margin-top: 10px; display: none;"></div>
+                
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-no" onclick="backToQuestion()">
+                        <i class="fas fa-arrow-left"></i> Indietro
+                    </button>
+                    <button class="modal-btn modal-btn-yes" onclick="validateCode()">
+                        <i class="fas fa-check"></i> Verifica Codice
                     </button>
                 </div>
             </div>
@@ -630,13 +654,73 @@
         let currentWizardStep = 1;
         
         // Make functions global
-        window.handleHasCode = handleHasCode;
+        window.showCodeInput = showCodeInput;
+        window.backToQuestion = backToQuestion;
+        window.validateCode = validateCode;
         window.showWizard = showWizard;
         window.wizardBack = wizardBack;
         window.wizardNext = wizardNext;
         
-        function handleHasCode() {
-            document.getElementById('referralModal').classList.remove('active');
+        function showCodeInput() {
+            document.getElementById('modalQuestion').style.display = 'none';
+            document.getElementById('modalCodeInput').style.display = 'block';
+        }
+        
+        function backToQuestion() {
+            document.getElementById('modalCodeInput').style.display = 'none';
+            document.getElementById('modalQuestion').style.display = 'block';
+            document.getElementById('contract-code-input').value = '';
+            document.getElementById('code-error').style.display = 'none';
+        }
+        
+        async function validateCode() {
+            const code = document.getElementById('contract-code-input').value.trim().toUpperCase();
+            const errorDiv = document.getElementById('code-error');
+            
+            if (!code) {
+                errorDiv.textContent = 'Inserisci un codice contratto';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Check users table
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('referral_code', code)
+                    .single();
+                
+                if (userData) {
+                    // Valid code - pre-fill and close modal
+                    document.getElementById('org-referral').value = code;
+                    document.getElementById('referralModal').classList.remove('active');
+                    return;
+                }
+                
+                // Check organizations table
+                const { data: orgData } = await supabase
+                    .from('organizations')
+                    .select('id')
+                    .eq('referral_code', code)
+                    .single();
+                
+                if (orgData) {
+                    // Valid code - pre-fill and close modal
+                    document.getElementById('org-referral').value = code;
+                    document.getElementById('referralModal').classList.remove('active');
+                    return;
+                }
+                
+                // Invalid code
+                errorDiv.textContent = '❌ Codice contratto non valido. Verifica e riprova.';
+                errorDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Code validation error:', error);
+                errorDiv.textContent = 'Errore nella verifica del codice. Riprova.';
+                errorDiv.style.display = 'block';
+            }
         }
         
         function showWizard() {
