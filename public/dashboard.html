@@ -396,6 +396,13 @@
                 </div>
             </div>
             
+            <!-- Organizzazione di appartenenza -->
+            <div class="section" id="organization-section" style="display: none;">
+                <h3>🏢 Organizzazione</h3>
+                <div id="organization-content"></div>
+            </div>
+            
+
             <!-- Chi ti ha invitato -->
             <div class="section">
                 <h3>👤 Chi ti ha invitato</h3>
@@ -600,6 +607,33 @@
                         `;
                     }
                 }
+                // Get organization data if user belongs to one
+                if (userData.organization_id) {
+                    const { data: orgData, error: orgError } = await supabase
+                        .from('organizations')
+                        .select('id, name, organization_type, referral_code')
+                        .eq('id', userData.organization_id)
+                        .single();
+                    
+                    const orgSection = document.getElementById('organization-section');
+                    const orgContent = document.getElementById('organization-content');
+                    
+                    if (!orgError && orgData && orgSection && orgContent) {
+                        orgSection.style.display = 'block';
+                        const orgTypeLabel = orgData.organization_type === 'company' ? 'Azienda' : 'Associazione';
+                        const orgIcon = orgData.organization_type === 'company' ? '🏢' : '��';
+                        
+                        orgContent.innerHTML = `
+                            <div style="background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: white; padding: 20px; border-radius: 12px; margin-top: 10px;">
+                                <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">FAI PARTE DI QUESTA ORGANIZZAZIONE:</div>
+                                <div style="font-size: 1.4em; font-weight: 600; margin-bottom: 4px;">${orgIcon} ${orgData.name}</div>
+                                <div style="font-size: 1.0em; opacity: 0.9; margin-top: 4px;">${orgTypeLabel}</div>
+                                <div style="font-size: 1.1em; font-weight: 500; opacity: 0.95; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">Codice Organizzazione: ${orgData.referral_code}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
                 
                 // Get referral stats (persone che hai invitato)
                 const { data: referrals, error: refError } = await supabase
