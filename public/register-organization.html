@@ -586,7 +586,7 @@
                 
                 <div class="form-group">
                     <label for="org-password">Password <span class="required">*</span></label>
-                    <input type="password" id="org-password" required placeholder="Minimo 8 caratteri" minlength="8">
+                    <input type="password" id="org-password" required placeholder="Minimo 8 caratteri" minlength="8" autocomplete="new-password">
                 </div>
             </div>
             
@@ -675,6 +675,33 @@
         window.showWizard = showWizard;
         window.wizardBack = wizardBack;
         window.wizardNext = wizardNext;
+        window.closeWizard = closeWizard;
+        
+        function closeWizard() {
+            // Hide wizard
+            document.getElementById('wizardContainer').classList.remove('active');
+            
+            // Reset wizard to initial state
+            currentWizardStep = 0;
+            validatedReferralId = null;
+            
+            // Clear all form fields
+            document.getElementById('wizard-referral').value = '';
+            document.getElementById('wizard-orgname').value = '';
+            document.getElementById('wizard-firstname').value = '';
+            document.getElementById('wizard-lastname').value = '';
+            document.getElementById('wizard-email').value = '';
+            document.getElementById('wizard-phone').value = '';
+            
+            // Hide modals
+            document.getElementById('modalQuestion').style.display = 'none';
+            document.getElementById('modalCodeInput').style.display = 'none';
+            
+            // Redirect to home or show success message
+            setTimeout(() => {
+                window.location.href = '/public/login.html';
+            }, 2000);
+        }
         
         function showCodeInput() {
             document.getElementById('modalQuestion').style.display = 'none';
