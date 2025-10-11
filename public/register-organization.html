@@ -895,7 +895,7 @@
             }
         }
         
-        function sendReferralRequest() {
+        async function sendReferralRequest() {
             const referralCode = document.getElementById('wizard-referral').value.trim().toUpperCase();
             const orgname = document.getElementById('wizard-orgname').value.trim();
             const firstname = document.getElementById('wizard-firstname').value.trim();
@@ -903,8 +903,26 @@
             const email = document.getElementById('wizard-email').value.trim();
             const phone = document.getElementById('wizard-phone').value.trim();
             
-            const subject = encodeURIComponent('Richiesta Codice Contratto Organizzazione - CDM86');
-            const body = encodeURIComponent(`Nuova richiesta di codice contratto per organizzazione:
+            try {
+                // Salva la richiesta nel database
+                const { data, error } = await supabase.rpc('create_organization_request', {
+                    p_referred_by_code: referralCode,
+                    p_organization_name: orgname,
+                    p_contact_first_name: firstname,
+                    p_contact_last_name: lastname,
+                    p_contact_email: email,
+                    p_contact_phone: phone
+                });
+                
+                if (error) {
+                    console.error('Errore salvataggio richiesta:', error);
+                    alert('Errore nel salvataggio della richiesta. Riprova.');
+                    return;
+                }
+                
+                // Invia anche email di notifica
+                const subject = encodeURIComponent('Richiesta Codice Contratto Organizzazione - CDM86');
+                const body = encodeURIComponent(`Nuova richiesta di codice contratto per organizzazione:
 
 Organizzazione: ${orgname}
 Referente: ${firstname} ${lastname}
@@ -914,9 +932,18 @@ Telefono: ${phone}
 INVITATO DA CODICE: ${referralCode}
 (Questo utente/organizzazione dovrebbe ricevere il credito per la segnalazione)
 
+ID Richiesta: ${data}
 Per favore, invia un codice contratto per questa organizzazione.`);
-            
-            window.open(`mailto:referralcdm86@appdataconnect.it?subject=${subject}&body=${body}`, '_blank');
+                
+                window.open(`mailto:referralcdm86@appdataconnect.it?subject=${subject}&body=${body}`, '_blank');
+                
+                alert('Richiesta inviata con successo! Riceverai il codice contratto via email.');
+                closeWizard();
+                
+            } catch (err) {
+                console.error('Errore:', err);
+                alert('Errore nel processo. Riprova.');
+            }
         }
         
         // Show/hide required fields based on organization type
