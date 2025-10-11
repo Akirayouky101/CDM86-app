@@ -630,8 +630,8 @@
                         <div class="label">Approvate</div>
                     </div>
                     <div class="stat-card">
-                        <div class="value" id="completed-org-requests">0</div>
-                        <div class="label">Completate</div>
+                        <div class="value" id="rejected-org-requests">0</div>
+                        <div class="label">Rifiutate</div>
                     </div>
                 </div>
                 
@@ -639,7 +639,7 @@
                     <button class="btn-filter active" onclick="filterOrgRequests('all')">Tutte</button>
                     <button class="btn-filter" onclick="filterOrgRequests('pending')">In Attesa</button>
                     <button class="btn-filter" onclick="filterOrgRequests('approved')">Approvate</button>
-                    <button class="btn-filter" onclick="filterOrgRequests('completed')">Completate</button>
+                    <button class="btn-filter" onclick="filterOrgRequests('rejected')">Rifiutate</button>
                 </div>
                 
                 <div id="org-requests-list"></div>
@@ -997,12 +997,12 @@
                 const totalEl = document.getElementById('total-org-requests');
                 const pendingEl = document.getElementById('pending-org-requests');
                 const approvedEl = document.getElementById('approved-org-requests');
-                const completedEl = document.getElementById('completed-org-requests');
+                const rejectedEl = document.getElementById('rejected-org-requests');
                 
                 if (totalEl) totalEl.textContent = allOrgRequests.length;
                 if (pendingEl) pendingEl.textContent = allOrgRequests.filter(r => r.status === 'pending').length;
                 if (approvedEl) approvedEl.textContent = allOrgRequests.filter(r => r.status === 'approved').length;
-                if (completedEl) completedEl.textContent = allOrgRequests.filter(r => r.status === 'completed').length;
+                if (rejectedEl) rejectedEl.textContent = allOrgRequests.filter(r => r.status === 'rejected').length;
                 
                 // Display requests
                 displayOrgRequests(allOrgRequests);
@@ -1072,6 +1072,17 @@
                             </div>
                             ` : ''}
                         </div>
+                        
+                        ${request.status === 'rejected' && request.admin_notes ? `
+                        <div style="margin-top: 15px; padding: 12px; background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px;">
+                            <div style="font-size: 12px; font-weight: 600; color: #991b1b; margin-bottom: 6px;">
+                                ❌ Motivo del rifiuto:
+                            </div>
+                            <div style="font-size: 14px; color: #7f1d1d;">
+                                ${request.admin_notes}
+                            </div>
+                        </div>
+                        ` : ''}
                         
                         <div class="org-request-footer">
                             <span>📅 Richiesta inviata il ${createdDate}</span>
