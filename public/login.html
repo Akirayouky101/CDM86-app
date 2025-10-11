@@ -539,16 +539,9 @@
         </div>
     </div>
     
-    <!-- Supabase JS -->
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
-        const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc3MDA1MjUsImV4cCI6MjA0MzI3NjUyNX0.4vQaLmGFJn1VEpgDY1lK_SXLKKnRr3OMZMKGRzDOxgM';
-        window.supabase = createClient(supabaseUrl, supabaseKey);
-    </script>
-    
     <script>
+        const API_URL = 'http://localhost:3000/api';
+        
         // Switch tra login e registrazione
         function switchTab(tab, event) {
             // Se clicchiamo su register, mostra la modale
@@ -722,16 +715,19 @@ Per favore, invia un codice referral a questo utente.`);
             loading.classList.add('show');
             
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
                 
-                if (error) {
-                    throw error;
-                }
+                const data = await response.json();
                 
-                if (data.user) {
+                if (response.ok && data.success) {
+                    // Save token
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
                     showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
                     
                     // Redirect to promotions page
@@ -739,17 +735,10 @@ Per favore, invia un codice referral a questo utente.`);
                         window.location.href = '/public/promotions.html';
                     }, 1500);
                 } else {
-                    showAlert('Credenziali non valide');
+                    showAlert(data.message || 'Credenziali non valide');
                     form.style.display = 'block';
                     loading.classList.remove('show');
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                showAlert(error.message || 'Errore di connessione');
-                form.style.display = 'block';
-                loading.classList.remove('show');
-            }
-        });
             } catch (error) {
                 console.error('Login error:', error);
                 showAlert('Errore di connessione. Server attivo?');
@@ -775,66 +764,37 @@ Per favore, invia un codice referral a questo utente.`);
             loading.classList.add('show');
             
             try {
-                // Valida referral code PRIMA della registrazione (se fornito)
-                let referrer = null;
-                if (referralCode) {
-                    const { data: referrerData, error: referrerError } = await supabase
-                        .from('users')
-                        .select('id, referral_code, first_name, last_name')
-                        .eq('referral_code', referralCode)
-                        .single();
-                    
-                    if (referrerError || !referrerData) {
-                        throw new Error('CODICE REFERRAL NON VALIDO!');
-                    }
-                    referrer = referrerData;
-                }
-                
-                // Registra l'utente su Supabase Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            first_name: firstName,
-                            last_name: lastName
-                        }
-                    }
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                        referralCode
+                    })
                 });
                 
-                if (authError) {
-                    throw authError;
-                }
+                const data = await response.json();
                 
-                // Se c'è un referral code valido, aggiorna referred_by_id
-                if (referrer && authData.user) {
-                    // Aspetta che il trigger crei l'entry in users
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                if (response.ok && data.success) {
+                    showAlert('✅ Registrazione completata! Accedi ora.', 'success');
                     
-                    const { error: updateError } = await supabase
-                        .from('users')
-                        .update({ referred_by_id: referrer.id })
-                        .eq('id', authData.user.id);
-                    
-                    if (updateError) {
-                        console.error('Errore aggiornamento referral:', updateError);
-                    }
+                    // Switch to login tab
+                    setTimeout(() => {
+                        document.querySelectorAll('.tab')[0].click();
+                        document.getElementById('login-email').value = email;
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Errore durante la registrazione');
+                    form.style.display = 'block';
+                    loading.classList.remove('show');
                 }
-                
-                showAlert('✅ Registrazione completata! Controlla la tua email per confermare.', 'success');
-                
-                // Switch to login tab
-                setTimeout(() => {
-                    document.querySelectorAll('.tab')[0].click();
-                    document.getElementById('login-email').value = email;
-                }, 2000);
             } catch (error) {
                 console.error('Register error:', error);
-                showAlert(error.message || 'Errore durante la registrazione');
+                showAlert('Errore di connessione. Server attivo?');
                 form.style.display = 'block';
-                loading.classList.remove('show');
-            }
-        });
                 loading.classList.remove('show');
             }
         });
