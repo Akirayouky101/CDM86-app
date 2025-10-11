@@ -577,7 +577,7 @@
         window.supabase = supabase;
         
         // Switch tra login e registrazione
-        function switchTab(tab, event) {
+        window.switchTab = function(tab, event) {
             // Se clicchiamo su register, mostra la modale
             if (tab === 'register') {
                 showReferralModal();
@@ -607,11 +607,11 @@
             document.getElementById('wizardContainer').classList.remove('active');
         }
         
-        function closeReferralModal() {
+        window.closeReferralModal = function() {
             document.getElementById('referralModal').classList.remove('active');
         }
         
-        function handleHasCode() {
+        window.handleHasCode = function() {
             closeReferralModal();
             // Mostra il form di registrazione
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -620,7 +620,7 @@
             document.getElementById('register-panel').classList.add('active');
         }
         
-        function showWizard() {
+        window.showWizard = function() {
             document.getElementById('modalQuestion').style.display = 'none';
             document.getElementById('wizardContainer').classList.add('active');
             currentWizardStep = 1;
@@ -654,14 +654,14 @@
             }
         }
         
-        function wizardBack() {
+        window.wizardBack = function() {
             if (currentWizardStep > 1) {
                 currentWizardStep--;
                 updateWizardStep();
             }
         }
         
-        function wizardNext() {
+        window.wizardNext = function() {
             if (currentWizardStep === 4) {
                 closeReferralModal();
                 return;
