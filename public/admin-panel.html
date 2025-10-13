@@ -2579,22 +2579,26 @@
                     partner_phone: document.getElementById('promo-partner-phone').value || null,
                     partner_city: document.getElementById('promo-partner-city').value,
                     partner_address: document.getElementById('promo-partner-address').value || null,
+                    partner_province: '',
                     category: document.getElementById('promo-category').value,
                     tags: document.getElementById('promo-tags').value.split(',').map(t => t.trim()).filter(t => t),
-                    image_main: uploadedImageUrl,
-                    image_thumbnail: uploadedImageUrl,
+                    image_url: uploadedImageUrl,
+                    thumbnail_url: uploadedImageUrl,
                     discount_type: document.getElementById('promo-discount-type').value,
                     discount_value: parseFloat(document.getElementById('promo-discount-value').value),
-                    price_original: parseFloat(document.getElementById('promo-original-price').value),
-                    price_discounted: parseFloat(document.getElementById('promo-discounted-price').value),
-                    validity_start_date: document.getElementById('promo-start-date').value,
-                    validity_end_date: document.getElementById('promo-end-date').value,
-                    limit_per_user: parseInt(document.getElementById('promo-limit-user').value) || 1,
+                    original_price: parseFloat(document.getElementById('promo-original-price').value),
+                    discounted_price: parseFloat(document.getElementById('promo-discounted-price').value),
+                    start_date: document.getElementById('promo-start-date').value || null,
+                    end_date: document.getElementById('promo-end-date').value || null,
+                    per_user_limit: parseInt(document.getElementById('promo-limit-user').value) || 1,
+                    max_redemptions: null,
+                    current_redemptions: 0,
                     is_active: document.getElementById('promo-active').checked,
                     is_featured: document.getElementById('promo-featured').checked,
                     points_cost: 0,
                     points_reward: 50,
-                    created_by_id: currentUser.id
+                    terms: null,
+                    how_to_redeem: null
                 };
                 
                 // Save to Supabase
@@ -2645,13 +2649,13 @@
                 
                 container.innerHTML = data.map(promo => `
                     <div class="promo-item">
-                        <img src="${promo.image_main}" alt="${promo.title}" class="promo-item-image" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        <img src="${promo.image_url}" alt="${promo.title}" class="promo-item-image" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
                         <div class="promo-item-content">
                             <div class="promo-item-title">${promo.title}</div>
                             <div class="promo-item-partner"><i class="fas fa-store"></i> ${promo.partner_name}</div>
                             <div class="promo-item-meta">
                                 <span><i class="fas fa-tag"></i> ${promo.category}</span>
-                                <span><i class="fas fa-euro-sign"></i> ${promo.price_discounted}€ (era ${promo.price_original}€)</span>
+                                <span><i class="fas fa-euro-sign"></i> ${promo.discounted_price}€ (era ${promo.original_price}€)</span>
                                 <span>${promo.is_active ? '<i class="fas fa-check-circle" style="color: #10b981;"></i> Attiva' : '<i class="fas fa-times-circle" style="color: #ef4444;"></i> Non attiva'}</span>
                             </div>
                         </div>
