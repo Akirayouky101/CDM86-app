@@ -2772,16 +2772,24 @@
                 // Show existing image preview if available
                 if (promo.image_url) {
                     const preview = document.getElementById('image-preview');
-                    const previewImg = document.getElementById('preview-image');
-                    previewImg.src = promo.image_url;
-                    preview.style.display = 'block';
+                    const previewImg = document.getElementById('preview-img');
+                    if (previewImg) {
+                        previewImg.src = promo.image_url;
+                        preview.style.display = 'block';
+                    }
                     
                     // Store existing image URL in a data attribute
-                    document.getElementById('promo-form').setAttribute('data-existing-image', promo.image_url);
+                    const promoForm = document.getElementById('new-promo-form');
+                    if (promoForm) {
+                        promoForm.setAttribute('data-existing-image', promo.image_url);
+                    }
                 }
                 
                 // Store promotion ID for update
-                document.getElementById('promo-form').setAttribute('data-edit-id', id);
+                const promoForm = document.getElementById('new-promo-form');
+                if (promoForm) {
+                    promoForm.setAttribute('data-edit-id', id);
+                }
                 
                 // Change button text
                 document.querySelector('#promo-form button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Aggiorna Promozione';
