@@ -2661,6 +2661,9 @@
             startY: 0,
             originalFile: null
         };
+        
+        // Global variable to store resized image file
+        let resizedImageFile = null;
 
         window.previewImage = function(event) {
             const file = event.target.files[0];
@@ -2861,6 +2864,9 @@
                         lastModified: Date.now()
                     });
                     
+                    // Save to global variable
+                    resizedImageFile = resizedFile;
+                    
                     // Show preview in form
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -2870,10 +2876,14 @@
                     };
                     reader.readAsDataURL(resizedFile);
                     
-                    // Update file input with resized image
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(resizedFile);
-                    document.getElementById('promo-image').files = dataTransfer.files;
+                    // Try to update file input (may not work in all browsers)
+                    try {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(resizedFile);
+                        document.getElementById('promo-image').files = dataTransfer.files;
+                    } catch (e) {
+                        console.warn('Could not update file input, using global variable instead');
+                    }
                     
                     // Mark as pre-resized
                     const fileInput = document.getElementById('promo-image');
@@ -2882,7 +2892,8 @@
                     console.log('✅ Image resized in canvas:', {
                         width: resizeState.canvas.width,
                         height: resizeState.canvas.height,
-                        preResizedFlag: true
+                        preResizedFlag: true,
+                        fileSaved: !!resizedImageFile
                     });
                     
                     // Close modal
@@ -2931,6 +2942,7 @@
             document.getElementById('image-preview').style.display = 'none';
             document.querySelector('.upload-label').style.display = 'flex';
             uploadedImageUrl = null;
+            resizedImageFile = null; // Clear global variable
         };
         
         // Update discount fields
@@ -3096,10 +3108,13 @@
                 let imageUrl = form.getAttribute('data-existing-image'); // Use existing image if editing
                 let thumbnailUrl = form.getAttribute('data-existing-thumbnail'); // Use existing thumbnail if editing
                 const fileInput = document.getElementById('promo-image');
-                const imageFile = fileInput.files[0];
+                
+                // Use resized image from global variable if available, otherwise use file input
+                let imageFile = resizedImageFile || fileInput.files[0];
                 
                 console.log('🔍 Checking image file:', {
-                    hasFiles: fileInput.files.length > 0,
+                    hasResizedFile: !!resizedImageFile,
+                    hasInputFiles: fileInput.files.length > 0,
                     imageFile: imageFile,
                     fileName: imageFile?.name,
                     fileSize: imageFile?.size,
