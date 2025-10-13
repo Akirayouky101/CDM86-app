@@ -2604,13 +2604,13 @@
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, ''),
                     description: document.getElementById('promo-description').value,
-                    short_description: document.getElementById('promo-short-description').value,
+                    short_description: document.getElementById('promo-short-desc').value,
                     partner_name: document.getElementById('promo-partner-name').value,
                     partner_email: document.getElementById('promo-partner-email').value || null,
                     partner_phone: document.getElementById('promo-partner-phone').value || null,
                     partner_city: document.getElementById('promo-partner-city').value,
                     partner_address: document.getElementById('promo-partner-address').value || null,
-                    partner_province: document.getElementById('promo-partner-province').value || '',
+                    partner_province: '',
                     category: document.getElementById('promo-category').value,
                     image_url: imageUrl,
                     thumbnail_url: imageUrl,
@@ -2620,13 +2620,13 @@
                     discounted_price: parseFloat(document.getElementById('promo-discounted-price').value),
                     start_date: document.getElementById('promo-start-date').value || null,
                     end_date: document.getElementById('promo-end-date').value || null,
-                    per_user_limit: parseInt(document.getElementById('promo-per-user-limit').value) || 1,
-                    max_redemptions: parseInt(document.getElementById('promo-max-redemptions').value) || null,
+                    per_user_limit: parseInt(document.getElementById('promo-limit-user').value) || 1,
+                    max_redemptions: null,
                     current_redemptions: isEditing ? undefined : 0, // Don't update on edit
-                    is_active: document.getElementById('promo-is-active').checked,
-                    is_featured: document.getElementById('promo-is-featured').checked,
-                    points_cost: parseInt(document.getElementById('promo-points-cost').value) || 0,
-                    points_reward: parseInt(document.getElementById('promo-points-reward').value) || 50,
+                    is_active: document.getElementById('promo-active').checked,
+                    is_featured: document.getElementById('promo-featured').checked,
+                    points_cost: 0,
+                    points_reward: 50,
                     terms: null,
                     how_to_redeem: null,
                     updated_at: new Date().toISOString()
@@ -2752,13 +2752,12 @@
                 // Fill form with existing data
                 document.getElementById('promo-title').value = promo.title || '';
                 document.getElementById('promo-description').value = promo.description || '';
-                document.getElementById('promo-short-description').value = promo.short_description || '';
+                document.getElementById('promo-short-desc').value = promo.short_description || '';
                 document.getElementById('promo-partner-name').value = promo.partner_name || '';
                 document.getElementById('promo-partner-email').value = promo.partner_email || '';
                 document.getElementById('promo-partner-phone').value = promo.partner_phone || '';
                 document.getElementById('promo-partner-city').value = promo.partner_city || '';
                 document.getElementById('promo-partner-address').value = promo.partner_address || '';
-                document.getElementById('promo-partner-province').value = promo.partner_province || '';
                 document.getElementById('promo-category').value = promo.category || 'ristoranti';
                 document.getElementById('promo-discount-type').value = promo.discount_type || 'percentage';
                 document.getElementById('promo-discount-value').value = promo.discount_value || '';
@@ -2766,12 +2765,9 @@
                 document.getElementById('promo-discounted-price').value = promo.discounted_price || '';
                 document.getElementById('promo-start-date').value = promo.start_date ? promo.start_date.split('T')[0] : '';
                 document.getElementById('promo-end-date').value = promo.end_date ? promo.end_date.split('T')[0] : '';
-                document.getElementById('promo-points-cost').value = promo.points_cost || 0;
-                document.getElementById('promo-points-reward').value = promo.points_reward || 0;
-                document.getElementById('promo-per-user-limit').value = promo.per_user_limit || 1;
-                document.getElementById('promo-max-redemptions').value = promo.max_redemptions || '';
-                document.getElementById('promo-is-active').checked = promo.is_active || false;
-                document.getElementById('promo-is-featured').checked = promo.is_featured || false;
+                document.getElementById('promo-limit-user').value = promo.per_user_limit || 1;
+                document.getElementById('promo-active').checked = promo.is_active || false;
+                document.getElementById('promo-featured').checked = promo.is_featured || false;
                 
                 // Show existing image preview if available
                 if (promo.image_url) {
