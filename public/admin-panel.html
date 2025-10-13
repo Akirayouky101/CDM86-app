@@ -2792,7 +2792,10 @@
                 }
                 
                 // Change button text
-                document.querySelector('#promo-form button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Aggiorna Promozione';
+                const submitBtn = document.querySelector('#new-promo-form button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Aggiorna Promozione';
+                }
                 
                 // Update discount label
                 updateDiscountFields();
