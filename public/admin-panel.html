@@ -1175,8 +1175,8 @@
         }
         
         .promo-item-image {
-            width: 120px;
-            height: 80px;
+            width: 120px !important;
+            height: 80px !important;
             min-width: 120px;
             min-height: 80px;
             max-width: 120px;
@@ -1185,6 +1185,8 @@
             object-fit: cover;
             object-position: center;
             flex-shrink: 0;
+            display: block;
+            overflow: hidden;
         }
         
         .promo-item-content {
@@ -2696,7 +2698,7 @@
                 
                 container.innerHTML = data.map(promo => `
                     <div class="promo-item">
-                        <img src="${promo.image_url}" alt="${promo.title}" class="promo-item-image" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        <img src="${promo.image_url}" alt="${promo.title}" class="promo-item-image" width="120" height="80" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
                         <div class="promo-item-content">
                             <div class="promo-item-title">${promo.title}</div>
                             <div class="promo-item-partner"><i class="fas fa-store"></i> ${promo.partner_name}</div>
@@ -2707,7 +2709,7 @@
                             </div>
                         </div>
                         <div class="promo-item-actions">
-                            <button class="btn-edit" onclick="editPromotion('${promo.id}')">
+                            <button class="btn-edit" onclick="editPromotion('${promo.id}')">>
                                 <i class="fas fa-edit"></i> Modifica
                             </button>
                             <button class="btn-delete" onclick="deletePromotion('${promo.id}', '${promo.title}')">
