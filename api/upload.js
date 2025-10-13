@@ -5,6 +5,7 @@
 
 import { put } from '@vercel/blob';
 import multiparty from 'multiparty';
+import fs from 'fs';
 
 export const config = {
   api: {
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
     });
 
     // Get file
-    const file = files.file[0];
+    const file = files.file?.[0];
     
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -47,6 +48,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'File too large. Max 5MB.' });
     }
 
+    // Read file content
+    const fileBuffer = fs.readFileSync(file.path);
+
     // Generate unique filename
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
@@ -54,10 +58,14 @@ export default async function handler(req, res) {
     const filename = `promotions/${timestamp}-${random}.${extension}`;
 
     // Upload to Vercel Blob
-    const blob = await put(filename, file.path, {
+    const blob = await put(filename, fileBuffer, {
       access: 'public',
       addRandomSuffix: false,
+      contentType: file.headers['content-type'],
     });
+
+    // Delete temp file
+    fs.unlinkSync(file.path);
 
     // Return URL
     return res.status(200).json({
