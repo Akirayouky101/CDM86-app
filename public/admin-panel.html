@@ -2528,6 +2528,7 @@
             // Remove edit attributes
             form.removeAttribute('data-edit-id');
             form.removeAttribute('data-existing-image');
+            form.removeAttribute('data-existing-thumbnail');
             
             // Reset button text
             form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salva Promozione';
@@ -2560,7 +2561,12 @@
                 }
                 
                 const data = await response.json();
-                return data.url;
+                
+                // Return both URLs (full for details, thumbnail for cards)
+                return {
+                    url: data.url,
+                    thumbnailUrl: data.thumbnailUrl
+                };
                 
             } catch (error) {
                 console.error('Upload error:', error);
@@ -2585,11 +2591,14 @@
                 
                 // Handle image upload
                 let imageUrl = form.getAttribute('data-existing-image'); // Use existing image if editing
+                let thumbnailUrl = form.getAttribute('data-existing-thumbnail'); // Use existing thumbnail if editing
                 const imageFile = document.getElementById('promo-image').files[0];
                 
                 if (imageFile) {
-                    // Upload new image
-                    imageUrl = await uploadToVercelBlob(imageFile);
+                    // Upload new image (returns both full and thumbnail)
+                    const uploadResult = await uploadToVercelBlob(imageFile);
+                    imageUrl = uploadResult.url;
+                    thumbnailUrl = uploadResult.thumbnailUrl;
                 } else if (!isEditing) {
                     // New promotion requires image
                     showMessage('error', 'Errore', 'Carica un\'immagine per la promozione');
@@ -2614,8 +2623,8 @@
                     partner_address: document.getElementById('promo-partner-address').value || null,
                     partner_province: '',
                     category: document.getElementById('promo-category').value,
-                    image_url: imageUrl,
-                    thumbnail_url: imageUrl,
+                    image_url: imageUrl,              // Full image for details
+                    thumbnail_url: thumbnailUrl,      // Thumbnail for cards
                     discount_type: document.getElementById('promo-discount-type').value,
                     discount_value: parseFloat(document.getElementById('promo-discount-value').value),
                     original_price: parseFloat(document.getElementById('promo-original-price').value),
@@ -2698,7 +2707,7 @@
                 
                 container.innerHTML = data.map(promo => `
                     <div class="promo-item">
-                        <img src="${promo.image_url}" alt="${promo.title}" class="promo-item-image" width="120" height="80" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        <img src="${promo.thumbnail_url || promo.image_url}" alt="${promo.title}" class="promo-item-image" width="120" height="80" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
                         <div class="promo-item-content">
                             <div class="promo-item-title">${promo.title}</div>
                             <div class="promo-item-partner"><i class="fas fa-store"></i> ${promo.partner_name}</div>
@@ -2780,10 +2789,11 @@
                         preview.style.display = 'block';
                     }
                     
-                    // Store existing image URL in a data attribute
+                    // Store existing images URLs in data attributes
                     const promoForm = document.getElementById('new-promo-form');
                     if (promoForm) {
                         promoForm.setAttribute('data-existing-image', promo.image_url);
+                        promoForm.setAttribute('data-existing-thumbnail', promo.thumbnail_url || promo.image_url);
                     }
                 }
                 

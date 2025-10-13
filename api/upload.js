@@ -1,11 +1,16 @@
 /**
  * Vercel Serverless Function per upload immagini su Vercel Blob
  * Endpoint: /api/upload
+ * 
+ * Crea due versioni dell'immagine:
+ * - Thumbnail: 120x80px per le card (crop al centro)
+ * - Full: 800x600px per i dettagli (mantiene proporzioni)
  */
 
 import { put } from '@vercel/blob';
 import multiparty from 'multiparty';
 import fs from 'fs';
+import sharp from 'sharp';
 
 export const config = {
   api: {
@@ -48,30 +53,57 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'File too large. Max 5MB.' });
     }
 
-    // Read file content
-    const fileBuffer = fs.readFileSync(file.path);
-
     // Generate unique filename
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
-    const extension = file.originalFilename.split('.').pop();
-    const filename = `promotions/${timestamp}-${random}.${extension}`;
+    const extension = 'jpg'; // Converti sempre in JPG per consistenza
 
-    // Upload to Vercel Blob
-    const blob = await put(filename, fileBuffer, {
+    // Read original file
+    const originalBuffer = fs.readFileSync(file.path);
+
+    // Create THUMBNAIL version (120x80px - crop al centro per le card)
+    const thumbnailBuffer = await sharp(originalBuffer)
+      .resize(120, 80, {
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+
+    // Create FULL version (800x600px - mantiene proporzioni per i dettagli)
+    const fullBuffer = await sharp(originalBuffer)
+      .resize(800, 600, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+
+    // Upload thumbnail
+    const thumbnailFilename = `promotions/thumb-${timestamp}-${random}.${extension}`;
+    const thumbnailBlob = await put(thumbnailFilename, thumbnailBuffer, {
       access: 'public',
       addRandomSuffix: false,
-      contentType: file.headers['content-type'],
+      contentType: 'image/jpeg',
+    });
+
+    // Upload full image
+    const fullFilename = `promotions/full-${timestamp}-${random}.${extension}`;
+    const fullBlob = await put(fullFilename, fullBuffer, {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'image/jpeg',
     });
 
     // Delete temp file
     fs.unlinkSync(file.path);
 
-    // Return URL
+    // Return both URLs
     return res.status(200).json({
       success: true,
-      url: blob.url,
-      filename: filename,
+      url: fullBlob.url,           // URL immagine full per i dettagli
+      thumbnailUrl: thumbnailBlob.url,  // URL thumbnail per le card
+      filename: fullFilename,
     });
 
   } catch (error) {
