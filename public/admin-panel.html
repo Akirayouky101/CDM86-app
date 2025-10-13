@@ -2532,7 +2532,12 @@
             
             // Hide form
             document.getElementById('promo-form-container').style.display = 'none';
-            document.querySelector('.btn-toggle-form').textContent = '+ Nuova Promozione';
+            
+            // Reset toggle button
+            const toggleBtn = document.querySelector('.btn-toggle');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            }
         };
         
         // Upload image to Vercel Blob
@@ -2736,7 +2741,10 @@
                 
                 // Show form
                 document.getElementById('promo-form-container').style.display = 'block';
-                document.querySelector('.btn-toggle-form').textContent = '✕ Chiudi Form';
+                const toggleBtn = document.querySelector('.btn-toggle');
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+                }
                 
                 // Scroll to form
                 document.getElementById('promo-form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
