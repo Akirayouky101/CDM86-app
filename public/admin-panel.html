@@ -3095,11 +3095,20 @@
                 // Handle image upload
                 let imageUrl = form.getAttribute('data-existing-image'); // Use existing image if editing
                 let thumbnailUrl = form.getAttribute('data-existing-thumbnail'); // Use existing thumbnail if editing
-                const imageFile = document.getElementById('promo-image').files[0];
+                const fileInput = document.getElementById('promo-image');
+                const imageFile = fileInput.files[0];
+                
+                console.log('🔍 Checking image file:', {
+                    hasFiles: fileInput.files.length > 0,
+                    imageFile: imageFile,
+                    fileName: imageFile?.name,
+                    fileSize: imageFile?.size,
+                    isEditing: isEditing,
+                    hasExistingImage: !!imageUrl
+                });
                 
                 if (imageFile) {
                     // Check if image was pre-resized in canvas
-                    const fileInput = document.getElementById('promo-image');
                     const isPreResized = fileInput.getAttribute('data-pre-resized') === 'true';
                     
                     console.log('📤 Uploading image:', {
