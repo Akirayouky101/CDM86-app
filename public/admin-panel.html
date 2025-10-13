@@ -3040,47 +3040,56 @@
                 console.log('📐 Creating thumbnail 400x300...');
                 const thumbnail = await resizeImageToSize(file, 400, 300, 0.8);
                 
-                // Step 3: Upload main image to Vercel Blob
-                console.log('☁️ Uploading main image to Vercel Blob...');
-                const mainFormData = new FormData();
-                mainFormData.append('file', mainImage);
+                // Step 3: Upload main image to Supabase Storage
+                console.log('☁️ Uploading main image to Supabase Storage...');
+                const mainFileName = `promotions/main-${Date.now()}-${Math.random().toString(36).substr(2, 6)}.png`;
+                const { data: mainData, error: mainError } = await supabase.storage
+                    .from('images')
+                    .upload(mainFileName, mainImage, {
+                        contentType: 'image/png',
+                        cacheControl: '3600',
+                        upsert: false
+                    });
                 
-                const mainResponse = await fetch('https://i4chrlj8r4zep4at.public.blob.vercel-storage.com', {
-                    method: 'PUT',
-                    headers: {
-                        'x-vercel-filename': `promotions/main-${Date.now()}-${Math.random().toString(36).substr(2, 6)}.${file.name.split('.').pop()}`
-                    },
-                    body: mainImage
-                });
-                
-                if (!mainResponse.ok) {
-                    throw new Error('Upload main image failed');
+                if (mainError) {
+                    console.error('Main image upload error:', mainError);
+                    throw new Error(`Upload main image failed: ${mainError.message}`);
                 }
                 
-                const mainData = await mainResponse.json();
-                console.log('✅ Main image uploaded:', mainData.url);
+                // Get public URL for main image
+                const { data: mainUrlData } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(mainFileName);
                 
-                // Step 4: Upload thumbnail to Vercel Blob
-                console.log('☁️ Uploading thumbnail to Vercel Blob...');
-                const thumbResponse = await fetch('https://i4chrlj8r4zep4at.public.blob.vercel-storage.com', {
-                    method: 'PUT',
-                    headers: {
-                        'x-vercel-filename': `promotions/thumb-${Date.now()}-${Math.random().toString(36).substr(2, 6)}.${file.name.split('.').pop()}`
-                    },
-                    body: thumbnail
-                });
+                console.log('✅ Main image uploaded:', mainUrlData.publicUrl);
                 
-                if (!thumbResponse.ok) {
-                    throw new Error('Upload thumbnail failed');
+                // Step 4: Upload thumbnail to Supabase Storage
+                console.log('☁️ Uploading thumbnail to Supabase Storage...');
+                const thumbFileName = `promotions/thumb-${Date.now()}-${Math.random().toString(36).substr(2, 6)}.png`;
+                const { data: thumbData, error: thumbError } = await supabase.storage
+                    .from('images')
+                    .upload(thumbFileName, thumbnail, {
+                        contentType: 'image/png',
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+                
+                if (thumbError) {
+                    console.error('Thumbnail upload error:', thumbError);
+                    throw new Error(`Upload thumbnail failed: ${thumbError.message}`);
                 }
                 
-                const thumbData = await thumbResponse.json();
-                console.log('✅ Thumbnail uploaded:', thumbData.url);
+                // Get public URL for thumbnail
+                const { data: thumbUrlData } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(thumbFileName);
+                
+                console.log('✅ Thumbnail uploaded:', thumbUrlData.publicUrl);
                 
                 // Return both URLs
                 return {
-                    url: mainData.url,
-                    thumbnailUrl: thumbData.url
+                    url: mainUrlData.publicUrl,
+                    thumbnailUrl: thumbUrlData.publicUrl
                 };
                 
             } catch (error) {
