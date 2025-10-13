@@ -2519,9 +2519,20 @@
         
         // Reset form
         window.resetPromoForm = function() {
-            document.getElementById('new-promo-form').reset();
+            const form = document.getElementById('new-promo-form');
+            form.reset();
             removeImage();
+            
+            // Remove edit attributes
+            form.removeAttribute('data-edit-id');
+            form.removeAttribute('data-existing-image');
+            
+            // Reset button text
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salva Promozione';
+            
+            // Hide form
             document.getElementById('promo-form-container').style.display = 'none';
+            document.querySelector('.btn-toggle-form').textContent = '+ Nuova Promozione';
         };
         
         // Upload image to Vercel Blob
@@ -2554,22 +2565,31 @@
         document.getElementById('new-promo-form')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+            const isEditing = !!editId;
+            
             try {
-                // Validate image
-                const imageFile = document.getElementById('promo-image').files[0];
-                if (!imageFile) {
-                    showMessage('error', 'Errore', 'Carica un\'immagine per la promozione');
-                    return;
-                }
-                
                 // Show loading
-                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Caricamento...';
                 submitBtn.disabled = true;
                 
-                // Upload image
-                uploadedImageUrl = await uploadToVercelBlob(imageFile);
+                // Handle image upload
+                let imageUrl = form.getAttribute('data-existing-image'); // Use existing image if editing
+                const imageFile = document.getElementById('promo-image').files[0];
+                
+                if (imageFile) {
+                    // Upload new image
+                    imageUrl = await uploadToVercelBlob(imageFile);
+                } else if (!isEditing) {
+                    // New promotion requires image
+                    showMessage('error', 'Errore', 'Carica un\'immagine per la promozione');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
                 
                 // Get form data
                 const formData = {
@@ -2579,44 +2599,60 @@
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, ''),
                     description: document.getElementById('promo-description').value,
-                    short_description: document.getElementById('promo-short-desc').value,
+                    short_description: document.getElementById('promo-short-description').value,
                     partner_name: document.getElementById('promo-partner-name').value,
                     partner_email: document.getElementById('promo-partner-email').value || null,
                     partner_phone: document.getElementById('promo-partner-phone').value || null,
                     partner_city: document.getElementById('promo-partner-city').value,
                     partner_address: document.getElementById('promo-partner-address').value || null,
-                    partner_province: '',
+                    partner_province: document.getElementById('promo-partner-province').value || '',
                     category: document.getElementById('promo-category').value,
-                    tags: document.getElementById('promo-tags').value.split(',').map(t => t.trim()).filter(t => t),
-                    image_url: uploadedImageUrl,
-                    thumbnail_url: uploadedImageUrl,
+                    image_url: imageUrl,
+                    thumbnail_url: imageUrl,
                     discount_type: document.getElementById('promo-discount-type').value,
                     discount_value: parseFloat(document.getElementById('promo-discount-value').value),
                     original_price: parseFloat(document.getElementById('promo-original-price').value),
                     discounted_price: parseFloat(document.getElementById('promo-discounted-price').value),
                     start_date: document.getElementById('promo-start-date').value || null,
                     end_date: document.getElementById('promo-end-date').value || null,
-                    per_user_limit: parseInt(document.getElementById('promo-limit-user').value) || 1,
-                    max_redemptions: null,
-                    current_redemptions: 0,
-                    is_active: document.getElementById('promo-active').checked,
-                    is_featured: document.getElementById('promo-featured').checked,
-                    points_cost: 0,
-                    points_reward: 50,
+                    per_user_limit: parseInt(document.getElementById('promo-per-user-limit').value) || 1,
+                    max_redemptions: parseInt(document.getElementById('promo-max-redemptions').value) || null,
+                    current_redemptions: isEditing ? undefined : 0, // Don't update on edit
+                    is_active: document.getElementById('promo-is-active').checked,
+                    is_featured: document.getElementById('promo-is-featured').checked,
+                    points_cost: parseInt(document.getElementById('promo-points-cost').value) || 0,
+                    points_reward: parseInt(document.getElementById('promo-points-reward').value) || 50,
                     terms: null,
-                    how_to_redeem: null
+                    how_to_redeem: null,
+                    updated_at: new Date().toISOString()
                 };
                 
-                // Save to Supabase
-                const { data, error } = await supabase
-                    .from('promotions')
-                    .insert([formData])
-                    .select();
+                // Remove undefined values
+                Object.keys(formData).forEach(key => formData[key] === undefined && delete formData[key]);
                 
-                if (error) throw error;
+                if (isEditing) {
+                    // Update existing promotion
+                    const { data, error } = await supabase
+                        .from('promotions')
+                        .update(formData)
+                        .eq('id', editId)
+                        .select();
+                    
+                    if (error) throw error;
+                    showMessage('success', 'Successo!', 'Promozione aggiornata con successo');
+                } else {
+                    // Insert new promotion
+                    formData.current_redemptions = 0;
+                    const { data, error } = await supabase
+                        .from('promotions')
+                        .insert([formData])
+                        .select();
+                    
+                    if (error) throw error;
+                    showMessage('success', 'Successo!', 'Promozione creata con successo');
+                }
                 
-                // Success
-                showMessage('success', 'Successo!', 'Promozione creata con successo');
+                // Success - reset and reload
                 resetPromoForm();
                 loadPromotions();
                 
@@ -2624,7 +2660,7 @@
                 console.error('Save error:', error);
                 showMessage('error', 'Errore', 'Errore durante il salvataggio: ' + error.message);
             } finally {
-                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const submitBtn = form.querySelector('button[type="submit"]');
                 submitBtn.innerHTML = '<i class="fas fa-save"></i> Salva Promozione';
                 submitBtn.disabled = false;
             }
@@ -2682,9 +2718,77 @@
             }
         };
         
-        // Edit promotion (placeholder)
+        // Edit promotion
         window.editPromotion = async function(id) {
-            showMessage('error', 'Coming Soon', 'Funzione modifica in arrivo!');
+            try {
+                // Fetch promotion data
+                const { data: promo, error } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                if (!promo) {
+                    showMessage('error', 'Errore', 'Promozione non trovata');
+                    return;
+                }
+                
+                // Show form
+                document.getElementById('promo-form-container').style.display = 'block';
+                document.querySelector('.btn-toggle-form').textContent = '✕ Chiudi Form';
+                
+                // Scroll to form
+                document.getElementById('promo-form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Fill form with existing data
+                document.getElementById('promo-title').value = promo.title || '';
+                document.getElementById('promo-description').value = promo.description || '';
+                document.getElementById('promo-short-description').value = promo.short_description || '';
+                document.getElementById('promo-partner-name').value = promo.partner_name || '';
+                document.getElementById('promo-partner-email').value = promo.partner_email || '';
+                document.getElementById('promo-partner-phone').value = promo.partner_phone || '';
+                document.getElementById('promo-partner-city').value = promo.partner_city || '';
+                document.getElementById('promo-partner-address').value = promo.partner_address || '';
+                document.getElementById('promo-partner-province').value = promo.partner_province || '';
+                document.getElementById('promo-category').value = promo.category || 'ristoranti';
+                document.getElementById('promo-discount-type').value = promo.discount_type || 'percentage';
+                document.getElementById('promo-discount-value').value = promo.discount_value || '';
+                document.getElementById('promo-original-price').value = promo.original_price || '';
+                document.getElementById('promo-discounted-price').value = promo.discounted_price || '';
+                document.getElementById('promo-start-date').value = promo.start_date ? promo.start_date.split('T')[0] : '';
+                document.getElementById('promo-end-date').value = promo.end_date ? promo.end_date.split('T')[0] : '';
+                document.getElementById('promo-points-cost').value = promo.points_cost || 0;
+                document.getElementById('promo-points-reward').value = promo.points_reward || 0;
+                document.getElementById('promo-per-user-limit').value = promo.per_user_limit || 1;
+                document.getElementById('promo-max-redemptions').value = promo.max_redemptions || '';
+                document.getElementById('promo-is-active').checked = promo.is_active || false;
+                document.getElementById('promo-is-featured').checked = promo.is_featured || false;
+                
+                // Show existing image preview if available
+                if (promo.image_url) {
+                    const preview = document.getElementById('image-preview');
+                    const previewImg = document.getElementById('preview-image');
+                    previewImg.src = promo.image_url;
+                    preview.style.display = 'block';
+                    
+                    // Store existing image URL in a data attribute
+                    document.getElementById('promo-form').setAttribute('data-existing-image', promo.image_url);
+                }
+                
+                // Store promotion ID for update
+                document.getElementById('promo-form').setAttribute('data-edit-id', id);
+                
+                // Change button text
+                document.querySelector('#promo-form button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Aggiorna Promozione';
+                
+                // Update discount label
+                updateDiscountFields();
+                
+            } catch (error) {
+                console.error('Edit promotion error:', error);
+                showMessage('error', 'Errore', 'Impossibile caricare la promozione');
+            }
         };
         
         // Delete promotion
