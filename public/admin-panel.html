@@ -905,6 +905,339 @@
             font-weight: 700;
             color: #dc2626;
         }
+        
+        /* Promotions Form Styles */
+        .promo-form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .btn-toggle {
+            background: #f3f4f6;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-toggle:hover {
+            background: #e5e7eb;
+        }
+        
+        .promo-form {
+            padding-top: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-section h3 i {
+            color: #dc2626;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .upload-label {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-label i {
+            font-size: 48px;
+            color: #9ca3af;
+        }
+        
+        .upload-label span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .upload-label small {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .image-preview {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .image-preview img {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .btn-remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-remove-image:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        /* Checkboxes */
+        .form-checkboxes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        /* Form Buttons */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 2px solid #f3f4f6;
+        }
+        
+        .btn-primary,
+        .btn-secondary {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-refresh {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-refresh:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        /* Promotions List */
+        .promotions-list-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .promo-item {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #f9fafb;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .promo-item:hover {
+            background: #f3f4f6;
+            transform: translateX(5px);
+        }
+        
+        .promo-item-image {
+            width: 120px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        
+        .promo-item-content {
+            flex: 1;
+        }
+        
+        .promo-item-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .promo-item-partner {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .promo-item-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        .promo-item-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-edit,
+        .btn-delete {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
     </style>
     <script src="/assets/js/config.js"></script>
     <!-- Chart.js -->
@@ -939,6 +1272,9 @@
         </button>
         <button class="tab-btn" onclick="switchTab('analytics')">
             <i class="fas fa-chart-line"></i> Analytics
+        </button>
+        <button class="tab-btn" onclick="switchTab('promotions')">
+            <i class="fas fa-tags"></i> Promozioni
         </button>
     </div>
     
@@ -1111,6 +1447,211 @@
                 </div>
             </div>
             <!-- END ANALYTICS TAB -->
+            
+            <!-- PROMOTIONS TAB -->
+            <div id="promotions-tab" class="tab-content" style="display: none;">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="fas fa-tags"></i> Gestione Promozioni</h1>
+                    <p>Crea e gestisci le card delle aziende convenzionate</p>
+                </div>
+                
+                <!-- Form Nuova Promozione -->
+                <div class="promo-form-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-plus-circle"></i> Nuova Promozione</h2>
+                        <button class="btn-toggle" onclick="togglePromoForm()">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="promo-form-container" class="promo-form" style="display: none;">
+                        <form id="new-promo-form">
+                            <!-- Informazioni Base -->
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="promo-title">Titolo Promozione *</label>
+                                    <input type="text" id="promo-title" required placeholder="es: Pizza Margherita + Bibita Omaggio">
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="promo-short-desc">Descrizione Breve *</label>
+                                    <input type="text" id="promo-short-desc" required placeholder="es: Pizza + Bibita gratis!">
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="promo-description">Descrizione Completa *</label>
+                                    <textarea id="promo-description" rows="4" required placeholder="Descrizione dettagliata della promozione..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Immagine -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-image"></i> Immagine Promozione</h3>
+                                <div class="upload-area">
+                                    <input type="file" id="promo-image" accept="image/*" onchange="previewImage(event)">
+                                    <label for="promo-image" class="upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>Clicca per caricare o trascina l'immagine</span>
+                                        <small>JPG, PNG o WebP (max 5MB)</small>
+                                    </label>
+                                    <div id="image-preview" class="image-preview" style="display: none;">
+                                        <img id="preview-img" src="" alt="Preview">
+                                        <button type="button" class="btn-remove-image" onclick="removeImage()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informazioni Partner -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-store"></i> Informazioni Partner</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="promo-partner-name">Nome Partner *</label>
+                                        <input type="text" id="promo-partner-name" required placeholder="es: Pizzeria da Mario">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-partner-email">Email</label>
+                                        <input type="email" id="promo-partner-email" placeholder="info@partner.it">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-partner-phone">Telefono</label>
+                                        <input type="tel" id="promo-partner-phone" placeholder="+39 02 1234567">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-partner-city">Città *</label>
+                                        <input type="text" id="promo-partner-city" required placeholder="Milano">
+                                    </div>
+                                    
+                                    <div class="form-group full-width">
+                                        <label for="promo-partner-address">Indirizzo</label>
+                                        <input type="text" id="promo-partner-address" placeholder="Via Roma 123">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Categoria e Tag -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-tags"></i> Categoria</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="promo-category">Categoria *</label>
+                                        <select id="promo-category" required>
+                                            <option value="">Seleziona categoria...</option>
+                                            <option value="ristoranti">🍕 Ristoranti</option>
+                                            <option value="shopping">🛍️ Shopping</option>
+                                            <option value="benessere">💆 Benessere & Spa</option>
+                                            <option value="sport">⚽ Sport & Fitness</option>
+                                            <option value="intrattenimento">🎬 Intrattenimento</option>
+                                            <option value="tecnologia">💻 Tecnologia</option>
+                                            <option value="viaggi">✈️ Viaggi</option>
+                                            <option value="servizi">🔧 Servizi</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-tags">Tag (separati da virgola)</label>
+                                        <input type="text" id="promo-tags" placeholder="pizza, cibo, italiano">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Prezzi e Sconto -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-euro-sign"></i> Prezzi e Sconto</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="promo-discount-type">Tipo Sconto *</label>
+                                        <select id="promo-discount-type" required onchange="updateDiscountFields()">
+                                            <option value="percentage">Percentuale (%)</option>
+                                            <option value="fixed">Importo Fisso (€)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-discount-value">Valore Sconto *</label>
+                                        <input type="number" id="promo-discount-value" required min="0" step="0.01" placeholder="es: 50 o 10.00">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-original-price">Prezzo Originale (€) *</label>
+                                        <input type="number" id="promo-original-price" required min="0" step="0.01" placeholder="es: 20.00">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-discounted-price">Prezzo Scontato (€) *</label>
+                                        <input type="number" id="promo-discounted-price" required min="0" step="0.01" placeholder="es: 10.00">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Validità -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-calendar"></i> Validità</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="promo-start-date">Data Inizio *</label>
+                                        <input type="date" id="promo-start-date" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-end-date">Data Fine *</label>
+                                        <input type="date" id="promo-end-date" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="promo-limit-user">Limite per Utente</label>
+                                        <input type="number" id="promo-limit-user" min="1" value="1" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Opzioni -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-cog"></i> Opzioni</h3>
+                                <div class="form-checkboxes">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="promo-active" checked>
+                                        <span>Attiva (visibile agli utenti)</span>
+                                    </label>
+                                    
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="promo-featured">
+                                        <span>In Evidenza (mostra in homepage)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Buttons -->
+                            <div class="form-buttons">
+                                <button type="button" class="btn-secondary" onclick="resetPromoForm()">
+                                    <i class="fas fa-times"></i> Annulla
+                                </button>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-save"></i> Salva Promozione
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Lista Promozioni Esistenti -->
+                <div class="promotions-list-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-list"></i> Promozioni Esistenti (<span id="count-promotions">0</span>)</h2>
+                        <button class="btn-refresh" onclick="loadPromotions()">
+                            <i class="fas fa-sync"></i> Aggiorna
+                        </button>
+                    </div>
+                    <div id="promotions-list"></div>
+                </div>
+            </div>
+            <!-- END PROMOTIONS TAB -->
         </div>
     </div>
     
@@ -1908,6 +2449,255 @@
             document.getElementById('message-modal').classList.remove('show');
         };
         
+        // ========================================
+        // PROMOTIONS MANAGEMENT
+        // ========================================
+        
+        let uploadedImageUrl = null;
+        
+        // Toggle promo form
+        window.togglePromoForm = function() {
+            const container = document.getElementById('promo-form-container');
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'block';
+        };
+        
+        // Preview image
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validate size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('error', 'Errore', 'L\'immagine non può superare i 5MB');
+                event.target.value = '';
+                return;
+            }
+            
+            // Validate type
+            if (!file.type.startsWith('image/')) {
+                showMessage('error', 'Errore', 'Il file deve essere un\'immagine');
+                event.target.value = '';
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('image-preview').style.display = 'block';
+                document.querySelector('.upload-label').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        // Remove image
+        window.removeImage = function() {
+            document.getElementById('promo-image').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.querySelector('.upload-label').style.display = 'flex';
+            uploadedImageUrl = null;
+        };
+        
+        // Update discount fields
+        window.updateDiscountFields = function() {
+            const discountType = document.getElementById('promo-discount-type').value;
+            const label = document.querySelector('label[for="promo-discount-value"]');
+            
+            if (discountType === 'percentage') {
+                label.textContent = 'Valore Sconto (%) *';
+            } else {
+                label.textContent = 'Valore Sconto (€) *';
+            }
+        };
+        
+        // Reset form
+        window.resetPromoForm = function() {
+            document.getElementById('new-promo-form').reset();
+            removeImage();
+            document.getElementById('promo-form-container').style.display = 'none';
+        };
+        
+        // Upload image to Vercel Blob
+        async function uploadToVercelBlob(file) {
+            try {
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Upload to Vercel Blob API
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload fallito');
+                }
+                
+                const data = await response.json();
+                return data.url;
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                throw error;
+            }
+        }
+        
+        // Save promotion
+        document.getElementById('new-promo-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Validate image
+                const imageFile = document.getElementById('promo-image').files[0];
+                if (!imageFile) {
+                    showMessage('error', 'Errore', 'Carica un\'immagine per la promozione');
+                    return;
+                }
+                
+                // Show loading
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Caricamento...';
+                submitBtn.disabled = true;
+                
+                // Upload image
+                uploadedImageUrl = await uploadToVercelBlob(imageFile);
+                
+                // Get form data
+                const formData = {
+                    title: document.getElementById('promo-title').value,
+                    slug: document.getElementById('promo-title').value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, ''),
+                    description: document.getElementById('promo-description').value,
+                    short_description: document.getElementById('promo-short-desc').value,
+                    partner_name: document.getElementById('promo-partner-name').value,
+                    partner_email: document.getElementById('promo-partner-email').value || null,
+                    partner_phone: document.getElementById('promo-partner-phone').value || null,
+                    partner_city: document.getElementById('promo-partner-city').value,
+                    partner_address: document.getElementById('promo-partner-address').value || null,
+                    category: document.getElementById('promo-category').value,
+                    tags: document.getElementById('promo-tags').value.split(',').map(t => t.trim()).filter(t => t),
+                    image_main: uploadedImageUrl,
+                    image_thumbnail: uploadedImageUrl,
+                    discount_type: document.getElementById('promo-discount-type').value,
+                    discount_value: parseFloat(document.getElementById('promo-discount-value').value),
+                    price_original: parseFloat(document.getElementById('promo-original-price').value),
+                    price_discounted: parseFloat(document.getElementById('promo-discounted-price').value),
+                    validity_start_date: document.getElementById('promo-start-date').value,
+                    validity_end_date: document.getElementById('promo-end-date').value,
+                    limit_per_user: parseInt(document.getElementById('promo-limit-user').value) || 1,
+                    is_active: document.getElementById('promo-active').checked,
+                    is_featured: document.getElementById('promo-featured').checked,
+                    points_cost: 0,
+                    points_reward: 50,
+                    created_by_id: currentUser.id
+                };
+                
+                // Save to Supabase
+                const { data, error } = await supabase
+                    .from('promotions')
+                    .insert([formData])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Success
+                showMessage('success', 'Successo!', 'Promozione creata con successo');
+                resetPromoForm();
+                loadPromotions();
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showMessage('error', 'Errore', 'Errore durante il salvataggio: ' + error.message);
+            } finally {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Salva Promozione';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Load promotions
+        window.loadPromotions = async function() {
+            try {
+                const { data, error } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('promotions-list');
+                document.getElementById('count-promotions').textContent = data.length;
+                
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-tags"></i>
+                            <p>Nessuna promozione trovata</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = data.map(promo => `
+                    <div class="promo-item">
+                        <img src="${promo.image_main}" alt="${promo.title}" class="promo-item-image" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        <div class="promo-item-content">
+                            <div class="promo-item-title">${promo.title}</div>
+                            <div class="promo-item-partner"><i class="fas fa-store"></i> ${promo.partner_name}</div>
+                            <div class="promo-item-meta">
+                                <span><i class="fas fa-tag"></i> ${promo.category}</span>
+                                <span><i class="fas fa-euro-sign"></i> ${promo.price_discounted}€ (era ${promo.price_original}€)</span>
+                                <span>${promo.is_active ? '<i class="fas fa-check-circle" style="color: #10b981;"></i> Attiva' : '<i class="fas fa-times-circle" style="color: #ef4444;"></i> Non attiva'}</span>
+                            </div>
+                        </div>
+                        <div class="promo-item-actions">
+                            <button class="btn-edit" onclick="editPromotion('${promo.id}')">
+                                <i class="fas fa-edit"></i> Modifica
+                            </button>
+                            <button class="btn-delete" onclick="deletePromotion('${promo.id}', '${promo.title}')">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Load promotions error:', error);
+                showMessage('error', 'Errore', 'Errore nel caricamento delle promozioni');
+            }
+        };
+        
+        // Edit promotion (placeholder)
+        window.editPromotion = async function(id) {
+            showMessage('error', 'Coming Soon', 'Funzione modifica in arrivo!');
+        };
+        
+        // Delete promotion
+        window.deletePromotion = async function(id, title) {
+            if (!confirm(`Sei sicuro di voler eliminare "${title}"?`)) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('promotions')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                showMessage('success', 'Successo', 'Promozione eliminata');
+                loadPromotions();
+                
+            } catch (error) {
+                console.error('Delete error:', error);
+                showMessage('error', 'Errore', 'Errore durante l\'eliminazione');
+            }
+        };
+        
         // Logout
         window.logout = async function() {
             await supabase.auth.signOut();
@@ -1919,6 +2709,12 @@
             const hasAccess = await checkAdminAccess();
             if (hasAccess) {
                 await loadRequests();
+                
+                // Load promotions if on promotions tab
+                const promotionsTab = document.getElementById('promotions-tab');
+                if (promotionsTab && promotionsTab.classList.contains('active')) {
+                    await loadPromotions();
+                }
             }
         })();
     </script>
