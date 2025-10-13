@@ -3146,6 +3146,15 @@
                     return;
                 }
                 
+                // Debug: Log image URLs
+                data.forEach(promo => {
+                    console.log('🖼️ Promo:', promo.title, {
+                        thumbnail_url: promo.thumbnail_url,
+                        image_url: promo.image_url,
+                        using: promo.thumbnail_url || promo.image_url
+                    });
+                });
+                
                 container.innerHTML = data.map(promo => `
                     <div class="promo-item">
                         <img src="${promo.thumbnail_url || promo.image_url}" alt="${promo.title}" class="promo-item-image" width="120" height="80" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
