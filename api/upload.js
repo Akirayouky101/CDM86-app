@@ -62,18 +62,29 @@ export default async function handler(req, res) {
 
     // Check if image is already resized (from canvas)
     const isPreResized = fields.preResized?.[0] === 'true';
+    
+    // Debug log
+    console.log('🔍 Upload Debug:', {
+      isPreResized,
+      fieldsPreResized: fields.preResized,
+      allFields: Object.keys(fields)
+    });
 
     let thumbnailBuffer;
     let fullBuffer;
 
     if (isPreResized) {
       // Image already resized in canvas - just optimize, don't resize again
+      console.log('✅ Using pre-resized image (no resize)');
+      
+      const metadata = await sharp(originalBuffer).metadata();
+      console.log('📐 Image dimensions:', metadata.width, 'x', metadata.height);
+      
       thumbnailBuffer = await sharp(originalBuffer)
         .png({ quality: 90, compressionLevel: 6 })
         .toBuffer();
 
       // For full version, create a larger version (3x scale)
-      const metadata = await sharp(originalBuffer).metadata();
       fullBuffer = await sharp(originalBuffer)
         .resize(metadata.width * 3, metadata.height * 3, {
           fit: 'inside',
@@ -83,6 +94,8 @@ export default async function handler(req, res) {
         .toBuffer();
     } else {
       // Original upload - resize as before
+      console.log('⚙️ Resizing original image (400x300 and 1200x900)');
+      
       // Create THUMBNAIL version (400x300px - per le card, ridimensionate con CSS)
       thumbnailBuffer = await sharp(originalBuffer)
         .resize(400, 300, {

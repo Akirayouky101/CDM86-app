@@ -2866,6 +2866,12 @@
                     const fileInput = document.getElementById('promo-image');
                     fileInput.setAttribute('data-pre-resized', 'true');
                     
+                    console.log('✅ Image resized in canvas:', {
+                        width: resizeState.canvas.width,
+                        height: resizeState.canvas.height,
+                        preResizedFlag: true
+                    });
+                    
                     // Close modal
                     closeResizeModal();
                     
@@ -2953,6 +2959,11 @@
         // Upload image to Vercel Blob
         async function uploadToVercelBlob(file, isPreResized = false) {
             try {
+                console.log('🚀 uploadToVercelBlob called:', { 
+                    fileName: file.name, 
+                    isPreResized: isPreResized 
+                });
+                
                 // Create FormData
                 const formData = new FormData();
                 formData.append('file', file);
@@ -2960,6 +2971,7 @@
                 // Add flag if image was pre-resized in canvas
                 if (isPreResized) {
                     formData.append('preResized', 'true');
+                    console.log('✅ Added preResized flag to FormData');
                 }
                 
                 // Upload to Vercel Blob API
@@ -2973,6 +2985,7 @@
                 }
                 
                 const data = await response.json();
+                console.log('📥 Upload response:', data);
                 
                 // Return both URLs (full for details, thumbnail for cards)
                 return {
@@ -3011,10 +3024,19 @@
                     const fileInput = document.getElementById('promo-image');
                     const isPreResized = fileInput.getAttribute('data-pre-resized') === 'true';
                     
+                    console.log('📤 Uploading image:', {
+                        fileName: imageFile.name,
+                        fileSize: imageFile.size,
+                        isPreResized: isPreResized,
+                        dataAttribute: fileInput.getAttribute('data-pre-resized')
+                    });
+                    
                     // Upload new image (returns both full and thumbnail)
                     const uploadResult = await uploadToVercelBlob(imageFile, isPreResized);
                     imageUrl = uploadResult.url;
                     thumbnailUrl = uploadResult.thumbnailUrl;
+                    
+                    console.log('✅ Upload complete:', { imageUrl, thumbnailUrl });
                     
                     // Clear pre-resized flag
                     fileInput.removeAttribute('data-pre-resized');
