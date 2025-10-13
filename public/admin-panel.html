@@ -1331,6 +1331,7 @@
             background: #f9fafb;
             margin-bottom: 15px;
             transition: all 0.3s;
+            overflow: hidden;
         }
         
         .promo-item:hover {
@@ -1341,16 +1342,28 @@
         .promo-item-image {
             width: 120px !important;
             height: 80px !important;
-            min-width: 120px;
-            min-height: 80px;
-            max-width: 120px;
-            max-height: 80px;
+            min-width: 120px !important;
+            min-height: 80px !important;
+            max-width: 120px !important;
+            max-height: 80px !important;
             border-radius: 10px;
             object-fit: cover;
             object-position: center;
             flex-shrink: 0;
-            display: block;
+            display: block !important;
+        }
+        
+        .promo-item-image-wrapper {
+            width: 120px;
+            height: 80px;
+            min-width: 120px;
+            min-height: 80px;
+            max-width: 120px;
+            max-height: 80px;
             overflow: hidden;
+            border-radius: 10px;
+            flex-shrink: 0;
+            position: relative;
         }
         
         .promo-item-content {
@@ -3157,7 +3170,9 @@
                 
                 container.innerHTML = data.map(promo => `
                     <div class="promo-item">
-                        <img src="${promo.thumbnail_url || promo.image_url}" alt="${promo.title}" class="promo-item-image" width="120" height="80" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        <div class="promo-item-image-wrapper">
+                            <img src="${promo.thumbnail_url || promo.image_url}" alt="${promo.title}" class="promo-item-image" onerror="this.src='https://via.placeholder.com/120x80?text=CDM86'">
+                        </div>
                         <div class="promo-item-content">
                             <div class="promo-item-title">${promo.title}</div>
                             <div class="promo-item-partner"><i class="fas fa-store"></i> ${promo.partner_name}</div>
