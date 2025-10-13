@@ -8,9 +8,6 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Cropper.js for image cropping -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    
     <style>
         * {
             margin: 0;
@@ -1078,7 +1075,7 @@
             gap: 12px;
         }
         
-        /* Image Cropper Modal */
+        /* Image Resize Modal */
         .crop-modal {
             display: none;
             position: fixed;
@@ -1086,7 +1083,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -1096,37 +1093,113 @@
             display: flex;
         }
         
-        .crop-container {
+        .resize-container {
             background: white;
             border-radius: 16px;
-            padding: 24px;
-            max-width: 90%;
-            max-height: 90%;
+            padding: 30px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
+            overflow-y: auto;
         }
         
         .crop-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f3f4f6;
         }
         
         .crop-header h3 {
-            font-size: 20px;
+            font-size: 22px;
             color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .crop-image-container {
-            max-width: 800px;
-            max-height: 500px;
+        .resize-preview-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .resize-instructions {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1e40af;
+        }
+        
+        .resize-instructions i {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .resize-instructions p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .mock-card-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+        
+        .mock-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             overflow: hidden;
+            width: 400px;
+            border: 3px solid #dc2626;
         }
         
-        .crop-image-container img {
-            max-width: 100%;
-            display: block;
+        .mock-card-image-area {
+            width: 100%;
+            height: 250px;
+            background: #f3f4f6;
+            position: relative;
+            overflow: hidden;
+            cursor: move;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .mock-card-image-area canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: none;
+        }
+        
+        .mock-card-content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .mock-card-content h4 {
+            font-size: 18px;
+            color: #111827;
+            margin: 0 0 8px 0;
+        }
+        
+        .mock-card-content p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
         }
         
         .crop-controls {
@@ -1134,26 +1207,30 @@
             gap: 12px;
             align-items: center;
             flex-wrap: wrap;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 12px;
         }
         
-        .crop-aspect-btn {
-            padding: 8px 16px;
-            border: 2px solid #e5e7eb;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
+        .crop-controls label {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .crop-aspect-btn.active {
-            border-color: #dc2626;
-            background: #fee2e2;
+        .crop-controls input[type="range"] {
+            width: 200px;
+        }
+        
+        .crop-controls .zoom-value {
+            font-weight: 600;
             color: #dc2626;
         }
         
-        .crop-aspect-btn:hover {
-            border-color: #dc2626;
+        .crop-controls .flex-spacer {
+            flex: 1;
         }
         
         .crop-footer {
@@ -2557,10 +2634,20 @@
             container.style.display = isVisible ? 'none' : 'block';
         };
         
-        // Preview image
-        // Cropper instance
-        let cropperInstance = null;
-        let currentImageFile = null;
+        // Preview image - Interactive Resize Modal
+        let resizeState = {
+            image: null,
+            canvas: null,
+            ctx: null,
+            scale: 1,
+            rotation: 0,
+            offsetX: 0,
+            offsetY: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            originalFile: null
+        };
 
         window.previewImage = function(event) {
             const file = event.target.files[0];
@@ -2580,114 +2667,236 @@
                 return;
             }
             
-            // Store file reference
-            currentImageFile = file;
-            
-            // Open crop modal
+            // Store file and open resize modal
+            resizeState.originalFile = file;
             const reader = new FileReader();
             reader.onload = function(e) {
-                openCropModal(e.target.result);
+                openResizeModal(e.target.result);
             };
             reader.readAsDataURL(file);
         };
         
-        // Open crop modal
-        function openCropModal(imageSrc) {
-            const modal = document.getElementById('crop-modal');
-            const cropImage = document.getElementById('crop-image');
+        // Open resize modal with interactive canvas
+        function openResizeModal(imageSrc) {
+            const modal = document.getElementById('resize-modal');
+            const canvas = document.getElementById('resize-canvas');
+            const ctx = canvas.getContext('2d');
             
-            cropImage.src = imageSrc;
+            // Set canvas size to match card image area (400x250)
+            canvas.width = 400;
+            canvas.height = 250;
+            
+            resizeState.canvas = canvas;
+            resizeState.ctx = ctx;
+            
+            // Load image
+            const img = new Image();
+            img.onload = function() {
+                resizeState.image = img;
+                
+                // Calculate initial scale to fit
+                const scaleW = canvas.width / img.width;
+                const scaleH = canvas.height / img.height;
+                resizeState.scale = Math.max(scaleW, scaleH);
+                
+                // Center image
+                resizeState.offsetX = 0;
+                resizeState.offsetY = 0;
+                resizeState.rotation = 0;
+                
+                // Initial render
+                renderCanvas();
+                
+                // Update zoom slider
+                const zoomSlider = document.getElementById('zoom-slider');
+                zoomSlider.value = resizeState.scale * 100;
+                document.getElementById('zoom-value').textContent = Math.round(resizeState.scale * 100) + '%';
+            };
+            img.src = imageSrc;
+            
+            // Show modal
             modal.classList.add('active');
             
-            // Initialize cropper
-            if (cropperInstance) {
-                cropperInstance.destroy();
-            }
-            
-            cropperInstance = new Cropper(cropImage, {
-                aspectRatio: NaN, // Free aspect ratio
-                viewMode: 1,
-                autoCropArea: 1,
-                responsive: true,
-                background: false,
-                zoomable: true,
-                scalable: true,
-                rotatable: true,
-            });
+            // Setup event listeners
+            setupCanvasListeners();
         }
         
-        // Close crop modal
-        window.closeCropModal = function() {
-            const modal = document.getElementById('crop-modal');
-            modal.classList.remove('active');
+        // Setup canvas interactivity
+        function setupCanvasListeners() {
+            const canvas = resizeState.canvas;
+            const area = document.getElementById('mock-card-area');
             
-            if (cropperInstance) {
-                cropperInstance.destroy();
-                cropperInstance = null;
-            }
+            // Mouse drag
+            area.onmousedown = function(e) {
+                resizeState.isDragging = true;
+                resizeState.startX = e.clientX;
+                resizeState.startY = e.clientY;
+            };
             
-            // Clear file input
-            document.getElementById('promo-image').value = '';
-            currentImageFile = null;
+            document.onmousemove = function(e) {
+                if (!resizeState.isDragging) return;
+                
+                const dx = e.clientX - resizeState.startX;
+                const dy = e.clientY - resizeState.startY;
+                
+                resizeState.offsetX += dx;
+                resizeState.offsetY += dy;
+                
+                resizeState.startX = e.clientX;
+                resizeState.startY = e.clientY;
+                
+                renderCanvas();
+            };
+            
+            document.onmouseup = function() {
+                resizeState.isDragging = false;
+            };
+            
+            // Mouse wheel zoom
+            area.onwheel = function(e) {
+                e.preventDefault();
+                
+                const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                resizeState.scale = Math.max(0.1, Math.min(3, resizeState.scale + delta));
+                
+                // Update slider
+                const zoomSlider = document.getElementById('zoom-slider');
+                zoomSlider.value = resizeState.scale * 100;
+                document.getElementById('zoom-value').textContent = Math.round(resizeState.scale * 100) + '%';
+                
+                renderCanvas();
+            };
+            
+            // Zoom slider
+            const zoomSlider = document.getElementById('zoom-slider');
+            zoomSlider.oninput = function(e) {
+                resizeState.scale = parseFloat(e.target.value) / 100;
+                document.getElementById('zoom-value').textContent = Math.round(resizeState.scale * 100) + '%';
+                renderCanvas();
+            };
+        }
+        
+        // Render canvas with current state
+        function renderCanvas() {
+            const { canvas, ctx, image, scale, rotation, offsetX, offsetY } = resizeState;
+            if (!image) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Save context
+            ctx.save();
+            
+            // Move to center
+            ctx.translate(canvas.width / 2 + offsetX, canvas.height / 2 + offsetY);
+            
+            // Rotate
+            ctx.rotate(rotation * Math.PI / 180);
+            
+            // Scale
+            const scaledWidth = image.width * scale;
+            const scaledHeight = image.height * scale;
+            
+            // Draw image centered
+            ctx.drawImage(image, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+            
+            // Restore context
+            ctx.restore();
+        }
+        
+        // Rotate image
+        window.rotateImage = function() {
+            resizeState.rotation = (resizeState.rotation + 90) % 360;
+            renderCanvas();
         };
         
-        // Set crop aspect ratio
-        window.setCropAspect = function(ratio) {
-            if (!cropperInstance) return;
+        // Reset image
+        window.resetImage = function() {
+            if (!resizeState.image) return;
             
-            // Update active button
-            document.querySelectorAll('.crop-aspect-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.closest('.crop-aspect-btn').classList.add('active');
+            const canvas = resizeState.canvas;
+            const img = resizeState.image;
             
-            // Set aspect ratio
-            cropperInstance.setAspectRatio(ratio);
+            // Recalculate initial scale
+            const scaleW = canvas.width / img.width;
+            const scaleH = canvas.height / img.height;
+            resizeState.scale = Math.max(scaleW, scaleH);
+            
+            // Reset position and rotation
+            resizeState.offsetX = 0;
+            resizeState.offsetY = 0;
+            resizeState.rotation = 0;
+            
+            // Update slider
+            const zoomSlider = document.getElementById('zoom-slider');
+            zoomSlider.value = resizeState.scale * 100;
+            document.getElementById('zoom-value').textContent = Math.round(resizeState.scale * 100) + '%';
+            
+            renderCanvas();
         };
         
-        // Apply crop and upload
-        window.applyCrop = async function() {
-            if (!cropperInstance) return;
+        // Apply resize and prepare for upload
+        window.applyResize = async function() {
+            if (!resizeState.canvas) return;
             
             try {
-                // Get cropped canvas
-                const canvas = cropperInstance.getCroppedCanvas({
-                    maxWidth: 4096,
-                    maxHeight: 4096,
-                    imageSmoothingQuality: 'high'
-                });
-                
-                // Convert to blob
-                canvas.toBlob(async function(blob) {
+                // Get canvas content as blob
+                resizeState.canvas.toBlob(async function(blob) {
                     // Create new file from blob
-                    const croppedFile = new File([blob], currentImageFile.name, {
-                        type: currentImageFile.type,
+                    const resizedFile = new File([blob], resizeState.originalFile.name, {
+                        type: 'image/png',
                         lastModified: Date.now()
                     });
                     
-                    // Show preview
+                    // Show preview in form
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById('preview-img').src = e.target.result;
                         document.getElementById('image-preview').style.display = 'block';
                         document.querySelector('.upload-label').style.display = 'none';
                     };
-                    reader.readAsDataURL(croppedFile);
+                    reader.readAsDataURL(resizedFile);
                     
-                    // Store cropped file for upload
+                    // Update file input with resized image
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(croppedFile);
+                    dataTransfer.items.add(resizedFile);
                     document.getElementById('promo-image').files = dataTransfer.files;
                     
                     // Close modal
-                    closeCropModal();
+                    closeResizeModal();
                     
-                    showMessage('success', 'Successo', 'Immagine ritagliata! Pronta per il caricamento.');
-                }, currentImageFile.type);
+                    showMessage('success', 'Successo', 'Immagine ridimensionata! Pronta per il caricamento.');
+                }, 'image/png', 0.95);
                 
             } catch (error) {
-                console.error('Crop error:', error);
-                showMessage('error', 'Errore', 'Errore durante il ritaglio dell\'immagine');
+                console.error('Resize error:', error);
+                showMessage('error', 'Errore', 'Errore durante il ridimensionamento dell\'immagine');
+            }
+        };
+        
+        // Close resize modal
+        window.closeResizeModal = function() {
+            const modal = document.getElementById('resize-modal');
+            modal.classList.remove('active');
+            
+            // Reset state
+            resizeState = {
+                image: null,
+                canvas: null,
+                ctx: null,
+                scale: 1,
+                rotation: 0,
+                offsetX: 0,
+                offsetY: 0,
+                isDragging: false,
+                startX: 0,
+                startY: 0,
+                originalFile: null
+            };
+            
+            // Clear file input if no preview
+            if (document.getElementById('image-preview').style.display === 'none') {
+                document.getElementById('promo-image').value = '';
             }
         };
         
@@ -3052,56 +3261,61 @@
         })();
     </script>
 
-    <!-- Image Crop Modal -->
-    <div id="crop-modal" class="crop-modal">
-        <div class="crop-container">
+    <!-- Image Resize Modal -->
+    <div id="resize-modal" class="crop-modal">
+        <div class="resize-container">
             <div class="crop-header">
-                <h3><i class="fas fa-crop"></i> Ritaglia Immagine</h3>
-                <button class="btn-secondary" onclick="closeCropModal()">
+                <h3><i class="fas fa-expand-arrows-alt"></i> Ridimensiona per Card</h3>
+                <button class="btn-secondary" onclick="closeResizeModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="crop-image-container">
-                <img id="crop-image" src="" alt="Immagine da ritagliare">
+            <div class="resize-preview-area">
+                <div class="resize-instructions">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Trascina e ridimensiona l'immagine per adattarla alla card. Usa la rotellina del mouse per zoommare.</p>
+                </div>
+                
+                <!-- Mock Card Preview -->
+                <div class="mock-card-container">
+                    <div class="mock-card">
+                        <div class="mock-card-image-area" id="mock-card-area">
+                            <canvas id="resize-canvas"></canvas>
+                        </div>
+                        <div class="mock-card-content">
+                            <h4>Anteprima Card</h4>
+                            <p>L'immagine apparirà così nella card</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="crop-controls">
-                <label style="font-weight: 600; color: #374151;">Proporzioni:</label>
-                <button class="crop-aspect-btn active" onclick="setCropAspect('free')">
-                    <i class="fas fa-expand"></i> Libero
-                </button>
-                <button class="crop-aspect-btn" onclick="setCropAspect(16/9)">
-                    <i class="fas fa-tv"></i> 16:9
-                </button>
-                <button class="crop-aspect-btn" onclick="setCropAspect(4/3)">
-                    <i class="fas fa-image"></i> 4:3
-                </button>
-                <button class="crop-aspect-btn" onclick="setCropAspect(1)">
-                    <i class="fas fa-square"></i> 1:1
-                </button>
+                <label style="font-weight: 600; color: #374151; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-search"></i> Zoom:
+                </label>
+                <input type="range" id="zoom-slider" min="10" max="300" value="100" style="width: 200px;">
+                <span id="zoom-value" style="font-weight: 600; color: #dc2626;">100%</span>
                 <div style="flex: 1;"></div>
-                <button class="btn-secondary" onclick="cropperInstance.rotate(-90)">
-                    <i class="fas fa-undo"></i> Ruota
+                <button class="btn-secondary" onclick="rotateImage()">
+                    <i class="fas fa-redo"></i> Ruota 90°
                 </button>
-                <button class="btn-secondary" onclick="cropperInstance.reset()">
+                <button class="btn-secondary" onclick="resetImage()">
                     <i class="fas fa-sync"></i> Reset
                 </button>
             </div>
             
             <div class="crop-footer">
-                <button class="btn-secondary" onclick="closeCropModal()">
+                <button class="btn-secondary" onclick="closeResizeModal()">
                     <i class="fas fa-times"></i> Annulla
                 </button>
-                <button class="btn-primary" onclick="applyCrop()">
-                    <i class="fas fa-check"></i> Applica e Carica
+                <button class="btn-primary" onclick="applyResize()">
+                    <i class="fas fa-check"></i> Salva e Carica
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Cropper.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 </body>
 </html>
