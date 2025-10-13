@@ -3,8 +3,8 @@
  * Endpoint: /api/upload
  * 
  * Crea due versioni dell'immagine:
- * - Thumbnail: 120x80px per le card (crop al centro)
- * - Full: 800x600px per i dettagli (mantiene proporzioni)
+ * - Thumbnail: 400x300px per le card (ridimensionate con CSS)
+ * - Full: 1200x900px per i dettagli (mantiene proporzioni)
  */
 
 import { put } from '@vercel/blob';
@@ -56,43 +56,44 @@ export default async function handler(req, res) {
     // Generate unique filename
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
-    const extension = 'jpg'; // Converti sempre in JPG per consistenza
 
     // Read original file
     const originalBuffer = fs.readFileSync(file.path);
 
-    // Create THUMBNAIL version (120x80px - crop al centro per le card)
+    // Create THUMBNAIL version (400x300px - per le card, ridimensionate con CSS)
     const thumbnailBuffer = await sharp(originalBuffer)
-      .resize(120, 80, {
-        fit: 'cover',
-        position: 'center'
+      .resize(400, 300, {
+        fit: 'inside',
+        withoutEnlargement: false,
+        background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
       })
-      .jpeg({ quality: 90 })
+      .png({ quality: 90, compressionLevel: 6 })
       .toBuffer();
 
-    // Create FULL version (800x600px - mantiene proporzioni per i dettagli)
+    // Create FULL version (1200x900px - per i dettagli)
     const fullBuffer = await sharp(originalBuffer)
-      .resize(800, 600, {
+      .resize(1200, 900, {
         fit: 'inside',
-        withoutEnlargement: true
+        withoutEnlargement: false,
+        background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
       })
-      .jpeg({ quality: 85 })
+      .png({ quality: 85, compressionLevel: 6 })
       .toBuffer();
 
     // Upload thumbnail
-    const thumbnailFilename = `promotions/thumb-${timestamp}-${random}.${extension}`;
+    const thumbnailFilename = `promotions/thumb-${timestamp}-${random}.png`;
     const thumbnailBlob = await put(thumbnailFilename, thumbnailBuffer, {
       access: 'public',
       addRandomSuffix: false,
-      contentType: 'image/jpeg',
+      contentType: 'image/png',
     });
 
     // Upload full image
-    const fullFilename = `promotions/full-${timestamp}-${random}.${extension}`;
+    const fullFilename = `promotions/full-${timestamp}-${random}.png`;
     const fullBlob = await put(fullFilename, fullBuffer, {
       access: 'public',
       addRandomSuffix: false,
-      contentType: 'image/jpeg',
+      contentType: 'image/png',
     });
 
     // Delete temp file
