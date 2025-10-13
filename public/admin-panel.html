@@ -2862,6 +2862,10 @@
                     dataTransfer.items.add(resizedFile);
                     document.getElementById('promo-image').files = dataTransfer.files;
                     
+                    // Mark as pre-resized
+                    const fileInput = document.getElementById('promo-image');
+                    fileInput.setAttribute('data-pre-resized', 'true');
+                    
                     // Close modal
                     closeResizeModal();
                     
@@ -2902,7 +2906,9 @@
         
         // Remove image
         window.removeImage = function() {
-            document.getElementById('promo-image').value = '';
+            const fileInput = document.getElementById('promo-image');
+            fileInput.value = '';
+            fileInput.removeAttribute('data-pre-resized'); // Clear pre-resized flag
             document.getElementById('image-preview').style.display = 'none';
             document.querySelector('.upload-label').style.display = 'flex';
             uploadedImageUrl = null;
@@ -2945,11 +2951,16 @@
         };
         
         // Upload image to Vercel Blob
-        async function uploadToVercelBlob(file) {
+        async function uploadToVercelBlob(file, isPreResized = false) {
             try {
                 // Create FormData
                 const formData = new FormData();
                 formData.append('file', file);
+                
+                // Add flag if image was pre-resized in canvas
+                if (isPreResized) {
+                    formData.append('preResized', 'true');
+                }
                 
                 // Upload to Vercel Blob API
                 const response = await fetch('/api/upload', {
@@ -2996,10 +3007,17 @@
                 const imageFile = document.getElementById('promo-image').files[0];
                 
                 if (imageFile) {
+                    // Check if image was pre-resized in canvas
+                    const fileInput = document.getElementById('promo-image');
+                    const isPreResized = fileInput.getAttribute('data-pre-resized') === 'true';
+                    
                     // Upload new image (returns both full and thumbnail)
-                    const uploadResult = await uploadToVercelBlob(imageFile);
+                    const uploadResult = await uploadToVercelBlob(imageFile, isPreResized);
                     imageUrl = uploadResult.url;
                     thumbnailUrl = uploadResult.thumbnailUrl;
+                    
+                    // Clear pre-resized flag
+                    fileInput.removeAttribute('data-pre-resized');
                 } else if (!isEditing) {
                     // New promotion requires image
                     showMessage('error', 'Errore', 'Carica un\'immagine per la promozione');

@@ -60,25 +60,49 @@ export default async function handler(req, res) {
     // Read original file
     const originalBuffer = fs.readFileSync(file.path);
 
-    // Create THUMBNAIL version (400x300px - per le card, ridimensionate con CSS)
-    const thumbnailBuffer = await sharp(originalBuffer)
-      .resize(400, 300, {
-        fit: 'inside',
-        withoutEnlargement: false,
-        background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
-      })
-      .png({ quality: 90, compressionLevel: 6 })
-      .toBuffer();
+    // Check if image is already resized (from canvas)
+    const isPreResized = fields.preResized?.[0] === 'true';
 
-    // Create FULL version (1200x900px - per i dettagli)
-    const fullBuffer = await sharp(originalBuffer)
-      .resize(1200, 900, {
-        fit: 'inside',
-        withoutEnlargement: false,
-        background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
-      })
-      .png({ quality: 85, compressionLevel: 6 })
-      .toBuffer();
+    let thumbnailBuffer;
+    let fullBuffer;
+
+    if (isPreResized) {
+      // Image already resized in canvas - just optimize, don't resize again
+      thumbnailBuffer = await sharp(originalBuffer)
+        .png({ quality: 90, compressionLevel: 6 })
+        .toBuffer();
+
+      // For full version, create a larger version (3x scale)
+      const metadata = await sharp(originalBuffer).metadata();
+      fullBuffer = await sharp(originalBuffer)
+        .resize(metadata.width * 3, metadata.height * 3, {
+          fit: 'inside',
+          withoutEnlargement: false,
+        })
+        .png({ quality: 85, compressionLevel: 6 })
+        .toBuffer();
+    } else {
+      // Original upload - resize as before
+      // Create THUMBNAIL version (400x300px - per le card, ridimensionate con CSS)
+      thumbnailBuffer = await sharp(originalBuffer)
+        .resize(400, 300, {
+          fit: 'inside',
+          withoutEnlargement: false,
+          background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
+        })
+        .png({ quality: 90, compressionLevel: 6 })
+        .toBuffer();
+
+      // Create FULL version (1200x900px - per i dettagli)
+      fullBuffer = await sharp(originalBuffer)
+        .resize(1200, 900, {
+          fit: 'inside',
+          withoutEnlargement: false,
+          background: { r: 255, g: 255, b: 255, alpha: 0 } // Sfondo trasparente
+        })
+        .png({ quality: 85, compressionLevel: 6 })
+        .toBuffer();
+    }
 
     // Upload thumbnail
     const thumbnailFilename = `promotions/thumb-${timestamp}-${random}.png`;
