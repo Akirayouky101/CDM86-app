@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth Modal - CDM86</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/auth-modal.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .test-container h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+        
+        .test-container p {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .test-info {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            text-align: left;
+        }
+        
+        .test-info h3 {
+            color: #2d3748;
+            margin: 0 0 12px;
+            font-size: 16px;
+        }
+        
+        .test-info pre {
+            background: #2d3748;
+            color: #a0aec0;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 Auth Modal Test</h1>
+        <p>Testa la modal di autenticazione</p>
+        
+        <button class="test-btn" onclick="window.authModal.open()">
+            Apri Auth Modal
+        </button>
+        
+        <button class="test-btn secondary" onclick="testCustomCallbacks()">
+            Test con Callbacks
+        </button>
+        
+        <div class="test-info">
+            <h3>📋 Come usare:</h3>
+            <pre>
+// Apri modal
+window.authModal.open();
+
+// Con callbacks personalizzati
+authModal.setOnUserSelect(() => {
+    console.log('Utente selezionato');
+});
+
+authModal.setOnOrganizationSelect(() => {
+    console.log('Azienda selezionata');
+});
+
+authModal.open();
+            </pre>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/assets/js/auth-modal.js"></script>
+    
+    <script>
+        // Test con callbacks personalizzati
+        function testCustomCallbacks() {
+            window.authModal.setOnUserSelect(() => {
+                alert('✅ Hai scelto: UTENTE\n\nVerrai reindirizzato alla registrazione utente');
+                // Qui puoi fare quello che vuoi invece del redirect
+            });
+            
+            window.authModal.setOnOrganizationSelect(() => {
+                alert('✅ Hai scelto: AZIENDA/ASSOCIAZIONE\n\nVerrai reindirizzato alla registrazione partner');
+            });
+            
+            window.authModal.setOnLogin(() => {
+                alert('✅ Hai scelto: LOGIN\n\nVerrai reindirizzato alla pagina di login');
+            });
+            
+            window.authModal.open();
+        }
+        
+        // Log per debug
+        console.log('🧪 Test page loaded');
+        console.log('Auth Modal:', window.authModal);
+    </script>
+</body>
+</html>

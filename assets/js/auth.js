@@ -35,10 +35,16 @@ export async function register(email, password, firstName, lastName, referralCod
 
         // 2. Il trigger handle_new_user() creerà automaticamente l'utente in public.users
         
+        // Verifica se email confirmation è richiesta
+        const emailConfirmationRequired = authData.user && !authData.session;
+        
         return {
             success: true,
-            message: 'Registrazione completata! Controlla la tua email per confermare.',
-            user: authData.user
+            message: emailConfirmationRequired 
+                ? 'Registrazione completata! Controlla la tua email per confermare.'
+                : 'Registrazione completata! Puoi effettuare il login.',
+            user: authData.user,
+            requiresEmailConfirmation: emailConfirmationRequired
         };
     } catch (error) {
         console.error('Registration error:', error);
@@ -120,6 +126,23 @@ export async function redirectIfNotLoggedIn(redirectTo = '/public/login.html') {
     if (!(await isLoggedIn())) {
         window.location.href = redirectTo;
     }
+}
+
+// Mostra auth modal se non loggato (per pagine protette)
+export async function showAuthModalIfNotLoggedIn() {
+    if (!(await isLoggedIn())) {
+        // Aspetta che authModal sia disponibile
+        if (window.authModal) {
+            window.authModal.open();
+            return true; // Non loggato
+        } else {
+            // Fallback a redirect
+            console.warn('⚠️ Auth modal non disponibile, redirect a login');
+            window.location.href = '/public/login.html';
+            return true;
+        }
+    }
+    return false; // Loggato
 }
 
 console.log('✅ Auth module loaded');
