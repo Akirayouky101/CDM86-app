@@ -1031,6 +1031,9 @@
             }
         }
         
+        // Make loadOrganizationRequests globally accessible
+        window.loadOrganizationRequests = loadOrganizationRequests;
+        
         // Display organization requests
         function displayOrgRequests(requests) {
             const container = document.getElementById('org-requests-list');
@@ -1421,10 +1424,9 @@
                 showSuccessModal();
                 
                 // Reload organization requests after a short delay
-                setTimeout(async () => {
-                    const loadFunc = window.loadOrganizationRequests;
-                    if (loadFunc && typeof loadFunc === 'function') {
-                        await loadFunc();
+                setTimeout(() => {
+                    if (window.loadOrganizationRequests) {
+                        window.loadOrganizationRequests();
                     }
                 }, 1000);
                 
