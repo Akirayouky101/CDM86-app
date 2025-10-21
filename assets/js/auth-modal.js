@@ -209,7 +209,7 @@ class AuthModal {
             this.onLogin();
         } else {
             // Redirect alla pagina di login
-            window.location.href = '/public/login.html';
+            window.location.href = '/index.html';
         }
     }
 

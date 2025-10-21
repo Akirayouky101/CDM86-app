@@ -549,7 +549,7 @@
             // User option
             document.getElementById('selectUser').addEventListener('click', () => {
                 this.close();
-                window.location.href = '/public/login.html#register';
+                window.location.href = '/index.html#register';
             });
 
             // Organization option
@@ -560,7 +560,7 @@
             // Login button
             document.getElementById('goToLogin').addEventListener('click', () => {
                 this.close();
-                window.location.href = '/public/login.html';
+                window.location.href = '/index.html';
             });
 
             // Back button

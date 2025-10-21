@@ -418,7 +418,7 @@ class AuthModalEnhanced {
      */
     selectUser() {
         this.close();
-        window.location.href = '/public/login.html#register';
+        window.location.href = '/index.html#register';
     }
 
     /**
@@ -433,7 +433,7 @@ class AuthModalEnhanced {
      */
     goToLogin() {
         this.close();
-        window.location.href = '/public/login.html';
+        window.location.href = '/index.html';
     }
 
     /**

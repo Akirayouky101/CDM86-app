@@ -1985,7 +1985,7 @@
                 const { data: { user }, error } = await supabase.auth.getUser();
                 
                 if (error || !user) {
-                    window.location.href = '/public/login.html';
+                    window.location.href = '/index.html';
                     return false;
                 }
                 
@@ -2001,7 +2001,7 @@
                 return true;
             } catch (error) {
                 console.error('Error checking admin access:', error);
-                window.location.href = '/public/login.html';
+                window.location.href = '/index.html';
                 return false;
             }
         }
@@ -3479,7 +3479,7 @@
         // Logout
         window.logout = async function() {
             await supabase.auth.signOut();
-            window.location.href = '/public/login.html';
+            window.location.href = '/index.html';
         };
 
         // Organization Requests Functions

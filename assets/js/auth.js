@@ -122,7 +122,7 @@ export async function redirectIfLoggedIn(redirectTo = '/public/promotions.html')
 }
 
 // Auto-redirect se NON loggato
-export async function redirectIfNotLoggedIn(redirectTo = '/public/login.html') {
+export async function redirectIfNotLoggedIn(redirectTo = '/index.html') {
     if (!(await isLoggedIn())) {
         window.location.href = redirectTo;
     }
@@ -138,7 +138,7 @@ export async function showAuthModalIfNotLoggedIn() {
         } else {
             // Fallback a redirect
             console.warn('⚠️ Auth modal non disponibile, redirect a login');
-            window.location.href = '/public/login.html';
+            window.location.href = '/index.html';
             return true;
         }
     }

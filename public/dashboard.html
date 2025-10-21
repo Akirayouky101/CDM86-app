@@ -716,7 +716,7 @@
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                window.location.href = '/public/login.html';
+                window.location.href = '/index.html';
                 return null;
             }
             
@@ -822,7 +822,7 @@
                     // Logout from dropdown
                     dropdown.querySelector('#logout-dropdown-item').addEventListener('click', async () => {
                         await supabase.auth.signOut();
-                        window.location.href = '/public/login.html';
+                        window.location.href = '/index.html';
                     });
                 }
                 
@@ -851,7 +851,7 @@
                 // Update referral link
                 const referralLinkEl = document.getElementById('referral-link');
                 if (referralLinkEl && userData.referral_code) {
-                    const link = `https://cdm86.com/public/login.html?ref=${userData.referral_code}`;
+                    const link = `https://cdm86.com/index.html?ref=${userData.referral_code}`;
                     referralLinkEl.textContent = link;
                 }
                 
@@ -1139,7 +1139,7 @@
             const qrContainer = document.getElementById('qr-canvas');
             if (!qrContainer || !referralCode) return;
             
-            const referralUrl = `https://cdm86.com/public/login.html?ref=${referralCode}`;
+            const referralUrl = `https://cdm86.com/index.html?ref=${referralCode}`;
             
             // Clear previous QR code
             qrContainer.innerHTML = '';
@@ -1206,7 +1206,7 @@
         // Logout
         window.logout = async function() {
             await supabase.auth.signOut();
-            window.location.href = '/public/login.html';
+            window.location.href = '/index.html';
         };
         
         // Open Admin Panel

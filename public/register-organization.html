@@ -495,7 +495,7 @@
     <!-- Referral Modal -->
     <div id="referralModal" class="modal active">
         <div class="modal-content">
-            <button class="modal-close" onclick="window.location.href='/public/login.html'">×</button>
+            <button class="modal-close" onclick="window.location.href='/index.html'">×</button>
             
             <div id="modalQuestion">
                 <div class="modal-header">
@@ -737,7 +737,7 @@
         </div>
         
         <div class="back-link">
-            <a href="/public/login.html">← Torna al Login</a>
+            <a href="/index.html">← Torna al Login</a>
         </div>
     </div>
     
@@ -782,7 +782,7 @@
             
             // Redirect to home or show success message
             setTimeout(() => {
-                window.location.href = '/public/login.html';
+                window.location.href = '/index.html';
             }, 2000);
         }
         
@@ -1194,7 +1194,7 @@ Per favore, invia un codice contratto per questa organizzazione.`);
                 showAlert('✅ Registrazione completata! Reindirizzamento al login...', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = '/public/login.html?org=1';
+                    window.location.href = '/index.html?org=1';
                 }, 2000);
                 
             } catch (error) {

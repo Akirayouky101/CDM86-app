@@ -405,7 +405,7 @@
                 const { data: { session } } = await supabase.auth.getSession();
                 
                 if (!session) {
-                    window.location.href = '/public/login.html';
+                    window.location.href = '/index.html';
                     return;
                 }
                 
@@ -418,7 +418,7 @@
                 
                 if (orgError || !orgData) {
                     alert('Errore: account organizzazione non trovato');
-                    window.location.href = '/public/login.html';
+                    window.location.href = '/index.html';
                     return;
                 }
                 
@@ -523,7 +523,7 @@
             const qrContainer = document.getElementById('qr-canvas');
             qrContainer.innerHTML = '';
             
-            const referralUrl = `https://cdm86.com/public/login.html?ref=${referralCode}`;
+            const referralUrl = `https://cdm86.com/index.html?ref=${referralCode}`;
             
             if (typeof QRCode !== 'undefined') {
                 new QRCode(qrContainer, {
@@ -592,7 +592,7 @@
         
         async function logout() {
             await supabase.auth.signOut();
-            window.location.href = '/public/login.html';
+            window.location.href = '/index.html';
         }
         
         // Initialize
