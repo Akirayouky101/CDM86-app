@@ -822,14 +822,20 @@
         
         // Show login required modal
         function showLoginRequiredModal() {
+            console.log('showLoginRequiredModal called');
             const overlay = document.getElementById('loginRequiredOverlay');
+            console.log('Overlay element:', overlay);
             if (overlay) {
                 overlay.classList.add('active');
+                console.log('Added active class to overlay');
+            } else {
+                console.error('Overlay element not found!');
             }
         }
         
         // Hide login required modal
         function hideLoginRequiredModal() {
+            console.log('hideLoginRequiredModal called');
             const overlay = document.getElementById('loginRequiredOverlay');
             if (overlay) {
                 overlay.classList.remove('active');
@@ -1310,17 +1316,23 @@
                 // Check if clicked on a promo card or any element inside it
                 const promoCard = e.target.closest('.promo-card');
                 if (promoCard) {
+                    console.log('Promo card clicked, currentUser:', currentUser);
+                    
                     // Don't intercept if clicked on favorite button
                     if (e.target.closest('.promo-favorite')) {
+                        console.log('Favorite button clicked, skipping');
                         return;
                     }
                     
                     // Check if user is logged in
                     if (!currentUser) {
+                        console.log('User not logged in, showing modal');
                         e.preventDefault();
                         e.stopPropagation();
                         showLoginRequiredModal();
                         return;
+                    } else {
+                        console.log('User logged in, allowing click');
                     }
                 }
             });
