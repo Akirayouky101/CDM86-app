@@ -515,15 +515,25 @@
         } else {
             // User not logged in - show auth modal
             loginBtn.addEventListener('click', () => {
+                console.log('Login button clicked');
+                console.log('authModalNew available?', window.authModalNew);
+
                 // Check if authModalNew is available
                 if (window.authModalNew) {
+                    console.log('Opening modal...');
                     window.authModalNew.open();
                 } else {
+                    console.log('Modal not found, redirecting to login page');
                     // Fallback to login page
                     window.location.href = '/public/login.html';
                 }
             });
         }
+
+        // Debug - check if modal is loaded
+        setTimeout(() => {
+            console.log('Checking modal after timeout:', window.authModalNew);
+        }, 1000);
     </script>
 </body>
 </html>

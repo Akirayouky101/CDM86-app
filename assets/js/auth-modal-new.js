@@ -7,6 +7,8 @@
 (function() {
     'use strict';
 
+    console.log('Auth Modal Script: Starting initialization...');
+
     class AuthModalNew {
         constructor() {
             this.isOpen = false;
@@ -678,8 +680,20 @@
         }
     }
 
-    // Create global instance
-    window.authModalNew = new AuthModalNew();
+    // Create global instance when DOM is ready
+    function initializeModal() {
+        if (!window.authModalNew) {
+            window.authModalNew = new AuthModalNew();
+            console.log('✅ Auth Modal New loaded and ready');
+            console.log('Modal instance:', window.authModalNew);
+        }
+    }
 
-    console.log('✅ Auth Modal New loaded and ready');
+    // Initialize immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeModal);
+        console.log('Waiting for DOMContentLoaded to initialize modal...');
+    } else {
+        initializeModal();
+    }
 })();

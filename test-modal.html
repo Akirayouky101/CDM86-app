@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth Modal</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test Auth Modal</h1>
+        <p>Questa pagina serve per testare il funzionamento della modal di autenticazione.</p>
+
+        <div>
+            <button class="btn" onclick="testModal()">
+                <i class="fas fa-external-link-alt"></i> Apri Modal
+            </button>
+
+            <button class="btn" onclick="checkModal()">
+                <i class="fas fa-check"></i> Verifica Modal
+            </button>
+
+            <button class="btn" onclick="reloadModal()">
+                <i class="fas fa-sync"></i> Ricarica Modal
+            </button>
+        </div>
+
+        <div id="status" class="status">
+            <strong>Status:</strong> <span id="status-text">In attesa...</span>
+        </div>
+
+        <div id="console-log" style="margin-top: 20px; padding: 10px; background: #000; color: #0f0; font-family: monospace; border-radius: 5px; max-height: 200px; overflow-y: auto;">
+            <div>Console Log:</div>
+        </div>
+    </div>
+
+    <!-- Auth Modal Script -->
+    <script src="assets/js/auth-modal-new.js"></script>
+
+    <!-- Supabase (needed for saving requests) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        window.supabase = createClient(supabaseUrl, supabaseKey);
+    </script>
+
+    <script>
+        // Override console.log to show in page
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const logDiv = document.getElementById('console-log');
+            const message = args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : arg
+            ).join(' ');
+            logDiv.innerHTML += '<div>> ' + message + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        console.error = function(...args) {
+            originalLog.apply(console, args);
+            const logDiv = document.getElementById('console-log');
+            const message = args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : arg
+            ).join(' ');
+            logDiv.innerHTML += '<div style="color: red;">> ERROR: ' + message + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        function updateStatus(text, isError = false) {
+            const statusText = document.getElementById('status-text');
+            statusText.textContent = text;
+            statusText.className = isError ? 'error' : 'success';
+            console.log('Status:', text);
+        }
+
+        function testModal() {
+            console.log('Testing modal...');
+            console.log('window.authModalNew:', window.authModalNew);
+
+            if (window.authModalNew) {
+                try {
+                    window.authModalNew.open();
+                    updateStatus('Modal aperta con successo!');
+                } catch (error) {
+                    updateStatus('Errore nell\'aprire la modal: ' + error.message, true);
+                    console.error('Error:', error);
+                }
+            } else {
+                updateStatus('Modal non trovata! window.authModalNew non è definito', true);
+            }
+        }
+
+        function checkModal() {
+            console.log('Checking modal status...');
+
+            if (window.authModalNew) {
+                updateStatus('✅ Modal caricata correttamente');
+                console.log('Modal object:', window.authModalNew);
+                console.log('Modal isOpen:', window.authModalNew.isOpen);
+            } else {
+                updateStatus('❌ Modal non caricata', true);
+                console.log('window.authModalNew is undefined');
+            }
+
+            // Check if modal HTML exists
+            const modalElement = document.getElementById('authModal');
+            if (modalElement) {
+                console.log('✅ Modal HTML found in DOM');
+            } else {
+                console.log('❌ Modal HTML not found in DOM');
+            }
+        }
+
+        function reloadModal() {
+            console.log('Reloading modal...');
+
+            // Remove existing modal
+            const existingModal = document.getElementById('authModal');
+            if (existingModal) {
+                existingModal.remove();
+                console.log('Existing modal removed');
+            }
+
+            // Reinitialize
+            if (window.authModalNew) {
+                window.authModalNew.initModal();
+                updateStatus('Modal ricaricata');
+            } else {
+                updateStatus('Cannot reload - modal not found', true);
+            }
+        }
+
+        // Check on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded');
+            setTimeout(() => {
+                checkModal();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
