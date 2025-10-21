@@ -13,6 +13,193 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Variabili globali
 let currentWizardStep = 1;
+let companyHasReferral = false;
+
+// ==========================================
+// SELECTION MODAL (Prima schermata)
+// ==========================================
+
+export function showSelectionModal() {
+    const overlay = document.getElementById('selectionModalOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+export function closeSelectionModal() {
+    const overlay = document.getElementById('selectionModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+export function selectUser() {
+    closeSelectionModal();
+    showReferralModal();
+}
+
+export function selectCompany() {
+    closeSelectionModal();
+    showCompanyRequestModal();
+}
+
+export function showExistingUserLogin() {
+    closeSelectionModal();
+    showLoginModal();
+}
+
+// ==========================================
+// COMPANY REQUEST MODAL
+// ==========================================
+
+export function showCompanyRequestModal() {
+    const overlay = document.getElementById('companyRequestModalOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+        companyHasReferral = false;
+        // Reset form
+        document.getElementById('companyReferralQuestion').style.display = 'block';
+        document.getElementById('companyFormWithReferral').classList.remove('active');
+        document.getElementById('companyFormWithoutReferral').classList.remove('active');
+    }
+}
+
+export function closeCompanyRequestModal() {
+    const overlay = document.getElementById('companyRequestModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.getElementById('companyRequestForm')?.reset();
+        document.getElementById('companyRequestFormNoRef')?.reset();
+    }
+}
+
+export function companyHasReferralYes() {
+    document.getElementById('companyReferralQuestion').style.display = 'none';
+    document.getElementById('companyFormWithReferral').classList.add('active');
+    companyHasReferral = true;
+}
+
+export function companyHasReferralNo() {
+    document.getElementById('companyReferralQuestion').style.display = 'none';
+    document.getElementById('companyFormWithoutReferral').classList.add('active');
+    companyHasReferral = false;
+}
+
+// ==========================================
+// COMPANY REQUEST SUBMISSION
+// ==========================================
+
+export async function handleCompanyRequest(event) {
+    event.preventDefault();
+
+    const loading = document.getElementById('companyRequestLoading');
+    const form = document.getElementById('companyRequestForm');
+
+    if (!form || !loading) return;
+
+    form.style.display = 'none';
+    loading.classList.add('show');
+
+    try {
+        const organizationName = document.getElementById('companyOrgName').value.trim();
+        const firstName = document.getElementById('companyFirstName').value.trim();
+        const lastName = document.getElementById('companyLastName').value.trim();
+        const email = document.getElementById('companyEmail').value.trim();
+        const phone = document.getElementById('companyPhone').value.trim();
+        const referralCode = document.getElementById('companyReferralCode').value.toUpperCase().trim();
+
+        // Valida referral code
+        const { data: referrerData, error: referrerError } = await supabase
+            .rpc('create_organization_request', {
+                p_referred_by_code: referralCode,
+                p_organization_name: organizationName,
+                p_contact_first_name: firstName,
+                p_contact_last_name: lastName,
+                p_contact_email: email,
+                p_contact_phone: phone
+            });
+
+        if (referrerError) throw referrerError;
+
+        showAlert('✅ Richiesta inviata con successo! Verrai contattato a breve.', 'success');
+
+        setTimeout(() => {
+            closeCompanyRequestModal();
+            form.reset();
+        }, 2000);
+
+    } catch (error) {
+        console.error('Company request error:', error);
+        showAlert(error.message || 'Errore durante l\'invio della richiesta');
+        form.style.display = 'block';
+        loading.classList.remove('show');
+    }
+}
+
+export async function handleCompanyRequestNoRef(event) {
+    event.preventDefault();
+
+    const loading = document.getElementById('companyRequestLoadingNoRef');
+    const form = document.getElementById('companyRequestFormNoRef');
+
+    if (!form || !loading) return;
+
+    form.style.display = 'none';
+    loading.classList.add('show');
+
+    try {
+        const organizationName = document.getElementById('companyOrgNameNoRef').value.trim();
+        const firstName = document.getElementById('companyFirstNameNoRef').value.trim();
+        const lastName = document.getElementById('companyLastNameNoRef').value.trim();
+        const email = document.getElementById('companyEmailNoRef').value.trim();
+        const phone = document.getElementById('companyPhoneNoRef').value.trim();
+
+        // Invia email di richiesta contatto
+        const subject = encodeURIComponent('Richiesta Contatto Azienda - CDM86');
+        const body = encodeURIComponent(`Nuova richiesta di contatto da un'azienda:
+
+Organizzazione: ${organizationName}
+Nome Referente: ${firstName} ${lastName}
+Email: ${email}
+Telefono: ${phone}
+
+L'azienda NON ha un codice referral.`);
+
+        // Invia anche al database (senza referral)
+        const { error } = await supabase
+            .from('organization_requests')
+            .insert({
+                organization_name: organizationName,
+                contact_first_name: firstName,
+                contact_last_name: lastName,
+                contact_email: email,
+                contact_phone: phone,
+                referred_by_id: null,
+                referred_by_code: null,
+                status: 'pending'
+            });
+
+        if (error) throw error;
+
+        showAlert('✅ Richiesta inviata! Ti contatteremo presto.', 'success');
+
+        // Apri client email
+        window.location.href = `mailto:referralcdm86@appdataconnect.it?subject=${subject}&body=${body}`;
+
+        setTimeout(() => {
+            closeCompanyRequestModal();
+            form.reset();
+        }, 2000);
+
+    } catch (error) {
+        console.error('Company request error:', error);
+        showAlert(error.message || 'Errore durante l\'invio della richiesta');
+        form.style.display = 'block';
+        loading.classList.remove('show');
+    }
+}
 
 // ==========================================
 // MODAL MANAGEMENT
@@ -421,9 +608,9 @@ export async function checkAuthStatus() {
             window.location.href = '/public/promotions.html';
         };
     } else {
-        // User not logged in
+        // User not logged in - show selection modal
         loginBtn.onclick = () => {
-            showLoginModal();
+            showSelectionModal();
         };
     }
 }
@@ -443,6 +630,22 @@ if (document.readyState === 'loading') {
 
 // Export per uso globale
 window.LoginModal = {
+    // Selection Modal
+    showSelection: showSelectionModal,
+    closeSelection: closeSelectionModal,
+    selectUser,
+    selectCompany,
+    showExistingUserLogin,
+    
+    // Company Request Modal
+    showCompanyRequest: showCompanyRequestModal,
+    closeCompanyRequest: closeCompanyRequestModal,
+    companyHasReferralYes,
+    companyHasReferralNo,
+    handleCompanyRequest,
+    handleCompanyRequestNoRef,
+    
+    // Login Modal
     show: showLoginModal,
     close: closeLoginModal,
     showReferral: showReferralModal,

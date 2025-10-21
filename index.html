@@ -435,6 +435,154 @@
         </button>
     </nav>
 
+    <!-- Selection Modal (Prima schermata) -->
+    <div class="selection-modal-overlay" id="selectionModalOverlay">
+        <div class="selection-modal">
+            <div class="selection-modal-header">
+                <button class="selection-modal-close" onclick="LoginModal.closeSelection()">&times;</button>
+                <div class="selection-modal-icon">🔐</div>
+                <h2 class="selection-modal-title">Benvenuto su CDM86</h2>
+                <p class="selection-modal-subtitle">Scegli come vuoi accedere alla piattaforma</p>
+            </div>
+
+            <div class="selection-modal-body">
+                <div class="selection-options">
+                    <div class="selection-option" onclick="LoginModal.selectUser()">
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">👤</span>
+                            <h3 class="selection-option-title">Sono un Utente</h3>
+                            <p class="selection-option-description">Accedi alle promozioni e guadagna punti</p>
+                        </div>
+                    </div>
+
+                    <div class="selection-option" onclick="LoginModal.selectCompany()">
+                        <span class="selection-option-badge">Partner</span>
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">🏢</span>
+                            <h3 class="selection-option-title">Azienda/Associazione</h3>
+                            <p class="selection-option-description">Richiedi informazioni per pubblicare promozioni</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selection-login-section">
+                    <p>Hai già un account?</p>
+                    <button class="selection-login-btn" onclick="LoginModal.showExistingUserLogin()">
+                        <span>🔑</span>
+                        <span>Accedi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Request Modal -->
+    <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
+        <div class="company-request-modal">
+            <button class="selection-modal-close" onclick="LoginModal.closeCompanyRequest()">&times;</button>
+            
+            <div class="company-request-header">
+                <h2>🏢 Richiesta Informazioni Azienda</h2>
+                <p>Compila il form per essere contattato dal nostro team</p>
+            </div>
+
+            <div class="company-request-body">
+                <!-- Domanda iniziale sul referral -->
+                <div class="referral-question-box" id="companyReferralQuestion">
+                    <h3>Hai un codice referral?</h3>
+                    <div class="referral-question-buttons">
+                        <button class="referral-question-btn yes" onclick="LoginModal.companyHasReferralYes()">Sì, ce l'ho</button>
+                        <button class="referral-question-btn no" onclick="LoginModal.companyHasReferralNo()">No, non ce l'ho</button>
+                    </div>
+                </div>
+
+                <!-- Form CON referral -->
+                <div class="company-form-section" id="companyFormWithReferral">
+                    <form id="companyRequestForm" onsubmit="return LoginModal.handleCompanyRequest(event)">
+                        <div class="form-group">
+                            <label for="companyOrgName">Nome Organizzazione *</label>
+                            <input type="text" id="companyOrgName" required placeholder="Es: Pizzeria Da Mario">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyReferralCode">Codice Referral * 🎫</label>
+                            <input type="text" id="companyReferralCode" required placeholder="ADMIN001" class="uppercase-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyFirstName">Nome Referente *</label>
+                            <input type="text" id="companyFirstName" required placeholder="Mario">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyLastName">Cognome Referente *</label>
+                            <input type="text" id="companyLastName" required placeholder="Rossi">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyEmail">Email *</label>
+                            <input type="email" id="companyEmail" required placeholder="info@pizzeria.it">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyPhone">Telefono *</label>
+                            <input type="tel" id="companyPhone" required placeholder="+39 123 456 7890">
+                        </div>
+
+                        <button type="submit" class="form-btn form-btn-primary">Invia Richiesta</button>
+                    </form>
+
+                    <div class="form-loading" id="companyRequestLoading">
+                        <div class="form-spinner"></div>
+                        <p>Invio in corso...</p>
+                    </div>
+                </div>
+
+                <!-- Form SENZA referral -->
+                <div class="company-form-section" id="companyFormWithoutReferral">
+                    <div class="referral-note">
+                        <strong>ℹ️ Nessun Problema!</strong>
+                        Compila il form e ti contatteremo per fornirti tutte le informazioni necessarie.
+                    </div>
+
+                    <form id="companyRequestFormNoRef" onsubmit="return LoginModal.handleCompanyRequestNoRef(event)">
+                        <div class="form-group">
+                            <label for="companyOrgNameNoRef">Nome Organizzazione *</label>
+                            <input type="text" id="companyOrgNameNoRef" required placeholder="Es: Pizzeria Da Mario">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyFirstNameNoRef">Nome Referente *</label>
+                            <input type="text" id="companyFirstNameNoRef" required placeholder="Mario">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyLastNameNoRef">Cognome Referente *</label>
+                            <input type="text" id="companyLastNameNoRef" required placeholder="Rossi">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyEmailNoRef">Email *</label>
+                            <input type="email" id="companyEmailNoRef" required placeholder="info@pizzeria.it">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyPhoneNoRef">Telefono *</label>
+                            <input type="tel" id="companyPhoneNoRef" required placeholder="+39 123 456 7890">
+                        </div>
+
+                        <button type="submit" class="form-btn form-btn-primary">Invia Richiesta</button>
+                    </form>
+
+                    <div class="form-loading" id="companyRequestLoadingNoRef">
+                        <div class="form-spinner"></div>
+                        <p>Invio in corso...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Login Modal -->
     <div class="login-modal-overlay" id="loginModalOverlay">
         <div class="login-modal">
