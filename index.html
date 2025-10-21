@@ -28,8 +28,8 @@
     <!-- Config -->
     <script src="assets/js/config.js"></script>
 
-    <!-- Auth Modal Enhanced -->
-    <script type="module" src="assets/js/auth-modal-enhanced.js"></script>
+    <!-- Auth Modal New -->
+    <script src="assets/js/auth-modal-new.js"></script>
 </head>
 <body class="promotions-page">
     
@@ -515,9 +515,9 @@
         } else {
             // User not logged in - show auth modal
             loginBtn.addEventListener('click', () => {
-                // Check if authModalEnhanced is available
-                if (window.authModalEnhanced) {
-                    window.authModalEnhanced.open();
+                // Check if authModalNew is available
+                if (window.authModalNew) {
+                    window.authModalNew.open();
                 } else {
                     // Fallback to login page
                     window.location.href = '/public/login.html';
