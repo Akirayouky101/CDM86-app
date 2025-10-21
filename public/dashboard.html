@@ -707,6 +707,10 @@
         const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
         let currentUser = null;
         
+        // Make supabase and currentUser globally accessible
+        window.supabaseClient = supabase;
+        window.getCurrentUser = () => currentUser;
+        
         // Check authentication
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
@@ -1294,6 +1298,14 @@
         // Submit report company
         window.submitReportCompany = async function(event) {
             event.preventDefault();
+            
+            const supabase = window.supabaseClient;
+            const currentUser = window.getCurrentUser();
+            
+            if (!supabase || !currentUser) {
+                alert('❌ Errore: sessione non valida. Ricarica la pagina.');
+                return;
+            }
             
             const companyName = document.getElementById('companyName').value;
             const companyEmail = document.getElementById('companyEmail').value;
