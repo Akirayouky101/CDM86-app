@@ -1283,7 +1283,80 @@
         </div>
     </div>
     
+    <!-- Success Modal -->
+    <div id="successModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 24px; padding: 48px 40px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: successSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; animation: successPulse 1.5s ease-in-out infinite;">
+                <i class="fas fa-check" style="font-size: 40px; color: white; animation: successCheckmark 0.6s ease-out 0.2s both;"></i>
+            </div>
+            <h2 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 28px; font-weight: 700;">
+                Segnalazione Inviata!
+            </h2>
+            <p style="color: #666; margin: 0 0 32px 0; font-size: 16px; line-height: 1.6;">
+                Grazie per la segnalazione! Riceverai una notifica quando l'azienda verrà contattata.
+            </p>
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 24px; border-radius: 8px; text-align: left;">
+                <p style="color: #065f46; margin: 0; font-size: 14px;">
+                    <i class="fas fa-gift" style="margin-right: 8px; color: #10b981;"></i>
+                    <strong>Guadagnerai punti</strong> quando l'azienda si iscriverà tramite la tua segnalazione!
+                </p>
+            </div>
+            <button onclick="closeSuccessModal()" style="width: 100%; padding: 14px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.3s;">
+                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                Perfetto!
+            </button>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes successSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+        }
+        
+        @keyframes successCheckmark {
+            0% {
+                transform: scale(0) rotate(-45deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(0deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+    </style>
+    
     <script>
+        // Show success modal
+        window.showSuccessModal = function() {
+            document.getElementById('successModal').style.display = 'flex';
+        };
+        
+        // Close success modal
+        window.closeSuccessModal = function() {
+            document.getElementById('successModal').style.display = 'none';
+        };
+        
         // Open report company modal
         window.openReportCompanyModal = function() {
             document.getElementById('reportCompanyModal').style.display = 'flex';
@@ -1343,11 +1416,17 @@
                 
                 if (error) throw error;
                 
-                alert('✅ Segnalazione inviata con successo! Riceverai una notifica quando l\'azienda verrà contattata.');
+                // Close report modal and show success modal
                 closeReportCompanyModal();
+                showSuccessModal();
                 
-                // Reload organization requests
-                await loadOrganizationRequests();
+                // Reload organization requests after a short delay
+                setTimeout(async () => {
+                    const loadFunc = window.loadOrganizationRequests;
+                    if (loadFunc && typeof loadFunc === 'function') {
+                        await loadFunc();
+                    }
+                }, 1000);
                 
             } catch (error) {
                 console.error('Error submitting report:', error);
