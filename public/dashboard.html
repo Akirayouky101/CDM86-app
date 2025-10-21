@@ -615,7 +615,22 @@
 
             <!-- Segnalazioni Aziende -->
             <div class="section">
-                <h3>🏢 Segnalazioni Aziende/Associazioni</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>🏢 Segnalazioni Aziende/Associazioni</h3>
+                    <button class="btn-primary" onclick="openReportCompanyModal()" style="padding: 12px 24px; border-radius: 8px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-plus-circle"></i>
+                        Segnala Azienda
+                    </button>
+                </div>
+                
+                <div class="info-box" style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 20px; border-radius: 8px;">
+                    <p style="color: #1e40af; margin: 0;">
+                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                        <strong>Conosci un'azienda che potrebbe essere interessata?</strong><br>
+                        Segnalacela e guadagna punti quando si iscrive! Riceverai una ricompensa per ogni azienda che si unisce tramite la tua segnalazione.
+                    </p>
+                </div>
+                
                 <div class="stats-grid" style="margin-bottom: 20px;">
                     <div class="stat-card">
                         <div class="value" id="total-org-requests">0</div>
@@ -1191,6 +1206,144 @@
         window.openAdminPanel = function() {
             window.location.href = '/public/admin-panel.html';
         };
+            };
+    </script>
+    
+    <!-- Report Company Modal -->
+    <div id="reportCompanyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; color: #1a1a1a;">
+                    <i class="fas fa-building" style="color: #667eea; margin-right: 8px;"></i>
+                    Segnala un'Azienda
+                </h2>
+                <button onclick="closeReportCompanyModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <p style="color: #666; margin-bottom: 24px;">
+                Compila i dati dell'azienda che vuoi segnalare. Riceverai punti quando si iscriverà!
+            </p>
+            
+            <form id="reportCompanyForm" onsubmit="submitReportCompany(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <i class="fas fa-building" style="color: #667eea; margin-right: 6px;"></i>
+                        Nome Azienda *
+                    </label>
+                    <input type="text" id="companyName" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Es: Ristorante Da Mario">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <i class="fas fa-envelope" style="color: #667eea; margin-right: 6px;"></i>
+                        Email Azienda *
+                    </label>
+                    <input type="email" id="companyEmail" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="info@azienda.it">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <i class="fas fa-phone" style="color: #667eea; margin-right: 6px;"></i>
+                        Telefono Azienda *
+                    </label>
+                    <input type="tel" id="companyPhone" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="+39 123 456 7890">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <i class="fas fa-user" style="color: #667eea; margin-right: 6px;"></i>
+                        Nome Contatto *
+                    </label>
+                    <input type="text" id="contactName" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Es: Mario Rossi">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <i class="fas fa-comment" style="color: #667eea; margin-right: 6px;"></i>
+                        Note (opzionale)
+                    </label>
+                    <textarea id="companyNotes" rows="3" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical;" placeholder="Qualsiasi informazione aggiuntiva..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeReportCompanyModal()" style="flex: 1; padding: 14px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; font-weight: 600; cursor: pointer; color: #666;">
+                        Annulla
+                    </button>
+                    <button type="submit" style="flex: 1; padding: 14px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-paper-plane" style="margin-right: 6px;"></i>
+                        Invia Segnalazione
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Open report company modal
+        window.openReportCompanyModal = function() {
+            document.getElementById('reportCompanyModal').style.display = 'flex';
+        };
+        
+        // Close report company modal
+        window.closeReportCompanyModal = function() {
+            document.getElementById('reportCompanyModal').style.display = 'none';
+            document.getElementById('reportCompanyForm').reset();
+        };
+        
+        // Submit report company
+        window.submitReportCompany = async function(event) {
+            event.preventDefault();
+            
+            const companyName = document.getElementById('companyName').value;
+            const companyEmail = document.getElementById('companyEmail').value;
+            const companyPhone = document.getElementById('companyPhone').value;
+            const contactName = document.getElementById('contactName').value;
+            const notes = document.getElementById('companyNotes').value;
+            
+            try {
+                // Get current user's referral code
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('referral_code')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (!userData || !userData.referral_code) {
+                    alert('❌ Errore: codice referral non trovato');
+                    return;
+                }
+                
+                // Insert into organization_requests table
+                const { data, error } = await supabase
+                    .from('organization_requests')
+                    .insert({
+                        organization_name: companyName,
+                        contact_email: companyEmail,
+                        contact_phone: companyPhone,
+                        contact_first_name: contactName.split(' ')[0] || contactName,
+                        contact_last_name: contactName.split(' ').slice(1).join(' ') || '',
+                        referred_by_id: currentUser.id,
+                        referred_by_code: userData.referral_code,
+                        admin_notes: notes || null,
+                        status: 'pending'
+                    });
+                
+                if (error) throw error;
+                
+                alert('✅ Segnalazione inviata con successo! Riceverai una notifica quando l\'azienda verrà contattata.');
+                closeReportCompanyModal();
+                
+                // Reload organization requests
+                await loadOrganizationRequests();
+                
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                alert('❌ Errore nell\'invio della segnalazione: ' + error.message);
+            }
+        };
     </script>
 </body>
+```
 </html>
