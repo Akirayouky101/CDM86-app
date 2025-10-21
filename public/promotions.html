@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="/assets/css/filters.css">
     <link rel="stylesheet" href="/assets/css/animations.css">
     <link rel="stylesheet" href="/assets/css/auth-modal.css">
+    <link rel="stylesheet" href="/assets/css/login-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -657,7 +658,7 @@
                         logoutMenuItem.addEventListener('click', async () => {
                             console.log('Logout clicked');
                             await supabase.auth.signOut();
-                            window.location.href = '/public/login.html';
+                            window.location.href = '/index.html';
                         });
                     } else {
                         console.error('Logout menu item not found');
@@ -957,12 +958,34 @@
         
         // Setup event listeners
         function setupEventListeners() {
+            // View Toggle (Grid/List)
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            const promotionsGrid = document.getElementById('promotions-grid');
+            
+            toggleButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    toggleButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Toggle view
+                    const view = btn.dataset.view;
+                    if (view === 'list') {
+                        promotionsGrid.classList.add('list-view');
+                        promotionsGrid.classList.remove('grid-view');
+                    } else {
+                        promotionsGrid.classList.add('grid-view');
+                        promotionsGrid.classList.remove('list-view');
+                    }
+                });
+            });
+            
             // Logout
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
                     await supabase.auth.signOut();
-                    window.location.href = '/public/login.html';
+                    window.location.href = '/index.html';
                 });
             }
             

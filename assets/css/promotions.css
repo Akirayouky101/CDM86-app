@@ -638,3 +638,69 @@ body {
         display: none;
     }
 }
+/* ============================================
+   LIST VIEW STYLES
+   ============================================ */
+
+.promotions-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+}
+
+.promotions-grid.list-view .promo-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-5);
+    height: auto;
+}
+
+.promotions-grid.list-view .promo-image {
+    height: 150px;
+    border-radius: 12px 0 0 12px;
+}
+
+.promotions-grid.list-view .promo-content {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.promotions-grid.list-view .promo-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.promotions-grid.list-view .promo-title {
+    font-size: 1.5rem;
+}
+
+.promotions-grid.list-view .promo-description {
+    font-size: 1rem;
+    margin-bottom: var(--space-4);
+}
+
+.promotions-grid.list-view .promo-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.promotions-grid.list-view .promo-meta {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .promotions-grid.list-view .promo-card {
+        grid-template-columns: 1fr;
+    }
+    
+    .promotions-grid.list-view .promo-image {
+        height: 200px;
+        border-radius: 12px 12px 0 0;
+    }
+}
