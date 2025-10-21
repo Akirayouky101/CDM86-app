@@ -26,6 +26,216 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <style>
+        /* Login Required Modal */
+        .login-required-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .login-required-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-required-modal {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUpBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        .login-required-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .login-required-icon i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        .login-required-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        
+        .login-required-text {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        
+        .login-required-features {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            animation: slideInLeft 0.5s ease-out backwards;
+        }
+        
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon i {
+            font-size: 18px;
+            color: white;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .login-required-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .login-required-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .login-required-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-required-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .login-required-btn-secondary {
+            background: #f1f3f5;
+            color: #495057;
+        }
+        
+        .login-required-btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .promo-card {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUpBounce {
+            from {
+                opacity: 0;
+                transform: translateY(100px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .login-required-modal {
+                padding: 32px 24px;
+            }
+            
+            .login-required-title {
+                font-size: 24px;
+            }
+            
+            .login-required-buttons {
+                flex-direction: column;
+            }
+            
+            .login-required-btn {
+                width: 100%;
+            }
+        }
+    </style>
+    
     <!-- Config -->
     <script src="assets/js/config.js"></script>
 </head>
@@ -752,8 +962,139 @@
         </div>
     </div>
 
+    <!-- Login Required Modal -->
+    <div class="login-required-overlay" id="loginRequiredOverlay">
+        <div class="login-required-modal">
+            <div class="login-required-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2 class="login-required-title">Accedi per Continuare</h2>
+            <p class="login-required-text">
+                Registrati gratuitamente per accedere a tutte le promozioni esclusive e sconti riservati ai membri!
+            </p>
+            
+            <div class="login-required-features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="feature-text">Accesso a centinaia di offerte esclusive</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="feature-text">Salva le tue promozioni preferite</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="feature-text">Ricevi notifiche per nuove offerte</div>
+                </div>
+            </div>
+            
+            <div class="login-required-buttons">
+                <button class="login-required-btn login-required-btn-primary" id="loginRequiredLogin">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Accedi Ora
+                </button>
+                <button class="login-required-btn login-required-btn-secondary" id="loginRequiredClose">
+                    <i class="fas fa-times"></i>
+                    Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- PWA Service Worker Registration -->
     <script type="module" src="assets/js/login-modal.js"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        let currentUser = null;
+        
+        // Check authentication
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            currentUser = session?.user || null;
+            console.log('Index - Current user:', currentUser);
+            return currentUser;
+        }
+        
+        // Show login required modal
+        function showLoginRequiredModal() {
+            const overlay = document.getElementById('loginRequiredOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
+        
+        // Hide login required modal
+        function hideLoginRequiredModal() {
+            const overlay = document.getElementById('loginRequiredOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+        }
+        
+        // Show selection modal (existing modal system)
+        function showSelectionModal() {
+            const selectionOverlay = document.getElementById('selectionModalOverlay');
+            if (selectionOverlay) {
+                selectionOverlay.classList.add('active');
+            }
+            hideLoginRequiredModal();
+        }
+        
+        // Initialize
+        (async () => {
+            await checkAuth();
+            
+            // Setup login required modal buttons
+            const loginBtn = document.getElementById('loginRequiredLogin');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', showSelectionModal);
+            }
+            
+            const closeBtn = document.getElementById('loginRequiredClose');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hideLoginRequiredModal);
+            }
+            
+            const overlay = document.getElementById('loginRequiredOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        hideLoginRequiredModal();
+                    }
+                });
+            }
+            
+            // Intercept clicks on promo cards
+            document.addEventListener('click', (e) => {
+                const promoCard = e.target.closest('.promo-card');
+                if (promoCard) {
+                    // Don't intercept favorite button clicks
+                    if (e.target.closest('.promo-favorite')) {
+                        return;
+                    }
+                    
+                    // Check if user is logged in
+                    if (!currentUser) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showLoginRequiredModal();
+                        return;
+                    }
+                    
+                    // User is logged in, allow navigation
+                    // (promo cards should have onclick or href)
+                }
+            });
+        })();
+    </script>
     <script>
         // Register Service Worker
         if ('serviceWorker' in navigator) {

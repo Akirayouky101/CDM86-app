@@ -223,7 +223,8 @@
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                window.location.href = '/public/login.html';
+                // Redirect to index where they can login via modal
+                window.location.href = '/index.html';
                 return null;
             }
             currentUser = session.user;
