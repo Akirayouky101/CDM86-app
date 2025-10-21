@@ -1093,6 +1093,35 @@
                     // (promo cards should have onclick or href)
                 }
             });
+            
+            // Setup category filter
+            const categoryChips = document.querySelectorAll('.category-chip');
+            const promoCards = document.querySelectorAll('.promo-card');
+            
+            categoryChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    // Update active state
+                    categoryChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    
+                    // Get selected category
+                    const selectedCategory = chip.dataset.category;
+                    console.log('Filter by category:', selectedCategory);
+                    
+                    // Filter promo cards
+                    promoCards.forEach(card => {
+                        const cardCategory = card.dataset.category;
+                        
+                        if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+                            card.style.display = 'flex';
+                            // Add animation
+                            card.style.animation = 'fadeIn 0.3s ease-out';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
         })();
     </script>
     <script>
