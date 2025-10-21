@@ -1860,12 +1860,12 @@
                         <div class="stat-label">Da Contattare</div>
                     </div>
                     <div class="stat-card approved">
-                        <div class="stat-value" id="org-stat-contacted">0</div>
-                        <div class="stat-label">Contattate</div>
-                    </div>
-                    <div class="stat-card completed">
                         <div class="stat-value" id="org-stat-approved">0</div>
                         <div class="stat-label">Approvate</div>
+                    </div>
+                    <div class="stat-card completed">
+                        <div class="stat-value" id="org-stat-completed">0</div>
+                        <div class="stat-label">Completate</div>
                     </div>
                 </div>
 
@@ -1876,18 +1876,18 @@
                             <label>Stato</label>
                             <select id="org-filter-status" onchange="applyOrgFilters()">
                                 <option value="">Tutti gli stati</option>
-                                <option value="pending">Da Contattare</option>
-                                <option value="contacted">Contattate</option>
-                                <option value="approved">Approvate</option>
-                                <option value="rejected">Rifiutate</option>
+                                <option value="pending">⏳ Da Contattare</option>
+                                <option value="approved">✅ Approvate</option>
+                                <option value="completed">🎉 Completate (con codice)</option>
+                                <option value="rejected">❌ Rifiutate</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label>Ha Referral</label>
                             <select id="org-filter-referral" onchange="applyOrgFilters()">
                                 <option value="">Tutti</option>
-                                <option value="yes">Con Referral</option>
-                                <option value="no">Senza Referral</option>
+                                <option value="yes">✅ Con Referral</option>
+                                <option value="no">❌ Senza Referral</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -3519,8 +3519,8 @@
         function updateOrgStats() {
             document.getElementById('org-stat-total').textContent = allOrgRequests.length;
             document.getElementById('org-stat-pending').textContent = allOrgRequests.filter(r => r.status === 'pending').length;
-            document.getElementById('org-stat-contacted').textContent = allOrgRequests.filter(r => r.status === 'contacted').length;
             document.getElementById('org-stat-approved').textContent = allOrgRequests.filter(r => r.status === 'approved').length;
+            document.getElementById('org-stat-completed').textContent = allOrgRequests.filter(r => r.status === 'completed').length;
         }
 
         function displayOrgRequests(requests) {
@@ -3536,39 +3536,48 @@
                 return;
             }
 
-            container.innerHTML = requests.map(request => `
+            container.innerHTML = requests.map(request => {
+                const hasReferral = request.referred_by_id && request.referred_by_code;
+                const contactName = `${request.contact_first_name || ''} ${request.contact_last_name || ''}`.trim();
+                
+                return `
                 <div class="request-card ${request.status}">
                     <div class="request-header">
                         <div>
-                            <h3>${request.organization_name}</h3>
-                            <p class="request-info">📧 ${request.email} • 📞 ${request.phone}</p>
-                            <p class="request-info">👤 ${request.contact_name} • 🏢 ${request.business_type}</p>
-                            ${request.has_referral ?
-                                `<p class="request-info">🎫 Referral: <strong>${request.referral_code || 'N/A'}</strong></p>` :
-                                '<p class="request-info">❌ Nessun referral</p>'}
+                            <h3>🏢 ${request.organization_name}</h3>
+                            <p class="request-info">� Referente: <strong>${contactName}</strong></p>
+                            <p class="request-info">� ${request.contact_email} • 📞 ${request.contact_phone}</p>
+                            ${hasReferral ?
+                                `<p class="request-info">🎫 Codice Referral: <strong>${request.referred_by_code}</strong></p>` :
+                                '<p class="request-info">⚠️ Nessun codice referral</p>'}
+                            ${request.organization_type ? `<p class="request-info">🏷️ Tipo: ${request.organization_type}</p>` : ''}
                         </div>
                         <span class="status-badge ${request.status}">${getOrgStatusLabel(request.status)}</span>
                     </div>
-                    ${request.message ? `<div class="request-message">💬 ${request.message}</div>` : ''}
-                    ${request.notes ? `<div class="request-notes">📝 Note: ${request.notes}</div>` : ''}
+                    ${request.admin_notes ? `<div class="request-notes">� Note Admin: ${request.admin_notes}</div>` : ''}
+                    ${request.contract_code ? `<div class="request-message">� Codice Contratto: <strong>${request.contract_code}</strong></div>` : ''}
                     <div class="request-footer">
-                        <span class="request-date">🕐 ${new Date(request.created_at).toLocaleString('it-IT')}</span>
+                        <span class="request-date">🕐 Richiesta: ${new Date(request.created_at).toLocaleString('it-IT')}</span>
+                        ${request.approved_at ? `<span class="request-date"> • ✅ Approvata: ${new Date(request.approved_at).toLocaleString('it-IT')}</span>` : ''}
                         <div class="request-actions">
                             ${request.status === 'pending' ? `
-                                <button class="btn-action btn-approve" onclick="markOrgContacted('${request.id}')">
-                                    <i class="fas fa-phone"></i> Contattata
-                                </button>
-                            ` : ''}
-                            ${request.status === 'contacted' ? `
-                                <button class="btn-action btn-complete" onclick="approveOrg('${request.id}')">
+                                <button class="btn-action btn-approve" onclick="approveOrg('${request.id}')">
                                     <i class="fas fa-check"></i> Approva
                                 </button>
                                 <button class="btn-action btn-reject" onclick="rejectOrg('${request.id}')">
                                     <i class="fas fa-times"></i> Rifiuta
                                 </button>
                             ` : ''}
+                            ${request.status === 'approved' && !request.contract_code ? `
+                                <button class="btn-action btn-complete" onclick="assignContractCode('${request.id}')">
+                                    <i class="fas fa-file-contract"></i> Assegna Codice
+                                </button>
+                            ` : ''}
                             <button class="btn-action" onclick="addOrgNote('${request.id}')">
                                 <i class="fas fa-sticky-note"></i> Note
+                            </button>
+                            <button class="btn-action" onclick="emailOrg('${request.contact_email}', '${request.organization_name}')">
+                                <i class="fas fa-envelope"></i> Email
                             </button>
                             <button class="btn-action btn-delete" onclick="deleteOrgRequest('${request.id}')">
                                 <i class="fas fa-trash"></i>
@@ -3576,15 +3585,15 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function getOrgStatusLabel(status) {
             const labels = {
                 'pending': '⏳ Da Contattare',
-                'contacted': '📞 Contattata',
                 'approved': '✅ Approvata',
-                'rejected': '❌ Rifiutata'
+                'rejected': '❌ Rifiutata',
+                'completed': '🎉 Completata'
             };
             return labels[status] || status;
         }
@@ -3600,18 +3609,20 @@
 
                 // Referral filter
                 if (hasReferral) {
-                    if (hasReferral === 'yes' && !request.has_referral) return false;
-                    if (hasReferral === 'no' && request.has_referral) return false;
+                    const requestHasReferral = request.referred_by_id && request.referred_by_code;
+                    if (hasReferral === 'yes' && !requestHasReferral) return false;
+                    if (hasReferral === 'no' && requestHasReferral) return false;
                 }
 
                 // Search filter
                 if (search) {
                     const searchStr = [
                         request.organization_name,
-                        request.email,
-                        request.phone,
-                        request.contact_name,
-                        request.referral_code || ''
+                        request.contact_email,
+                        request.contact_phone,
+                        request.contact_first_name,
+                        request.contact_last_name,
+                        request.referred_by_code || ''
                     ].join(' ').toLowerCase();
 
                     if (!searchStr.includes(search)) return false;
@@ -3630,35 +3641,16 @@
             displayOrgRequests(allOrgRequests);
         };
 
-        window.markOrgContacted = async function(requestId) {
-            if (!confirm('Confermi di aver contattato questa azienda?')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('organization_requests')
-                    .update({
-                        status: 'contacted',
-                        contacted_at: new Date().toISOString()
-                    })
-                    .eq('id', requestId);
-
-                if (error) throw error;
-
-                showMessage('success', 'Aggiornato', 'Stato aggiornato a Contattata');
-                loadOrgRequests();
-            } catch (error) {
-                console.error('Error updating organization request:', error);
-                showMessage('error', 'Errore', error.message);
-            }
-        };
-
         window.approveOrg = async function(requestId) {
             if (!confirm('Confermi di approvare questa azienda come partner?')) return;
 
             try {
                 const { error } = await supabase
                     .from('organization_requests')
-                    .update({ status: 'approved' })
+                    .update({ 
+                        status: 'approved',
+                        approved_at: new Date().toISOString()
+                    })
                     .eq('id', requestId);
 
                 if (error) throw error;
@@ -3671,6 +3663,36 @@
             }
         };
 
+        window.assignContractCode = async function(requestId) {
+            const contractCode = prompt('Inserisci il codice contratto da assegnare:');
+            if (!contractCode) return;
+
+            try {
+                const { error } = await supabase
+                    .from('organization_requests')
+                    .update({ 
+                        contract_code: contractCode.toUpperCase(),
+                        status: 'completed',
+                        completed_at: new Date().toISOString()
+                    })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showMessage('success', 'Codice Assegnato', `Codice contratto ${contractCode} assegnato con successo`);
+                loadOrgRequests();
+            } catch (error) {
+                console.error('Error assigning contract code:', error);
+                showMessage('error', 'Errore', error.message);
+            }
+        };
+
+        window.emailOrg = function(email, orgName) {
+            const subject = encodeURIComponent(`Richiesta Informazioni - ${orgName}`);
+            const body = encodeURIComponent(`Gentile ${orgName},\n\nGrazie per aver mostrato interesse nella piattaforma CDM86.\n\n`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
         window.rejectOrg = async function(requestId) {
             const reason = prompt('Motivo del rifiuto (opzionale):');
 
@@ -3679,11 +3701,11 @@
                 if (reason) {
                     const { data } = await supabase
                         .from('organization_requests')
-                        .select('notes')
+                        .select('admin_notes')
                         .eq('id', requestId)
                         .single();
 
-                    updates.notes = (data?.notes || '') + '\nRifiutata: ' + reason;
+                    updates.admin_notes = (data?.admin_notes || '') + '\nRifiutata: ' + reason;
                 }
 
                 const { error } = await supabase
@@ -3703,14 +3725,14 @@
 
         window.addOrgNote = async function(requestId) {
             const request = allOrgRequests.find(r => r.id === requestId);
-            const note = prompt('Aggiungi nota:', request?.notes || '');
+            const note = prompt('Aggiungi nota amministrativa:', request?.admin_notes || '');
 
             if (note === null) return;
 
             try {
                 const { error } = await supabase
                     .from('organization_requests')
-                    .update({ notes: note })
+                    .update({ admin_notes: note })
                     .eq('id', requestId);
 
                 if (error) throw error;
