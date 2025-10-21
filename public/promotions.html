@@ -844,11 +844,15 @@
         
         // Initialize
         (async () => {
+            console.log('🚀 Initializing page...');
             const user = await checkAuth();
+            console.log('Current user:', user);
             
             if (user) {
+                console.log('User is logged in');
                 await loadUserInfo();
             } else {
+                console.log('User is NOT logged in');
                 // Update login button for non-logged users
                 const loginBtn = document.getElementById('login-btn');
                 if (loginBtn) {
@@ -862,6 +866,7 @@
             await loadPromotions();
             setupEventListeners();
             setupLoginRequiredModal();
+            console.log('✅ Page initialization complete');
         })();
         
         // Setup login required modal
@@ -990,13 +995,19 @@
         // Load promotions
         async function loadPromotions() {
             try {
+                console.log('Loading promotions...');
                 const { data: promotions, error } = await supabase
                     .from('promotions')
                     .select('*')
                     .eq('is_active', true)
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Error from Supabase:', error);
+                    throw error;
+                }
+                
+                console.log('Promotions loaded:', promotions?.length || 0);
                 
                 // Store all promotions
                 allPromotions = promotions || [];
@@ -1016,8 +1027,8 @@
                 
             } catch (error) {
                 console.error('Error loading promotions:', error);
-                document.getElementById('promotions-grid').innerHTML = 
-                    '<p style="text-align:center; padding:2rem;">Errore nel caricamento delle promozioni</p>';
+                // Don't override the static cards, just log the error
+                console.log('Keeping static promotion cards');
             }
         }
         
@@ -1025,8 +1036,11 @@
         function displayPromotions(promotions, favoriteIds) {
             const grid = document.getElementById('promotions-grid');
             
+            console.log('displayPromotions called with', promotions?.length || 0, 'promotions');
+            
             if (!promotions || promotions.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; padding:2rem;">Nessuna promozione disponibile</p>';
+                console.log('No promotions from database, keeping static cards');
+                // Don't override if there are no promotions - keep static cards
                 return;
             }
             
