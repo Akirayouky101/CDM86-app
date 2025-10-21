@@ -61,6 +61,16 @@
             position: relative;
         }
         
+        /* Make promo cards clickable */
+        .promo-card {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-2px);
+        }
+        
         .login-required-icon {
             width: 80px;
             height: 80px;
@@ -985,13 +995,16 @@
                 // Store all promotions
                 allPromotions = promotions || [];
                 
-                // Load favorites
-                const { data: favorites } = await supabase
-                    .from('favorites')
-                    .select('promotion_id')
-                    .eq('user_id', currentUser.id);
-                
-                const favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                // Load favorites only if user is logged in
+                let favoriteIds = new Set();
+                if (currentUser) {
+                    const { data: favorites } = await supabase
+                        .from('favorites')
+                        .select('promotion_id')
+                        .eq('user_id', currentUser.id);
+                    
+                    favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                }
                 
                 displayPromotions(allPromotions, favoriteIds);
                 
