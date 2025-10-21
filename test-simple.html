@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Semplice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .auth-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .auth-option:hover {
+            border-color: #667eea;
+            background: #f5f5ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Modal Semplice</h1>
+    <button onclick="openModal()">Apri Modal</button>
+    <button onclick="testConsole()">Test Console</button>
+
+    <!-- Modal HTML direttamente nella pagina -->
+    <div class="modal-overlay" id="testModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2>Benvenuto su CDM86</h2>
+            <p>Scegli come vuoi accedere:</p>
+
+            <div class="auth-option" onclick="selectUser()">
+                <h3>👤 Sono un Utente</h3>
+                <p>Accedi alle promozioni</p>
+            </div>
+
+            <div class="auth-option" onclick="selectOrganization()">
+                <h3>🏢 Azienda/Associazione</h3>
+                <p>Richiedi informazioni partner</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="goToLogin()">Già registrato? Accedi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('Script loaded');
+
+        function testConsole() {
+            console.log('Console is working!');
+            alert('Check browser console (F12)');
+        }
+
+        function openModal() {
+            console.log('Opening modal...');
+            const modal = document.getElementById('testModal');
+            if (modal) {
+                modal.classList.add('active');
+                console.log('Modal opened');
+            } else {
+                console.log('Modal not found!');
+            }
+        }
+
+        function closeModal() {
+            console.log('Closing modal...');
+            const modal = document.getElementById('testModal');
+            if (modal) {
+                modal.classList.remove('active');
+                console.log('Modal closed');
+            }
+        }
+
+        function selectUser() {
+            alert('Hai scelto: Utente\nVerrai reindirizzato alla registrazione utente');
+            closeModal();
+            // window.location.href = '/public/login.html#register';
+        }
+
+        function selectOrganization() {
+            alert('Hai scelto: Azienda\nQui apparirà il form di richiesta contatto');
+            closeModal();
+        }
+
+        function goToLogin() {
+            alert('Redirect al login');
+            closeModal();
+            // window.location.href = '/public/login.html';
+        }
+
+        // Test automatico
+        window.onload = function() {
+            console.log('Page fully loaded');
+            console.log('Modal element exists?', document.getElementById('testModal') !== null);
+        }
+    </script>
+</body>
+</html>

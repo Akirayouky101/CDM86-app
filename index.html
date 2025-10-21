@@ -27,9 +27,6 @@
     
     <!-- Config -->
     <script src="assets/js/config.js"></script>
-
-    <!-- Auth Modal New -->
-    <script src="assets/js/auth-modal-new.js"></script>
 </head>
 <body class="promotions-page">
     
@@ -437,6 +434,42 @@
         </button>
     </nav>
 
+    <!-- Auth Modal HTML -->
+    <div id="authModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%; margin: 20px;">
+            <div style="text-align: right;">
+                <button onclick="document.getElementById('authModal').style.display='none'" style="background: none; border: none; font-size: 32px; cursor: pointer;">&times;</button>
+            </div>
+            <div style="text-align: center;">
+                <h2 style="font-size: 48px; margin-bottom: 10px;">🔐</h2>
+                <h2 style="color: #333; font-size: 28px; margin: 10px 0;">Benvenuto su CDM86</h2>
+                <p style="color: #666; margin-bottom: 30px;">Scegli come vuoi accedere alla piattaforma</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <div onclick="window.location.href='/public/login.html#register'" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin: 10px 0; cursor: pointer; text-align: center; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e0e0e0'">
+                    <div style="font-size: 36px; margin-bottom: 10px;">👤</div>
+                    <h3 style="margin: 10px 0;">Sono un Utente</h3>
+                    <p style="color: #666; margin: 0;">Accedi alle promozioni e guadagna punti</p>
+                </div>
+
+                <div onclick="showOrganizationForm()" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin: 10px 0; cursor: pointer; text-align: center; position: relative; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e0e0e0'">
+                    <span style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">Partner</span>
+                    <div style="font-size: 36px; margin-bottom: 10px;">🏢</div>
+                    <h3 style="margin: 10px 0;">Azienda/Associazione</h3>
+                    <p style="color: #666; margin: 0;">Richiedi informazioni per pubblicare promozioni</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <p style="color: #666; margin-bottom: 10px;">Hai già un account?</p>
+                <button onclick="window.location.href='/public/login.html'" style="background: #f5f5f5; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    🔑 Accedi
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- PWA Service Worker Registration -->
     <script>
         // Register Service Worker
@@ -515,25 +548,26 @@
         } else {
             // User not logged in - show auth modal
             loginBtn.addEventListener('click', () => {
-                console.log('Login button clicked');
-                console.log('authModalNew available?', window.authModalNew);
-
-                // Check if authModalNew is available
-                if (window.authModalNew) {
-                    console.log('Opening modal...');
-                    window.authModalNew.open();
-                } else {
-                    console.log('Modal not found, redirecting to login page');
-                    // Fallback to login page
-                    window.location.href = '/public/login.html';
-                }
+                console.log('Login button clicked - showing modal');
+                showAuthModal();
             });
         }
 
-        // Debug - check if modal is loaded
-        setTimeout(() => {
-            console.log('Checking modal after timeout:', window.authModalNew);
-        }, 1000);
+        // Simple modal functions
+        function showAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('Modal shown');
+            } else {
+                console.log('Modal element not found');
+            }
+        }
+
+        function showOrganizationForm() {
+            alert('Form richiesta contatto azienda - In sviluppo\n\nQui apparirà il form per richiedere informazioni per diventare partner CDM86.');
+            document.getElementById('authModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>
