@@ -3942,15 +3942,15 @@
                 // Get total points distributed
                 const { data: totalPoints, error: totalError } = await supabase
                     .from('user_points')
-                    .select('total_points');
+                    .select('points_total');
                 
                 if (totalError) throw totalError;
                 
-                const total = totalPoints.reduce((sum, user) => sum + (user.total_points || 0), 0);
+                const total = totalPoints.reduce((sum, user) => sum + (user.points_total || 0), 0);
                 document.getElementById('points-total-distributed').textContent = total.toLocaleString();
                 
                 // Get active users (users with points > 0)
-                const activeUsers = totalPoints.filter(user => user.total_points > 0).length;
+                const activeUsers = totalPoints.filter(user => user.points_total > 0).length;
                 document.getElementById('points-active-users').textContent = activeUsers;
                 
                 // Get total rewards redeemed
@@ -3974,49 +3974,60 @@
         // Load points leaderboard
         window.loadPointsLeaderboard = async function() {
             try {
-                const { data: users, error } = await supabase
+                // First get user_points with user_id
+                const { data: userPoints, error: pointsError } = await supabase
                     .from('user_points')
-                    .select(`
-                        *,
-                        users!inner(email)
-                    `)
-                    .order('total_points', { ascending: false })
+                    .select('*')
+                    .order('points_total', { ascending: false })
                     .limit(50);
                 
-                if (error) throw error;
+                if (pointsError) throw pointsError;
                 
-                const container = document.getElementById('leaderboard-list');
-                
-                if (!users || users.length === 0) {
-                    container.innerHTML = '<div class="empty-state">Nessun utente con punti ancora</div>';
+                if (!userPoints || userPoints.length === 0) {
+                    document.getElementById('leaderboard-list').innerHTML = '<div class="empty-state">Nessun utente con punti ancora</div>';
                     return;
                 }
                 
-                container.innerHTML = users.map((user, index) => {
+                // Get user emails from auth.users
+                const userIds = userPoints.map(up => up.user_id);
+                const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+                
+                // Create a map of user_id to email
+                const userEmailMap = {};
+                if (users) {
+                    users.forEach(user => {
+                        userEmailMap[user.id] = user.email;
+                    });
+                }
+                
+                const container = document.getElementById('leaderboard-list');
+                
+                container.innerHTML = userPoints.map((user, index) => {
                     const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-                    const levelBadge = getLevelBadge(user.current_level);
+                    const levelBadge = getLevelBadge(user.level);
+                    const userEmail = userEmailMap[user.user_id] || 'Utente Sconosciuto';
                     
                     return `
-                        <div class="request-card" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-left: 4px solid ${getLevelColor(user.current_level)};">
+                        <div class="request-card" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-left: 4px solid ${getLevelColor(user.level)};">
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <div style="font-size: 32px; min-width: 50px; text-align: center;">${medal}</div>
                                 <div style="flex: 1;">
                                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                        <strong style="font-size: 18px;">${user.users?.email || 'Utente Sconosciuto'}</strong>
+                                        <strong style="font-size: 18px;">${userEmail}</strong>
                                         ${levelBadge}
                                     </div>
                                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px;">
                                         <div>
                                             <div style="color: #64748b; font-size: 12px;">Punti Totali</div>
-                                            <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${user.total_points || 0}</div>
+                                            <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${user.points_total || 0}</div>
                                         </div>
                                         <div>
                                             <div style="color: #64748b; font-size: 12px;">Punti Disponibili</div>
-                                            <div style="font-size: 20px; font-weight: 600; color: #10b981;">${user.available_points || 0}</div>
+                                            <div style="font-size: 20px; font-weight: 600; color: #10b981;">${user.points_available || 0}</div>
                                         </div>
                                         <div>
                                             <div style="color: #64748b; font-size: 12px;">Punti Usati</div>
-                                            <div style="font-size: 20px; font-weight: 600; color: #f59e0b;">${user.points_spent || 0}</div>
+                                            <div style="font-size: 20px; font-weight: 600; color: #f59e0b;">${user.points_used || 0}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -4037,8 +4048,8 @@
                 const { data: rewards, error } = await supabase
                     .from('rewards')
                     .select('*')
-                    .order('required_level')
-                    .order('points_cost');
+                    .order('level_required')
+                    .order('points_required');
                 
                 if (error) throw error;
                 
@@ -4056,32 +4067,32 @@
                             <div style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                                     <div>
-                                        <h3 style="margin: 0 0 5px 0;">${reward.name}</h3>
+                                        <h3 style="margin: 0 0 5px 0;">${reward.title}</h3>
                                         <p style="color: #64748b; margin: 0;">${reward.description}</p>
                                     </div>
                                     <div style="text-align: right;">
-                                        <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${reward.points_cost} pts</div>
-                                        ${getLevelBadge(reward.required_level)}
+                                        <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${reward.points_required} pts</div>
+                                        ${getLevelBadge(reward.level_required)}
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
                                     <div>
                                         <span style="color: #64748b;">Stock:</span>
-                                        <strong>${reward.stock_quantity || 0}</strong>
+                                        <strong>${reward.stock === -1 ? 'Illimitato' : reward.stock}</strong>
                                     </div>
                                     <div>
                                         <span style="color: #64748b;">Stato:</span>
-                                        <span class="status-badge ${reward.is_active ? 'approved' : 'rejected'}">
-                                            ${reward.is_active ? 'Attivo' : 'Disattivo'}
+                                        <span class="status-badge ${reward.active ? 'approved' : 'rejected'}">
+                                            ${reward.active ? 'Attivo' : 'Disattivo'}
                                         </span>
                                     </div>
                                     <div style="flex: 1;"></div>
                                     <button class="btn-filter" onclick="editReward('${reward.id}')">
                                         <i class="fas fa-edit"></i> Modifica
                                     </button>
-                                    <button class="btn-filter" onclick="toggleRewardStatus('${reward.id}', ${!reward.is_active})">
-                                        <i class="fas fa-${reward.is_active ? 'ban' : 'check'}"></i>
-                                        ${reward.is_active ? 'Disattiva' : 'Attiva'}
+                                    <button class="btn-filter" onclick="toggleRewardStatus('${reward.id}', ${!reward.active})">
+                                        <i class="fas fa-${reward.active ? 'ban' : 'check'}"></i>
+                                        ${reward.active ? 'Disattiva' : 'Attiva'}
                                     </button>
                                 </div>
                             </div>
@@ -4108,8 +4119,7 @@
                     .from('reward_redemptions')
                     .select(`
                         *,
-                        rewards(name, icon, points_cost),
-                        users!inner(email)
+                        rewards(title, points_required)
                     `)
                     .order('redeemed_at', { ascending: false });
                 
@@ -4120,6 +4130,15 @@
                 const { data: redemptions, error } = await query;
                 
                 if (error) throw error;
+                
+                // Get user emails
+                const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+                const userEmailMap = {};
+                if (users) {
+                    users.forEach(user => {
+                        userEmailMap[user.id] = user.email;
+                    });
+                }
                 
                 const container = document.getElementById('redemptions-list');
                 
@@ -4139,13 +4158,13 @@
                     return `
                         <div class="request-card" style="border-left: 4px solid ${statusColors[redemption.status]};">
                             <div style="display: flex; gap: 20px;">
-                                <div style="font-size: 48px;">${redemption.rewards?.icon || '🎁'}</div>
+                                <div style="font-size: 48px;">🎁</div>
                                 <div style="flex: 1;">
                                     <div style="display: flex; justify-content: space-between; align-items: start;">
                                         <div>
-                                            <h3 style="margin: 0 0 5px 0;">${redemption.rewards?.name || 'Premio Sconosciuto'}</h3>
+                                            <h3 style="margin: 0 0 5px 0;">${redemption.rewards?.title || 'Premio Sconosciuto'}</h3>
                                             <p style="color: #64748b; margin: 0;">
-                                                <i class="fas fa-user"></i> ${redemption.users?.email || 'Utente Sconosciuto'}
+                                                <i class="fas fa-user"></i> ${userEmailMap[redemption.user_id] || 'Utente Sconosciuto'}
                                             </p>
                                             <p style="color: #64748b; margin: 5px 0 0 0;">
                                                 <i class="fas fa-clock"></i> ${new Date(redemption.redeemed_at).toLocaleDateString('it-IT', { 
@@ -4159,7 +4178,7 @@
                                         </div>
                                         <div style="text-align: right;">
                                             <div style="font-size: 20px; font-weight: 700; color: #3b82f6;">
-                                                ${redemption.rewards?.points_cost || 0} pts
+                                                ${redemption.points_spent || 0} pts
                                             </div>
                                             <span class="status-badge ${redemption.status}">${getStatusLabel(redemption.status)}</span>
                                         </div>
