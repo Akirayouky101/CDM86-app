@@ -391,6 +391,22 @@
             transform: none;
         }
         
+        .confirm-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .confirm-title {
+            margin-bottom: 15px;
+        }
+        
+        .confirm-note {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
         .success-message {
             text-align: center;
             padding: 30px;
@@ -460,12 +476,12 @@
                 
                 <!-- Step 3: Conferma -->
                 <div class="wizard-step-content" id="step3">
-                    <div style="background: #f5f5f5; padding: 20px; border-radius: 10px;">
-                        <p style="margin-bottom: 15px;"><strong>Verifica i tuoi dati:</strong></p>
+                    <div class="confirm-box">
+                        <p class="confirm-title"><strong>Verifica i tuoi dati:</strong></p>
                         <p><strong>Nome:</strong> <span id="confirm-name"></span></p>
                         <p><strong>Email:</strong> <span id="confirm-email"></span></p>
                     </div>
-                    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                    <p class="confirm-note">
                         Riceverai il codice referral all'indirizzo fornito.
                     </p>
                 </div>
