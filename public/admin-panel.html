@@ -1481,11 +1481,11 @@
         </div>
         
         <!-- Content -->
-        <div id="content" style="display: none;">
+        <div id="content" class="hidden">
             <!-- REQUESTS TAB REMOVED - Use Org Requests instead -->
             
             <!-- ANALYTICS TAB -->
-            <div id="analytics-tab" class="tab-content" style="display: none;">
+            <div id="analytics-tab" class="tab-content hidden">
                 <!-- Page Header -->
                 <div class="page-header">
                     <h1><i class="fas fa-chart-line"></i> Analytics Dashboard</h1>
@@ -1504,7 +1504,7 @@
                 <!-- Analytics Stats Grid -->
                 <div class="analytics-stats-grid">
                     <div class="analytics-card">
-                        <div class="analytics-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="analytics-card-icon gradient-purple">
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="analytics-card-content">
@@ -1515,7 +1515,7 @@
                     </div>
                     
                     <div class="analytics-card">
-                        <div class="analytics-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="analytics-card-icon gradient-pink">
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="analytics-card-content">
@@ -1526,7 +1526,7 @@
                     </div>
                     
                     <div class="analytics-card">
-                        <div class="analytics-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="analytics-card-icon gradient-blue">
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div class="analytics-card-content">
@@ -1537,7 +1537,7 @@
                     </div>
                     
                     <div class="analytics-card">
-                        <div class="analytics-card-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="analytics-card-icon gradient-green">
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="analytics-card-content">
@@ -1584,7 +1584,7 @@
             <!-- END ANALYTICS TAB -->
             
             <!-- PROMOTIONS TAB -->
-            <div id="promotions-tab" class="tab-content" style="display: none;">
+            <div id="promotions-tab" class="tab-content hidden">
                 <!-- Page Header -->
                 <div class="page-header">
                     <h1><i class="fas fa-tags"></i> Gestione Promozioni</h1>
@@ -1600,7 +1600,7 @@
                         </button>
                     </div>
                     
-                    <div id="promo-form-container" class="promo-form" style="display: none;">
+                    <div id="promo-form-container" class="promo-form hidden">
                         <form id="new-promo-form">
                             <!-- Informazioni Base -->
                             <div class="form-grid">
@@ -1630,7 +1630,7 @@
                                         <span>Clicca per caricare o trascina l'immagine</span>
                                         <small>JPG, PNG o WebP (max 5MB)</small>
                                     </label>
-                                    <div id="image-preview" class="image-preview" style="display: none;">
+                                    <div id="image-preview" class="image-preview hidden">
                                         <img id="preview-img" src="" alt="Preview">
                                         <button type="button" class="btn-remove-image" onclick="removeImage()">
                                             <i class="fas fa-times"></i>
@@ -1821,8 +1821,8 @@
                 <div class="filters-section">
                     <div class="filters-row">
                         <div class="filter-group">
-                            <label>Stato</label>
-                            <select id="org-filter-status" class="enhanced-select" onchange="applyOrgFilters()">
+                            <label for="org-filter-status">Stato</label>
+                            <select id="org-filter-status" class="enhanced-select" onchange="applyOrgFilters()" title="Filtra per stato organizzazione">
                                 <option value="">📋 Tutti gli stati</option>
                                 <option value="pending">⏳ Da Contattare</option>
                                 <option value="approved">✅ Approvate</option>
@@ -1831,8 +1831,8 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label>Ha Referral</label>
-                            <select id="org-filter-referral" class="enhanced-select" onchange="applyOrgFilters()">
+                            <label for="org-filter-referral">Ha Referral</label>
+                            <select id="org-filter-referral" class="enhanced-select" onchange="applyOrgFilters()" title="Filtra per presenza referral">
                                 <option value="">📊 Tutti</option>
                                 <option value="yes">✅ Con Referral</option>
                                 <option value="no">❌ Senza Referral</option>
@@ -1864,7 +1864,7 @@
             <!-- ========================================
                  POINTS SYSTEM TAB
                  ======================================== -->
-            <div id="points-tab" class="tab-content" style="display: none;">
+            <div id="points-tab" class="tab-content hidden">
                 <!-- Points Stats Overview -->
                 <div class="page-header">
                     <h1>🏆 Sistema Punti</h1>
@@ -1941,14 +1941,14 @@
             <!-- ========================================
                  CONTRACTS TAB
                  ======================================== -->
-            <div id="contracts-tab" class="tab-content" style="display: none;">
+            <div id="contracts-tab" class="tab-content hidden">
                 <div class="page-header">
                     <h1>📄 Gestione Contratti</h1>
                     <p>Monitora contratti e scadenze organizzazioni partner</p>
                 </div>
                 
                 <!-- Alerts for expiring contracts -->
-                <div id="contracts-alerts" class="requests-section" style="margin-bottom: 30px;">
+                <div id="contracts-alerts" class="requests-section margin-bottom-30">
                     <!-- Will be populated by JS -->
                 </div>
                 
@@ -2015,13 +2015,13 @@
     <!-- Confirmation Modal for Organization Approval -->
     <div id="confirm-modal" class="message-modal">
         <div class="message-modal-content">
-            <div class="message-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <div class="message-icon gradient-orange">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
             <h3 class="message-title" id="confirm-title">Conferma Azione</h3>
             <p class="message-text" id="confirm-text">Sei sicuro di voler procedere?</p>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                <button class="btn-message-close" style="background: #64748b;" onclick="closeConfirmModal()">Annulla</button>
+            <div class="flex-gap-10 justify-center margin-top-20">
+                <button class="btn-message-close btn-secondary" onclick="closeConfirmModal()">Annulla</button>
                 <button class="btn-message-close" id="confirm-action-btn" onclick="confirmAction()">Conferma</button>
             </div>
         </div>
@@ -4161,40 +4161,40 @@
                 
                 container.innerHTML = rewards.map(reward => `
                     <div class="list-card">
-                        <div style="display: flex; gap: 20px;">
-                            <div style="font-size: 60px;">${reward.icon || '🎁'}</div>
-                            <div style="flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div class="flex-gap-20">
+                            <div class="font-size-60">${reward.icon || '🎁'}</div>
+                            <div class="flex-1">
+                                <div class="flex-between-start margin-bottom-10">
                                     <div>
-                                        <h3 style="margin: 0 0 5px 0;">${reward.title}</h3>
-                                        <p style="color: #64748b; margin: 0;">${reward.description}</p>
+                                        <h3 class="margin-0 margin-bottom-5">${reward.title}</h3>
+                                        <p class="color-secondary margin-0">${reward.description}</p>
                                     </div>
-                                    <div style="text-align: right;">
-                                        <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${reward.points_required} pts</div>
+                                    <div class="text-right">
+                                        <div class="font-size-24 font-weight-700 color-blue">${reward.points_required} pts</div>
                                         ${getLevelBadge(reward.level_required)}
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
+                                <div class="flex-gap-15 flex-align-center margin-top-15">
                                     <div>
-                                        <span style="color: #64748b;">Stock:</span>
+                                        <span class="color-secondary">Stock:</span>
                                         <strong>${reward.stock === -1 ? 'Illimitato' : reward.stock}</strong>
                                     </div>
                                     <div>
-                                        <span style="color: #64748b;">Stato:</span>
+                                        <span class="color-secondary">Stato:</span>
                                         <span class="status-badge ${reward.active ? 'active' : 'expired'}">
                                             ${reward.active ? 'Attivo' : 'Disattivo'}
                                         </span>
                                     </div>
-                                    <div style="flex: 1;"></div>
-                                    <button class="btn-action-edit" onclick="editReward('${reward.id}')">
+                                    <div class="flex-1"></div>
+                                    <button class="btn-action-edit" onclick="editReward('${reward.id}')" aria-label="Modifica premio ${reward.title}">
                                         <i class="fas fa-edit"></i> Modifica
                                     </button>
-                                    <button class="btn-filter" onclick="toggleRewardStatus('${reward.id}', ${!reward.active})">
+                                    <button class="btn-filter" onclick="toggleRewardStatus('${reward.id}', ${!reward.active})" aria-label="${reward.active ? 'Disattiva' : 'Attiva'} premio">
                                         <i class="fas fa-${reward.active ? 'ban' : 'check'}"></i>
                                         ${reward.active ? 'Disattiva' : 'Attiva'}
                                     </button>
                                     <button class="btn-action-reject" onclick="deleteReward('${reward.id}', '${reward.title.replace(/'/g, "\\'")}')">
-                                        <i class="fas fa-trash"></i> Elimina
+                                        <i class="fas fa-trash" aria-label="Elimina premio ${reward.title}"></i> Elimina
                                     </button>
                                 </div>
                             </div>
@@ -4265,16 +4265,16 @@
                     
                     return `
                         <div class="list-card" style="border-left: 4px solid ${statusColors[redemption.status]};">
-                            <div style="display: flex; gap: 20px;">
+                            <div class="flex-gap-20">
                                 <div style="font-size: 48px;">🎁</div>
-                                <div style="flex: 1;">
-                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div class="flex-1">
+                                    <div class="flex-between-start">
                                         <div>
-                                            <h3 style="margin: 0 0 5px 0;">${redemption.reward_title || 'Premio Sconosciuto'}</h3>
-                                            <p style="color: #64748b; margin: 0;">
+                                            <h3 class="margin-0 margin-bottom-5">${redemption.reward_title || 'Premio Sconosciuto'}</h3>
+                                            <p class="color-secondary margin-0">
                                                 <i class="fas fa-user"></i> ${redemption.user_email || 'Utente Sconosciuto'}
                                             </p>
-                                            <p style="color: #64748b; margin: 5px 0 0 0;">
+                                            <p class="color-secondary margin-top-5 margin-0">
                                                 <i class="fas fa-clock"></i> ${new Date(redemption.redeemed_at).toLocaleDateString('it-IT', { 
                                                     day: '2-digit', 
                                                     month: 'long', 
@@ -4284,25 +4284,25 @@
                                                 })}
                                             </p>
                                         </div>
-                                        <div style="text-align: right;">
-                                            <div style="font-size: 20px; font-weight: 700; color: #3b82f6;">
+                                        <div class="text-right">
+                                            <div class="font-size-20 font-weight-700 color-blue">
                                                 ${redemption.points_spent || 0} pts
                                             </div>
                                             <span class="status-badge ${redemption.status}">${getStatusLabel(redemption.status)}</span>
                                         </div>
                                     </div>
                                     ${redemption.status === 'pending' ? `
-                                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                            <button class="btn-action-approve" onclick="approveRedemption('${redemption.id}')">
+                                        <div class="flex-gap-10 margin-top-15">
+                                            <button class="btn-action-approve" onclick="approveRedemption('${redemption.id}')" aria-label="Approva riscatto">
                                                 <i class="fas fa-check"></i> Approva
                                             </button>
-                                            <button class="btn-action-reject" onclick="rejectRedemption('${redemption.id}')">
+                                            <button class="btn-action-reject" onclick="rejectRedemption('${redemption.id}')" aria-label="Rifiuta riscatto">
                                                 <i class="fas fa-times"></i> Rifiuta
                                             </button>
                                         </div>
                                     ` : redemption.status === 'approved' ? `
-                                        <div style="margin-top: 15px;">
-                                            <button class="btn-action-approve" onclick="markAsDelivered('${redemption.id}')">
+                                        <div class="margin-top-15">
+                                            <button class="btn-action-approve" onclick="markAsDelivered('${redemption.id}')" aria-label="Segna come consegnato">
                                                 <i class="fas fa-truck"></i> Segna come Consegnato
                                             </button>
                                         </div>
@@ -4731,19 +4731,19 @@
             container.style.display = 'block';
             container.innerHTML = `
                 <div class="section-header">
-                    <h2 style="color: #f59e0b;">⚠️ Contratti in Scadenza (${expiringContracts.length})</h2>
+                    <h2 class="color-warning">⚠️ Contratti in Scadenza (${expiringContracts.length})</h2>
                 </div>
                 ${expiringContracts.map(contract => `
-                    <div class="request-card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="request-card contract-expiring">
+                        <div class="flex-between flex-align-center">
                             <div>
                                 <strong>${contract.organization_name}</strong> - ${contract.contract_code}
-                                <div style="color: #92400e; margin-top: 5px;">
+                                <div class="color-warning-dark margin-top-5">
                                     Scadenza: ${new Date(contract.end_date).toLocaleDateString('it-IT')} 
                                     (${contract.days_remaining} giorni rimanenti)
                                 </div>
                             </div>
-                            <button class="btn-filter" onclick="renewContract('${contract.id}')">
+                            <button class="btn-filter" onclick="renewContract('${contract.id}')" aria-label="Rinnova contratto">
                                 <i class="fas fa-redo"></i> Rinnova Ora
                             </button>
                         </div>
@@ -4912,12 +4912,12 @@
             </div>
             
             <div class="crop-controls">
-                <label style="font-weight: 600; color: #374151; display: flex; align-items: center; gap: 8px;">
+                <label class="font-weight-600 color-gray flex-center-gap-8">
                     <i class="fas fa-search"></i> Zoom:
                 </label>
-                <input type="range" id="zoom-slider" min="10" max="300" value="100" style="width: 200px;">
-                <span id="zoom-value" style="font-weight: 600; color: #dc2626;">100%</span>
-                <div style="flex: 1;"></div>
+                <input type="range" id="zoom-slider" min="10" max="300" value="100" class="zoom-slider">
+                <span id="zoom-value" class="font-weight-600 color-red">100%</span>
+                <div class="flex-1"></div>
                 <button class="btn-secondary" onclick="rotateImage()">
                     <i class="fas fa-redo"></i> Ruota 90°
                 </button>
