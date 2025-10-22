@@ -3658,52 +3658,97 @@
                 return;
             }
 
-            container.innerHTML = requests.map(request => {
+            container.innerHTML = requests.map((request, index) => {
                 const hasReferral = request.referred_by_id && request.referred_by_code;
                 const contactName = `${request.contact_first_name || ''} ${request.contact_last_name || ''}`.trim();
+                const detailsId = `org-details-${request.id}`;
                 
                 return `
                 <div class="list-card ${request.status}">
-                    <div class="request-header">
-                        <div>
-                            <h3>🏢 ${request.organization_name}</h3>
-                            <p class="request-info">👤 Referente: <strong>${contactName}</strong></p>
-                            <p class="request-info">📧 ${request.contact_email} • 📞 ${request.contact_phone}</p>
-                            ${hasReferral ?
-                                `<p class="request-info">🎫 Codice Referral: <strong>${request.referred_by_code}</strong></p>` :
-                                '<p class="request-info">⚠️ Nessun codice referral</p>'}
-                            ${request.organization_type ? `<p class="request-info">🏷️ Tipo: ${request.organization_type}</p>` : ''}
+                    <div class="request-header" onclick="toggleOrgDetails('${detailsId}')">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <h3 style="margin: 0;">🏢 ${request.organization_name}</h3>
+                                <span class="status-badge ${request.status}">${getOrgStatusLabel(request.status)}</span>
+                            </div>
+                            <p class="request-info" style="margin-top: 8px;">� ${contactName} • � ${request.contact_email}</p>
                         </div>
-                        <span class="status-badge ${request.status}">${getOrgStatusLabel(request.status)}</span>
+                        <button class="btn-expand" type="button">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
-                    ${request.admin_notes ? `<div class="request-notes">📝 Note Admin: ${request.admin_notes}</div>` : ''}
-                    ${request.contract_code ? `<div class="request-message">📄 Codice Contratto: <strong>${request.contract_code}</strong></div>` : ''}
-                    <div class="request-footer">
-                        <span class="request-date">🕐 Richiesta: ${new Date(request.created_at).toLocaleString('it-IT')}</span>
-                        ${request.approved_at ? `<span class="request-date"> • ✅ Approvata: ${new Date(request.approved_at).toLocaleString('it-IT')}</span>` : ''}
-                        <div class="request-actions">
-                            ${request.status === 'pending' ? `
-                                <button class="btn-action-approve" onclick="approveOrg('${request.id}')">
-                                    <i class="fas fa-check"></i> Approva
-                                </button>
-                                <button class="btn-action-reject" onclick="rejectOrg('${request.id}')">
-                                    <i class="fas fa-times"></i> Rifiuta
-                                </button>
+                    
+                    <div id="${detailsId}" class="request-details-collapse">
+                        <div class="request-details-content">
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">📞 Telefono</span>
+                                    <span class="detail-value">${request.contact_phone}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">📧 Email</span>
+                                    <span class="detail-value">${request.contact_email}</span>
+                                </div>
+                                ${request.organization_type ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">🏷️ Tipo Organizzazione</span>
+                                    <span class="detail-value">${request.organization_type}</span>
+                                </div>
+                                ` : ''}
+                                <div class="detail-item">
+                                    <span class="detail-label">🎫 Referral</span>
+                                    <span class="detail-value">${hasReferral ? `<strong>${request.referred_by_code}</strong>` : '<em style="color: #94a3b8;">Nessun referral</em>'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">🕐 Data Richiesta</span>
+                                    <span class="detail-value">${new Date(request.created_at).toLocaleString('it-IT')}</span>
+                                </div>
+                                ${request.approved_at ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">✅ Data Approvazione</span>
+                                    <span class="detail-value">${new Date(request.approved_at).toLocaleString('it-IT')}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            ${request.admin_notes ? `
+                            <div class="detail-notes">
+                                <div class="detail-label">📝 Note Admin</div>
+                                <div class="note-content">${request.admin_notes}</div>
+                            </div>
                             ` : ''}
-                            ${request.status === 'approved' && !request.contract_code ? `
-                                <button class="btn-action-edit" onclick="assignContractCode('${request.id}')">
-                                    <i class="fas fa-file-contract"></i> Assegna Codice
-                                </button>
+                            
+                            ${request.contract_code ? `
+                            <div class="detail-contract">
+                                <i class="fas fa-file-contract"></i>
+                                <span>Codice Contratto: <strong>${request.contract_code}</strong></span>
+                            </div>
                             ` : ''}
-                            <button class="btn-filter" onclick="addOrgNote('${request.id}')">
-                                <i class="fas fa-sticky-note"></i> Note
-                            </button>
-                            <button class="btn-filter" onclick="emailOrg('${request.contact_email}', '${request.organization_name}')">
-                                <i class="fas fa-envelope"></i> Email
-                            </button>
-                            <button class="btn-action-reject" onclick="deleteOrgRequest('${request.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            
+                            <div class="request-actions">
+                                ${request.status === 'pending' ? `
+                                    <button class="btn-action-approve" onclick="approveOrg('${request.id}')">
+                                        <i class="fas fa-check"></i> Approva
+                                    </button>
+                                    <button class="btn-action-reject" onclick="rejectOrg('${request.id}')">
+                                        <i class="fas fa-times"></i> Rifiuta
+                                    </button>
+                                ` : ''}
+                                ${request.status === 'approved' && !request.contract_code ? `
+                                    <button class="btn-action-edit" onclick="assignContractCode('${request.id}')">
+                                        <i class="fas fa-file-contract"></i> Assegna Codice
+                                    </button>
+                                ` : ''}
+                                <button class="btn-filter" onclick="addOrgNote('${request.id}')">
+                                    <i class="fas fa-sticky-note"></i> Note
+                                </button>
+                                <button class="btn-filter" onclick="emailOrg('${request.contact_email}', '${request.organization_name}')">
+                                    <i class="fas fa-envelope"></i> Email
+                                </button>
+                                <button class="btn-action-reject" onclick="deleteOrgRequest('${request.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3719,6 +3764,35 @@
             };
             return labels[status] || status;
         }
+        
+        // Toggle organization request details
+        window.toggleOrgDetails = function(detailsId) {
+            const details = document.getElementById(detailsId);
+            const card = details.closest('.list-card');
+            const btn = card.querySelector('.btn-expand i');
+            
+            if (details.classList.contains('open')) {
+                details.classList.remove('open');
+                btn.style.transform = 'rotate(0deg)';
+            } else {
+                details.classList.add('open');
+                btn.style.transform = 'rotate(180deg)';
+            }
+        };
+
+        window.toggleContractDetails = function(detailsId) {
+            const details = document.getElementById(detailsId);
+            const card = details.closest('.list-card');
+            const btn = card.querySelector('.btn-expand i');
+            
+            if (details.classList.contains('open')) {
+                details.classList.remove('open');
+                btn.style.transform = 'rotate(0deg)';
+            } else {
+                details.classList.add('open');
+                btn.style.transform = 'rotate(180deg)';
+            }
+        };
 
         window.applyOrgFilters = function() {
             const status = document.getElementById('org-filter-status').value;
@@ -4405,60 +4479,84 @@
                     renewed: '🔄'
                 };
                 
+                const detailsId = `contract-details-${contract.id}`;
+                
                 return `
-                    <div class="request-card" style="border-left: 4px solid ${statusColors[contract.status]};">
-                        <div style="display: flex; justify-content: between; gap: 20px;">
+                    <div class="list-card" style="border-left: 4px solid ${statusColors[contract.status]};">
+                        <div class="request-header" onclick="toggleContractDetails('${detailsId}')">
                             <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                     <h3 style="margin: 0;">${contract.organization_name}</h3>
                                     <span class="status-badge ${contract.status}">
-                                        ${statusIcons[contract.status]} ${contract.status_label}
+                                        ${statusIcons[contract.status]} ${contract.status_label || contract.status}
                                     </span>
                                 </div>
-                                
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                                    <div>
-                                        <div style="color: #64748b; font-size: 12px;">Codice Contratto</div>
-                                        <div style="font-size: 18px; font-weight: 700; color: #3b82f6;">${contract.contract_code}</div>
+                                <p class="request-info" style="margin-top: 8px;">
+                                    📄 ${contract.contract_code} • 
+                                    Scade: ${new Date(contract.end_date).toLocaleDateString('it-IT')}
+                                    ${contract.days_remaining !== undefined ? ` • ${contract.days_remaining > 0 ? contract.days_remaining + ' giorni' : 'Scaduto'}` : ''}
+                                </p>
+                            </div>
+                            <button class="btn-expand" type="button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div id="${detailsId}" class="request-details-collapse">
+                            <div class="request-details-content">
+                                <div class="details-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">📄 Codice Contratto</span>
+                                        <span class="detail-value">${contract.contract_code}</span>
                                     </div>
-                                    <div>
-                                        <div style="color: #64748b; font-size: 12px;">Data Inizio</div>
-                                        <div style="font-weight: 600;">${new Date(contract.start_date).toLocaleDateString('it-IT')}</div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">📅 Data Inizio</span>
+                                        <span class="detail-value">${new Date(contract.start_date).toLocaleDateString('it-IT')}</span>
                                     </div>
-                                    <div>
-                                        <div style="color: #64748b; font-size: 12px;">Data Scadenza</div>
-                                        <div style="font-weight: 600;">${new Date(contract.end_date).toLocaleDateString('it-IT')}</div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">⏰ Data Scadenza</span>
+                                        <span class="detail-value">${new Date(contract.end_date).toLocaleDateString('it-IT')}</span>
                                     </div>
-                                    <div>
-                                        <div style="color: #64748b; font-size: 12px;">Giorni Rimanenti</div>
-                                        <div style="font-weight: 600; color: ${contract.days_remaining < 30 ? '#ef4444' : '#10b981'};">
-                                            ${contract.days_remaining > 0 ? contract.days_remaining : 'Scaduto'}
-                                        </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">⏳ Giorni Rimanenti</span>
+                                        <span class="detail-value" style="color: ${contract.days_remaining < 30 ? '#ef4444' : '#10b981'};">
+                                            ${contract.days_remaining > 0 ? contract.days_remaining + ' giorni' : 'Scaduto'}
+                                        </span>
                                     </div>
+                                    ${contract.referent_name ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">👤 Referente</span>
+                                        <span class="detail-value">${contract.referent_name}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${contract.referent_email ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">📧 Email</span>
+                                        <span class="detail-value">${contract.referent_email}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${contract.referent_phone ? `
+                                    <div class="detail-item">
+                                        <span class="detail-label">📞 Telefono</span>
+                                        <span class="detail-value">${contract.referent_phone}</span>
+                                    </div>
+                                    ` : ''}
                                 </div>
                                 
-                                ${contract.contact_person ? `
-                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                                        <div style="color: #64748b; font-size: 12px;">Referente</div>
-                                        <div>${contract.contact_person}</div>
-                                        <div style="font-size: 14px; color: #64748b;">
-                                            ${contract.contact_email} • ${contract.contact_phone || ''}
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                
-                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <div class="request-actions">
                                     <button class="btn-filter" onclick="viewContractDetails('${contract.id}')">
                                         <i class="fas fa-eye"></i> Dettagli
                                     </button>
                                     ${contract.status === 'active' || contract.status === 'expiring' ? `
-                                        <button class="btn-filter" onclick="renewContract('${contract.id}')">
+                                        <button class="btn-action-edit" onclick="renewContract('${contract.id}')">
                                             <i class="fas fa-redo"></i> Rinnova
                                         </button>
                                     ` : ''}
-                                    <button class="btn-filter" onclick="emailContract('${contract.contact_email}', '${contract.organization_name}')">
-                                        <i class="fas fa-envelope"></i> Email
-                                    </button>
+                                    ${contract.referent_email ? `
+                                        <button class="btn-filter" onclick="emailContract('${contract.referent_email}', '${contract.organization_name}')">
+                                            <i class="fas fa-envelope"></i> Email
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>

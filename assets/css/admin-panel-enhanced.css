@@ -632,3 +632,168 @@
 .empty-state p {
     margin: 10px 0;
 }
+
+/* ================== COLLAPSIBLE DETAILS ================== */
+
+.request-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+    transition: all 0.3s;
+}
+
+.request-header:hover {
+    background: rgba(59, 130, 246, 0.02);
+    margin: -8px;
+    padding: 8px 8px 24px 8px;
+    border-radius: 8px;
+}
+
+.btn-expand {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.btn-expand:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.btn-expand:hover i {
+    color: white;
+}
+
+.btn-expand i {
+    transition: all 0.3s;
+    color: #64748b;
+    font-size: 16px;
+}
+
+.request-details-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.request-details-collapse.open {
+    max-height: 1000px;
+}
+
+.request-details-content {
+    padding-top: 20px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.3s;
+}
+
+.detail-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.detail-notes {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.detail-notes .detail-label {
+    color: #92400e;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.note-content {
+    color: #451a03;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.detail-contract {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-left: 4px solid #3b82f6;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.detail-contract i {
+    font-size: 20px;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 2px solid #f1f5f9;
+}
+
+.request-info {
+    margin: 4px 0;
+    color: #64748b;
+    font-size: 14px;
+}
