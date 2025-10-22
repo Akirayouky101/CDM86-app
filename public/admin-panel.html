@@ -3837,86 +3837,88 @@
             displayOrgRequests(allOrgRequests);
         };
 
+        // Contract modal variables
+        let currentApprovingRequestId = null;
+
         window.approveOrg = async function(requestId) {
-            // Get request details
             const request = allOrgRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            currentApprovingRequestId = requestId;
+            
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            const endDate = new Date();
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            
+            document.getElementById('contract-code-input').value = '';
+            document.getElementById('contract-start-date').value = today;
+            document.getElementById('contract-end-date').value = endDate.toISOString().split('T')[0];
+            document.getElementById('contract-code-modal').style.display = 'flex';
+        };
+
+        window.closeContractModal = function() {
+            document.getElementById('contract-code-modal').style.display = 'none';
+            currentApprovingRequestId = null;
+        };
+
+        document.getElementById('contract-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentApprovingRequestId) return;
+            
+            const request = allOrgRequests.find(r => r.id === currentApprovingRequestId);
             const orgName = request?.organization_name || 'questa azienda';
             
-            // Step 1: Ask for contract code
-            showConfirmModal(
-                '📝 Inserisci Codice Contratto',
-                `Per approvare "${orgName}" devi inserire il codice contratto.`,
-                async () => {
-                    // Prompt for contract code
-                    const contractCode = prompt('Inserisci il codice contratto (es: CTR-2025-0001):');
-                    
-                    if (!contractCode || contractCode.trim() === '') {
-                        showMessage('error', 'Errore', 'Codice contratto obbligatorio per approvare');
-                        return;
+            const contractCode = document.getElementById('contract-code-input').value.toUpperCase().trim();
+            const startDate = document.getElementById('contract-start-date').value;
+            const endDate = document.getElementById('contract-end-date').value;
+            
+            try {
+                // Create contract
+                const { data: contractData, error: contractError } = await supabase
+                    .from('contracts')
+                    .insert({
+                        contract_code: contractCode,
+                        organization_request_id: currentApprovingRequestId,
+                        organization_name: orgName,
+                        start_date: startDate,
+                        end_date: endDate,
+                        contact_person: `${request.contact_first_name} ${request.contact_last_name}`,
+                        contact_email: request.contact_email,
+                        contact_phone: request.contact_phone,
+                        created_by: (await supabase.auth.getUser()).data.user.id
+                    })
+                    .select()
+                    .single();
+                
+                if (contractError) {
+                    if (contractError.code === '23505') {
+                        throw new Error('Codice contratto già esistente. Scegline uno diverso.');
                     }
-                    
-                    // Step 2: Ask for contract dates
-                    const startDate = prompt('Data inizio contratto (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-                    if (!startDate) {
-                        showMessage('error', 'Annullato', 'Data inizio richiesta');
-                        return;
-                    }
-                    
-                    // Calculate end date (1 year from start)
-                    const endDateDefault = new Date(startDate);
-                    endDateDefault.setFullYear(endDateDefault.getFullYear() + 1);
-                    const endDate = prompt('Data fine contratto (YYYY-MM-DD):', endDateDefault.toISOString().split('T')[0]);
-                    if (!endDate) {
-                        showMessage('error', 'Annullato', 'Data fine richiesta');
-                        return;
-                    }
-                    
-                    try {
-                        // Step 3: Create contract
-                        const { data: contractData, error: contractError } = await supabase
-                            .from('contracts')
-                            .insert({
-                                contract_code: contractCode.toUpperCase().trim(),
-                                organization_request_id: requestId,
-                                organization_name: orgName,
-                                start_date: startDate,
-                                end_date: endDate,
-                                contact_person: `${request.contact_first_name} ${request.contact_last_name}`,
-                                contact_email: request.contact_email,
-                                contact_phone: request.contact_phone,
-                                created_by: (await supabase.auth.getUser()).data.user.id
-                            })
-                            .select()
-                            .single();
-                        
-                        if (contractError) {
-                            if (contractError.code === '23505') {
-                                throw new Error('Codice contratto già esistente. Scegline uno diverso.');
-                            }
-                            throw contractError;
-                        }
-                        
-                        // Step 4: Update organization request status + assign contract code
-                        const { error: updateError } = await supabase
-                            .from('organization_requests')
-                            .update({ 
-                                status: 'approved',
-                                approved_at: new Date().toISOString(),
-                                contract_code: contractCode.toUpperCase().trim()
-                            })
-                            .eq('id', requestId);
-
-                        if (updateError) throw updateError;
-
-                        showMessage('success', '✅ Approvata', `Azienda "${orgName}" approvata!\n\nContratto ${contractCode} creato.\nL'utente referrer ha ricevuto 100 punti!`);
-                        loadOrgRequests();
-                    } catch (error) {
-                        console.error('Error approving organization:', error);
-                        showMessage('error', 'Errore', error.message);
-                    }
+                    throw contractError;
                 }
-            );
-        };
+                
+                // Update organization request status
+                const { error: updateError } = await supabase
+                    .from('organization_requests')
+                    .update({ 
+                        status: 'approved',
+                        approved_at: new Date().toISOString(),
+                        contract_code: contractCode
+                    })
+                    .eq('id', currentApprovingRequestId);
+
+                if (updateError) throw updateError;
+
+                showMessage('success', '✅ Approvata', `Azienda "${orgName}" approvata!\n\nContratto ${contractCode} creato.\nL'utente referrer ha ricevuto 100 punti!`);
+                closeContractModal();
+                loadOrgRequests();
+            } catch (error) {
+                console.error('Error approving organization:', error);
+                showMessage('error', 'Errore', error.message);
+            }
+        });
 
         window.assignContractCode = async function(requestId) {
             const contractCode = prompt('Inserisci il codice contratto da assegnare:');
@@ -3948,8 +3950,30 @@
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
+        // Reject modal variables
+        let currentRejectingRequestId = null;
+
         window.rejectOrg = async function(requestId) {
-            const reason = prompt('Motivo del rifiuto (opzionale):');
+            const request = allOrgRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            currentRejectingRequestId = requestId;
+            document.getElementById('reject-message').textContent = `Sei sicuro di voler rifiutare la richiesta di "${request.organization_name}"?`;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('confirm-reject-modal').style.display = 'flex';
+        };
+
+        window.closeRejectModal = function() {
+            document.getElementById('confirm-reject-modal').style.display = 'none';
+            currentRejectingRequestId = null;
+        };
+
+        document.getElementById('reject-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentRejectingRequestId) return;
+            
+            const reason = document.getElementById('reject-reason').value.trim();
 
             try {
                 const updates = { status: 'rejected' };
@@ -3957,7 +3981,7 @@
                     const { data } = await supabase
                         .from('organization_requests')
                         .select('admin_notes')
-                        .eq('id', requestId)
+                        .eq('id', currentRejectingRequestId)
                         .single();
 
                     updates.admin_notes = (data?.admin_notes || '') + '\nRifiutata: ' + reason;
@@ -3966,17 +3990,18 @@
                 const { error } = await supabase
                     .from('organization_requests')
                     .update(updates)
-                    .eq('id', requestId);
+                    .eq('id', currentRejectingRequestId);
 
                 if (error) throw error;
 
                 showMessage('success', 'Rifiutata', 'Richiesta rifiutata');
+                closeRejectModal();
                 loadOrgRequests();
             } catch (error) {
                 console.error('Error rejecting organization:', error);
                 showMessage('error', 'Errore', error.message);
             }
-        };
+        });
 
         window.addOrgNote = async function(requestId) {
             const request = allOrgRequests.find(r => r.id === requestId);
@@ -4511,24 +4536,42 @@
         };
         
         // Delete Reward
-        window.deleteReward = async function(rewardId, rewardTitle) {
-            if (!confirm(`Sei sicuro di voler eliminare il premio "${rewardTitle}"?\n\nQuesta azione non può essere annullata.`)) {
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('rewards')
-                    .delete()
-                    .eq('id', rewardId);
-                
-                if (error) throw error;
-                
-                showMessage('success', 'Eliminato', 'Premio eliminato con successo');
-                loadRewardsManagement();
-            } catch (error) {
-                console.error('Error deleting reward:', error);
-                showMessage('error', 'Errore', error.message);
+        // Delete modal variables
+        let currentDeletingItem = null;
+        let currentDeleteCallback = null;
+
+        window.deleteReward = function(rewardId, rewardTitle) {
+            document.getElementById('delete-message').textContent = `Sei sicuro di voler eliminare il premio "${rewardTitle}"? Questa azione non può essere annullata.`;
+            currentDeletingItem = { id: rewardId, title: rewardTitle };
+            currentDeleteCallback = async () => {
+                try {
+                    const { error } = await supabase
+                        .from('rewards')
+                        .delete()
+                        .eq('id', rewardId);
+                    
+                    if (error) throw error;
+                    
+                    showMessage('success', 'Eliminato', 'Premio eliminato con successo');
+                    loadRewardsManagement();
+                } catch (error) {
+                    console.error('Error deleting reward:', error);
+                    showMessage('error', 'Errore', error.message);
+                }
+            };
+            document.getElementById('confirm-delete-modal').style.display = 'flex';
+        };
+
+        window.closeDeleteModal = function() {
+            document.getElementById('confirm-delete-modal').style.display = 'none';
+            currentDeletingItem = null;
+            currentDeleteCallback = null;
+        };
+
+        window.confirmDelete = async function() {
+            if (currentDeleteCallback) {
+                await currentDeleteCallback();
+                closeDeleteModal();
             }
         };
 
@@ -4977,6 +5020,93 @@
                     </button>
                     <button type="submit" class="btn-action-edit">
                         <i class="fas fa-save"></i> Salva Premio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contract Code Modal -->
+    <div id="contract-code-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Inserisci Codice Contratto</h2>
+                <button type="button" onclick="closeContractModal()" class="modal-close-btn" aria-label="Chiudi modal">×</button>
+            </div>
+            <form id="contract-form" class="form-container">
+                <p class="color-secondary">Per approvare l'azienda devi inserire i dati del contratto.</p>
+                
+                <div class="form-group">
+                    <label for="contract-code-input" class="form-label">📄 Codice Contratto *</label>
+                    <input type="text" id="contract-code-input" class="form-input" required 
+                           placeholder="es. CTR-2025-0001" pattern="[A-Z0-9-]+" 
+                           title="Solo lettere maiuscole, numeri e trattini">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contract-start-date" class="form-label">📅 Data Inizio *</label>
+                        <input type="date" id="contract-start-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contract-end-date" class="form-label">📅 Data Fine *</label>
+                        <input type="date" id="contract-end-date" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeContractModal()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="submit" class="btn-action-approve">
+                        <i class="fas fa-check"></i> Approva e Crea Contratto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirm-delete-modal" class="modal-overlay">
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h2 class="modal-title">⚠️ Conferma Eliminazione</h2>
+                <button type="button" onclick="closeDeleteModal()" class="modal-close-btn" aria-label="Chiudi modal">×</button>
+            </div>
+            <div class="form-container">
+                <p id="delete-message" class="color-secondary"></p>
+                <div class="form-actions">
+                    <button type="button" onclick="closeDeleteModal()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="button" onclick="confirmDelete()" class="btn-action-reject">
+                        <i class="fas fa-trash"></i> Elimina
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Reject Modal -->
+    <div id="confirm-reject-modal" class="modal-overlay">
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h2 class="modal-title">❌ Conferma Rifiuto</h2>
+                <button type="button" onclick="closeRejectModal()" class="modal-close-btn" aria-label="Chiudi modal">×</button>
+            </div>
+            <form id="reject-form" class="form-container">
+                <p id="reject-message" class="color-secondary"></p>
+                <div class="form-group">
+                    <label for="reject-reason" class="form-label">📝 Motivo Rifiuto (opzionale)</label>
+                    <textarea id="reject-reason" class="form-textarea" rows="3" 
+                              placeholder="Spiega perché l'azienda viene rifiutata..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeRejectModal()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="submit" class="btn-action-reject">
+                        <i class="fas fa-ban"></i> Conferma Rifiuto
                     </button>
                 </div>
             </form>
