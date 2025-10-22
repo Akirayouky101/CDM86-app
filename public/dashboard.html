@@ -8,6 +8,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Points System CSS -->
+    <link rel="stylesheet" href="/assets/css/points-system.css">
+    
     <style>
         * {
             margin: 0;
@@ -604,6 +607,99 @@
                     <div class="icon">🎫</div>
                     <div class="value" id="stat-code">---</div>
                     <div class="label">Tuo Codice</div>
+                </div>
+            </div>
+            
+            <!-- ========================================
+                 POINTS SYSTEM SECTION - Animated
+                 ======================================== -->
+            <div class="points-section">
+                <div class="points-header">
+                    <div class="points-title">
+                        <i class="fas fa-trophy"></i>
+                        Sistema Punti
+                    </div>
+                    <div class="points-balance">
+                        <div class="points-available" id="points-available">0</div>
+                        <div class="points-label">Punti Disponibili</div>
+                    </div>
+                </div>
+                
+                <!-- Level Progress Bar -->
+                <div class="level-progress-container">
+                    <div class="level-info">
+                        <div class="current-level">
+                            <div class="level-badge bronze" id="level-badge">
+                                🥉
+                            </div>
+                            <div>
+                                <div id="level-name" style="font-size: 20px; font-weight: 700;">Bronzo</div>
+                                <div id="level-description" style="font-size: 13px; opacity: 0.9;">Livello iniziale</div>
+                            </div>
+                        </div>
+                        <div class="next-level" id="next-level-info">
+                            Prossimo: Argento (100 punti)
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="level-progress" style="width: 0%"></div>
+                        <div class="progress-text" id="progress-text">0 / 100</div>
+                    </div>
+                </div>
+                
+                <!-- Points Stats -->
+                <div class="points-stats-grid">
+                    <div class="points-stat-item">
+                        <span class="stat-value" id="points-total">0</span>
+                        <span class="stat-label">Totali</span>
+                    </div>
+                    <div class="points-stat-item">
+                        <span class="stat-value" id="points-used">0</span>
+                        <span class="stat-label">Utilizzati</span>
+                    </div>
+                    <div class="points-stat-item">
+                        <span class="stat-value" id="points-referrals">0</span>
+                        <span class="stat-label">Referral</span>
+                    </div>
+                    <div class="points-stat-item">
+                        <span class="stat-value" id="points-reports">0</span>
+                        <span class="stat-label">Segnalazioni</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========================================
+                 REWARDS CATALOG
+                 ======================================== -->
+            <div class="rewards-section">
+                <h3>
+                    <i class="fas fa-gift"></i>
+                    Premi Disponibili
+                </h3>
+                <div class="rewards-grid" id="rewards-grid">
+                    <!-- Rewards will be loaded here dynamically -->
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <p>Caricamento premi...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========================================
+                 POINTS TRANSACTIONS HISTORY
+                 ======================================== -->
+            <div class="transactions-section">
+                <h3>
+                    <i class="fas fa-history"></i>
+                    Storico Transazioni
+                </h3>
+                <div id="transactions-list">
+                    <!-- Transactions will be loaded here -->
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <p>Caricamento transazioni...</p>
+                    </div>
                 </div>
             </div>
             
@@ -1435,6 +1531,393 @@
                 alert('❌ Errore nell\'invio della segnalazione: ' + error.message);
             }
         };
+    </script>
+    
+    <!-- ========================================
+         REWARD REDEMPTION MODAL
+         ======================================== -->
+    <div id="redeemModal" class="redeem-modal">
+        <div class="redeem-modal-content">
+            <div class="redeem-modal-icon" id="redeem-modal-icon">🎁</div>
+            <h2 class="redeem-modal-title" id="redeem-modal-title">Riscatta Premio</h2>
+            <p class="redeem-modal-description" id="redeem-modal-description">
+                Sei sicuro di voler riscattare questo premio?
+            </p>
+            <div class="redeem-modal-points">
+                <i class="fas fa-coins"></i>
+                <span id="redeem-modal-points">0</span>
+            </div>
+            <div class="redeem-modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeRedeemModal()">
+                    Annulla
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmRedeem()">
+                    Conferma Riscatto
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ========================================
+        // POINTS SYSTEM JAVASCRIPT
+        // ========================================
+        
+        let currentReward = null;
+        let userPointsData = null;
+        
+        // Load Points System Data
+        async function loadPointsSystem() {
+            try {
+                const userId = currentUser.id;
+                
+                // Get user points
+                const { data: pointsData, error: pointsError } = await window.supabaseClient
+                    .from('user_points')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+                
+                if (pointsError && pointsError.code !== 'PGRST116') {
+                    throw pointsError;
+                }
+                
+                // If no points record exists, create one
+                if (!pointsData) {
+                    const { data: newPoints } = await window.supabaseClient
+                        .from('user_points')
+                        .insert({ user_id: userId })
+                        .select()
+                        .single();
+                    userPointsData = newPoints || { 
+                        points_total: 0, 
+                        points_used: 0, 
+                        points_available: 0,
+                        referrals_count: 0,
+                        approved_reports_count: 0,
+                        level: 'bronze'
+                    };
+                } else {
+                    userPointsData = pointsData;
+                }
+                
+                // Update UI
+                updatePointsUI(userPointsData);
+                
+                // Load rewards
+                await loadRewards();
+                
+                // Load transactions
+                await loadTransactions();
+                
+            } catch (error) {
+                console.error('Error loading points system:', error);
+            }
+        }
+        
+        // Update Points UI
+        function updatePointsUI(data) {
+            // Update points display
+            document.getElementById('points-available').textContent = data.points_available || 0;
+            document.getElementById('points-total').textContent = data.points_total || 0;
+            document.getElementById('points-used').textContent = data.points_used || 0;
+            document.getElementById('points-referrals').textContent = data.referrals_count || 0;
+            document.getElementById('points-reports').textContent = data.approved_reports_count || 0;
+            
+            // Update level
+            const level = data.level || 'bronze';
+            const levelBadge = document.getElementById('level-badge');
+            const levelName = document.getElementById('level-name');
+            const levelDescription = document.getElementById('level-description');
+            
+            // Level data
+            const levelData = {
+                bronze: { icon: '🥉', name: 'Bronzo', desc: 'Livello iniziale', next: 100, color: 'bronze' },
+                silver: { icon: '🥈', name: 'Argento', desc: 'Livello intermedio', next: 500, color: 'silver' },
+                gold: { icon: '🥇', name: 'Oro', desc: 'Livello avanzato', next: 1000, color: 'gold' },
+                platinum: { icon: '💎', name: 'Platino', desc: 'Livello massimo', next: 9999, color: 'platinum' }
+            };
+            
+            const currentLevel = levelData[level];
+            levelBadge.innerHTML = currentLevel.icon;
+            levelBadge.className = 'level-badge ' + currentLevel.color;
+            levelName.textContent = currentLevel.name;
+            levelDescription.textContent = currentLevel.desc;
+            
+            // Update progress bar
+            const total = data.points_total || 0;
+            const nextLevelPoints = currentLevel.next;
+            const previousLevelPoints = level === 'bronze' ? 0 : level === 'silver' ? 100 : level === 'gold' ? 500 : 1000;
+            
+            const progress = level === 'platinum' ? 100 : 
+                ((total - previousLevelPoints) / (nextLevelPoints - previousLevelPoints)) * 100;
+            
+            const progressBar = document.getElementById('level-progress');
+            progressBar.style.width = Math.min(progress, 100) + '%';
+            
+            // Update progress text
+            const progressText = document.getElementById('progress-text');
+            if (level === 'platinum') {
+                progressText.textContent = 'Livello Massimo!';
+                document.getElementById('next-level-info').textContent = 'Hai raggiunto il livello massimo!';
+            } else {
+                progressText.textContent = `${total} / ${nextLevelPoints}`;
+                const nextLevelName = level === 'bronze' ? 'Argento' : level === 'silver' ? 'Oro' : 'Platino';
+                document.getElementById('next-level-info').textContent = `Prossimo: ${nextLevelName} (${nextLevelPoints} punti)`;
+            }
+        }
+        
+        // Load Rewards
+        async function loadRewards() {
+            try {
+                const { data: rewards, error } = await window.supabaseClient
+                    .from('rewards')
+                    .select('*')
+                    .eq('active', true)
+                    .order('sort_order', { ascending: true });
+                
+                if (error) throw error;
+                
+                const rewardsGrid = document.getElementById('rewards-grid');
+                
+                if (!rewards || rewards.length === 0) {
+                    rewardsGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-gift" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Nessun premio disponibile al momento</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                rewardsGrid.innerHTML = rewards.map(reward => {
+                    const canRedeem = userPointsData.points_available >= reward.points_required;
+                    const levelIcons = {
+                        bronze: '🥉',
+                        silver: '🥈',
+                        gold: '🥇',
+                        platinum: '💎'
+                    };
+                    const rewardIcon = reward.category === 'discount' ? '💰' : 
+                                      reward.category === 'badge' ? '🏆' : 
+                                      reward.category === 'premium' ? '⭐' : 
+                                      reward.category === 'service' ? '🎯' : '🎁';
+                    
+                    const stockText = reward.stock === -1 ? '' : 
+                                     reward.stock === 0 ? '<span class="reward-stock">Esaurito</span>' :
+                                     reward.stock < 10 ? `<span class="reward-stock low-stock">Solo ${reward.stock} disponibili!</span>` :
+                                     `<span class="reward-stock">${reward.stock} disponibili</span>`;
+                    
+                    return `
+                        <div class="reward-card ${!canRedeem || reward.stock === 0 ? 'locked' : ''}" 
+                             onclick="${canRedeem && reward.stock !== 0 ? `openRedeemModal(${JSON.stringify(reward).replace(/"/g, '&quot;')})` : ''}">
+                            <div class="reward-content">
+                                <div class="reward-header">
+                                    <div class="reward-icon">${rewardIcon}</div>
+                                    <div class="reward-points-badge">
+                                        <i class="fas fa-coins"></i> ${reward.points_required}
+                                    </div>
+                                </div>
+                                <div class="reward-level-badge ${reward.level_required}">
+                                    ${levelIcons[reward.level_required]} ${reward.level_required}
+                                </div>
+                                <h4 class="reward-title">${reward.title}</h4>
+                                <p class="reward-description">${reward.description || ''}</p>
+                                ${stockText}
+                                <button class="reward-redeem-btn" ${!canRedeem || reward.stock === 0 ? 'disabled' : ''}>
+                                    ${!canRedeem ? '<i class="fas fa-lock"></i> Punti insufficienti' : 
+                                      reward.stock === 0 ? '<i class="fas fa-times"></i> Esaurito' :
+                                      '<i class="fas fa-gift"></i> Riscatta'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading rewards:', error);
+                document.getElementById('rewards-grid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <p>Errore nel caricamento dei premi</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load Transactions
+        async function loadTransactions() {
+            try {
+                const { data: transactions, error } = await window.supabaseClient
+                    .from('points_transactions')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                const transactionsList = document.getElementById('transactions-list');
+                
+                if (!transactions || transactions.length === 0) {
+                    transactionsList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Nessuna transazione trovata</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const typeLabels = {
+                    referral_completed: 'Referral Completato',
+                    report_approved: 'Segnalazione Approvata',
+                    report_rejected: 'Segnalazione Rifiutata',
+                    reward_redeemed: 'Premio Riscattato',
+                    admin_adjustment: 'Aggiustamento Admin',
+                    bonus: 'Bonus'
+                };
+                
+                const typeIcons = {
+                    referral_completed: '👥',
+                    report_approved: '✅',
+                    report_rejected: '❌',
+                    reward_redeemed: '🎁',
+                    admin_adjustment: '⚙️',
+                    bonus: '🎉'
+                };
+                
+                transactionsList.innerHTML = transactions.map(tx => {
+                    const isPositive = tx.points > 0;
+                    const date = new Date(tx.created_at).toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    return `
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon ${isPositive ? 'positive' : 'negative'}">
+                                    ${typeIcons[tx.transaction_type] || '📝'}
+                                </div>
+                                <div class="transaction-details">
+                                    <h4>${typeLabels[tx.transaction_type] || tx.transaction_type}</h4>
+                                    <p>${tx.description || date}</p>
+                                </div>
+                            </div>
+                            <div class="transaction-points ${isPositive ? 'positive' : 'negative'}">
+                                ${isPositive ? '+' : ''}${tx.points}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                document.getElementById('transactions-list').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <p>Errore nel caricamento delle transazioni</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Open Redeem Modal
+        window.openRedeemModal = function(reward) {
+            currentReward = reward;
+            document.getElementById('redeem-modal-icon').textContent = '🎁';
+            document.getElementById('redeem-modal-title').textContent = reward.title;
+            document.getElementById('redeem-modal-description').textContent = reward.description;
+            document.getElementById('redeem-modal-points').textContent = reward.points_required;
+            document.getElementById('redeemModal').classList.add('active');
+        };
+        
+        // Close Redeem Modal
+        window.closeRedeemModal = function() {
+            document.getElementById('redeemModal').classList.remove('active');
+            currentReward = null;
+        };
+        
+        // Confirm Redeem
+        window.confirmRedeem = async function() {
+            if (!currentReward) return;
+            
+            try {
+                // Call the deduct_points_from_user function
+                const { data, error } = await window.supabaseClient
+                    .rpc('deduct_points_from_user', {
+                        p_user_id: currentUser.id,
+                        p_points: currentReward.points_required,
+                        p_transaction_type: 'reward_redeemed',
+                        p_reference_id: currentReward.id,
+                        p_description: `Riscattato: ${currentReward.title}`
+                    });
+                
+                if (error) throw error;
+                
+                if (data === false) {
+                    alert('❌ Punti insufficienti per riscattare questo premio');
+                    return;
+                }
+                
+                // Create redemption record
+                await window.supabaseClient
+                    .from('reward_redemptions')
+                    .insert({
+                        user_id: currentUser.id,
+                        reward_id: currentReward.id,
+                        points_spent: currentReward.points_required,
+                        status: 'pending'
+                    });
+                
+                // Show confetti animation
+                createConfetti();
+                
+                // Close modal
+                closeRedeemModal();
+                
+                // Show success message
+                setTimeout(() => {
+                    alert('🎉 Premio riscattato con successo! Verrai contattato a breve.');
+                }, 300);
+                
+                // Reload points system
+                setTimeout(() => {
+                    loadPointsSystem();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error redeeming reward:', error);
+                alert('❌ Errore nel riscatto del premio: ' + error.message);
+            }
+        };
+        
+        // Create Confetti Animation
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+        
+        // Initialize points system when dashboard loads
+        if (currentUser) {
+            loadPointsSystem();
+        }
     </script>
 </body>
 ```
