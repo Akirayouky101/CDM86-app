@@ -240,9 +240,13 @@ body {
     gap: var(--space-3);
     overflow-x: auto;
     padding-bottom: var(--space-2);
+    /* Hide scrollbar for Firefox */
     scrollbar-width: none;
+    /* Hide scrollbar for IE/Edge legacy */
+    -ms-overflow-style: none;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
 .categories-scroll::-webkit-scrollbar {
     display: none;
 }
