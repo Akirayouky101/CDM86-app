@@ -769,6 +769,15 @@ body {
     background: #f8fafc;
 }
 
+.chevron-icon {
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.hidden {
+    display: none !important;
+}
+
 .dropdown-menu-item.logout-item {
     color: #e74c3c;
     border-bottom: none;
