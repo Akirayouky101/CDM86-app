@@ -229,12 +229,11 @@ RETURNS TRIGGER AS $$
 DECLARE
     v_referrer_id UUID;
 BEGIN
-    -- Get referrer user_id from referral_code
-    SELECT id INTO v_referrer_id
-    FROM users
-    WHERE referral_code = NEW.referred_by;
-    
-    IF v_referrer_id IS NOT NULL THEN
+    -- Get referrer user_id from referral_code (if referred_by_id is provided)
+    -- The referred_by_id is already the UUID of the referrer
+    IF NEW.referred_by_id IS NOT NULL THEN
+        v_referrer_id := NEW.referred_by_id;
+        
         -- Award 50 points to referrer
         PERFORM add_points_to_user(
             v_referrer_id,
@@ -258,7 +257,7 @@ DROP TRIGGER IF EXISTS trigger_award_referral_points ON users;
 CREATE TRIGGER trigger_award_referral_points
     AFTER INSERT ON users
     FOR EACH ROW
-    WHEN (NEW.referred_by IS NOT NULL)
+    WHEN (NEW.referred_by_id IS NOT NULL)
     EXECUTE FUNCTION award_referral_points();
 
 -- Trigger: Award/Remove points when organization request is approved/rejected
