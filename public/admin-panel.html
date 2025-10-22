@@ -3854,12 +3854,18 @@
             document.getElementById('contract-code-input').value = '';
             document.getElementById('contract-start-date').value = today;
             document.getElementById('contract-end-date').value = endDate.toISOString().split('T')[0];
-            document.getElementById('contract-code-modal').style.display = 'flex';
+            const modal = document.getElementById('contract-code-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
         };
 
         window.closeContractModal = function() {
-            document.getElementById('contract-code-modal').style.display = 'none';
-            currentApprovingRequestId = null;
+            const modal = document.getElementById('contract-code-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                currentApprovingRequestId = null;
+            }, 300);
         };
 
         document.getElementById('contract-form').addEventListener('submit', async function(e) {
@@ -3960,12 +3966,18 @@
             currentRejectingRequestId = requestId;
             document.getElementById('reject-message').textContent = `Sei sicuro di voler rifiutare la richiesta di "${request.organization_name}"?`;
             document.getElementById('reject-reason').value = '';
-            document.getElementById('confirm-reject-modal').style.display = 'flex';
+            const modal = document.getElementById('confirm-reject-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
         };
 
         window.closeRejectModal = function() {
-            document.getElementById('confirm-reject-modal').style.display = 'none';
-            currentRejectingRequestId = null;
+            const modal = document.getElementById('confirm-reject-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                currentRejectingRequestId = null;
+            }, 300);
         };
 
         document.getElementById('reject-form').addEventListener('submit', async function(e) {
@@ -4456,7 +4468,9 @@
             document.getElementById('reward-form').reset();
             document.getElementById('reward-id').value = '';
             document.getElementById('reward-active').checked = true;
-            document.getElementById('reward-form-modal').style.display = 'flex';
+            const modal = document.getElementById('reward-form-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
         };
         
         // Edit Reward
@@ -4480,7 +4494,9 @@
                 document.getElementById('reward-icon').value = reward.icon || '';
                 document.getElementById('reward-active').checked = reward.active;
                 
-                document.getElementById('reward-form-modal').style.display = 'flex';
+                const modal = document.getElementById('reward-form-modal');
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
             } catch (error) {
                 console.error('Error loading reward:', error);
                 showMessage('error', 'Errore', 'Impossibile caricare il premio');
@@ -4489,8 +4505,12 @@
         
         // Close Reward Form
         window.closeRewardForm = function() {
-            document.getElementById('reward-form-modal').style.display = 'none';
-            document.getElementById('reward-form').reset();
+            const modal = document.getElementById('reward-form-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('reward-form').reset();
+            }, 300);
         };
         
         // Save Reward
@@ -4559,13 +4579,19 @@
                     showMessage('error', 'Errore', error.message);
                 }
             };
-            document.getElementById('confirm-delete-modal').style.display = 'flex';
+            const modal = document.getElementById('confirm-delete-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
         };
 
         window.closeDeleteModal = function() {
-            document.getElementById('confirm-delete-modal').style.display = 'none';
-            currentDeletingItem = null;
-            currentDeleteCallback = null;
+            const modal = document.getElementById('confirm-delete-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                currentDeletingItem = null;
+                currentDeleteCallback = null;
+            }, 300);
         };
 
         window.confirmDelete = async function() {
