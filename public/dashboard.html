@@ -633,8 +633,8 @@
                                 🥉
                             </div>
                             <div>
-                                <div id="level-name" style="font-size: 20px; font-weight: 700;">Bronzo</div>
-                                <div id="level-description" style="font-size: 13px; opacity: 0.9;">Livello iniziale</div>
+                                <div id="level-name" class="level-name">Bronzo</div>
+                                <div id="level-description" class="level-description">Livello iniziale</div>
                             </div>
                         </div>
                         <div class="next-level" id="next-level-info">
@@ -643,7 +643,7 @@
                     </div>
                     
                     <div class="progress-bar-wrapper">
-                        <div class="progress-bar-fill" id="level-progress" style="width: 0%"></div>
+                        <div class="progress-bar-fill" id="level-progress"></div>
                         <div class="progress-text" id="progress-text">0 / 100</div>
                     </div>
                 </div>
@@ -679,8 +679,8 @@
                 </h3>
                 <div class="rewards-grid" id="rewards-grid">
                     <!-- Rewards will be loaded here dynamically -->
-                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin loading-spinner"></i>
                         <p>Caricamento premi...</p>
                     </div>
                 </div>
@@ -696,38 +696,38 @@
                 </h3>
                 <div id="transactions-list">
                     <!-- Transactions will be loaded here -->
-                    <div style="text-align: center; padding: 40px; color: #999;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin loading-spinner"></i>
                         <p>Caricamento transazioni...</p>
                     </div>
                 </div>
             </div>
             
             <!-- Organizzazione di appartenenza -->
-            <div class="section" id="organization-section" style="display: none;">
+            <div class="section hidden" id="organization-section">
                 <h3>🏢 Organizzazione</h3>
                 <div id="organization-content"></div>
             </div>
 
             <!-- Segnalazioni Aziende -->
             <div class="section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="section-header">
                     <h3>🏢 Segnalazioni Aziende/Associazioni</h3>
-                    <button class="btn-primary" onclick="openReportCompanyModal()" style="padding: 12px 24px; border-radius: 8px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <button class="btn-report-company" onclick="openReportCompanyModal()">
                         <i class="fas fa-plus-circle"></i>
                         Segnala Azienda
                     </button>
                 </div>
                 
-                <div class="info-box" style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 20px; border-radius: 8px;">
-                    <p style="color: #1e40af; margin: 0;">
-                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                <div class="info-box info-box-blue">
+                    <p class="info-text">
+                        <i class="fas fa-info-circle icon-margin"></i>
                         <strong>Conosci un'azienda che potrebbe essere interessata?</strong><br>
                         Segnalacela e guadagna punti quando si iscrive! Riceverai una ricompensa per ogni azienda che si unisce tramite la tua segnalazione.
                     </p>
                 </div>
                 
-                <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stats-grid margin-bottom-20">
                     <div class="stat-card">
                         <div class="value" id="total-org-requests">0</div>
                         <div class="label">Totale Richieste</div>
@@ -746,7 +746,7 @@
                     </div>
                 </div>
                 
-                <div class="filter-buttons" style="margin-bottom: 15px;">
+                <div class="filter-buttons margin-bottom-15">
                     <button class="btn-filter active" onclick="filterOrgRequests('all')">Tutte</button>
                     <button class="btn-filter" onclick="filterOrgRequests('pending')">In Attesa</button>
                     <button class="btn-filter" onclick="filterOrgRequests('approved')">Approvate</button>
@@ -1312,69 +1312,69 @@
     </script>
     
     <!-- Report Company Modal -->
-    <div id="reportCompanyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="margin: 0; color: #1a1a1a;">
-                    <i class="fas fa-building" style="color: #667eea; margin-right: 8px;"></i>
+    <div id="reportCompanyModal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header-row">
+                <h2 class="modal-title">
+                    <i class="fas fa-building modal-icon"></i>
                     Segnala un'Azienda
                 </h2>
-                <button onclick="closeReportCompanyModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">
+                <button onclick="closeReportCompanyModal()" class="btn-modal-close" aria-label="Chiudi modal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <p style="color: #666; margin-bottom: 24px;">
+            <p class="modal-description">
                 Compila i dati dell'azienda che vuoi segnalare. Riceverai punti quando si iscriverà!
             </p>
             
             <form id="reportCompanyForm" onsubmit="submitReportCompany(event)">
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
-                        <i class="fas fa-building" style="color: #667eea; margin-right: 6px;"></i>
+                <div class="form-group">
+                    <label for="companyName" class="form-label">
+                        <i class="fas fa-building modal-icon"></i>
                         Nome Azienda *
                     </label>
-                    <input type="text" id="companyName" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Es: Ristorante Da Mario">
+                    <input type="text" id="companyName" required class="form-input" placeholder="Es: Ristorante Da Mario">
                 </div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
-                        <i class="fas fa-envelope" style="color: #667eea; margin-right: 6px;"></i>
+                <div class="form-group">
+                    <label for="companyEmail" class="form-label">
+                        <i class="fas fa-envelope modal-icon"></i>
                         Email Azienda *
                     </label>
-                    <input type="email" id="companyEmail" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="info@azienda.it">
+                    <input type="email" id="companyEmail" required class="form-input" placeholder="info@azienda.it">
                 </div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
-                        <i class="fas fa-phone" style="color: #667eea; margin-right: 6px;"></i>
+                <div class="form-group">
+                    <label for="companyPhone" class="form-label">
+                        <i class="fas fa-phone modal-icon"></i>
                         Telefono Azienda *
                     </label>
-                    <input type="tel" id="companyPhone" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="+39 123 456 7890">
+                    <input type="tel" id="companyPhone" required class="form-input" placeholder="+39 123 456 7890">
                 </div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
-                        <i class="fas fa-user" style="color: #667eea; margin-right: 6px;"></i>
+                <div class="form-group">
+                    <label for="contactName" class="form-label">
+                        <i class="fas fa-user modal-icon"></i>
                         Nome Contatto *
                     </label>
-                    <input type="text" id="contactName" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Es: Mario Rossi">
+                    <input type="text" id="contactName" required class="form-input" placeholder="Es: Mario Rossi">
                 </div>
                 
-                <div style="margin-bottom: 24px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
-                        <i class="fas fa-comment" style="color: #667eea; margin-right: 6px;"></i>
+                <div class="form-group">
+                    <label for="companyNotes" class="form-label">
+                        <i class="fas fa-comment modal-icon"></i>
                         Note (opzionale)
                     </label>
-                    <textarea id="companyNotes" rows="3" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical;" placeholder="Qualsiasi informazione aggiuntiva..."></textarea>
+                    <textarea id="companyNotes" rows="3" class="form-textarea" placeholder="Qualsiasi informazione aggiuntiva..."></textarea>
                 </div>
                 
-                <div style="display: flex; gap: 12px;">
-                    <button type="button" onclick="closeReportCompanyModal()" style="flex: 1; padding: 14px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; font-weight: 600; cursor: pointer; color: #666;">
+                <div class="form-actions">
+                    <button type="button" onclick="closeReportCompanyModal()" class="btn-cancel">
                         Annulla
                     </button>
-                    <button type="submit" style="flex: 1; padding: 14px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-paper-plane" style="margin-right: 6px;"></i>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane icon-margin"></i>
                         Invia Segnalazione
                     </button>
                 </div>
@@ -1383,25 +1383,25 @@
     </div>
     
     <!-- Success Modal -->
-    <div id="successModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 24px; padding: 48px 40px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: successSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; animation: successPulse 1.5s ease-in-out infinite;">
-                <i class="fas fa-check" style="font-size: 40px; color: white; animation: successCheckmark 0.6s ease-out 0.2s both;"></i>
+    <div id="successModal" class="modal-success-overlay hidden">
+        <div class="modal-success-container">
+            <div class="success-icon-wrapper">
+                <i class="fas fa-check success-icon"></i>
             </div>
-            <h2 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 28px; font-weight: 700;">
+            <h2 class="success-title">
                 Segnalazione Inviata!
             </h2>
-            <p style="color: #666; margin: 0 0 32px 0; font-size: 16px; line-height: 1.6;">
+            <p class="success-message">
                 Grazie per la segnalazione! Riceverai una notifica quando l'azienda verrà contattata.
             </p>
-            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 24px; border-radius: 8px; text-align: left;">
-                <p style="color: #065f46; margin: 0; font-size: 14px;">
-                    <i class="fas fa-gift" style="margin-right: 8px; color: #10b981;"></i>
+            <div class="success-info-box">
+                <p class="success-info-text">
+                    <i class="fas fa-gift success-gift-icon"></i>
                     <strong>Guadagnerai punti</strong> quando l'azienda si iscriverà tramite la tua segnalazione!
                 </p>
             </div>
-            <button onclick="closeSuccessModal()" style="width: 100%; padding: 14px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.3s;">
-                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+            <button onclick="closeSuccessModal()" class="btn-success-close">
+                <i class="fas fa-check-circle icon-margin"></i>
                 Perfetto!
             </button>
         </div>

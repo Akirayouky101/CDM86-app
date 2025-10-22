@@ -717,3 +717,341 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* =====================================================
+   DASHBOARD UTILITY CLASSES
+   ===================================================== */
+
+.level-name {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.level-description {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.loading-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.loading-spinner {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-report-company {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-report-company:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.info-box {
+    padding: 16px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.info-box-blue {
+    background: #f0f9ff;
+    border-left: 4px solid #3b82f6;
+}
+
+.info-text {
+    color: #1e40af;
+    margin: 0;
+}
+
+.icon-margin {
+    margin-right: 8px;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 15px;
+}
+
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+
+/* Modal Styles for Dashboard */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-title {
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.modal-icon {
+    color: #667eea;
+    margin-right: 8px;
+}
+
+.btn-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.btn-modal-close:hover {
+    color: #333;
+}
+
+.modal-description {
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.btn-submit {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Success Modal */
+.modal-success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-success-container {
+    background: white;
+    border-radius: 24px;
+    padding: 48px 40px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: successSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.success-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: successPulse 1.5s ease-in-out infinite;
+}
+
+.success-icon {
+    font-size: 40px;
+    color: white;
+    animation: successCheckmark 0.6s ease-out 0.2s both;
+}
+
+.success-title {
+    margin: 0 0 12px 0;
+    color: #1a1a1a;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.success-message {
+    color: #666;
+    margin: 0 0 32px 0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.success-info-box {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    padding: 16px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.success-info-text {
+    color: #065f46;
+    margin: 0;
+    font-size: 14px;
+}
+
+.success-gift-icon {
+    margin-right: 8px;
+    color: #10b981;
+}
+
+.btn-success-close {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-success-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes successSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes successCheckmark {
+    from {
+        opacity: 0;
+        transform: scale(0) rotate(-45deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
