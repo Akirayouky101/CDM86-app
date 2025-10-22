@@ -1452,17 +1452,17 @@
     
     <!-- Tabs Navigation -->
     <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab('requests')">
-            <i class="fas fa-list"></i> Richieste
+        <button class="tab-btn active" onclick="switchTab('org-requests')">
+            <i class="fas fa-building"></i> Richieste Aziende
+        </button>
+        <button class="tab-btn" onclick="switchTab('contracts')">
+            <i class="fas fa-file-contract"></i> Contratti
         </button>
         <button class="tab-btn" onclick="switchTab('analytics')">
             <i class="fas fa-chart-line"></i> Analytics
         </button>
         <button class="tab-btn" onclick="switchTab('promotions')">
             <i class="fas fa-tags"></i> Promozioni
-        </button>
-        <button class="tab-btn" onclick="switchTab('org-requests')">
-            <i class="fas fa-building"></i> Richieste Aziende
         </button>
         <button class="tab-btn" onclick="switchTab('points')">
             <i class="fas fa-trophy"></i> Sistema Punti
@@ -1479,66 +1479,7 @@
         
         <!-- Content -->
         <div id="content" style="display: none;">
-            <!-- REQUESTS TAB -->
-            <div id="requests-tab" class="tab-content active">
-            <!-- Page Header -->
-            <div class="page-header">
-                <h1><i class="fas fa-crown"></i> Pannello Amministratore</h1>
-                <p>Gestione richieste codici contratto organizzazioni</p>
-            </div>
-            
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card total">
-                    <div class="stat-value" id="stat-total">0</div>
-                    <div class="stat-label">Totale Richieste</div>
-                </div>
-                <div class="stat-card pending">
-                    <div class="stat-value" id="stat-pending">0</div>
-                    <div class="stat-label">In Attesa</div>
-                </div>
-                <div class="stat-card approved">
-                    <div class="stat-value" id="stat-approved">0</div>
-                    <div class="stat-label">Approvate</div>
-                </div>
-                <div class="stat-card completed">
-                    <div class="stat-value" id="stat-completed">0</div>
-                    <div class="stat-label">Completate</div>
-                </div>
-            </div>
-            
-            <!-- Filters -->
-            <div class="filters-section">
-                <div class="filters-row">
-                    <div class="filter-group">
-                        <label>Stato</label>
-                        <select id="filter-status" onchange="applyFilters()">
-                            <option value="">Tutti gli stati</option>
-                            <option value="pending">In Attesa</option>
-                            <option value="approved">Approvate</option>
-                            <option value="completed">Completate</option>
-                            <option value="rejected">Rifiutate</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Cerca</label>
-                        <input type="text" id="filter-search" placeholder="Nome organizzazione, email, telefono..." oninput="applyFilters()">
-                    </div>
-                    <button class="btn-filter-clear" onclick="clearFilters()">
-                        <i class="fas fa-times"></i> Cancella Filtri
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Requests List -->
-            <div class="requests-section">
-                <div class="section-header">
-                    <h2>📋 Richieste (<span id="count-requests">0</span>)</h2>
-                </div>
-                <div id="requests-list"></div>
-            </div>
-            </div>
-            <!-- END REQUESTS TAB -->
+            <!-- REQUESTS TAB REMOVED - Use Org Requests instead -->
             
             <!-- ANALYTICS TAB -->
             <div id="analytics-tab" class="tab-content" style="display: none;">
@@ -1845,7 +1786,8 @@
             <!-- END PROMOTIONS TAB -->
 
             <!-- ORGANIZATION REQUESTS TAB -->
-            <div id="org-requests-tab" class="tab-content" style="display: none;">
+            <!-- ORGANIZATION REQUESTS TAB (DEFAULT/ACTIVE) -->
+            <div id="org-requests-tab" class="tab-content active">
                 <!-- Page Header -->
                 <div class="page-header">
                     <h1><i class="fas fa-building"></i> Richieste Aziende</h1>
@@ -1991,6 +1933,56 @@
                 </div>
             </div>
             <!-- END POINTS SYSTEM TAB -->
+            
+            <!-- ========================================
+                 CONTRACTS TAB
+                 ======================================== -->
+            <div id="contracts-tab" class="tab-content" style="display: none;">
+                <div class="page-header">
+                    <h1>📄 Gestione Contratti</h1>
+                    <p>Monitora contratti e scadenze organizzazioni partner</p>
+                </div>
+                
+                <!-- Alerts for expiring contracts -->
+                <div id="contracts-alerts" class="requests-section" style="margin-bottom: 30px;">
+                    <!-- Will be populated by JS -->
+                </div>
+                
+                <!-- Search and Filters -->
+                <div class="filters-section">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label>Stato</label>
+                            <select id="contracts-filter-status" onchange="filterContracts()">
+                                <option value="">Tutti</option>
+                                <option value="active">Attivi</option>
+                                <option value="expiring">In Scadenza</option>
+                                <option value="expired">Scaduti</option>
+                                <option value="cancelled">Cancellati</option>
+                                <option value="renewed">Rinnovati</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Cerca</label>
+                            <input type="text" id="contracts-search" placeholder="Codice contratto, organizzazione..." oninput="filterContracts()">
+                        </div>
+                        <button class="btn-filter" onclick="loadContracts()">
+                            <i class="fas fa-sync-alt"></i> Aggiorna
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Contracts List -->
+                <div class="requests-section">
+                    <div class="section-header">
+                        <h2>📋 Contratti (<span id="contracts-count">0</span>)</h2>
+                    </div>
+                    <div id="contracts-list">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <!-- END CONTRACTS TAB -->
         </div>
     </div>
     
@@ -3759,26 +3751,77 @@
         };
 
         window.approveOrg = async function(requestId) {
-            // Get request details for the confirmation message
+            // Get request details
             const request = allOrgRequests.find(r => r.id === requestId);
             const orgName = request?.organization_name || 'questa azienda';
             
+            // Step 1: Ask for contract code
             showConfirmModal(
-                '⚠️ Conferma Approvazione',
-                `Sei sicuro di voler approvare "${orgName}" come partner?\n\nQuesta azione assegnerà automaticamente 100 punti all'utente referrer e non può essere annullata.`,
+                '📝 Inserisci Codice Contratto',
+                `Per approvare "${orgName}" devi inserire il codice contratto.`,
                 async () => {
+                    // Prompt for contract code
+                    const contractCode = prompt('Inserisci il codice contratto (es: CTR-2025-0001):');
+                    
+                    if (!contractCode || contractCode.trim() === '') {
+                        showMessage('error', 'Errore', 'Codice contratto obbligatorio per approvare');
+                        return;
+                    }
+                    
+                    // Step 2: Ask for contract dates
+                    const startDate = prompt('Data inizio contratto (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+                    if (!startDate) {
+                        showMessage('error', 'Annullato', 'Data inizio richiesta');
+                        return;
+                    }
+                    
+                    // Calculate end date (1 year from start)
+                    const endDateDefault = new Date(startDate);
+                    endDateDefault.setFullYear(endDateDefault.getFullYear() + 1);
+                    const endDate = prompt('Data fine contratto (YYYY-MM-DD):', endDateDefault.toISOString().split('T')[0]);
+                    if (!endDate) {
+                        showMessage('error', 'Annullato', 'Data fine richiesta');
+                        return;
+                    }
+                    
                     try {
-                        const { error } = await supabase
+                        // Step 3: Create contract
+                        const { data: contractData, error: contractError } = await supabase
+                            .from('contracts')
+                            .insert({
+                                contract_code: contractCode.toUpperCase().trim(),
+                                organization_request_id: requestId,
+                                organization_name: orgName,
+                                start_date: startDate,
+                                end_date: endDate,
+                                contact_person: `${request.contact_first_name} ${request.contact_last_name}`,
+                                contact_email: request.contact_email,
+                                contact_phone: request.contact_phone,
+                                created_by: (await supabase.auth.getUser()).data.user.id
+                            })
+                            .select()
+                            .single();
+                        
+                        if (contractError) {
+                            if (contractError.code === '23505') {
+                                throw new Error('Codice contratto già esistente. Scegline uno diverso.');
+                            }
+                            throw contractError;
+                        }
+                        
+                        // Step 4: Update organization request status + assign contract code
+                        const { error: updateError } = await supabase
                             .from('organization_requests')
                             .update({ 
                                 status: 'approved',
-                                approved_at: new Date().toISOString()
+                                approved_at: new Date().toISOString(),
+                                contract_code: contractCode.toUpperCase().trim()
                             })
                             .eq('id', requestId);
 
-                        if (error) throw error;
+                        if (updateError) throw updateError;
 
-                        showMessage('success', '✅ Approvata', `Azienda "${orgName}" approvata come partner. L'utente referrer ha ricevuto 100 punti!`);
+                        showMessage('success', '✅ Approvata', `Azienda "${orgName}" approvata!\n\nContratto ${contractCode} creato.\nL'utente referrer ha ricevuto 100 punti!`);
                         loadOrgRequests();
                     } catch (error) {
                         console.error('Error approving organization:', error);
@@ -4284,6 +4327,248 @@
             showMessage('info', 'Funzionalità in arrivo', 'Form aggiunta premi sarà disponibile a breve');
         };
 
+        // ========================================
+        // CONTRACTS MANAGEMENT FUNCTIONS
+        // ========================================
+        
+        let allContracts = [];
+        
+        // Load all contracts
+        window.loadContracts = async function() {
+            try {
+                const { data: contracts, error } = await supabase
+                    .from('contracts_with_details')
+                    .select('*')
+                    .order('end_date', { ascending: true });
+                
+                if (error) throw error;
+                
+                allContracts = contracts || [];
+                displayContracts(allContracts);
+                displayContractAlerts(allContracts);
+                
+            } catch (error) {
+                console.error('Error loading contracts:', error);
+                showMessage('error', 'Errore', 'Impossibile caricare i contratti');
+            }
+        };
+        
+        // Display contracts
+        function displayContracts(contracts) {
+            const container = document.getElementById('contracts-list');
+            document.getElementById('contracts-count').textContent = contracts.length;
+            
+            if (!contracts || contracts.length === 0) {
+                container.innerHTML = '<div class="empty-state">Nessun contratto trovato</div>';
+                return;
+            }
+            
+            container.innerHTML = contracts.map(contract => {
+                const statusColors = {
+                    active: '#10b981',
+                    expiring: '#f59e0b',
+                    expired: '#ef4444',
+                    cancelled: '#64748b',
+                    renewed: '#3b82f6'
+                };
+                
+                const statusIcons = {
+                    active: '✅',
+                    expiring: '⚠️',
+                    expired: '❌',
+                    cancelled: '🚫',
+                    renewed: '🔄'
+                };
+                
+                return `
+                    <div class="request-card" style="border-left: 4px solid ${statusColors[contract.status]};">
+                        <div style="display: flex; justify-content: between; gap: 20px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <h3 style="margin: 0;">${contract.organization_name}</h3>
+                                    <span class="status-badge ${contract.status}">
+                                        ${statusIcons[contract.status]} ${contract.status_label}
+                                    </span>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                                    <div>
+                                        <div style="color: #64748b; font-size: 12px;">Codice Contratto</div>
+                                        <div style="font-size: 18px; font-weight: 700; color: #3b82f6;">${contract.contract_code}</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748b; font-size: 12px;">Data Inizio</div>
+                                        <div style="font-weight: 600;">${new Date(contract.start_date).toLocaleDateString('it-IT')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748b; font-size: 12px;">Data Scadenza</div>
+                                        <div style="font-weight: 600;">${new Date(contract.end_date).toLocaleDateString('it-IT')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748b; font-size: 12px;">Giorni Rimanenti</div>
+                                        <div style="font-weight: 600; color: ${contract.days_remaining < 30 ? '#ef4444' : '#10b981'};">
+                                            ${contract.days_remaining > 0 ? contract.days_remaining : 'Scaduto'}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${contract.contact_person ? `
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                                        <div style="color: #64748b; font-size: 12px;">Referente</div>
+                                        <div>${contract.contact_person}</div>
+                                        <div style="font-size: 14px; color: #64748b;">
+                                            ${contract.contact_email} • ${contract.contact_phone || ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button class="btn-filter" onclick="viewContractDetails('${contract.id}')">
+                                        <i class="fas fa-eye"></i> Dettagli
+                                    </button>
+                                    ${contract.status === 'active' || contract.status === 'expiring' ? `
+                                        <button class="btn-filter" onclick="renewContract('${contract.id}')">
+                                            <i class="fas fa-redo"></i> Rinnova
+                                        </button>
+                                    ` : ''}
+                                    <button class="btn-filter" onclick="emailContract('${contract.contact_email}', '${contract.organization_name}')">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Display alerts for expiring contracts
+        function displayContractAlerts(contracts) {
+            const container = document.getElementById('contracts-alerts');
+            
+            const expiringContracts = contracts.filter(c => 
+                c.status === 'expiring' || (c.days_remaining > 0 && c.days_remaining <= 30)
+            );
+            
+            if (expiringContracts.length === 0) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="section-header">
+                    <h2 style="color: #f59e0b;">⚠️ Contratti in Scadenza (${expiringContracts.length})</h2>
+                </div>
+                ${expiringContracts.map(contract => `
+                    <div class="request-card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <strong>${contract.organization_name}</strong> - ${contract.contract_code}
+                                <div style="color: #92400e; margin-top: 5px;">
+                                    Scadenza: ${new Date(contract.end_date).toLocaleDateString('it-IT')} 
+                                    (${contract.days_remaining} giorni rimanenti)
+                                </div>
+                            </div>
+                            <button class="btn-filter" onclick="renewContract('${contract.id}')">
+                                <i class="fas fa-redo"></i> Rinnova Ora
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        // Filter contracts
+        window.filterContracts = function() {
+            const statusFilter = document.getElementById('contracts-filter-status').value;
+            const searchTerm = document.getElementById('contracts-search').value.toLowerCase();
+            
+            const filtered = allContracts.filter(contract => {
+                const matchesStatus = !statusFilter || contract.status === statusFilter;
+                const matchesSearch = !searchTerm || 
+                    contract.contract_code.toLowerCase().includes(searchTerm) ||
+                    contract.organization_name.toLowerCase().includes(searchTerm);
+                
+                return matchesStatus && matchesSearch;
+            });
+            
+            displayContracts(filtered);
+        };
+        
+        // View contract details
+        window.viewContractDetails = function(contractId) {
+            const contract = allContracts.find(c => c.id === contractId);
+            if (!contract) return;
+            
+            alert(`Contratto: ${contract.contract_code}\n\nOrganizzazione: ${contract.organization_name}\n\nInizio: ${new Date(contract.start_date).toLocaleDateString('it-IT')}\nScadenza: ${new Date(contract.end_date).toLocaleDateString('it-IT')}\n\nGiorni rimanenti: ${contract.days_remaining}\nStato: ${contract.status_label}\n\nReferente: ${contract.contact_person}\nEmail: ${contract.contact_email}\nTelefono: ${contract.contact_phone || 'N/D'}`);
+        };
+        
+        // Renew contract
+        window.renewContract = async function(contractId) {
+            const contract = allContracts.find(c => c.id === contractId);
+            if (!contract) return;
+            
+            if (!confirm(`Vuoi rinnovare il contratto ${contract.contract_code} per ${contract.organization_name}?`)) return;
+            
+            const newCode = prompt('Nuovo codice contratto:', 'CTR-' + new Date().getFullYear() + '-XXXX');
+            if (!newCode) return;
+            
+            const newStartDate = prompt('Nuova data inizio (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+            if (!newStartDate) return;
+            
+            const defaultEndDate = new Date(newStartDate);
+            defaultEndDate.setFullYear(defaultEndDate.getFullYear() + 1);
+            const newEndDate = prompt('Nuova data fine (YYYY-MM-DD):', defaultEndDate.toISOString().split('T')[0]);
+            if (!newEndDate) return;
+            
+            try {
+                // Create new contract
+                const { data: newContract, error: createError } = await supabase
+                    .from('contracts')
+                    .insert({
+                        contract_code: newCode,
+                        organization_request_id: contract.organization_request_id,
+                        organization_name: contract.organization_name,
+                        start_date: newStartDate,
+                        end_date: newEndDate,
+                        contact_person: contract.contact_person,
+                        contact_email: contract.contact_email,
+                        contact_phone: contract.contact_phone,
+                        created_by: (await supabase.auth.getUser()).data.user.id
+                    })
+                    .select()
+                    .single();
+                
+                if (createError) throw createError;
+                
+                // Mark old contract as renewed
+                const { error: updateError } = await supabase
+                    .from('contracts')
+                    .update({ 
+                        status: 'renewed',
+                        renewed_to: newContract.id
+                    })
+                    .eq('id', contractId);
+                
+                if (updateError) throw updateError;
+                
+                showMessage('success', 'Rinnovato', `Contratto rinnovato con successo! Nuovo codice: ${newCode}`);
+                loadContracts();
+            } catch (error) {
+                console.error('Error renewing contract:', error);
+                showMessage('error', 'Errore', error.message);
+            }
+        };
+        
+        // Email contract
+        window.emailContract = function(email, orgName) {
+            const subject = encodeURIComponent(`Rinnovo Contratto - ${orgName}`);
+            const body = encodeURIComponent(`Gentile ${orgName},\n\nVi contattiamo in merito al rinnovo del vostro contratto con CDM86.\n\n`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
         // Update switchTab to load org requests
         const originalSwitchTab = window.switchTab;
         window.switchTab = function(tab) {
@@ -4301,13 +4586,19 @@
                 loadRewardsManagement();
                 loadRedemptions();
             }
+            
+            // Load contracts when switching to that tab
+            if (tab === 'contracts') {
+                loadContracts();
+            }
         };
 
         // Initialize
         (async () => {
             const hasAccess = await checkAdminAccess();
             if (hasAccess) {
-                await loadRequests();
+                // Load org requests (now default tab)
+                await loadOrgRequests();
                 
                 // Load promotions if on promotions tab
                 const promotionsTab = document.getElementById('promotions-tab');
