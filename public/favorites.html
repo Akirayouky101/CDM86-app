@@ -227,7 +227,7 @@
             </div>
 
             <div class="promotions-grid" id="favorites-grid">
-                <p style="text-align:center; padding:2rem;">Caricamento preferiti...</p>
+                <p class="text-center padding-2rem">Caricamento preferiti...</p>
             </div>
             
             <div id="empty-state" class="empty-favorites empty-state-hidden">
@@ -329,7 +329,7 @@
                 console.error('Error loading favorites:', error);
                 if (loading) loading.style.display = 'none';
                 if (grid) {
-                    grid.innerHTML = `<p style="text-align:center; padding:2rem; color: red;">Errore: ${error.message}</p>`;
+                    grid.innerHTML = `<p class="text-center padding-2rem color-error">Errore: ${error.message}</p>`;
                 }
             }
         }
@@ -345,10 +345,10 @@
             // Check if empty
             if (!promotions || promotions.length === 0) {
                 grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                        <i class="far fa-heart" style="font-size: 80px; color: #ddd; margin-bottom: 20px; display: block;"></i>
-                        <h2 style="color: #666; margin-bottom: 10px; font-size: 24px;">Nessun preferito ancora</h2>
-                        <p style="color: #999; margin-bottom: 30px;">Inizia ad aggiungere promozioni ai tuoi preferiti!</p>
+                    <div class="empty-state-container">
+                        <i class="far fa-heart empty-state-icon"></i>
+                        <h2 class="empty-state-title">Nessun preferito ancora</h2>
+                        <p class="empty-state-text">Inizia ad aggiungere promozioni ai tuoi preferiti!</p>
                         <button class="btn-browse" onclick="window.location.href='/public/promotions.html'">
                             Sfoglia Promozioni
                         </button>
@@ -463,16 +463,16 @@
                     `;
                     
                     dropdown.innerHTML = `
-                        <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <a href="/public/dashboard.html" class="dropdown-menu-item">
                             <span>📊</span><span>Dashboard</span>
                         </a>
-                        <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <a href="/public/promotions.html" class="dropdown-menu-item">
                             <span>🎫</span><span>Promozioni</span>
                         </a>
-                        <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                        <a href="/public/favorites.html" class="dropdown-menu-item">
                             <span>❤️</span><span>Preferiti</span>
                         </a>
-                        <a href="#" id="logout-link" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #e74c3c; text-decoration: none;">
+                        <a href="#" id="logout-link" class="dropdown-menu-item logout-item">
                             <span>🚪</span><span>Esci</span>
                         </a>
                     `;
