@@ -3611,6 +3611,8 @@
                                 <p>Esegui lo script SQL nella cartella /sql per crearla.</p>
                             </div>
                         `;
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('content').style.display = 'block';
                         return;
                     }
                     throw error;
@@ -3619,9 +3621,15 @@
                 allOrgRequests = data || [];
                 updateOrgStats();
                 displayOrgRequests(allOrgRequests);
+                
+                // Hide loading and show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
 
             } catch (error) {
                 console.error('Error loading organization requests:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
             }
         }
 
