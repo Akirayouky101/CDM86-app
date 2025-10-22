@@ -3974,38 +3974,25 @@
         // Load points leaderboard
         window.loadPointsLeaderboard = async function() {
             try {
-                // First get user_points with user_id
+                // Use the view that includes email
                 const { data: userPoints, error: pointsError } = await supabase
-                    .from('user_points')
+                    .from('user_points_with_email')
                     .select('*')
                     .order('points_total', { ascending: false })
                     .limit(50);
                 
                 if (pointsError) throw pointsError;
                 
+                const container = document.getElementById('leaderboard-list');
+                
                 if (!userPoints || userPoints.length === 0) {
-                    document.getElementById('leaderboard-list').innerHTML = '<div class="empty-state">Nessun utente con punti ancora</div>';
+                    container.innerHTML = '<div class="empty-state">Nessun utente con punti ancora</div>';
                     return;
                 }
-                
-                // Get user emails from auth.users
-                const userIds = userPoints.map(up => up.user_id);
-                const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-                
-                // Create a map of user_id to email
-                const userEmailMap = {};
-                if (users) {
-                    users.forEach(user => {
-                        userEmailMap[user.id] = user.email;
-                    });
-                }
-                
-                const container = document.getElementById('leaderboard-list');
                 
                 container.innerHTML = userPoints.map((user, index) => {
                     const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
                     const levelBadge = getLevelBadge(user.level);
-                    const userEmail = userEmailMap[user.user_id] || 'Utente Sconosciuto';
                     
                     return `
                         <div class="request-card" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-left: 4px solid ${getLevelColor(user.level)};">
@@ -4013,7 +4000,7 @@
                                 <div style="font-size: 32px; min-width: 50px; text-align: center;">${medal}</div>
                                 <div style="flex: 1;">
                                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                        <strong style="font-size: 18px;">${userEmail}</strong>
+                                        <strong style="font-size: 18px;">${user.email || 'Utente Sconosciuto'}</strong>
                                         ${levelBadge}
                                     </div>
                                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px;">
@@ -4115,12 +4102,10 @@
         
         async function loadRedemptions() {
             try {
+                // Use the view that includes email and reward details
                 let query = supabase
-                    .from('reward_redemptions')
-                    .select(`
-                        *,
-                        rewards(title, points_required)
-                    `)
+                    .from('redemptions_with_details')
+                    .select('*')
                     .order('redeemed_at', { ascending: false });
                 
                 if (currentRedemptionFilter !== 'all') {
@@ -4130,15 +4115,6 @@
                 const { data: redemptions, error } = await query;
                 
                 if (error) throw error;
-                
-                // Get user emails
-                const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-                const userEmailMap = {};
-                if (users) {
-                    users.forEach(user => {
-                        userEmailMap[user.id] = user.email;
-                    });
-                }
                 
                 const container = document.getElementById('redemptions-list');
                 
@@ -4162,9 +4138,9 @@
                                 <div style="flex: 1;">
                                     <div style="display: flex; justify-content: space-between; align-items: start;">
                                         <div>
-                                            <h3 style="margin: 0 0 5px 0;">${redemption.rewards?.title || 'Premio Sconosciuto'}</h3>
+                                            <h3 style="margin: 0 0 5px 0;">${redemption.reward_title || 'Premio Sconosciuto'}</h3>
                                             <p style="color: #64748b; margin: 0;">
-                                                <i class="fas fa-user"></i> ${userEmailMap[redemption.user_id] || 'Utente Sconosciuto'}
+                                                <i class="fas fa-user"></i> ${redemption.user_email || 'Utente Sconosciuto'}
                                             </p>
                                             <p style="color: #64748b; margin: 5px 0 0 0;">
                                                 <i class="fas fa-clock"></i> ${new Date(redemption.redeemed_at).toLocaleDateString('it-IT', { 
