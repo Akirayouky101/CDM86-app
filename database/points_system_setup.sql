@@ -269,7 +269,7 @@ BEGIN
         IF NEW.status = 'approved' THEN
             -- Award 100 points for approved report
             PERFORM add_points_to_user(
-                NEW.user_id,
+                NEW.referred_by_id,
                 100,
                 'report_approved',
                 NEW.id,
@@ -279,7 +279,7 @@ BEGIN
             -- Increment approved reports count
             UPDATE user_points
             SET approved_reports_count = approved_reports_count + 1
-            WHERE user_id = NEW.user_id;
+            WHERE user_id = NEW.referred_by_id;
             
         ELSIF NEW.status = 'rejected' THEN
             -- No points awarded, just log
@@ -290,7 +290,7 @@ BEGIN
                 reference_id,
                 description
             ) VALUES (
-                NEW.user_id,
+                NEW.referred_by_id,
                 0,
                 'report_rejected',
                 NEW.id,
@@ -300,7 +300,7 @@ BEGIN
             -- Increment rejected reports count
             UPDATE user_points
             SET rejected_reports_count = rejected_reports_count + 1
-            WHERE user_id = NEW.user_id;
+            WHERE user_id = NEW.referred_by_id;
         END IF;
     END IF;
     

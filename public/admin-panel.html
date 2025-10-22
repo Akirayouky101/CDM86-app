@@ -2015,6 +2015,21 @@
         </div>
     </div>
     
+    <!-- Confirmation Modal for Organization Approval -->
+    <div id="confirm-modal" class="message-modal">
+        <div class="message-modal-content">
+            <div class="message-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="message-title" id="confirm-title">Conferma Azione</h3>
+            <p class="message-text" id="confirm-text">Sei sicuro di voler procedere?</p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="btn-message-close" style="background: #64748b;" onclick="closeConfirmModal()">Annulla</button>
+                <button class="btn-message-close" id="confirm-action-btn" onclick="confirmAction()">Conferma</button>
+            </div>
+        </div>
+    </div>
+    
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
@@ -2786,6 +2801,28 @@
         // Close message modal
         window.closeMessageModal = function() {
             document.getElementById('message-modal').classList.remove('show');
+        };
+        
+        // Confirmation modal management
+        let confirmCallback = null;
+        
+        window.showConfirmModal = function(title, message, callback) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-text').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').classList.add('show');
+        };
+        
+        window.closeConfirmModal = function() {
+            document.getElementById('confirm-modal').classList.remove('show');
+            confirmCallback = null;
+        };
+        
+        window.confirmAction = function() {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            closeConfirmModal();
         };
         
         // ========================================
@@ -3722,25 +3759,33 @@
         };
 
         window.approveOrg = async function(requestId) {
-            if (!confirm('Confermi di approvare questa azienda come partner?')) return;
+            // Get request details for the confirmation message
+            const request = allOrgRequests.find(r => r.id === requestId);
+            const orgName = request?.organization_name || 'questa azienda';
+            
+            showConfirmModal(
+                '⚠️ Conferma Approvazione',
+                `Sei sicuro di voler approvare "${orgName}" come partner?\n\nQuesta azione assegnerà automaticamente 100 punti all'utente referrer e non può essere annullata.`,
+                async () => {
+                    try {
+                        const { error } = await supabase
+                            .from('organization_requests')
+                            .update({ 
+                                status: 'approved',
+                                approved_at: new Date().toISOString()
+                            })
+                            .eq('id', requestId);
 
-            try {
-                const { error } = await supabase
-                    .from('organization_requests')
-                    .update({ 
-                        status: 'approved',
-                        approved_at: new Date().toISOString()
-                    })
-                    .eq('id', requestId);
+                        if (error) throw error;
 
-                if (error) throw error;
-
-                showMessage('success', 'Approvata', 'Azienda approvata come partner');
-                loadOrgRequests();
-            } catch (error) {
-                console.error('Error approving organization:', error);
-                showMessage('error', 'Errore', error.message);
-            }
+                        showMessage('success', '✅ Approvata', `Azienda "${orgName}" approvata come partner. L'utente referrer ha ricevuto 100 punti!`);
+                        loadOrgRequests();
+                    } catch (error) {
+                        console.error('Error approving organization:', error);
+                        showMessage('error', 'Errore', error.message);
+                    }
+                }
+            );
         };
 
         window.assignContractCode = async function(requestId) {
