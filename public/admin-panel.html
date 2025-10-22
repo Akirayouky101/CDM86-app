@@ -8,6 +8,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Admin Panel Enhanced Styles -->
+    <link rel="stylesheet" href="/assets/css/admin-panel-enhanced.css">
+    
     <style>
         * {
             margin: 0;
@@ -1869,20 +1872,20 @@
                 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card total">
-                        <div class="stat-value" id="points-total-distributed">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="points-total-distributed">0</div>
                         <div class="stat-label">Punti Totali Distribuiti</div>
                     </div>
-                    <div class="stat-card pending">
-                        <div class="stat-value" id="points-active-users">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="points-active-users">0</div>
                         <div class="stat-label">Utenti Attivi</div>
                     </div>
-                    <div class="stat-card approved">
-                        <div class="stat-value" id="points-rewards-redeemed">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="points-rewards-redeemed">0</div>
                         <div class="stat-label">Premi Riscattati</div>
                     </div>
-                    <div class="stat-card completed">
-                        <div class="stat-value" id="points-avg-per-user">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="points-avg-per-user">0</div>
                         <div class="stat-label">Media Punti/Utente</div>
                     </div>
                 </div>
@@ -1896,7 +1899,7 @@
                         </button>
                     </div>
                     
-                    <div id="leaderboard-list">
+                    <div id="leaderboard-list" class="enhanced-list">
                         <!-- Will be populated by JS -->
                     </div>
                 </div>
@@ -1905,12 +1908,12 @@
                 <div class="requests-section">
                     <div class="section-header">
                         <h2>🎁 Gestione Premi</h2>
-                        <button class="btn-filter" onclick="showAddRewardForm()">
+                        <button class="btn-action-edit" onclick="showAddRewardForm()">
                             <i class="fas fa-plus"></i> Aggiungi Premio
                         </button>
                     </div>
                     
-                    <div id="rewards-management-list">
+                    <div id="rewards-management-list" class="enhanced-list">
                         <!-- Will be populated by JS -->
                     </div>
                 </div>
@@ -1920,14 +1923,14 @@
                     <div class="section-header">
                         <h2>📦 Riscatti in Attesa</h2>
                         <div class="filters-row">
-                            <button class="btn-filter" onclick="filterRedemptions('all')">Tutti</button>
+                            <button class="btn-filter active" onclick="filterRedemptions('all')">Tutti</button>
                             <button class="btn-filter" onclick="filterRedemptions('pending')">In Attesa</button>
                             <button class="btn-filter" onclick="filterRedemptions('approved')">Approvati</button>
                             <button class="btn-filter" onclick="filterRedemptions('delivered')">Consegnati</button>
                         </div>
                     </div>
                     
-                    <div id="redemptions-list">
+                    <div id="redemptions-list" class="enhanced-list">
                         <!-- Will be populated by JS -->
                     </div>
                 </div>
@@ -1953,7 +1956,7 @@
                     <div class="filters-row">
                         <div class="filter-group">
                             <label>Stato</label>
-                            <select id="contracts-filter-status" onchange="filterContracts()">
+                            <select id="contracts-filter-status" onchange="filterContracts()" class="enhanced-select">
                                 <option value="">Tutti</option>
                                 <option value="active">Attivi</option>
                                 <option value="expiring">In Scadenza</option>
@@ -1962,11 +1965,12 @@
                                 <option value="renewed">Rinnovati</option>
                             </select>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group search-box">
                             <label>Cerca</label>
-                            <input type="text" id="contracts-search" placeholder="Codice contratto, organizzazione..." oninput="filterContracts()">
+                            <input type="text" id="contracts-search" class="search-input" placeholder="Codice contratto, organizzazione..." oninput="filterContracts()">
+                            <i class="fas fa-search search-icon"></i>
                         </div>
-                        <button class="btn-filter" onclick="loadContracts()">
+                        <button class="btn-refresh" onclick="loadContracts()">
                             <i class="fas fa-sync-alt"></i> Aggiorna
                         </button>
                     </div>
@@ -4056,7 +4060,7 @@
                 }
                 
                 container.innerHTML = rewards.map(reward => `
-                    <div class="request-card">
+                    <div class="list-card">
                         <div style="display: flex; gap: 20px;">
                             <div style="font-size: 60px;">${reward.icon || '🎁'}</div>
                             <div style="flex: 1;">
@@ -4077,12 +4081,12 @@
                                     </div>
                                     <div>
                                         <span style="color: #64748b;">Stato:</span>
-                                        <span class="status-badge ${reward.active ? 'approved' : 'rejected'}">
+                                        <span class="status-badge ${reward.active ? 'active' : 'expired'}">
                                             ${reward.active ? 'Attivo' : 'Disattivo'}
                                         </span>
                                     </div>
                                     <div style="flex: 1;"></div>
-                                    <button class="btn-filter" onclick="editReward('${reward.id}')">
+                                    <button class="btn-action-edit" onclick="editReward('${reward.id}')">
                                         <i class="fas fa-edit"></i> Modifica
                                     </button>
                                     <button class="btn-filter" onclick="toggleRewardStatus('${reward.id}', ${!reward.active})">
@@ -4105,6 +4109,23 @@
         
         window.filterRedemptions = function(filter) {
             currentRedemptionFilter = filter;
+            
+            // Update active button visual state
+            const buttons = document.querySelectorAll('#redemptions-list').closest('.requests-section').querySelectorAll('.btn-filter');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('Tutti') && filter === 'all') {
+                    btn.classList.add('active');
+                } else if (btn.textContent.includes('In Attesa') && filter === 'pending') {
+                    btn.classList.add('active');
+                } else if (btn.textContent.includes('Approvati') && filter === 'approved') {
+                    btn.classList.add('active');
+                } else if (btn.textContent.includes('Consegnati') && filter === 'delivered') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
             loadRedemptions();
         };
         
@@ -4140,7 +4161,7 @@
                     };
                     
                     return `
-                        <div class="request-card" style="border-left: 4px solid ${statusColors[redemption.status]};">
+                        <div class="list-card" style="border-left: 4px solid ${statusColors[redemption.status]};">
                             <div style="display: flex; gap: 20px;">
                                 <div style="font-size: 48px;">🎁</div>
                                 <div style="flex: 1;">
@@ -4169,16 +4190,16 @@
                                     </div>
                                     ${redemption.status === 'pending' ? `
                                         <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                            <button class="btn-filter" onclick="approveRedemption('${redemption.id}')">
+                                            <button class="btn-action-approve" onclick="approveRedemption('${redemption.id}')">
                                                 <i class="fas fa-check"></i> Approva
                                             </button>
-                                            <button class="btn-filter" onclick="rejectRedemption('${redemption.id}')">
+                                            <button class="btn-action-reject" onclick="rejectRedemption('${redemption.id}')">
                                                 <i class="fas fa-times"></i> Rifiuta
                                             </button>
                                         </div>
                                     ` : redemption.status === 'approved' ? `
                                         <div style="margin-top: 15px;">
-                                            <button class="btn-filter" onclick="markAsDelivered('${redemption.id}')">
+                                            <button class="btn-action-approve" onclick="markAsDelivered('${redemption.id}')">
                                                 <i class="fas fa-truck"></i> Segna come Consegnato
                                             </button>
                                         </div>
