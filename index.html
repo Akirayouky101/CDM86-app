@@ -36,8 +36,8 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
             z-index: 10000;
             animation: fadeIn 0.3s ease-out;
         }
@@ -215,6 +215,11 @@
                 opacity: 1;
                 transform: translateX(0);
             }
+        }
+        
+        .wizard-note {
+            font-size: 14px;
+            color: #666;
         }
         
         @media (max-width: 640px) {
@@ -939,7 +944,7 @@
                             <p><strong>Nome:</strong> <span id="wizardConfirmName"></span></p>
                             <p><strong>Email:</strong> <span id="wizardConfirmEmail"></span></p>
                         </div>
-                        <p style="font-size: 14px; color: #666;">
+                        <p class="wizard-note">
                             Riceverai il codice referral all'indirizzo fornito.
                         </p>
                     </div>
