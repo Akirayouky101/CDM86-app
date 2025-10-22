@@ -1055,3 +1055,282 @@
         transform: scale(1) rotate(0deg);
     }
 }
+
+/* QR Code */
+.qr-code-image {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+/* Referrer Card */
+.referrer-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.referrer-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.referrer-name {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.referrer-code {
+    font-size: 1.1em;
+    font-weight: 500;
+    opacity: 0.95;
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* Original User Card */
+.original-user-card {
+    text-align: center;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.original-user-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.original-user-title {
+    font-size: 1.1em;
+    color: #666;
+}
+
+.original-user-subtitle {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* Organization Card */
+.organization-card {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.organization-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.organization-name {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.organization-type {
+    font-size: 1.0em;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.organization-code {
+    font-size: 1.1em;
+    font-weight: 500;
+    opacity: 0.95;
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* Referral User Cards */
+.referral-user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.referral-user-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.referral-user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.referral-user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.referral-user-name {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.referral-user-date {
+    font-size: 0.85em;
+    color: #999;
+}
+
+.referral-user-code-section {
+    text-align: right;
+}
+
+.referral-code-label {
+    font-size: 0.8em;
+    color: #999;
+    margin-bottom: 4px;
+}
+
+.referral-code-value {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #667eea;
+}
+
+/* Empty Referrals Card */
+.empty-referrals-card {
+    text-align: center;
+    padding: 40px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.empty-referrals-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.empty-referrals-title {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.empty-referrals-subtitle {
+    font-size: 0.9em;
+    color: #999;
+}
+
+/* Empty Organization Requests */
+.empty-org-requests {
+    text-align: center;
+    padding: 40px;
+    color: #9ca3af;
+}
+
+.empty-org-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-org-title {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.empty-org-subtitle {
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Rejection Notice */
+.rejection-notice {
+    margin-top: 15px;
+    padding: 12px;
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+}
+
+.rejection-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #991b1b;
+    margin-bottom: 6px;
+}
+
+.rejection-text {
+    font-size: 14px;
+    color: #7f1d1d;
+}
+
+/* Empty States */
+.empty-rewards {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.empty-rewards-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.empty-transactions {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.empty-transactions-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+/* Error States */
+.error-rewards {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 40px;
+    color: #ef4444;
+}
+
+.error-transactions {
+    text-align: center;
+    padding: 40px;
+    color: #ef4444;
+}
+
+.error-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}

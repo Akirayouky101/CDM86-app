@@ -299,6 +299,26 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        .qr-title {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-subtitle {
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .margin-top-10 {
+            margin-top: 10px;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .stats-grid {
@@ -334,7 +354,7 @@
             <p>Caricamento dashboard...</p>
         </div>
         
-        <div id="dashboard" style="display: none;">
+        <div id="dashboard" class="hidden">
             <!-- Organization Info Card -->
             <div class="card">
                 <h2><i class="fas fa-building"></i> Informazioni Organizzazione</h2>
@@ -366,10 +386,10 @@
                     </button>
                 </div>
                 
-                <h3 style="text-align: center; margin-top: 30px; margin-bottom: 20px;">QR Code per Registrazione</h3>
+                <h3 class="qr-title">QR Code per Registrazione</h3>
                 <div class="qr-container">
                     <div id="qr-canvas"></div>
-                    <p style="margin-top: 15px; color: #666;">Scansiona per registrarti automaticamente</p>
+                    <p class="qr-subtitle">Scansiona per registrarti automaticamente</p>
                 </div>
             </div>
             
@@ -545,7 +565,7 @@
                     <div class="empty-state">
                         <i class="fas fa-users"></i>
                         <p>Nessun dipendente/membro registrato ancora</p>
-                        <p style="margin-top: 10px;">Condividi il codice referral per iniziare!</p>
+                        <p class="margin-top-10">Condividi il codice referral per iniziare!</p>
                     </div>
                 `;
                 return;

@@ -969,18 +969,18 @@
                 if (referrerContent) {
                     if (!referrerError && referrerData) {
                         referrerContent.innerHTML = `
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-top: 10px;">
-                                <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">SEI STATO INVITATO DA:</div>
-                                <div style="font-size: 1.4em; font-weight: 600; margin-bottom: 4px;">${referrerData.first_name} ${referrerData.last_name}</div>
-                                <div style="font-size: 1.1em; font-weight: 500; opacity: 0.95; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">Codice: ${referrerData.referral_code}</div>
+                            <div class="referrer-card">
+                                <div class="referrer-label">SEI STATO INVITATO DA:</div>
+                                <div class="referrer-name">${referrerData.first_name} ${referrerData.last_name}</div>
+                                <div class="referrer-code">Codice: ${referrerData.referral_code}</div>
                             </div>
                         `;
                     } else {
                         referrerContent.innerHTML = `
-                            <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; margin-top: 10px;">
-                                <div style="font-size: 2.5em; margin-bottom: 10px;">🌟</div>
-                                <div style="font-size: 1.1em; color: #666;">Sei un utente originale!</div>
-                                <div style="font-size: 0.9em; color: #999; margin-top: 5px;">Nessuno ti ha invitato.</div>
+                            <div class="original-user-card">
+                                <div class="original-user-icon">🌟</div>
+                                <div class="original-user-title">Sei un utente originale!</div>
+                                <div class="original-user-subtitle">Nessuno ti ha invitato.</div>
                             </div>
                         `;
                     }
@@ -1002,11 +1002,11 @@
                         const orgIcon = orgData.organization_type === 'company' ? '🏢' : '��';
                         
                         orgContent.innerHTML = `
-                            <div style="background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: white; padding: 20px; border-radius: 12px; margin-top: 10px;">
-                                <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">FAI PARTE DI QUESTA ORGANIZZAZIONE:</div>
-                                <div style="font-size: 1.4em; font-weight: 600; margin-bottom: 4px;">${orgIcon} ${orgData.name}</div>
-                                <div style="font-size: 1.0em; opacity: 0.9; margin-top: 4px;">${orgTypeLabel}</div>
-                                <div style="font-size: 1.1em; font-weight: 500; opacity: 0.95; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">Codice Organizzazione: ${orgData.referral_code}</div>
+                            <div class="organization-card">
+                                <div class="organization-label">FAI PARTE DI QUESTA ORGANIZZAZIONE:</div>
+                                <div class="organization-name">${orgIcon} ${orgData.name}</div>
+                                <div class="organization-type">${orgTypeLabel}</div>
+                                <div class="organization-code">Codice Organizzazione: ${orgData.referral_code}</div>
                             </div>
                         `;
                     }
@@ -1040,33 +1040,33 @@
                                 });
                                 
                                 return `
-                                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease;">
-                                        <div style="display: flex; align-items: center; gap: 15px;">
-                                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.1em;">
+                                    <li class="referral-user-card">
+                                        <div class="referral-user-info">
+                                            <div class="referral-user-avatar">
                                                 ${initials}
                                             </div>
                                             <div>
-                                                <div style="font-weight: 600; font-size: 1.05em; color: #333; margin-bottom: 4px;">
+                                                <div class="referral-user-name">
                                                     ${user.first_name} ${user.last_name}
                                                 </div>
-                                                <div style="font-size: 0.85em; color: #999;">
+                                                <div class="referral-user-date">
                                                     Iscritto il ${joinDate}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div style="text-align: right;">
-                                            <div style="font-size: 0.8em; color: #999; margin-bottom: 4px;">Codice Referral</div>
-                                            <div style="font-weight: 600; font-size: 1.1em; color: #667eea;">${user.referral_code}</div>
+                                        <div class="referral-user-code-section">
+                                            <div class="referral-code-label">Codice Referral</div>
+                                            <div class="referral-code-value">${user.referral_code}</div>
                                         </div>
                                     </li>
                                 `;
                             }).join('');
                         } else {
                             referredList.innerHTML = `
-                                <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 12px;">
-                                    <div style="font-size: 3em; margin-bottom: 15px;">👥</div>
-                                    <div style="font-size: 1.1em; color: #666; margin-bottom: 8px;">Non hai ancora invitato nessuno</div>
-                                    <div style="font-size: 0.9em; color: #999;">Condividi il tuo codice referral per iniziare!</div>
+                                <div class="empty-referrals-card">
+                                    <div class="empty-referrals-icon">👥</div>
+                                    <div class="empty-referrals-title">Non hai ancora invitato nessuno</div>
+                                    <div class="empty-referrals-subtitle">Condividi il tuo codice referral per iniziare!</div>
                                 </div>
                             `;
                         }
@@ -1137,10 +1137,10 @@
             
             if (requests.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #9ca3af;">
-                        <i class="fas fa-building" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
-                        <p style="font-size: 16px; font-weight: 500;">Nessuna segnalazione ancora</p>
-                        <p style="font-size: 14px; margin-top: 8px;">Condividi il tuo codice referral per invitare aziende!</p>
+                    <div class="empty-org-requests">
+                        <i class="fas fa-building empty-org-icon"></i>
+                        <p class="empty-org-title">Nessuna segnalazione ancora</p>
+                        <p class="empty-org-subtitle">Condividi il tuo codice referral per invitare aziende!</p>
                     </div>
                 `;
                 return;
@@ -1192,11 +1192,11 @@
                         </div>
                         
                         ${request.status === 'rejected' && request.admin_notes ? `
-                        <div style="margin-top: 15px; padding: 12px; background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px;">
-                            <div style="font-size: 12px; font-weight: 600; color: #991b1b; margin-bottom: 6px;">
+                        <div class="rejection-notice">
+                            <div class="rejection-label">
                                 ❌ Motivo del rifiuto:
                             </div>
-                            <div style="font-size: 14px; color: #7f1d1d;">
+                            <div class="rejection-text">
                                 ${request.admin_notes}
                             </div>
                         </div>
@@ -1253,7 +1253,7 @@
             } else {
                 // Fallback to Google Charts API
                 const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(referralUrl)}`;
-                qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" style="max-width: 100%; border-radius: 8px;">`;
+                qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" class="qr-code-image">`;
             }
         }
         
@@ -1682,8 +1682,8 @@
                 
                 if (!rewards || rewards.length === 0) {
                     rewardsGrid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
-                            <i class="fas fa-gift" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                        <div class="empty-rewards">
+                            <i class="fas fa-gift empty-rewards-icon"></i>
                             <p>Nessun premio disponibile al momento</p>
                         </div>
                     `;
@@ -1737,8 +1737,8 @@
             } catch (error) {
                 console.error('Error loading rewards:', error);
                 document.getElementById('rewards-grid').innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #ef4444;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <div class="error-rewards">
+                        <i class="fas fa-exclamation-triangle error-icon"></i>
                         <p>Errore nel caricamento dei premi</p>
                     </div>
                 `;
@@ -1761,8 +1761,8 @@
                 
                 if (!transactions || transactions.length === 0) {
                     transactionsList.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #999;">
-                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                        <div class="empty-transactions">
+                            <i class="fas fa-inbox empty-transactions-icon"></i>
                             <p>Nessuna transazione trovata</p>
                         </div>
                     `;
@@ -1818,8 +1818,8 @@
             } catch (error) {
                 console.error('Error loading transactions:', error);
                 document.getElementById('transactions-list').innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #ef4444;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <div class="error-transactions">
+                        <i class="fas fa-exclamation-triangle error-icon"></i>
                         <p>Errore nel caricamento delle transazioni</p>
                     </div>
                 `;
