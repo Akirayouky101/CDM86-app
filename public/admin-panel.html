@@ -1494,11 +1494,11 @@
                 
                 <!-- Time Filter -->
                 <div class="time-filter">
-                    <button class="time-btn active" onclick="setTimeFilter('7d')">Ultimi 7 Giorni</button>
-                    <button class="time-btn" onclick="setTimeFilter('30d')">Ultimo Mese</button>
-                    <button class="time-btn" onclick="setTimeFilter('90d')">Ultimi 3 Mesi</button>
-                    <button class="time-btn" onclick="setTimeFilter('365d')">Ultimo Anno</button>
-                    <button class="time-btn" onclick="setTimeFilter('all')">Tutto</button>
+                    <button class="btn-filter active" onclick="setTimeFilter('7d')">Ultimi 7 Giorni</button>
+                    <button class="btn-filter" onclick="setTimeFilter('30d')">Ultimo Mese</button>
+                    <button class="btn-filter" onclick="setTimeFilter('90d')">Ultimi 3 Mesi</button>
+                    <button class="btn-filter" onclick="setTimeFilter('365d')">Ultimo Anno</button>
+                    <button class="btn-filter" onclick="setTimeFilter('all')">Tutto</button>
                 </div>
                 
                 <!-- Analytics Stats Grid -->
@@ -1799,20 +1799,20 @@
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card total">
-                        <div class="stat-value" id="org-stat-total">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="org-stat-total">0</div>
                         <div class="stat-label">Totale Richieste</div>
                     </div>
-                    <div class="stat-card pending">
-                        <div class="stat-value" id="org-stat-pending">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="org-stat-pending">0</div>
                         <div class="stat-label">Da Contattare</div>
                     </div>
-                    <div class="stat-card approved">
-                        <div class="stat-value" id="org-stat-approved">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="org-stat-approved">0</div>
                         <div class="stat-label">Approvate</div>
                     </div>
-                    <div class="stat-card completed">
-                        <div class="stat-value" id="org-stat-completed">0</div>
+                    <div class="stats-card">
+                        <div class="stats-value" id="org-stat-completed">0</div>
                         <div class="stat-label">Completate</div>
                     </div>
                 </div>
@@ -1822,7 +1822,7 @@
                     <div class="filters-row">
                         <div class="filter-group">
                             <label>Stato</label>
-                            <select id="org-filter-status" onchange="applyOrgFilters()">
+                            <select id="org-filter-status" class="enhanced-select" onchange="applyOrgFilters()">
                                 <option value="">Tutti gli stati</option>
                                 <option value="pending">⏳ Da Contattare</option>
                                 <option value="approved">✅ Approvate</option>
@@ -1832,17 +1832,18 @@
                         </div>
                         <div class="filter-group">
                             <label>Ha Referral</label>
-                            <select id="org-filter-referral" onchange="applyOrgFilters()">
+                            <select id="org-filter-referral" class="enhanced-select" onchange="applyOrgFilters()">
                                 <option value="">Tutti</option>
                                 <option value="yes">✅ Con Referral</option>
                                 <option value="no">❌ Senza Referral</option>
                             </select>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group search-box">
                             <label>Cerca</label>
-                            <input type="text" id="org-filter-search" placeholder="Nome azienda, email, telefono..." oninput="applyOrgFilters()">
+                            <input type="text" id="org-filter-search" class="search-input" placeholder="Nome azienda, email, telefono..." oninput="applyOrgFilters()">
+                            <i class="fas fa-search search-icon"></i>
                         </div>
-                        <button class="btn-filter-clear" onclick="clearOrgFilters()">
+                        <button class="btn-action-reject" onclick="clearOrgFilters()">
                             <i class="fas fa-times"></i> Cancella Filtri
                         </button>
                     </div>
@@ -1853,7 +1854,7 @@
                     <div class="section-header">
                         <h2>🏢 Richieste Aziende (<span id="count-org-requests">0</span>)</h2>
                     </div>
-                    <div id="org-requests-list">
+                    <div id="org-requests-list" class="enhanced-list">
                         <!-- Populated by JavaScript -->
                     </div>
                 </div>
@@ -2065,7 +2066,7 @@
         // Time Filter
         window.setTimeFilter = function(filter) {
             currentTimeFilter = filter;
-            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.time-filter .btn-filter').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             loadAnalytics();
         };
@@ -3662,12 +3663,12 @@
                 const contactName = `${request.contact_first_name || ''} ${request.contact_last_name || ''}`.trim();
                 
                 return `
-                <div class="request-card ${request.status}">
+                <div class="list-card ${request.status}">
                     <div class="request-header">
                         <div>
                             <h3>🏢 ${request.organization_name}</h3>
-                            <p class="request-info">� Referente: <strong>${contactName}</strong></p>
-                            <p class="request-info">� ${request.contact_email} • 📞 ${request.contact_phone}</p>
+                            <p class="request-info">👤 Referente: <strong>${contactName}</strong></p>
+                            <p class="request-info">📧 ${request.contact_email} • 📞 ${request.contact_phone}</p>
                             ${hasReferral ?
                                 `<p class="request-info">🎫 Codice Referral: <strong>${request.referred_by_code}</strong></p>` :
                                 '<p class="request-info">⚠️ Nessun codice referral</p>'}
@@ -3675,32 +3676,32 @@
                         </div>
                         <span class="status-badge ${request.status}">${getOrgStatusLabel(request.status)}</span>
                     </div>
-                    ${request.admin_notes ? `<div class="request-notes">� Note Admin: ${request.admin_notes}</div>` : ''}
-                    ${request.contract_code ? `<div class="request-message">� Codice Contratto: <strong>${request.contract_code}</strong></div>` : ''}
+                    ${request.admin_notes ? `<div class="request-notes">📝 Note Admin: ${request.admin_notes}</div>` : ''}
+                    ${request.contract_code ? `<div class="request-message">📄 Codice Contratto: <strong>${request.contract_code}</strong></div>` : ''}
                     <div class="request-footer">
                         <span class="request-date">🕐 Richiesta: ${new Date(request.created_at).toLocaleString('it-IT')}</span>
                         ${request.approved_at ? `<span class="request-date"> • ✅ Approvata: ${new Date(request.approved_at).toLocaleString('it-IT')}</span>` : ''}
                         <div class="request-actions">
                             ${request.status === 'pending' ? `
-                                <button class="btn-action btn-approve" onclick="approveOrg('${request.id}')">
+                                <button class="btn-action-approve" onclick="approveOrg('${request.id}')">
                                     <i class="fas fa-check"></i> Approva
                                 </button>
-                                <button class="btn-action btn-reject" onclick="rejectOrg('${request.id}')">
+                                <button class="btn-action-reject" onclick="rejectOrg('${request.id}')">
                                     <i class="fas fa-times"></i> Rifiuta
                                 </button>
                             ` : ''}
                             ${request.status === 'approved' && !request.contract_code ? `
-                                <button class="btn-action btn-complete" onclick="assignContractCode('${request.id}')">
+                                <button class="btn-action-edit" onclick="assignContractCode('${request.id}')">
                                     <i class="fas fa-file-contract"></i> Assegna Codice
                                 </button>
                             ` : ''}
-                            <button class="btn-action" onclick="addOrgNote('${request.id}')">
+                            <button class="btn-filter" onclick="addOrgNote('${request.id}')">
                                 <i class="fas fa-sticky-note"></i> Note
                             </button>
-                            <button class="btn-action" onclick="emailOrg('${request.contact_email}', '${request.organization_name}')">
+                            <button class="btn-filter" onclick="emailOrg('${request.contact_email}', '${request.organization_name}')">
                                 <i class="fas fa-envelope"></i> Email
                             </button>
-                            <button class="btn-action btn-delete" onclick="deleteOrgRequest('${request.id}')">
+                            <button class="btn-action-reject" onclick="deleteOrgRequest('${request.id}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
