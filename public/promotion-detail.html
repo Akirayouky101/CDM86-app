@@ -169,7 +169,7 @@
             <div class="promo-detail-content">
                 <div class="promo-detail-header">
                     <h1 class="promo-detail-title" id="promo-title">Caricamento...</h1>
-                    <button class="promo-favorite-btn" id="favorite-btn" onclick="toggleFavorite()">
+                    <button class="promo-favorite-btn" id="favorite-btn" onclick="toggleFavorite()" aria-label="Aggiungi ai preferiti" title="Aggiungi ai preferiti">
                         <i class="fas fa-heart"></i>
                     </button>
                 </div>
@@ -188,7 +188,7 @@
                         <div class="price-label">Prezzo originale</div>
                         <div class="price-original" id="price-original">€0.00</div>
                     </div>
-                    <div style="flex: 1; text-align: right;">
+                    <div class="flex-1 text-right">
                         <div class="price-label">Prezzo scontato</div>
                         <div class="price-final" id="price-final">€0.00</div>
                     </div>
@@ -404,16 +404,16 @@
                 `;
                 
                 dropdown.innerHTML = `
-                    <a href="/public/dashboard.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                    <a href="/public/dashboard.html" class="dropdown-menu-item">
                         <span>📊</span><span>Dashboard</span>
                     </a>
-                    <a href="/public/promotions.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                    <a href="/public/promotions.html" class="dropdown-menu-item">
                         <span>🎫</span><span>Promozioni</span>
                     </a>
-                    <a href="/public/favorites.html" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                    <a href="/public/favorites.html" class="dropdown-menu-item">
                         <span>❤️</span><span>Preferiti</span>
                     </a>
-                    <a href="#" onclick="logout(event)" style="padding: 14px 20px; display: flex; align-items: center; gap: 12px; color: #e74c3c; text-decoration: none;">
+                    <a href="#" onclick="logout(event)" class="dropdown-menu-item logout-item">
                         <span>🚪</span><span>Esci</span>
                     </a>
                 `;

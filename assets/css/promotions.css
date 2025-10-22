@@ -714,6 +714,14 @@ body {
     text-align: center;
 }
 
+.text-right {
+    text-align: right;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
 .padding-2rem {
     padding: 2rem;
 }
