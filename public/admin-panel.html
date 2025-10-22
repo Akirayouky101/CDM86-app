@@ -4895,51 +4895,48 @@
     </div>
 
     <!-- Reward Form Modal -->
-    <div id="reward-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 24px; padding: 40px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 id="reward-form-title" style="margin: 0; color: #1e293b;">🎁 Aggiungi Nuovo Premio</h2>
-                <button onclick="closeRewardForm()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #64748b; padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;">
+    <div id="reward-form-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reward-form-title" class="modal-title">🎁 Aggiungi Nuovo Premio</h2>
+                <button type="button" onclick="closeRewardForm()" class="modal-close-btn" aria-label="Chiudi modal">
                     ×
                 </button>
             </div>
             
-            <form id="reward-form" onsubmit="saveReward(event)" style="display: flex; flex-direction: column; gap: 20px;">
+            <form id="reward-form" onsubmit="saveReward(event)" class="form-container">
                 <input type="hidden" id="reward-id" value="">
                 
-                <div>
-                    <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                <div class="form-group">
+                    <label for="reward-title" class="form-label">
                         🏷️ Titolo Premio *
                     </label>
-                    <input type="text" id="reward-title" required 
-                           style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: all 0.3s;"
+                    <input type="text" id="reward-title" class="form-input" required 
                            placeholder="es. Buono Amazon 10€">
                 </div>
                 
-                <div>
-                    <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                <div class="form-group">
+                    <label for="reward-description" class="form-label">
                         📝 Descrizione *
                     </label>
-                    <textarea id="reward-description" required rows="3"
-                              style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; resize: vertical; transition: all 0.3s;"
+                    <textarea id="reward-description" class="form-textarea" required rows="3"
                               placeholder="Descrivi il premio in dettaglio..."></textarea>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reward-points" class="form-label">
                             ⭐ Punti Richiesti *
                         </label>
-                        <input type="number" id="reward-points" required min="0"
-                               style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: all 0.3s;"
+                        <input type="number" id="reward-points" class="form-number" required min="0"
                                placeholder="100">
                     </div>
                     
-                    <div>
-                        <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                    <div class="form-group">
+                        <label for="reward-level" class="form-label">
                             🏆 Livello Richiesto *
                         </label>
-                        <select id="reward-level" required class="enhanced-select">
+                        <select id="reward-level" class="enhanced-select" required>
                             <option value="bronze">🥉 Bronze</option>
                             <option value="silver">🥈 Silver</option>
                             <option value="gold">🥇 Gold</option>
@@ -4948,40 +4945,37 @@
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reward-stock" class="form-label">
                             📦 Stock
                         </label>
-                        <input type="number" id="reward-stock" min="-1"
-                               style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: all 0.3s;"
+                        <input type="number" id="reward-stock" class="form-number" min="-1"
                                placeholder="-1 = Illimitato">
-                        <small style="color: #64748b; font-size: 13px;">-1 per stock illimitato</small>
+                        <small class="form-hint">-1 per stock illimitato</small>
                     </div>
                     
-                    <div>
-                        <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                    <div class="form-group">
+                        <label for="reward-icon" class="form-label">
                             😊 Icona (Emoji)
                         </label>
-                        <input type="text" id="reward-icon" maxlength="2"
-                               style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: all 0.3s;"
+                        <input type="text" id="reward-icon" class="form-input" maxlength="2"
                                placeholder="🎁">
                     </div>
                 </div>
                 
-                <div>
-                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 16px; background: #f8fafc; border-radius: 12px; transition: all 0.3s;">
-                        <input type="checkbox" id="reward-active" checked
-                               style="width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-weight: 600; color: #334155;">✅ Premio Attivo</span>
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="reward-active" class="form-checkbox" checked>
+                        <span class="checkbox-label">✅ Premio Attivo</span>
                     </label>
                 </div>
                 
-                <div style="display: flex; gap: 12px; margin-top: 10px;">
-                    <button type="button" onclick="closeRewardForm()" class="btn-secondary" style="flex: 1;">
+                <div class="form-actions">
+                    <button type="button" onclick="closeRewardForm()" class="btn-secondary">
                         <i class="fas fa-times"></i> Annulla
                     </button>
-                    <button type="submit" class="btn-action-edit" style="flex: 2;">
+                    <button type="submit" class="btn-action-edit">
                         <i class="fas fa-save"></i> Salva Premio
                     </button>
                 </div>
