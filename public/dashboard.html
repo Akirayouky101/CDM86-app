@@ -1082,6 +1082,9 @@
                 if (loading) loading.style.display = 'none';
                 if (content) content.classList.remove('content-hidden');
                 
+                // Load points system after dashboard is ready
+                await loadPointsSystem();
+                
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 alert('Errore nel caricamento dei dati: ' + error.message);
@@ -1912,11 +1915,6 @@
                     setTimeout(() => confetti.remove(), 4000);
                 }, i * 30);
             }
-        }
-        
-        // Initialize points system when dashboard loads
-        if (currentUser) {
-            loadPointsSystem();
         }
     </script>
 </body>
