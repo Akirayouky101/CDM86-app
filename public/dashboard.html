@@ -817,11 +817,11 @@
             }
             
             // Check if user is an organization - redirect to org dashboard
-            const { data: orgData } = await supabase
+            const { data: orgData, error: orgError } = await supabase
                 .from('organizations')
                 .select('id')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
             
             if (orgData) {
                 // This is an organization, redirect to org dashboard
