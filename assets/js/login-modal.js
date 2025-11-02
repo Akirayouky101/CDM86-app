@@ -539,9 +539,9 @@ export async function handleRegister(event) {
 
         if (authError) throw authError;
 
-        // Aggiorna referred_by_id o organization_id
+        // Aggiorna referred_by_id o organization_id tramite API (bypassa RLS)
         if ((referrer || referrerOrgId) && authData.user) {
-            console.log('🔄 Inizio aggiornamento referral...');
+            console.log('🔄 Inizio aggiornamento referral tramite API...');
             console.log('👤 User ID:', authData.user.id);
             console.log('🎯 Referrer:', referrer);
             console.log('🏢 Org ID:', referrerOrgId);
@@ -549,44 +549,49 @@ export async function handleRegister(event) {
             // Aspetta che il trigger crei l'entry in users
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            const updateData = {};
-            if (referrer) {
-                updateData.referred_by_id = referrer.id;
-                console.log('✅ Imposto referred_by_id:', referrer.id);
-            }
-            if (referrerOrgId) {
-                updateData.organization_id = referrerOrgId;
-                console.log('✅ Imposto organization_id:', referrerOrgId);
-            }
+            try {
+                const apiUrl = window.CDM86_CONFIG?.api?.baseUrl || '/api';
+                const response = await fetch(`${apiUrl}/set-referral`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: authData.user.id,
+                        referredById: referrer?.id || null,
+                        organizationId: referrerOrgId || null
+                    })
+                });
 
-            console.log('📝 UpdateData:', updateData);
+                const result = await response.json();
 
-            const { data: updateResult, error: updateError } = await supabase
-                .from('users')
-                .update(updateData)
-                .eq('id', authData.user.id)
-                .select();
-
-            if (updateError) {
-                console.error('❌ ERRORE aggiornamento referral:', updateError);
-            } else {
-                console.log('✅ UPDATE riuscito:', updateResult);
-            }
-            
-            // Verifica che l'update sia andato a buon fine
-            const { data: verifyUser, error: verifyError } = await supabase
-                .from('users')
-                .select('id, referred_by_id, organization_id')
-                .eq('id', authData.user.id)
-                .single();
-            
-            if (verifyError) {
-                console.error('❌ ERRORE verifica utente:', verifyError);
-            } else {
-                console.log('🔍 VERIFICA utente dopo update:', verifyUser);
-                if (referrer && !verifyUser.referred_by_id) {
-                    console.error('⚠️ PROBLEMA: referred_by_id è ancora NULL dopo UPDATE!');
+                if (!response.ok) {
+                    console.error('❌ ERRORE API set-referral:', result);
+                    throw new Error(result.error || 'Failed to set referral');
                 }
+
+                console.log('✅ Referral impostato via API:', result.data);
+                
+                // Verifica finale
+                const { data: verifyUser, error: verifyError } = await supabase
+                    .from('users')
+                    .select('id, referred_by_id, organization_id')
+                    .eq('id', authData.user.id)
+                    .single();
+                
+                if (verifyError) {
+                    console.error('❌ ERRORE verifica utente:', verifyError);
+                } else {
+                    console.log('🔍 VERIFICA utente dopo update:', verifyUser);
+                    if (referrer && !verifyUser.referred_by_id) {
+                        console.error('⚠️ PROBLEMA: referred_by_id è ancora NULL dopo UPDATE API!');
+                    } else if (referrer && verifyUser.referred_by_id) {
+                        console.log('🎉 SUCCESS! referred_by_id impostato correttamente!');
+                    }
+                }
+
+            } catch (error) {
+                console.error('❌ Errore chiamata API set-referral:', error);
             }
         }
 
