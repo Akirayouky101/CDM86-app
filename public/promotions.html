@@ -906,9 +906,16 @@
                     .from('users')
                     .select('*')
                     .eq('id', currentUser.id)
-                    .single();
+                    .maybeSingle();
                 
                 if (error) throw error;
+                
+                // Se l'utente non esiste ancora nella tabella users, aspetta
+                if (!userData) {
+                    console.warn('User not yet in users table, retrying...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return loadUserInfo(); // Riprova
+                }
                 
                 const firstName = userData.first_name || 'User';
                 const greetingEl = document.getElementById('user-greeting'); if (greetingEl) greetingEl.textContent = `Ciao, ${firstName}!`;
