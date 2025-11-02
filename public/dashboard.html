@@ -85,6 +85,23 @@
             font-size: 12px !important;
         }
         
+        /* Modal animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
         .content-hidden {
             display: none;
         }
@@ -959,10 +976,10 @@
                 // Generate QR Code for referral
                 generateQRCode(userData.referral_code);
                 
-                // Update referral link
+                // Update referral link (punta alla registrazione con codice precompilato)
                 const referralLinkEl = document.getElementById('referral-link');
                 if (referralLinkEl && userData.referral_code) {
-                    const link = `https://cdm86.com/index.html?ref=${userData.referral_code}`;
+                    const link = `https://cdm86.com?ref=${userData.referral_code}`;
                     referralLinkEl.textContent = link;
                 }
                 
@@ -1253,7 +1270,7 @@
             const qrContainer = document.getElementById('qr-canvas');
             if (!qrContainer || !referralCode) return;
             
-            const referralUrl = `https://cdm86.com/index.html?ref=${referralCode}`;
+            const referralUrl = `https://cdm86.com?ref=${referralCode}`;
             
             // Clear previous QR code
             qrContainer.innerHTML = '';
@@ -1275,17 +1292,71 @@
             }
         }
         
+        // Show success modal
+        function showSuccessModal(title, message) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 400px;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    animation: slideUp 0.3s ease;
+                ">
+                    <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+                    <h3 style="color: #10b981; font-size: 24px; margin-bottom: 10px;">${title}</h3>
+                    <p style="color: #666; font-size: 16px; margin-bottom: 30px;">${message}</p>
+                    <button onclick="this.closest('div').parentElement.remove()" style="
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 12px 40px;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        OK
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Auto close after 3 seconds
+            setTimeout(() => {
+                modal.remove();
+            }, 3000);
+        }
+        
         // Copy referral code
         window.copyCode = function() {
             const code = document.getElementById('my-code')?.textContent;
             if (!code || code === 'LOADING...' || code === 'N/A') {
-                alert('❌ Codice non disponibile');
+                showSuccessModal('❌ Errore', 'Codice non disponibile');
                 return;
             }
             navigator.clipboard.writeText(code).then(() => {
-                alert('✅ Codice referral copiato!');
+                showSuccessModal('Codice Copiato!', `Il tuo codice referral "${code}" è stato copiato negli appunti`);
             }).catch(() => {
-                alert('❌ Errore nella copia');
+                showSuccessModal('❌ Errore', 'Errore nella copia del codice');
             });
         };
         
@@ -1293,11 +1364,11 @@
         window.copyLink = function() {
             const link = document.getElementById('referral-link')?.textContent;
             if (!link || link === 'Caricamento link...') {
-                alert('❌ Link non disponibile');
+                showSuccessModal('❌ Errore', 'Link non disponibile');
                 return;
             }
             navigator.clipboard.writeText(link).then(() => {
-                alert('✅ Link referral copiato!');
+                showSuccessModal('Link Copiato!', 'Il link di invito è stato copiato. Condividilo con i tuoi amici!');
             }).catch(() => {
                 alert('❌ Errore nella copia');
             });

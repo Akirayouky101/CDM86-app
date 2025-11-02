@@ -1168,6 +1168,90 @@
             console.log('📱 PWA can be installed');
         });
         
+        // Check for referral code in URL
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            
+            if (refCode) {
+                console.log('🎯 Referral code detected:', refCode);
+                
+                // Save referral code to localStorage
+                localStorage.setItem('referral_code', refCode);
+                
+                // Wait for LoginModal to be loaded
+                setTimeout(() => {
+                    if (window.LoginModal) {
+                        // Show selection modal first
+                        window.LoginModal.showSelection();
+                        
+                        // Auto-select "Utente" option
+                        setTimeout(() => {
+                            window.LoginModal.selectUser();
+                            
+                            // Switch to register tab
+                            setTimeout(() => {
+                                const registerTab = document.querySelector('[onclick="window.LoginModal.switchTab(\'register\')"]');
+                                if (registerTab) {
+                                    registerTab.click();
+                                    
+                                    // Pre-fill referral code
+                                    setTimeout(() => {
+                                        const referralInput = document.getElementById('registerReferralCode');
+                                        if (referralInput) {
+                                            referralInput.value = refCode.toUpperCase();
+                                            
+                                            // Visual feedback
+                                            referralInput.style.borderColor = '#10b981';
+                                            referralInput.style.background = '#f0fdf4';
+                                            
+                                            // Show success message
+                                            const message = document.createElement('div');
+                                            message.style.cssText = `
+                                                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                                color: white;
+                                                padding: 12px 20px;
+                                                border-radius: 10px;
+                                                margin-bottom: 15px;
+                                                font-weight: 600;
+                                                text-align: center;
+                                                animation: slideDown 0.3s ease;
+                                            `;
+                                            message.innerHTML = `✅ Codice referral <strong>${refCode.toUpperCase()}</strong> applicato!`;
+                                            
+                                            const form = referralInput.closest('form');
+                                            if (form) {
+                                                form.insertBefore(message, form.firstChild);
+                                            }
+                                        }
+                                    }, 300);
+                                }
+                            }, 200);
+                        }, 200);
+                    } else {
+                        console.warn('⚠️ LoginModal not loaded yet');
+                    }
+                }, 500);
+            }
+        })();
+    </script>
+    <script>
+        // Keyframes for slideDown animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
         window.addEventListener('appinstalled', () => {
             console.log('✅ PWA installed successfully');
             deferredPrompt = null;
