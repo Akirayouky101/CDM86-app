@@ -51,7 +51,7 @@ SELECT
     pt.id,
     pt.user_id,
     u.first_name || ' ' || u.last_name as user_name,
-    pt.points_awarded,
+    pt.points,
     pt.description,
     pt.created_at
 FROM points_transactions pt
