@@ -992,9 +992,16 @@
                         .from('users')
                         .select('id, first_name, last_name, referral_code')
                         .eq('id', userData.referred_by_id)
-                        .single();
+                        .maybeSingle();
                     referrerData = result.data;
                     referrerError = result.error;
+                    
+                    console.log('🔍 Referrer lookup:', {
+                        referred_by_id: userData.referred_by_id,
+                        found: !!referrerData,
+                        data: referrerData,
+                        error: referrerError
+                    });
                 }
                 
                 const referrerContent = document.getElementById('referrer-content');
