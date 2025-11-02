@@ -898,8 +898,6 @@
         }
         
         // Load user info
-        
-        // Load user info
         async function loadUserInfo() {
             try {
                 const { data: userData, error } = await supabase
@@ -910,11 +908,11 @@
                 
                 if (error) throw error;
                 
-                // Se l'utente non esiste ancora nella tabella users, aspetta
+                // Se l'utente non esiste ancora nella tabella users, aspetta e riprova
                 if (!userData) {
-                    console.warn('User not yet in users table, retrying...');
+                    console.warn('User not yet in users table, retrying in 1s...');
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    return loadUserInfo(); // Riprova
+                    return loadUserInfo();
                 }
                 
                 const firstName = userData.first_name || 'User';
