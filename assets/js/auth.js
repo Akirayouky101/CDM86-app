@@ -85,13 +85,20 @@ export async function login(email, password) {
 // Funzione: Logout
 export async function logout() {
     try {
-        const { error } = await supabase.auth.signOut();
+        // Clear all storage first
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Sign out from Supabase with global scope
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
         if (error) throw error;
         
-        localStorage.removeItem('supabase_session');
         return { success: true };
     } catch (error) {
         console.error('Logout error:', error);
+        // Force logout anyway by clearing storage
+        localStorage.clear();
+        sessionStorage.clear();
         return { success: false, message: error.message };
     }
 }
