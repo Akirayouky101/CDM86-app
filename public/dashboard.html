@@ -1584,9 +1584,9 @@
                     .from('user_points')
                     .select('*')
                     .eq('user_id', userId)
-                    .single();
+                    .maybeSingle();
                 
-                if (pointsError && pointsError.code !== 'PGRST116') {
+                if (pointsError) {
                     throw pointsError;
                 }
                 
