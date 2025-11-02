@@ -12,6 +12,21 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export default async function handler(req, res) {
+    // CORS Headers
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Permetti tutti per ora
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
     // Solo POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
