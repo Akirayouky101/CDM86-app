@@ -1451,22 +1451,30 @@
     <script>
         // Show success modal
         window.showSuccessModal = function() {
-            document.getElementById('successModal').style.display = 'flex';
+            const modal = document.getElementById('successModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         };
         
         // Close success modal
         window.closeSuccessModal = function() {
-            document.getElementById('successModal').style.display = 'none';
+            const modal = document.getElementById('successModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
         };
         
         // Open report company modal
         window.openReportCompanyModal = function() {
-            document.getElementById('reportCompanyModal').style.display = 'flex';
+            const modal = document.getElementById('reportCompanyModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         };
         
         // Close report company modal
         window.closeReportCompanyModal = function() {
-            document.getElementById('reportCompanyModal').style.display = 'none';
+            const modal = document.getElementById('reportCompanyModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
             document.getElementById('reportCompanyForm').reset();
         };
         
