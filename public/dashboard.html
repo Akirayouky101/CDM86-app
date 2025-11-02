@@ -1572,7 +1572,12 @@
         // Load Points System Data
         async function loadPointsSystem() {
             try {
-                const userId = currentUser.id;
+                const user = window.getCurrentUser();
+                if (!user) {
+                    console.error('No current user found');
+                    return;
+                }
+                const userId = user.id;
                 
                 // Get user points
                 const { data: pointsData, error: pointsError } = await window.supabaseClient
@@ -1751,10 +1756,13 @@
         // Load Transactions
         async function loadTransactions() {
             try {
+                const user = window.getCurrentUser();
+                if (!user) return;
+                
                 const { data: transactions, error } = await window.supabaseClient
                     .from('points_transactions')
                     .select('*')
-                    .eq('user_id', currentUser.id)
+                    .eq('user_id', user.id)
                     .order('created_at', { ascending: false })
                     .limit(10);
                 
@@ -1849,11 +1857,17 @@
         window.confirmRedeem = async function() {
             if (!currentReward) return;
             
+            const user = window.getCurrentUser();
+            if (!user) {
+                alert('❌ Errore: utente non trovato');
+                return;
+            }
+            
             try {
                 // Call the deduct_points_from_user function
                 const { data, error } = await window.supabaseClient
                     .rpc('deduct_points_from_user', {
-                        p_user_id: currentUser.id,
+                        p_user_id: user.id,
                         p_points: currentReward.points_required,
                         p_transaction_type: 'reward_redeemed',
                         p_reference_id: currentReward.id,
@@ -1871,7 +1885,7 @@
                 await window.supabaseClient
                     .from('reward_redemptions')
                     .insert({
-                        user_id: currentUser.id,
+                        user_id: user.id,
                         reward_id: currentReward.id,
                         points_spent: currentReward.points_required,
                         status: 'pending'
