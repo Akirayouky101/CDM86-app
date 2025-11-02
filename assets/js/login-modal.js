@@ -504,7 +504,7 @@ export async function handleRegister(event) {
                     .from('organizations')
                     .select('id, referral_code, name')
                     .eq('referral_code', referralCode)
-                    .single();
+                    .maybeSingle();
 
                 if (orgError || !orgData) {
                     throw new Error('CODICE ORGANIZZAZIONE NON VALIDO!');
@@ -516,7 +516,7 @@ export async function handleRegister(event) {
                     .from('users')
                     .select('id, referral_code, first_name, last_name')
                     .eq('referral_code', referralCode)
-                    .single();
+                    .maybeSingle();
 
                 if (referrerError || !referrerData) {
                     throw new Error('CODICE REFERRAL NON VALIDO!');
