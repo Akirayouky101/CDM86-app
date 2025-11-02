@@ -35,6 +35,13 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - NO CACHING, always network
 self.addEventListener('fetch', (event) => {
+    // Skip service worker for API calls
+    if (event.request.url.includes('/api/') || 
+        event.request.url.includes('vercel.app') ||
+        event.request.url.includes('supabase.co')) {
+        return; // Let the browser handle it directly
+    }
+    
     event.respondWith(
         fetch(event.request)
             .then(response => {
