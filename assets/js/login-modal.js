@@ -450,7 +450,7 @@ export async function handleLogin(event) {
                 .from('organizations')
                 .select('id')
                 .eq('id', data.user.id)
-                .single();
+                .maybeSingle();
 
             // Redirect based on user type
             setTimeout(() => {
