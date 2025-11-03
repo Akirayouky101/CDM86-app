@@ -5145,22 +5145,35 @@
         let pendingResetEmail = null;
 
         window.resetUserPassword = function(userId, email) {
+            console.log('🔑 resetUserPassword chiamata:', userId, email);
+            alert('DEBUG: resetUserPassword chiamata per ' + email);
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
             document.getElementById('reset-password-modal').style.display = 'flex';
+            console.log('✅ Modale reset aperta');
         }
 
         window.closeResetPasswordModal = function() {
+            console.log('❌ closeResetPasswordModal chiamata');
             document.getElementById('reset-password-modal').style.display = 'none';
             pendingResetUserId = null;
             pendingResetEmail = null;
         }
 
         window.confirmResetPassword = async function() {
-            if (!pendingResetUserId || !pendingResetEmail) return;
+            console.log('✅ confirmResetPassword chiamata');
+            alert('DEBUG: confirmResetPassword chiamata!');
+            if (!pendingResetUserId || !pendingResetEmail) {
+                alert('DEBUG: Errore - pendingResetUserId o pendingResetEmail mancanti');
+                return;
+            }
             
             const confirmBtn = document.getElementById('confirm-reset-btn');
+            if (!confirmBtn) {
+                alert('DEBUG: Errore - pulsante confirm-reset-btn non trovato!');
+                return;
+            }
             const originalText = confirmBtn.innerHTML;
             confirmBtn.innerHTML = '⏳ Invio...';
             confirmBtn.disabled = true;
@@ -5190,22 +5203,35 @@
         let pendingDeleteEmail = null;
 
         window.deleteUser = function(userId, email) {
+            console.log('🗑️ deleteUser chiamata:', userId, email);
+            alert('DEBUG: deleteUser chiamata per ' + email);
             pendingDeleteUserId = userId;
             pendingDeleteEmail = email;
             document.getElementById('delete-user-email').textContent = email;
             document.getElementById('delete-user-modal').style.display = 'flex';
+            console.log('✅ Modale delete aperta');
         }
 
         window.closeDeleteUserModal = function() {
+            console.log('❌ closeDeleteUserModal chiamata');
             document.getElementById('delete-user-modal').style.display = 'none';
             pendingDeleteUserId = null;
             pendingDeleteEmail = null;
         }
 
         window.confirmDeleteUser = async function() {
-            if (!pendingDeleteUserId || !pendingDeleteEmail) return;
+            console.log('✅ confirmDeleteUser chiamata');
+            alert('DEBUG: confirmDeleteUser chiamata!');
+            if (!pendingDeleteUserId || !pendingDeleteEmail) {
+                alert('DEBUG: Errore - pendingDeleteUserId o pendingDeleteEmail mancanti');
+                return;
+            }
             
             const confirmBtn = document.getElementById('confirm-delete-btn');
+            if (!confirmBtn) {
+                alert('DEBUG: Errore - pulsante confirm-delete-btn non trovato!');
+                return;
+            }
             const originalText = confirmBtn.innerHTML;
             confirmBtn.innerHTML = '⏳ Eliminazione...';
             confirmBtn.disabled = true;
