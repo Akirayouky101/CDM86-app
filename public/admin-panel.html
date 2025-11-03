@@ -5159,6 +5159,7 @@
 
         window.closeResetPasswordModal = function() {
             console.log('❌ closeResetPasswordModal chiamata');
+            console.trace('Stack trace di closeResetPasswordModal:');
             document.getElementById('reset-password-modal').style.display = 'none';
             pendingResetUserId = null;
             pendingResetEmail = null;
@@ -5220,6 +5221,7 @@
 
         window.closeDeleteUserModal = function() {
             console.log('❌ closeDeleteUserModal chiamata');
+            console.trace('Stack trace di closeDeleteUserModal:');
             document.getElementById('delete-user-modal').style.display = 'none';
             pendingDeleteUserId = null;
             pendingDeleteEmail = null;
