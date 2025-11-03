@@ -1252,6 +1252,142 @@
             renderUsers(filtered);
         };
 
+        // Tab Switching
+        window.switchTab = function(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Load data if needed
+            if (tabName === 'users') {
+                loadUsers();
+            } else if (tabName === 'contracts') {
+                loadContracts();
+            } else if (tabName === 'points') {
+                loadPointsStats();
+                loadPointsLeaderboard();
+                loadRewardsManagement();
+                loadRedemptions();
+            }
+        };
+
+        // Modal Functions
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        };
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        // Create User
+        window.handleCreateUser = async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword').value;
+            const firstName = document.getElementById('newUserFirstName').value.trim();
+            const lastName = document.getElementById('newUserLastName').value.trim();
+            const phone = document.getElementById('newUserPhone').value.trim();
+
+            try {
+                const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                    email: email,
+                    password: password,
+                    email_confirm: true
+                });
+
+                if (authError) throw authError;
+
+                const { error: userError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: authData.user.id,
+                        email: email,
+                        first_name: firstName,
+                        last_name: lastName,
+                        phone: phone || null,
+                        role: 'user',
+                        points: 100
+                    });
+
+                if (userError) throw userError;
+
+                alert('✅ Utente creato con successo!');
+                closeModal('createUserModal');
+                document.getElementById('createUserForm').reset();
+                loadUsers();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        // Reset Password
+        window.openResetPasswordModal = function(userId, email) {
+            pendingResetUser = { id: userId, email: email };
+            document.getElementById('resetUserEmail').textContent = email;
+            openModal('resetPasswordModal');
+        };
+
+        window.confirmResetPassword = async function() {
+            if (!pendingResetUser) return;
+
+            try {
+                const { error } = await supabase.auth.admin.generateLink({
+                    type: 'recovery',
+                    email: pendingResetUser.email
+                });
+
+                if (error) throw error;
+
+                alert(`✅ Email di reset inviata a ${pendingResetUser.email}`);
+                closeModal('resetPasswordModal');
+                pendingResetUser = null;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        // Delete User
+        window.openDeleteUserModal = function(userId, email) {
+            pendingDeleteUser = { id: userId, email: email };
+            document.getElementById('deleteUserEmail').textContent = email;
+            openModal('deleteUserModal');
+        };
+
+        window.confirmDeleteUser = async function() {
+            if (!pendingDeleteUser) return;
+
+            try {
+                const { error } = await supabase.auth.admin.deleteUser(pendingDeleteUser.id);
+
+                if (error) throw error;
+
+                alert(`✅ Utente ${pendingDeleteUser.email} eliminato!`);
+                closeModal('deleteUserModal');
+                pendingDeleteUser = null;
+                loadUsers();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
         // Logout
         window.handleLogout = async function() {
             if (confirm('Vuoi davvero uscire?')) {
