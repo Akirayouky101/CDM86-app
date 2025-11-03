@@ -1,12 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Static site - no build needed'",
-  "outputDirectory": ".",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -19,16 +18,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
   ]
 }
