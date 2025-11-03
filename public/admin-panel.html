@@ -5193,17 +5193,17 @@
         })();
 
         // Create User Modal Functions
-        function openCreateUserModal() {
+        window.openCreateUserModal = function() {
             document.getElementById('create-user-modal').style.display = 'flex';
             document.getElementById('create-user-form').reset();
         }
 
-        function closeCreateUserModal() {
+        window.closeCreateUserModal = function() {
             document.getElementById('create-user-modal').style.display = 'none';
             document.getElementById('create-user-form').reset();
         }
 
-        async function handleCreateUser(event) {
+        window.handleCreateUser = async function(event) {
             event.preventDefault();
 
             const email = document.getElementById('new-user-email').value.trim();
@@ -5516,7 +5516,7 @@
                 </div>
                 <div class="form-group">
                     <label for="new-user-password" class="form-label">🔐 Password *</label>
-                    <input type="password" id="new-user-password" required minlength="8" class="form-input" placeholder="Minimo 8 caratteri">
+                    <input type="password" id="new-user-password" required minlength="8" autocomplete="new-password" class="form-input" placeholder="Minimo 8 caratteri">
                 </div>
                 <div class="form-group">
                     <label for="new-user-first-name" class="form-label">👤 Nome *</label>
