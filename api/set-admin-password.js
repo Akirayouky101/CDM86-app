@@ -29,24 +29,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Usa la service role key per operazioni admin
-        const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uchrjlngfzfibcpdxtky.supabase.co';
-        const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-        console.log('Environment check:', {
-            hasUrl: !!SUPABASE_URL,
-            hasKey: !!SUPABASE_SERVICE_KEY,
-            keyLength: SUPABASE_SERVICE_KEY ? SUPABASE_SERVICE_KEY.length : 0
-        });
-
-        if (!SUPABASE_SERVICE_KEY) {
-            return res.status(500).json({ 
-                error: 'SUPABASE_SERVICE_ROLE_KEY not configured on Vercel',
-                debug: {
-                    env: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
-                }
-            });
-        }
+        // TEMPORANEO: Hardcoded per setup iniziale - DA RIMUOVERE DOPO
+        const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDAzMTIwNiwiZXhwIjoyMDc1NjA3MjA2fQ.lK0csqtGl2zREC3YsHLfQ_gt4XUAQTQr3bx0CXt96L0';
 
         const supabaseAdmin = createClient(
             SUPABASE_URL,
