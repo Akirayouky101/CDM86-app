@@ -2182,8 +2182,14 @@
                 
                 currentUser = user;
                 
-                // Check if user is admin (email = diegomarruchi@outlook.it)
-                if (user.email !== 'diegomarruchi@outlook.it') {
+                // Check if user is admin from database
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (userError || !userData || userData.role !== 'admin') {
                     alert('Accesso negato. Solo gli amministratori possono accedere a questa pagina.');
                     window.location.href = '/public/dashboard.html';
                     return false;
