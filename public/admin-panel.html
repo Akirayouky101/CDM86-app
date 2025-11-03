@@ -1532,14 +1532,14 @@
                             </div>
                         </div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    <div onclick="openUserDetailsPanel()" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(236, 72, 153, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(236, 72, 153, 0.3)'">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                                <i class="fas fa-trophy"></i>
+                                <i class="fas fa-user-circle"></i>
                             </div>
                             <div>
-                                <p style="margin: 0; font-size: 14px; opacity: 0.9;">Punti Totali</p>
-                                <h3 style="margin: 4px 0 0 0; font-size: 32px; font-weight: 700;" id="totalPointsCount">0</h3>
+                                <p style="margin: 0; font-size: 14px; opacity: 0.9;">Dettagli Utente</p>
+                                <h3 style="margin: 4px 0 0 0; font-size: 18px; font-weight: 600;">Visualizza →</h3>
                             </div>
                         </div>
                     </div>
@@ -5091,12 +5091,12 @@
                         <!-- Actions -->
                         <div style="display: flex; gap: 10px;">
                             <button 
-                                onclick="showSetPasswordModal('${user.id}', '${user.email}')" 
+                                onclick="resetUserPassword('${user.id}', '${user.email}')" 
                                 style="flex: 1; padding: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
                                 onmouseover="this.style.transform='scale(1.02)'" 
                                 onmouseout="this.style.transform='scale(1)'"
-                                title="Imposta password">
-                                <i class="fas fa-key"></i> Password
+                                title="Reset password">
+                                <i class="fas fa-key"></i> Reset
                             </button>
                             <button 
                                 onclick="deleteUser('${user.id}', '${user.email}')" 
@@ -5115,7 +5115,6 @@
             document.getElementById('totalUsersCount').textContent = users.length;
             document.getElementById('verifiedUsersCount').textContent = users.filter(u => u.is_verified).length;
             document.getElementById('adminUsersCount').textContent = users.filter(u => u.role === 'admin').length;
-            document.getElementById('totalPointsCount').textContent = users.reduce((sum, u) => sum + (u.points || 0), 0);
         }
 
         function filterUsers() {
@@ -5285,6 +5284,128 @@
         document.getElementById('create-user-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'create-user-modal') {
                 closeCreateUserModal();
+            }
+        });
+
+        // User Details Panel Functions
+        window.openUserDetailsPanel = function() {
+            document.getElementById('user-details-panel').style.display = 'flex';
+            document.getElementById('userDetailsSearch').value = '';
+            document.getElementById('userSelectionList').innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Usa la ricerca per trovare un utente</p>';
+            document.getElementById('selectedUserDetails').style.display = 'none';
+        }
+
+        window.closeUserDetailsPanel = function() {
+            document.getElementById('user-details-panel').style.display = 'none';
+        }
+
+        window.searchUserForDetails = function() {
+            const searchTerm = document.getElementById('userDetailsSearch').value.toLowerCase().trim();
+            const listContainer = document.getElementById('userSelectionList');
+            
+            if (!searchTerm) {
+                listContainer.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Usa la ricerca per trovare un utente</p>';
+                return;
+            }
+
+            const filtered = allUsersData.filter(user =>
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.first_name && user.first_name.toLowerCase().includes(searchTerm)) ||
+                (user.last_name && user.last_name.toLowerCase().includes(searchTerm)) ||
+                (user.referral_code && user.referral_code.toLowerCase().includes(searchTerm))
+            );
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">❌ Nessun utente trovato</p>';
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(user => `
+                <div onclick="showUserDetails('${user.id}')" style="padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#dc2626'; this.style.background='#fef2f2'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: ${user.role === 'admin' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'}; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white;">
+                            ${user.role === 'admin' ? '👑' : '👤'}
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0; font-weight: 700; font-size: 15px; color: #1f2937;">${user.first_name || 'User'} ${user.last_name || ''}</p>
+                            <p style="margin: 2px 0 0 0; font-size: 13px; color: #6b7280;">${user.email}</p>
+                        </div>
+                        <span style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; font-family: monospace;">${user.referral_code}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.showUserDetails = async function(userId) {
+            const user = allUsersData.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('selectedUserDetails').style.display = 'block';
+            const detailsContainer = document.getElementById('userDetailsContent');
+
+            // Load referral data
+            const { data: referrals } = await supabase
+                .from('users')
+                .select('*')
+                .eq('referred_by_id', userId);
+
+            const { data: network } = await supabase
+                .from('referral_network')
+                .select('*')
+                .eq('user_id', userId);
+
+            detailsContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <!-- Info Card -->
+                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 12px; padding: 20px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 16px; opacity: 0.9;">📧 Informazioni Personali</h4>
+                        <p style="margin: 8px 0;"><strong>Nome:</strong> ${user.first_name || '-'} ${user.last_name || ''}</p>
+                        <p style="margin: 8px 0;"><strong>Email:</strong> ${user.email}</p>
+                        <p style="margin: 8px 0;"><strong>Telefono:</strong> ${user.phone || '-'}</p>
+                        <p style="margin: 8px 0;"><strong>Ruolo:</strong> ${user.role === 'admin' ? '👑 Admin' : '👤 User'}</p>
+                    </div>
+
+                    <!-- Referral Card -->
+                    <div style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; border-radius: 12px; padding: 20px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 16px; opacity: 0.9;">🎁 Sistema Referral</h4>
+                        <p style="margin: 8px 0;"><strong>Codice:</strong> <span style="background: rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700;">${user.referral_code || '-'}</span></p>
+                        <p style="margin: 8px 0;"><strong>Inviti Diretti:</strong> ${referrals ? referrals.length : 0}</p>
+                        <p style="margin: 8px 0;"><strong>Punti MLM:</strong> ${network ? network.length : 0}</p>
+                        <p style="margin: 8px 0;"><strong>Punti Totali:</strong> <strong style="font-size: 24px;">${user.points || 0}</strong> 🏆</p>
+                    </div>
+
+                    <!-- Account Card -->
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 20px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 16px; opacity: 0.9;">⚙️ Stato Account</h4>
+                        <p style="margin: 8px 0;"><strong>Verificato:</strong> ${user.is_verified ? '✅ Sì' : '❌ No'}</p>
+                        <p style="margin: 8px 0;"><strong>Registrato:</strong> ${new Date(user.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        <p style="margin: 8px 0;"><strong>Ultimo Accesso:</strong> ${user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('it-IT') : '-'}</p>
+                    </div>
+                </div>
+
+                ${referrals && referrals.length > 0 ? `
+                    <div style="margin-top: 24px; background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 16px; color: #1f2937;">👥 Utenti Invitati (${referrals.length})</h4>
+                        <div style="display: grid; gap: 12px;">
+                            ${referrals.map(r => `
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 8px;">
+                                    <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">👤</div>
+                                    <div style="flex: 1;">
+                                        <p style="margin: 0; font-weight: 600; font-size: 14px;">${r.first_name || 'User'} ${r.last_name || ''}</p>
+                                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #6b7280;">${r.email}</p>
+                                    </div>
+                                    <span style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: monospace;">${r.referral_code}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        document.getElementById('user-details-panel')?.addEventListener('click', (e) => {
+            if (e.target.id === 'user-details-panel') {
+                closeUserDetailsPanel();
             }
         });
     </script>
@@ -5531,7 +5652,7 @@
             <form id="create-user-form" onsubmit="handleCreateUser(event)" class="form-container">
                 <div class="form-group">
                     <label for="new-user-email" class="form-label">📧 Email *</label>
-                    <input type="email" id="new-user-email" required class="form-input" placeholder="utente@email.com">
+                    <input type="email" id="new-user-email" required autocomplete="email" class="form-input" placeholder="utente@email.com">
                 </div>
                 <div class="form-group">
                     <label for="new-user-password" class="form-label">🔐 Password *</label>
@@ -5564,6 +5685,42 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- User Details Panel Modal -->
+    <div id="user-details-panel" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 class="modal-title">👤 Dettagli Utente</h2>
+                <button type="button" onclick="closeUserDetailsPanel()" class="modal-close-btn">×</button>
+            </div>
+            <div class="form-container">
+                <!-- Search User -->
+                <div class="form-group">
+                    <label class="form-label">🔍 Cerca Utente</label>
+                    <input 
+                        type="text" 
+                        id="userDetailsSearch" 
+                        class="form-input" 
+                        placeholder="Cerca per email, nome o cognome..."
+                        oninput="searchUserForDetails()"
+                    />
+                </div>
+
+                <!-- User Selection List -->
+                <div id="userSelectionList" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+                    <p style="text-align: center; color: #6b7280; padding: 20px;">Usa la ricerca per trovare un utente</p>
+                </div>
+
+                <!-- User Details Display (hidden until user selected) -->
+                <div id="selectedUserDetails" style="display: none;">
+                    <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+                        <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700;">📊 Informazioni Complete</h3>
+                        <div id="userDetailsContent"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
