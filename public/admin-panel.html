@@ -2187,7 +2187,9 @@
                     .from('users')
                     .select('role')
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle();
+                
+                console.log('Admin check:', { userId: user.id, userData, userError });
                 
                 if (userError || !userData || userData.role !== 'admin') {
                     alert('Accesso negato. Solo gli amministratori possono accedere a questa pagina.');
