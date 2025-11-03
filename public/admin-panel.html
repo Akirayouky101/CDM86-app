@@ -1458,6 +1458,9 @@
         <button class="tab-btn active" onclick="switchTab('org-requests')">
             <i class="fas fa-building"></i> Richieste Aziende
         </button>
+        <button class="tab-btn" onclick="switchTab('users')">
+            <i class="fas fa-users"></i> Gestione Utenti
+        </button>
         <button class="tab-btn" onclick="switchTab('contracts')">
             <i class="fas fa-file-contract"></i> Contratti
         </button>
@@ -1482,6 +1485,102 @@
         
         <!-- Content -->
         <div id="content" class="hidden">
+            <!-- USERS MANAGEMENT TAB -->
+            <div id="users-tab" class="tab-content hidden">
+                <div class="page-header">
+                    <h1><i class="fas fa-users"></i> Gestione Utenti</h1>
+                    <p>Visualizza, modifica ed elimina utenti</p>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="users-filters" style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+                    <input 
+                        type="text" 
+                        id="userSearch" 
+                        placeholder="🔍 Cerca per email, nome o cognome..." 
+                        style="flex: 1; min-width: 250px; padding: 12px 18px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px;"
+                        oninput="filterUsers()"
+                    />
+                    <select id="userRoleFilter" style="padding: 12px 18px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px;" onchange="filterUsers()">
+                        <option value="">Tutti i ruoli</option>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button onclick="loadAllUsers()" style="padding: 12px 24px; background: #dc2626; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-sync-alt"></i> Ricarica
+                    </button>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Codice Ref.</th>
+                                    <th>Punti</th>
+                                    <th>Ruolo</th>
+                                    <th>Stato</th>
+                                    <th>Registrato</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 40px;">
+                                        <div class="spinner"></div>
+                                        <p style="margin-top: 15px; color: #6b7280;">Caricamento utenti...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- User Stats -->
+                <div class="analytics-stats-grid" style="margin-top: 30px;">
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon gradient-blue">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <p class="analytics-card-label">Totale Utenti</p>
+                            <h3 class="analytics-card-value" id="totalUsersCount">0</h3>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon gradient-green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <p class="analytics-card-label">Utenti Verificati</p>
+                            <h3 class="analytics-card-value" id="verifiedUsersCount">0</h3>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon gradient-purple">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <p class="analytics-card-label">Amministratori</p>
+                            <h3 class="analytics-card-value" id="adminUsersCount">0</h3>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon gradient-orange">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <p class="analytics-card-label">Punti Totali</p>
+                            <h3 class="analytics-card-value" id="totalPointsCount">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- REQUESTS TAB REMOVED - Use Org Requests instead -->
             
             <!-- ANALYTICS TAB -->
@@ -4886,6 +4985,11 @@
                 loadOrgRequests();
             }
             
+            // Load users when switching to that tab
+            if (tab === 'users') {
+                loadAllUsers();
+            }
+            
             // Load points system when switching to that tab
             if (tab === 'points') {
                 loadPointsStats();
@@ -4899,6 +5003,166 @@
                 loadContracts();
             }
         };
+
+        // ==========================================
+        // USERS MANAGEMENT FUNCTIONS
+        // ==========================================
+
+        let allUsersData = [];
+
+        async function loadAllUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            
+            try {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px;"><div class="spinner"></div><p style="margin-top: 15px;">Caricamento utenti...</p></td></tr>';
+                
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                allUsersData = users || [];
+                renderUsers(allUsersData);
+                updateUserStats(allUsersData);
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #dc2626;">❌ Errore caricamento utenti</td></tr>';
+            }
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px;">Nessun utente trovato</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td><strong>${user.email}</strong></td>
+                    <td>${user.first_name || '-'}</td>
+                    <td>${user.last_name || '-'}</td>
+                    <td><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${user.referral_code || '-'}</code></td>
+                    <td><span style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${user.points || 0}</span></td>
+                    <td>
+                        <span style="background: ${user.role === 'admin' ? '#fef3c7' : '#e0e7ff'}; color: ${user.role === 'admin' ? '#92400e' : '#3730a3'}; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">
+                            ${user.role === 'admin' ? '👑 Admin' : '👤 User'}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background: ${user.is_verified ? '#dcfce7' : '#fee2e2'}; color: ${user.is_verified ? '#166534' : '#991b1b'}; padding: 4px 12px; border-radius: 12px; font-size: 13px;">
+                            ${user.is_verified ? '✓ Verificato' : '⚠ Non verificato'}
+                        </span>
+                    </td>
+                    <td style="font-size: 13px; color: #6b7280;">${new Date(user.created_at).toLocaleDateString('it-IT')}</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button 
+                                onclick="resetUserPassword('${user.id}', '${user.email}')" 
+                                style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;"
+                                title="Reset password">
+                                🔑
+                            </button>
+                            <button 
+                                onclick="deleteUser('${user.id}', '${user.email}')" 
+                                style="padding: 6px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;"
+                                title="Elimina utente">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateUserStats(users) {
+            document.getElementById('totalUsersCount').textContent = users.length;
+            document.getElementById('verifiedUsersCount').textContent = users.filter(u => u.is_verified).length;
+            document.getElementById('adminUsersCount').textContent = users.filter(u => u.role === 'admin').length;
+            document.getElementById('totalPointsCount').textContent = users.reduce((sum, u) => sum + (u.points || 0), 0);
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const roleFilter = document.getElementById('userRoleFilter').value;
+            
+            let filtered = allUsersData;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(user => 
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.first_name && user.first_name.toLowerCase().includes(searchTerm)) ||
+                    (user.last_name && user.last_name.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (roleFilter) {
+                filtered = filtered.filter(user => user.role === roleFilter);
+            }
+            
+            renderUsers(filtered);
+        }
+
+        async function resetUserPassword(userId, email) {
+            if (!confirm(`Vuoi inviare un'email di reset password a ${email}?`)) return;
+            
+            try {
+                const { error } = await supabase.auth.admin.generateLink({
+                    type: 'recovery',
+                    email: email
+                });
+                
+                if (error) throw error;
+                
+                alert(`✅ Email di reset inviata a ${email}`);
+                
+            } catch (error) {
+                console.error('Reset password error:', error);
+                alert(`❌ Errore: ${error.message}\n\nUsa il pannello Supabase → Authentication per inviare l'email di recupero.`);
+            }
+        }
+
+        async function deleteUser(userId, email) {
+            if (!confirm(`⚠️ SEI SICURO di voler eliminare l'utente ${email}?\n\nQuesta azione è IRREVERSIBILE!`)) return;
+            
+            if (!confirm('Conferma di nuovo: eliminare l\'utente?')) return;
+            
+            try {
+                // Delete from public.users
+                const { error: publicError } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('id', userId);
+                
+                if (publicError) throw publicError;
+                
+                // Delete from auth.users (requires admin API)
+                const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+                
+                if (authError) {
+                    console.warn('Auth delete error:', authError);
+                    alert(`⚠️ Utente eliminato da database ma non da Auth.\nElimina manualmente da Supabase → Authentication`);
+                } else {
+                    alert(`✅ Utente ${email} eliminato con successo!`);
+                }
+                
+                // Reload users
+                loadAllUsers();
+                
+            } catch (error) {
+                console.error('Delete user error:', error);
+                alert(`❌ Errore: ${error.message}`);
+            }
+        }
+
+        window.loadAllUsers = loadAllUsers;
+        window.filterUsers = filterUsers;
+        window.resetUserPassword = resetUserPassword;
+        window.deleteUser = deleteUser;
 
         // Initialize
         (async () => {
