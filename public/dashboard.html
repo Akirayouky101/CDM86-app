@@ -911,15 +911,21 @@
                 
                 if (userError) throw userError;
                 
-                console.log('✅ User data loaded:', userData);
-                console.log('📋 Referral code:', userData.referral_code);
+                console.log('✅ User data loaded (raw):', userData);
+                console.log('� Type of userData:', typeof userData, 'Is array:', Array.isArray(userData));
+                
+                // Fix: se userData è un array, prendi il primo elemento
+                const user = Array.isArray(userData) ? userData[0] : userData;
+                
+                console.log('✅ User object:', user);
+                console.log('�📋 Referral code:', user.referral_code);
                 
                 // Update UI with correct IDs
                 const userEmail = document.getElementById('user-email');
                 if (userEmail) userEmail.textContent = currentUser.email;
                 
                 const userNameNav = document.getElementById('user-name-nav');
-                if (userNameNav) userNameNav.textContent = userData.first_name || 'User';
+                if (userNameNav) userNameNav.textContent = user.first_name || 'User';
                 
                 // Create dropdown menu for user button
                 const userBtn = document.getElementById('user-btn');
@@ -998,7 +1004,7 @@
                 }
                 
                 const welcomeText = document.getElementById('welcome-text');
-                if (welcomeText) welcomeText.textContent = `Benvenuto, ${userData.first_name}!`;
+                if (welcomeText) welcomeText.textContent = `Benvenuto, ${user.first_name}!`;
                 
                 // Show admin panel link if user is admin
                 if (currentUser.email === 'diegomarruchi@outlook.it') {
@@ -1008,24 +1014,24 @@
                 
                 // Update referral code display
                 const statPoints = document.getElementById('stat-points');
-                if (statPoints) statPoints.textContent = userData.points || 0;
+                if (statPoints) statPoints.textContent = user.points || 0;
                 
                 const statCode = document.getElementById('stat-code');
-                console.log('📝 Setting stat-code to:', userData.referral_code);
-                if (statCode) statCode.textContent = userData.referral_code || 'N/A';
+                console.log('📝 Setting stat-code to:', user.referral_code);
+                if (statCode) statCode.textContent = user.referral_code || 'N/A';
                 
                 const myCode = document.getElementById('my-code');
-                console.log('📝 Setting my-code to:', userData.referral_code);
-                if (myCode) myCode.textContent = userData.referral_code || 'N/A';
+                console.log('📝 Setting my-code to:', user.referral_code);
+                if (myCode) myCode.textContent = user.referral_code || 'N/A';
                 
                 // Generate QR Code for referral
-                console.log('🎨 Generating QR code for:', userData.referral_code);
-                generateQRCode(userData.referral_code);
+                console.log('🎨 Generating QR code for:', user.referral_code);
+                generateQRCode(user.referral_code);
                 
                 // Update referral link (punta alla registrazione con codice precompilato)
                 const referralLinkEl = document.getElementById('referral-link');
-                if (referralLinkEl && userData.referral_code) {
-                    const link = `https://cdm86.com?ref=${userData.referral_code}`;
+                if (referralLinkEl && user.referral_code) {
+                    const link = `https://cdm86.com?ref=${user.referral_code}`;
                     console.log('🔗 Setting referral link to:', link);
                     referralLinkEl.textContent = link;
                 } else {
@@ -1036,17 +1042,17 @@
                 let referrerData = null;
                 let referrerError = null;
                 
-                if (userData.referred_by_id) {
+                if (user.referred_by_id) {
                     const result = await supabase
                         .from('users')
                         .select('id, first_name, last_name, referral_code')
-                        .eq('id', userData.referred_by_id)
+                        .eq('id', user.referred_by_id)
                         .maybeSingle();
                     referrerData = result.data;
                     referrerError = result.error;
                     
                     console.log('🔍 Referrer lookup:', {
-                        referred_by_id: userData.referred_by_id,
+                        referred_by_id: user.referred_by_id,
                         found: !!referrerData,
                         data: referrerData,
                         error: referrerError
@@ -1074,11 +1080,11 @@
                     }
                 }
                 // Get organization data if user belongs to one
-                if (userData.organization_id) {
+                if (user.organization_id) {
                     const { data: orgData, error: orgError } = await supabase
                         .from('organizations')
                         .select('id, name, organization_type, referral_code')
-                        .eq('id', userData.organization_id)
+                        .eq('id', user.organization_id)
                         .single();
                     
                     const orgSection = document.getElementById('organization-section');
