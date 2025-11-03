@@ -5277,13 +5277,17 @@
 
         // Close modals on outside click
         document.getElementById('reset-password-modal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'reset-password-modal') {
+            console.log('Click su reset modal:', e.target, 'currentTarget:', e.currentTarget);
+            if (e.target === e.currentTarget) {
+                console.log('Click sull\'overlay, chiudo modale');
                 closeResetPasswordModal();
             }
         });
 
         document.getElementById('delete-user-modal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'delete-user-modal') {
+            console.log('Click su delete modal:', e.target, 'currentTarget:', e.currentTarget);
+            if (e.target === e.currentTarget) {
+                console.log('Click sull\'overlay, chiudo modale');
                 closeDeleteUserModal();
             }
         });
