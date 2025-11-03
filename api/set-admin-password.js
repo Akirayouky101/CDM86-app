@@ -33,8 +33,19 @@ export default async function handler(req, res) {
         const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uchrjlngfzfibcpdxtky.supabase.co';
         const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+        console.log('Environment check:', {
+            hasUrl: !!SUPABASE_URL,
+            hasKey: !!SUPABASE_SERVICE_KEY,
+            keyLength: SUPABASE_SERVICE_KEY ? SUPABASE_SERVICE_KEY.length : 0
+        });
+
         if (!SUPABASE_SERVICE_KEY) {
-            throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured on Vercel');
+            return res.status(500).json({ 
+                error: 'SUPABASE_SERVICE_ROLE_KEY not configured on Vercel',
+                debug: {
+                    env: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
+                }
+            });
         }
 
         const supabaseAdmin = createClient(
