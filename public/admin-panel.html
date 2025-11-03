@@ -1128,18 +1128,197 @@
 
         <!-- PROMOTIONS TAB -->
         <div id="promotionsTab" class="tab-content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="promoStatTotal">0</div>
+                    <div class="stat-label">📋 Totale Promozioni</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="promoStatActive">0</div>
+                    <div class="stat-label">✅ Attive</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="promoStatExpiring">0</div>
+                    <div class="stat-label">⏰ In Scadenza</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="promoStatExpired">0</div>
+                    <div class="stat-label">❌ Scadute</div>
+                </div>
+            </div>
+
+            <!-- New Promotion Card -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-tags"></i> Promozioni
+                        <i class="fas fa-plus-circle"></i> Nuova Promozione
                     </h2>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePromoForm()">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                 </div>
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <p>Gestione promozioni in arrivo</p>
+                <div id="promoFormContainer" style="display: none; padding: 0 1.5rem 1.5rem 1.5rem;">
+                    <form id="newPromoForm" onsubmit="handleCreatePromo(event)">
+                        <!-- Basic Info -->
+                        <div class="form-group">
+                            <label for="promoTitle">Titolo Promozione *</label>
+                            <input type="text" id="promoTitle" required placeholder="es: Pizza Margherita + Bibita Omaggio">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="promoShortDesc">Descrizione Breve *</label>
+                            <input type="text" id="promoShortDesc" required placeholder="es: Pizza + Bibita gratis!">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="promoDescription">Descrizione Completa *</label>
+                            <textarea id="promoDescription" rows="3" required placeholder="Descrizione dettagliata..."></textarea>
+                        </div>
+
+                        <!-- Partner Info -->
+                        <h3 style="margin: 1.5rem 0 1rem 0; color: var(--primary);"><i class="fas fa-store"></i> Informazioni Partner</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label for="promoPartnerName">Nome Partner *</label>
+                                <input type="text" id="promoPartnerName" required placeholder="Pizzeria da Mario">
+                            </div>
+                            <div class="form-group">
+                                <label for="promoPartnerCity">Città *</label>
+                                <input type="text" id="promoPartnerCity" required placeholder="Milano">
+                            </div>
+                            <div class="form-group">
+                                <label for="promoPartnerEmail">Email</label>
+                                <input type="email" id="promoPartnerEmail" placeholder="info@partner.it">
+                            </div>
+                            <div class="form-group">
+                                <label for="promoPartnerPhone">Telefono</label>
+                                <input type="tel" id="promoPartnerPhone" placeholder="+39 02 1234567">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="promoPartnerAddress">Indirizzo</label>
+                            <input type="text" id="promoPartnerAddress" placeholder="Via Roma 123">
+                        </div>
+
+                        <!-- Category -->
+                        <h3 style="margin: 1.5rem 0 1rem 0; color: var(--primary);"><i class="fas fa-tags"></i> Categoria e Prezzi</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label for="promoCategory">Categoria *</label>
+                                <select id="promoCategory" required>
+                                    <option value="">Seleziona...</option>
+                                    <option value="ristoranti">🍕 Ristoranti</option>
+                                    <option value="shopping">🛍️ Shopping</option>
+                                    <option value="benessere">💆 Benessere & Spa</option>
+                                    <option value="sport">⚽ Sport & Fitness</option>
+                                    <option value="intrattenimento">🎬 Intrattenimento</option>
+                                    <option value="tecnologia">💻 Tecnologia</option>
+                                    <option value="viaggi">✈️ Viaggi</option>
+                                    <option value="servizi">🔧 Servizi</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="promoDiscountType">Tipo Sconto *</label>
+                                <select id="promoDiscountType" required>
+                                    <option value="percentage">Percentuale (%)</option>
+                                    <option value="fixed">Importo Fisso (€)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="promoDiscountValue">Valore Sconto *</label>
+                                <input type="number" id="promoDiscountValue" required min="0" step="0.01" placeholder="50">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label for="promoOriginalPrice">Prezzo Originale (€) *</label>
+                                <input type="number" id="promoOriginalPrice" required min="0" step="0.01" placeholder="20.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="promoDiscountedPrice">Prezzo Scontato (€) *</label>
+                                <input type="number" id="promoDiscountedPrice" required min="0" step="0.01" placeholder="10.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="promoStartDate">Data Inizio *</label>
+                                <input type="date" id="promoStartDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="promoEndDate">Data Fine *</label>
+                                <input type="date" id="promoEndDate" required>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div style="display: flex; gap: 2rem; margin: 1rem 0;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="promoActive" checked>
+                                <span>✅ Attiva</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="promoFeatured">
+                                <span>⭐ In Evidenza</span>
+                            </label>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="button" class="btn btn-secondary" onclick="resetPromoForm()">
+                                <i class="fas fa-times"></i> Annulla
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva Promozione
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
+
+            <!-- Promotions List -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-list"></i> Promozioni Esistenti (<span id="countPromotions">0</span>)
+                    </h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadPromotions()">
+                        <i class="fas fa-sync-alt"></i> Aggiorna
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="search-box">
+                    <input type="text" id="promoFilterSearch" placeholder="🔍 Cerca promozione..." onkeyup="applyPromoFilters()">
+                    <select id="promoFilterCategory" onchange="applyPromoFilters()">
+                        <option value="">Tutte le categorie</option>
+                        <option value="ristoranti">🍕 Ristoranti</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="benessere">💆 Benessere</option>
+                        <option value="sport">⚽ Sport</option>
+                        <option value="intrattenimento">🎬 Intrattenimento</option>
+                        <option value="tecnologia">💻 Tecnologia</option>
+                        <option value="viaggi">✈️ Viaggi</option>
+                        <option value="servizi">🔧 Servizi</option>
+                    </select>
+                    <select id="promoFilterStatus" onchange="applyPromoFilters()">
+                        <option value="">Tutti gli stati</option>
+                        <option value="active">✅ Attive</option>
+                        <option value="expiring">⏰ In Scadenza</option>
+                        <option value="expired">❌ Scadute</option>
+                    </select>
+                </div>
+
+                <!-- Loading -->
+                <div id="promotionsLoading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Caricamento promozioni...</p>
+                </div>
+
+                <!-- Promotions List -->
+                <div id="promotionsList"></div>
             </div>
         </div>
     </div>
@@ -1453,6 +1632,8 @@
                 loadRedemptions();
             } else if (tabName === 'analytics') {
                 loadAnalytics();
+            } else if (tabName === 'promotions') {
+                loadPromotions();
             }
         };
 
@@ -2086,6 +2267,275 @@
                 console.error('Error loading recent activity:', error);
             }
         }
+
+        // ========================================
+        // PROMOTIONS FUNCTIONS
+        // ========================================
+
+        let allPromotions = [];
+
+        window.togglePromoForm = function() {
+            const container = document.getElementById('promoFormContainer');
+            const isHidden = container.style.display === 'none';
+            container.style.display = isHidden ? 'block' : 'none';
+        };
+
+        window.resetPromoForm = function() {
+            document.getElementById('newPromoForm').reset();
+            document.getElementById('promoFormContainer').style.display = 'none';
+        };
+
+        window.handleCreatePromo = async function(event) {
+            event.preventDefault();
+
+            const formData = {
+                title: document.getElementById('promoTitle').value.trim(),
+                short_description: document.getElementById('promoShortDesc').value.trim(),
+                description: document.getElementById('promoDescription').value.trim(),
+                partner_name: document.getElementById('promoPartnerName').value.trim(),
+                partner_city: document.getElementById('promoPartnerCity').value.trim(),
+                partner_email: document.getElementById('promoPartnerEmail').value.trim(),
+                partner_phone: document.getElementById('promoPartnerPhone').value.trim(),
+                partner_address: document.getElementById('promoPartnerAddress').value.trim(),
+                category: document.getElementById('promoCategory').value,
+                discount_type: document.getElementById('promoDiscountType').value,
+                discount_value: parseFloat(document.getElementById('promoDiscountValue').value),
+                original_price: parseFloat(document.getElementById('promoOriginalPrice').value),
+                discounted_price: parseFloat(document.getElementById('promoDiscountedPrice').value),
+                start_date: document.getElementById('promoStartDate').value,
+                end_date: document.getElementById('promoEndDate').value,
+                is_active: document.getElementById('promoActive').checked,
+                is_featured: document.getElementById('promoFeatured').checked
+            };
+
+            try {
+                const { error } = await supabase
+                    .from('promotions')
+                    .insert(formData);
+
+                if (error) throw error;
+
+                alert('✅ Promozione creata con successo!');
+                resetPromoForm();
+                loadPromotions();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.loadPromotions = async function() {
+            const loading = document.getElementById('promotionsLoading');
+            const container = document.getElementById('promotionsList');
+
+            try {
+                loading.style.display = 'block';
+                container.innerHTML = '';
+
+                const { data, error } = await supabase
+                    .from('promotions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allPromotions = data || [];
+                updatePromoStats(allPromotions);
+                displayPromotions(allPromotions);
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                loading.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Errore caricamento promozioni</p></div>';
+            }
+        };
+
+        function updatePromoStats(promos) {
+            const now = new Date();
+            const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            const active = promos.filter(p => p.is_active && new Date(p.end_date) > now).length;
+            const expiring = promos.filter(p => p.is_active && new Date(p.end_date) > now && new Date(p.end_date) <= sevenDaysFromNow).length;
+            const expired = promos.filter(p => new Date(p.end_date) <= now).length;
+
+            document.getElementById('promoStatTotal').textContent = promos.length;
+            document.getElementById('promoStatActive').textContent = active;
+            document.getElementById('promoStatExpiring').textContent = expiring;
+            document.getElementById('promoStatExpired').textContent = expired;
+        }
+
+        function displayPromotions(promos) {
+            const container = document.getElementById('promotionsList');
+            document.getElementById('countPromotions').textContent = promos.length;
+
+            if (!promos || promos.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-tags"></i></div><p>Nessuna promozione trovata</p></div>';
+                return;
+            }
+
+            const now = new Date();
+            const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            container.innerHTML = promos.map(promo => {
+                const endDate = new Date(promo.end_date);
+                const isExpired = endDate <= now;
+                const isExpiring = !isExpired && endDate <= sevenDaysFromNow;
+                const isActive = promo.is_active && !isExpired;
+
+                let statusBadge = '';
+                if (isExpired) {
+                    statusBadge = '<span class="badge" style="background: var(--danger);">❌ Scaduta</span>';
+                } else if (isExpiring) {
+                    statusBadge = '<span class="badge" style="background: var(--warning);">⏰ In Scadenza</span>';
+                } else if (isActive) {
+                    statusBadge = '<span class="badge" style="background: var(--accent);">✅ Attiva</span>';
+                } else {
+                    statusBadge = '<span class="badge" style="background: var(--gray-500);">⏸️ Disattivata</span>';
+                }
+
+                const categoryIcons = {
+                    ristoranti: '🍕',
+                    shopping: '🛍️',
+                    benessere: '💆',
+                    sport: '⚽',
+                    intrattenimento: '🎬',
+                    tecnologia: '💻',
+                    viaggi: '✈️',
+                    servizi: '🔧'
+                };
+
+                const discount = promo.discount_type === 'percentage' 
+                    ? `-${promo.discount_value}%` 
+                    : `-€${promo.discount_value.toFixed(2)}`;
+
+                return `
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 0.5rem 0; color: var(--primary);">
+                                    ${categoryIcons[promo.category] || '📌'} ${promo.title}
+                                    ${promo.is_featured ? ' ⭐' : ''}
+                                </h3>
+                                <p style="margin: 0 0 0.5rem 0; color: var(--gray-700);">${promo.short_description}</p>
+                                <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">
+                                    🏪 ${promo.partner_name} • 📍 ${promo.partner_city}
+                                </p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+
+                        <div style="background: var(--gray-100); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                                <div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Sconto</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${discount}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Prezzo Originale</div>
+                                    <div style="font-size: 1.25rem; text-decoration: line-through; color: var(--gray-500);">€${promo.original_price.toFixed(2)}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Prezzo Scontato</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">€${promo.discounted_price.toFixed(2)}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">Validità</div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-700);">
+                                        ${new Date(promo.start_date).toLocaleDateString('it-IT')} - ${new Date(promo.end_date).toLocaleDateString('it-IT')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary btn-sm" onclick="editPromo('${promo.id}')">
+                                <i class="fas fa-edit"></i> Modifica
+                            </button>
+                            <button class="btn ${isActive ? 'btn-danger' : 'btn-primary'} btn-sm" onclick="togglePromoStatus('${promo.id}', ${!promo.is_active})">
+                                <i class="fas fa-${isActive ? 'pause' : 'play'}"></i> ${isActive ? 'Disattiva' : 'Attiva'}
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePromo('${promo.id}')">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.applyPromoFilters = function() {
+            const search = document.getElementById('promoFilterSearch').value.toLowerCase();
+            const category = document.getElementById('promoFilterCategory').value;
+            const status = document.getElementById('promoFilterStatus').value;
+
+            let filtered = allPromotions;
+
+            if (search) {
+                filtered = filtered.filter(p =>
+                    (p.title && p.title.toLowerCase().includes(search)) ||
+                    (p.partner_name && p.partner_name.toLowerCase().includes(search)) ||
+                    (p.partner_city && p.partner_city.toLowerCase().includes(search))
+                );
+            }
+
+            if (category) {
+                filtered = filtered.filter(p => p.category === category);
+            }
+
+            if (status) {
+                const now = new Date();
+                const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+                filtered = filtered.filter(p => {
+                    const endDate = new Date(p.end_date);
+                    if (status === 'active') return p.is_active && endDate > now;
+                    if (status === 'expiring') return p.is_active && endDate > now && endDate <= sevenDaysFromNow;
+                    if (status === 'expired') return endDate <= now;
+                    return true;
+                });
+            }
+
+            displayPromotions(filtered);
+        };
+
+        window.togglePromoStatus = async function(promoId, newStatus) {
+            try {
+                const { error } = await supabase
+                    .from('promotions')
+                    .update({ is_active: newStatus })
+                    .eq('id', promoId);
+
+                if (error) throw error;
+
+                alert(`✅ Promozione ${newStatus ? 'attivata' : 'disattivata'}!`);
+                loadPromotions();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.deletePromo = async function(promoId) {
+            if (!confirm('Eliminare questa promozione?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('promotions')
+                    .delete()
+                    .eq('id', promoId);
+
+                if (error) throw error;
+
+                alert('✅ Promozione eliminata!');
+                loadPromotions();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.editPromo = function(promoId) {
+            alert('🚧 Funzione modifica in sviluppo. Per ora puoi eliminare e ricreare la promozione.');
+        };
 
         // Logout
         window.handleLogout = async function() {
