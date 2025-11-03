@@ -704,18 +704,56 @@
             </div>
             
             <!-- ========================================
-                 POINTS TRANSACTIONS HISTORY
+                 MLM DASHBOARD CARDS
                  ======================================== -->
-            <div class="transactions-section">
-                <h3>
-                    <i class="fas fa-history"></i>
-                    Storico Transazioni
-                </h3>
-                <div id="transactions-list">
-                    <!-- Transactions will be loaded here -->
-                    <div class="loading-state">
-                        <i class="fas fa-spinner fa-spin loading-spinner"></i>
-                        <p>Caricamento transazioni...</p>
+            <div class="mlm-cards-section">
+                <div class="mlm-cards-grid">
+                    <!-- Card Transazioni -->
+                    <div class="mlm-card mlm-card-transactions" onclick="openTransactionsModal()">
+                        <div class="mlm-card-background">
+                            <div class="mlm-card-icon-bg">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                        </div>
+                        <div class="mlm-card-content">
+                            <div class="mlm-card-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3>Storico Transazioni</h3>
+                            <p class="mlm-card-description">Visualizza tutte le tue transazioni punti</p>
+                            <div class="mlm-card-stats">
+                                <span class="mlm-card-count" id="transactions-count">0</span>
+                                <span class="mlm-card-label">transazioni</span>
+                            </div>
+                        </div>
+                        <div class="mlm-card-footer">
+                            <span>Visualizza dettagli</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Grafico Rete -->
+                    <div class="mlm-card mlm-card-network" onclick="openNetworkModal()">
+                        <div class="mlm-card-background">
+                            <div class="mlm-card-icon-bg">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="mlm-card-content">
+                            <div class="mlm-card-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h3>La Tua Rete</h3>
+                            <p class="mlm-card-description">Esplora la tua rete di referral MLM</p>
+                            <div class="mlm-card-stats">
+                                <span class="mlm-card-count" id="network-count">0</span>
+                                <span class="mlm-card-label">referral</span>
+                            </div>
+                        </div>
+                        <div class="mlm-card-footer">
+                            <span>Visualizza albero</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1554,6 +1592,711 @@
                 opacity: 1;
             }
         }
+
+        /* MLM Cards Section */
+        .mlm-cards-section {
+            margin: 2rem 0;
+        }
+
+        .mlm-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .mlm-card {
+            position: relative;
+            border-radius: 20px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            background: white;
+            border: 2px solid transparent;
+        }
+
+        .mlm-card-transactions {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .mlm-card-network {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .mlm-card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            overflow: hidden;
+        }
+
+        .mlm-card-icon-bg {
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 180px;
+            color: rgba(255, 255, 255, 0.2);
+            transform: rotate(-15deg);
+            transition: all 0.5s ease;
+        }
+
+        .mlm-card:hover .mlm-card-icon-bg {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .mlm-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .mlm-card-content {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+        }
+
+        .mlm-card-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .mlm-card:hover .mlm-card-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .mlm-card h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .mlm-card-description {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+            margin: 0 0 1.5rem 0;
+            line-height: 1.5;
+        }
+
+        .mlm-card-stats {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mlm-card-count {
+            font-size: 3rem;
+            color: white;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .mlm-card-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .mlm-card-footer {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .mlm-card-footer i {
+            transition: transform 0.3s ease;
+        }
+
+        .mlm-card:hover .mlm-card-footer i {
+            transform: translateX(5px);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .mlm-card-count {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* MLM Modal Styles */
+        .mlm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .mlm-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mlm-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 1rem;
+        }
+
+        .mlm-modal-header h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mlm-modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .mlm-modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .mlm-modal-loading {
+            text-align: center;
+            padding: 3rem;
+            color: #667eea;
+        }
+
+        .mlm-modal-loading i {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .mlm-spinner {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .mlm-modal-empty {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .mlm-modal-empty i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Transaction Items in Modal */
+        .modal-transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .modal-transaction-item:hover {
+            background: #f8f9fa;
+        }
+
+        .modal-transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .modal-transaction-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .modal-transaction-icon.positive {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .modal-transaction-icon.negative {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .modal-transaction-details h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .modal-transaction-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .modal-transaction-points {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .modal-transaction-points.positive {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .modal-transaction-points.negative {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Network Tree Styles */
+        .network-tree {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+        }
+
+        .network-level {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        /* Root Level (Tu) */
+        .root-level {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .root-node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid white;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            border-radius: 20px;
+            padding: 2rem;
+            min-width: 250px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .root-node::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 30px;
+            background: linear-gradient(to bottom, #667eea, #ddd);
+        }
+
+        .root-node .node-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .root-node .node-name {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .root-node .node-code {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /* Level Header */
+        .level-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem 2rem;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .network-level-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .network-level-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .level-badge.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 10px rgba(240, 147, 251, 0.3);
+        }
+
+        .level-title span:last-child {
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Network Nodes Grid */
+        .network-nodes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        /* Connecting Lines */
+        .network-level.level-1::before,
+        .network-level.level-2::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ddd 20%, #ddd 80%, transparent);
+        }
+
+        /* Individual Network Nodes */
+        .network-node {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        /* Connecting line from top */
+        .network-node::before {
+            content: '';
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 2rem;
+            background: #ddd;
+        }
+
+        .network-node:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.25);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .network-node.secondary {
+            border-color: #fdd;
+        }
+
+        .network-node.secondary:hover {
+            border-color: #f093fb;
+            box-shadow: 0 8px 30px rgba(240, 147, 251, 0.25);
+        }
+
+        .node-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            filter: grayscale(0.2);
+        }
+
+        .node-name {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .node-email {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            word-break: break-word;
+        }
+
+        .node-code {
+            background: #f3f4f6;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #667eea;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .node-points {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .network-node-email {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .network-node-date {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* Network Stats */
+        .network-stats {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .network-stat {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .network-stat:hover {
+            background: #f8f9fa;
+            transform: translateY(-3px);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .network-stat.primary .stat-value {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .network-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .network-stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state small {
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mlm-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mlm-modal-content {
+                width: 95%;
+                padding: 1.5rem;
+                max-height: 90vh;
+            }
+
+            .network-tree {
+                padding: 1rem;
+            }
+
+            .root-node {
+                min-width: 200px;
+                padding: 1.5rem;
+            }
+
+            .network-nodes {
+                grid-template-columns: 1fr;
+                padding: 0;
+            }
+
+            .network-node::before {
+                left: 50%;
+                top: -1.5rem;
+                height: 1.5rem;
+            }
+
+            .network-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .modal-transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .modal-transaction-points {
+                align-self: flex-end;
+            }
+        }
     </style>
     
     <script>
@@ -1731,8 +2474,8 @@
                 // Load rewards
                 await loadRewards();
                 
-                // Load transactions
-                await loadTransactions();
+                // Update MLM counts (sostituisce loadTransactions)
+                await updateMLMCounts();
                 
             } catch (error) {
                 console.error('Error loading points system:', error);
@@ -1870,88 +2613,6 @@
         }
         
         // Load Transactions
-        async function loadTransactions() {
-            try {
-                const user = window.getCurrentUser();
-                if (!user) return;
-                
-                const { data: transactions, error } = await window.supabaseClient
-                    .from('points_transactions')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
-                
-                if (error) throw error;
-                
-                const transactionsList = document.getElementById('transactions-list');
-                
-                if (!transactions || transactions.length === 0) {
-                    transactionsList.innerHTML = `
-                        <div class="empty-transactions">
-                            <i class="fas fa-inbox empty-transactions-icon"></i>
-                            <p>Nessuna transazione trovata</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                const typeLabels = {
-                    referral_completed: 'Referral Completato',
-                    report_approved: 'Segnalazione Approvata',
-                    report_rejected: 'Segnalazione Rifiutata',
-                    reward_redeemed: 'Premio Riscattato',
-                    admin_adjustment: 'Aggiustamento Admin',
-                    bonus: 'Bonus'
-                };
-                
-                const typeIcons = {
-                    referral_completed: '👥',
-                    report_approved: '✅',
-                    report_rejected: '❌',
-                    reward_redeemed: '🎁',
-                    admin_adjustment: '⚙️',
-                    bonus: '🎉'
-                };
-                
-                transactionsList.innerHTML = transactions.map(tx => {
-                    const isPositive = tx.points > 0;
-                    const date = new Date(tx.created_at).toLocaleDateString('it-IT', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    return `
-                        <div class="transaction-item">
-                            <div class="transaction-info">
-                                <div class="transaction-icon ${isPositive ? 'positive' : 'negative'}">
-                                    ${typeIcons[tx.transaction_type] || '📝'}
-                                </div>
-                                <div class="transaction-details">
-                                    <h4>${typeLabels[tx.transaction_type] || tx.transaction_type}</h4>
-                                    <p>${tx.description || date}</p>
-                                </div>
-                            </div>
-                            <div class="transaction-points ${isPositive ? 'positive' : 'negative'}">
-                                ${isPositive ? '+' : ''}${tx.points}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                console.error('Error loading transactions:', error);
-                document.getElementById('transactions-list').innerHTML = `
-                    <div class="error-transactions">
-                        <i class="fas fa-exclamation-triangle error-icon"></i>
-                        <p>Errore nel caricamento delle transazioni</p>
-                    </div>
-                `;
-            }
-        }
         
         // Open Redeem Modal
         window.openRedeemModal = function(reward) {
@@ -2046,7 +2707,333 @@
                 }, i * 30);
             }
         }
+        
+        // ============================================================================
+        // MLM MODALS - Transazioni e Rete Referral
+        // ============================================================================
+        
+        // Open Transactions Modal
+        window.openTransactionsModal = async function() {
+            document.getElementById('transactionsModal').classList.add('active');
+            await loadAllTransactions();
+        };
+        
+        // Close Transactions Modal
+        window.closeTransactionsModal = function() {
+            document.getElementById('transactionsModal').classList.remove('active');
+        };
+        
+        // Load All Transactions
+        async function loadAllTransactions() {
+            try {
+                const user = window.getCurrentUser();
+                if (!user) return;
+                
+                const { data: transactions, error } = await window.supabaseClient
+                    .from('points_transactions')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const modalContent = document.getElementById('all-transactions-list');
+                
+                if (!transactions || transactions.length === 0) {
+                    modalContent.innerHTML = `
+                        <div class="empty-transactions">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <p>Nessuna transazione trovata</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const typeLabels = {
+                    referral_completed: 'Referral Completato',
+                    report_approved: 'Segnalazione Approvata',
+                    report_rejected: 'Segnalazione Rifiutata',
+                    reward_redeemed: 'Premio Riscattato',
+                    admin_adjustment: 'Aggiustamento Admin',
+                    bonus: 'Bonus'
+                };
+                
+                const typeIcons = {
+                    referral_completed: '👥',
+                    report_approved: '✅',
+                    report_rejected: '❌',
+                    reward_redeemed: '🎁',
+                    admin_adjustment: '⚙️',
+                    bonus: '🎉'
+                };
+                
+                modalContent.innerHTML = transactions.map(tx => {
+                    const isPositive = tx.points > 0;
+                    const date = new Date(tx.created_at).toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    return `
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon ${isPositive ? 'positive' : 'negative'}">
+                                    ${typeIcons[tx.transaction_type] || '📝'}
+                                </div>
+                                <div class="transaction-details">
+                                    <h4>${typeLabels[tx.transaction_type] || tx.transaction_type}</h4>
+                                    <p>${tx.description || 'N/A'}</p>
+                                    <small class="transaction-date">${date}</small>
+                                </div>
+                            </div>
+                            <div class="transaction-points ${isPositive ? 'positive' : 'negative'}">
+                                ${isPositive ? '+' : ''}${tx.points}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading all transactions:', error);
+                document.getElementById('all-transactions-list').innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                        <p>Errore nel caricamento delle transazioni</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Open Network Modal
+        window.openNetworkModal = async function() {
+            document.getElementById('networkModal').classList.add('active');
+            await loadReferralNetwork();
+        };
+        
+        // Close Network Modal
+        window.closeNetworkModal = function() {
+            document.getElementById('networkModal').classList.remove('active');
+        };
+        
+        // Load Referral Network
+        async function loadReferralNetwork() {
+            try {
+                const user = window.getCurrentUser();
+                if (!user) return;
+                
+                // Carica rete referral
+                const { data: network, error } = await window.supabaseClient
+                    .from('referral_network')
+                    .select(`
+                        *,
+                        referral:users!referral_network_referral_id_fkey(
+                            id,
+                            email,
+                            first_name,
+                            last_name,
+                            referral_code,
+                            created_at
+                        )
+                    `)
+                    .eq('user_id', user.id)
+                    .order('level', { ascending: true })
+                    .order('created_at', { ascending: true });
+                
+                if (error) throw error;
+                
+                const modalContent = document.getElementById('network-chart');
+                
+                if (!network || network.length === 0) {
+                    modalContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <p>Non hai ancora referral nella tua rete</p>
+                            <small>Condividi il tuo codice referral per iniziare!</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Raggruppa per livello
+                const level1 = network.filter(n => n.level === 1);
+                const level2 = network.filter(n => n.level === 2);
+                
+                let html = '<div class="network-tree">';
+                
+                // Root (Tu)
+                html += `
+                    <div class="network-level root-level">
+                        <div class="network-node root-node">
+                            <div class="node-icon">👤</div>
+                            <div class="node-name">Tu</div>
+                            <div class="node-code">${user.user_metadata?.referral_code || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Livello 1 (Referral Diretti)
+                if (level1.length > 0) {
+                    html += `
+                        <div class="network-level level-1">
+                            <div class="level-title">
+                                <span class="level-badge">Livello 1</span>
+                                <span>${level1.length} referral dirett${level1.length === 1 ? 'o' : 'i'}</span>
+                            </div>
+                            <div class="network-nodes">
+                                ${level1.map(item => `
+                                    <div class="network-node">
+                                        <div class="node-icon">👥</div>
+                                        <div class="node-name">${item.referral?.first_name || 'User'} ${item.referral?.last_name || ''}</div>
+                                        <div class="node-email">${item.referral?.email || 'N/A'}</div>
+                                        <div class="node-points">+${item.points_awarded} punti</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Livello 2 (Referral Indiretti)
+                if (level2.length > 0) {
+                    html += `
+                        <div class="network-level level-2">
+                            <div class="level-title">
+                                <span class="level-badge secondary">Livello 2</span>
+                                <span>${level2.length} referral indirett${level2.length === 1 ? 'o' : 'i'}</span>
+                            </div>
+                            <div class="network-nodes">
+                                ${level2.map(item => `
+                                    <div class="network-node secondary">
+                                        <div class="node-icon">👥</div>
+                                        <div class="node-name">${item.referral?.first_name || 'User'} ${item.referral?.last_name || ''}</div>
+                                        <div class="node-email">${item.referral?.email || 'N/A'}</div>
+                                        <div class="node-points">+${item.points_awarded} punti</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                
+                // Statistiche
+                const totalPoints = network.reduce((sum, n) => sum + parseFloat(n.points_awarded), 0);
+                html += `
+                    <div class="network-stats">
+                        <div class="network-stat">
+                            <div class="stat-value">${level1.length}</div>
+                            <div class="stat-label">Diretti</div>
+                        </div>
+                        <div class="network-stat">
+                            <div class="stat-value">${level2.length}</div>
+                            <div class="stat-label">Indiretti</div>
+                        </div>
+                        <div class="network-stat primary">
+                            <div class="stat-value">${totalPoints}</div>
+                            <div class="stat-label">Punti Totali dalla Rete</div>
+                        </div>
+                    </div>
+                `;
+                
+                modalContent.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading referral network:', error);
+                document.getElementById('network-chart').innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                        <p>Errore nel caricamento della rete</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update transactions and network counts
+        async function updateMLMCounts() {
+            try {
+                const user = window.getCurrentUser();
+                if (!user) return;
+                
+                // Count transactions
+                const { count: txCount, error: txError } = await window.supabaseClient
+                    .from('points_transactions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                
+                if (!txError && txCount !== null) {
+                    document.getElementById('transactions-count').textContent = txCount;
+                }
+                
+                // Count network
+                const { count: netCount, error: netError } = await window.supabaseClient
+                    .from('referral_network')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                
+                if (!netError && netCount !== null) {
+                    document.getElementById('network-count').textContent = netCount;
+                }
+                
+            } catch (error) {
+                console.error('Error updating MLM counts:', error);
+            }
+        }
     </script>
+    
+    <!-- ============================================================================
+         MODALS - Transazioni e Rete Referral
+         ============================================================================ -->
+    
+    <!-- Transactions Modal -->
+    <div class="mlm-modal" id="transactionsModal">
+        <div class="mlm-modal-content">
+            <div class="mlm-modal-header">
+                <h3>
+                    <i class="fas fa-history"></i>
+                    Storico Transazioni Completo
+                </h3>
+                <button class="mlm-modal-close" onclick="closeTransactionsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mlm-modal-body">
+                <div id="all-transactions-list">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin mlm-spinner"></i>
+                        <p>Caricamento transazioni...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network Modal -->
+    <div class="mlm-modal" id="networkModal">
+        <div class="mlm-modal-content large">
+            <div class="mlm-modal-header">
+                <h3>
+                    <i class="fas fa-sitemap"></i>
+                    La Tua Rete Referral
+                </h3>
+                <button class="mlm-modal-close" onclick="closeNetworkModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mlm-modal-body">
+                <div id="network-chart">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin mlm-spinner"></i>
+                        <p>Caricamento rete...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 ```
 </html>
