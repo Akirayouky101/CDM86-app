@@ -5149,11 +5149,8 @@
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
-            // Delay per evitare che il click si propaghi alla modale
-            setTimeout(() => {
-                document.getElementById('reset-password-modal').style.display = 'flex';
-                console.log('✅ Modale reset aperta');
-            }, 10);
+            document.getElementById('reset-password-modal').style.display = 'flex';
+            console.log('✅ Modale reset aperta');
         }
 
         window.closeResetPasswordModal = function() {
@@ -5208,11 +5205,8 @@
             pendingDeleteUserId = userId;
             pendingDeleteEmail = email;
             document.getElementById('delete-user-email').textContent = email;
-            // Delay per evitare che il click si propaghi alla modale
-            setTimeout(() => {
-                document.getElementById('delete-user-modal').style.display = 'flex';
-                console.log('✅ Modale delete aperta');
-            }, 10);
+            document.getElementById('delete-user-modal').style.display = 'flex';
+            console.log('✅ Modale delete aperta');
         }
 
         window.closeDeleteUserModal = function() {
@@ -5280,12 +5274,24 @@
             }
         });
 
+        // Stop propagation when clicking inside modal content
+        document.querySelector('#reset-password-modal .modal-content')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Click dentro modal content, stop propagation');
+        });
+
         document.getElementById('delete-user-modal')?.addEventListener('click', (e) => {
             console.log('Click su delete modal:', e.target, 'currentTarget:', e.currentTarget);
             if (e.target === e.currentTarget) {
                 console.log('Click sull\'overlay, chiudo modale');
                 closeDeleteUserModal();
             }
+        });
+
+        // Stop propagation when clicking inside modal content
+        document.querySelector('#delete-user-modal .modal-content')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Click dentro modal content, stop propagation');
         });
 
         window.loadAllUsers = loadAllUsers;
