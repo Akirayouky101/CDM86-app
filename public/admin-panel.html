@@ -5150,8 +5150,11 @@
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
-            document.getElementById('reset-password-modal').style.display = 'flex';
-            console.log('✅ Modale reset aperta');
+            // Delay per evitare che il click si propaghi alla modale
+            setTimeout(() => {
+                document.getElementById('reset-password-modal').style.display = 'flex';
+                console.log('✅ Modale reset aperta');
+            }, 10);
         }
 
         window.closeResetPasswordModal = function() {
@@ -5208,8 +5211,11 @@
             pendingDeleteUserId = userId;
             pendingDeleteEmail = email;
             document.getElementById('delete-user-email').textContent = email;
-            document.getElementById('delete-user-modal').style.display = 'flex';
-            console.log('✅ Modale delete aperta');
+            // Delay per evitare che il click si propaghi alla modale
+            setTimeout(() => {
+                document.getElementById('delete-user-modal').style.display = 'flex';
+                console.log('✅ Modale delete aperta');
+            }, 10);
         }
 
         window.closeDeleteUserModal = function() {
