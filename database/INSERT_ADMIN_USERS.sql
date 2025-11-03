@@ -91,15 +91,13 @@ BEGIN
         points_total,
         points_used,
         points_available,
-        referrals_count,
-        level
+        referrals_count
     ) VALUES (
         v_diego_id,
         0,
         0,
         0,
-        0,
-        1
+        0
     )
     ON CONFLICT (user_id) DO NOTHING;
     
@@ -110,15 +108,13 @@ BEGIN
         points_total,
         points_used,
         points_available,
-        referrals_count,
-        level
+        referrals_count
     ) VALUES (
         v_claudio_id,
         0,
         0,
         0,
-        0,
-        1
+        0
     )
     ON CONFLICT (user_id) DO NOTHING;
     
@@ -149,7 +145,6 @@ SELECT
     first_name,
     last_name,
     referral_code,
-    is_admin,
     created_at
 FROM users
 WHERE email IN ('diegomarruchi@outlook.it', 'claudio.mura1967@gmail.com')

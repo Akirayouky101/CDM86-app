@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { userId, referredById, organizationId } = req.body;
+        const { userId, referredById, organizationId, accountType } = req.body;
 
         // Validazione
         if (!userId) {
@@ -42,6 +42,15 @@ export default async function handler(req, res) {
 
         if (!referredById && !organizationId) {
             return res.status(400).json({ error: 'Either referredById or organizationId is required' });
+        }
+
+        // Valida account_type se fornito
+        const validAccountTypes = ['user', 'organization', 'partner', 'association', 'collaborator'];
+        if (accountType && !validAccountTypes.includes(accountType)) {
+            return res.status(400).json({ 
+                error: 'Invalid account_type',
+                validTypes: validAccountTypes
+            });
         }
 
         // Verifica che l'utente esista
@@ -65,6 +74,12 @@ export default async function handler(req, res) {
 
         // Prepara update
         const updateData = {};
+        
+        // Imposta account_type se fornito
+        if (accountType) {
+            updateData.account_type = accountType;
+        }
+        
         if (referredById) {
             // Verifica che il referrer esista
             const { data: referrer, error: referrerError } = await supabaseAdmin
@@ -111,8 +126,11 @@ export default async function handler(req, res) {
         console.log('✅ Referral set successfully:', {
             userId,
             referredById,
-            organizationId
+            organizationId,
+            accountType: updateData.account_type
         });
+
+        console.log('🎯 MLM System will automatically award points via trigger');
 
         return res.status(200).json({
             success: true,
