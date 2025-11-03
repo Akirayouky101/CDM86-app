@@ -900,6 +900,8 @@
         // Load dashboard data
         async function loadDashboardData() {
             try {
+                console.log('🚀 Starting loadDashboardData...');
+                
                 // Get user data
                 const { data: userData, error: userError } = await supabase
                     .from('users')
@@ -908,6 +910,9 @@
                     .single();
                 
                 if (userError) throw userError;
+                
+                console.log('✅ User data loaded:', userData);
+                console.log('📋 Referral code:', userData.referral_code);
                 
                 // Update UI with correct IDs
                 const userEmail = document.getElementById('user-email');
@@ -1006,19 +1011,25 @@
                 if (statPoints) statPoints.textContent = userData.points || 0;
                 
                 const statCode = document.getElementById('stat-code');
+                console.log('📝 Setting stat-code to:', userData.referral_code);
                 if (statCode) statCode.textContent = userData.referral_code || 'N/A';
                 
                 const myCode = document.getElementById('my-code');
+                console.log('📝 Setting my-code to:', userData.referral_code);
                 if (myCode) myCode.textContent = userData.referral_code || 'N/A';
                 
                 // Generate QR Code for referral
+                console.log('🎨 Generating QR code for:', userData.referral_code);
                 generateQRCode(userData.referral_code);
                 
                 // Update referral link (punta alla registrazione con codice precompilato)
                 const referralLinkEl = document.getElementById('referral-link');
                 if (referralLinkEl && userData.referral_code) {
                     const link = `https://cdm86.com?ref=${userData.referral_code}`;
+                    console.log('🔗 Setting referral link to:', link);
                     referralLinkEl.textContent = link;
+                } else {
+                    console.warn('⚠️ Cannot set referral link - element or code missing');
                 }
                 
                 // Get who referred this user (chi ti ha invitato)
@@ -1312,16 +1323,24 @@
         
         // Generate QR Code
         function generateQRCode(referralCode) {
+            console.log('🎨 generateQRCode called with:', referralCode);
             const qrContainer = document.getElementById('qr-canvas');
-            if (!qrContainer || !referralCode) return;
+            console.log('📦 QR container element:', qrContainer);
+            
+            if (!qrContainer || !referralCode) {
+                console.warn('⚠️ Cannot generate QR - container:', !!qrContainer, 'code:', referralCode);
+                return;
+            }
             
             const referralUrl = `https://cdm86.com?ref=${referralCode}`;
+            console.log('🔗 QR URL:', referralUrl);
             
             // Clear previous QR code
             qrContainer.innerHTML = '';
             
             // Check if QRCode library is loaded
             if (typeof QRCode !== 'undefined') {
+                console.log('✅ QRCode library loaded, generating...');
                 new QRCode(qrContainer, {
                     text: referralUrl,
                     width: 200,
@@ -1331,6 +1350,7 @@
                     correctLevel: QRCode.CorrectLevel.H
                 });
             } else {
+                console.log('📊 Using Google Charts fallback');
                 // Fallback to Google Charts API
                 const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(referralUrl)}`;
                 qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code Referral" class="qr-code-image">`;
