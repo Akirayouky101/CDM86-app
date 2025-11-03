@@ -712,23 +712,23 @@
                     <div class="mlm-card mlm-card-transactions" onclick="openTransactionsModal()">
                         <div class="mlm-card-background">
                             <div class="mlm-card-icon-bg">
-                                <i class="fas fa-coins"></i>
+                                <i class="fas fa-receipt"></i>
                             </div>
                         </div>
                         <div class="mlm-card-content">
                             <div class="mlm-card-icon">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-wallet"></i>
                             </div>
-                            <h3>Storico Transazioni</h3>
-                            <p class="mlm-card-description">Visualizza tutte le tue transazioni punti</p>
+                            <h3>💰 Transazioni</h3>
+                            <p class="mlm-card-description">Cronologia completa dei tuoi movimenti punti</p>
                             <div class="mlm-card-stats">
                                 <span class="mlm-card-count" id="transactions-count">0</span>
-                                <span class="mlm-card-label">transazioni</span>
+                                <span class="mlm-card-label">movimenti</span>
                             </div>
                         </div>
                         <div class="mlm-card-footer">
-                            <span>Visualizza dettagli</span>
-                            <i class="fas fa-arrow-right"></i>
+                            <span>Apri storico</span>
+                            <i class="fas fa-chevron-circle-right"></i>
                         </div>
                     </div>
                     
@@ -736,23 +736,23 @@
                     <div class="mlm-card mlm-card-network" onclick="openNetworkModal()">
                         <div class="mlm-card-background">
                             <div class="mlm-card-icon-bg">
-                                <i class="fas fa-users"></i>
+                                <i class="fas fa-network-wired"></i>
                             </div>
                         </div>
                         <div class="mlm-card-content">
                             <div class="mlm-card-icon">
-                                <i class="fas fa-project-diagram"></i>
+                                <i class="fas fa-diagram-project"></i>
                             </div>
-                            <h3>La Tua Rete</h3>
-                            <p class="mlm-card-description">Esplora la tua rete di referral MLM</p>
+                            <h3>🌳 Rete MLM</h3>
+                            <p class="mlm-card-description">Visualizza il tuo albero referral a 2 livelli</p>
                             <div class="mlm-card-stats">
                                 <span class="mlm-card-count" id="network-count">0</span>
-                                <span class="mlm-card-label">referral</span>
+                                <span class="mlm-card-label">membri</span>
                             </div>
                         </div>
                         <div class="mlm-card-footer">
-                            <span>Visualizza albero</span>
-                            <i class="fas fa-arrow-right"></i>
+                            <span>Esplora rete</span>
+                            <i class="fas fa-chevron-circle-right"></i>
                         </div>
                     </div>
                 </div>
@@ -1675,11 +1675,49 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
         }
 
         .mlm-card:hover .mlm-card-icon {
-            transform: scale(1.1) rotate(5deg);
-            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.15) rotate(10deg);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            animation: none;
+        }
+
+        .mlm-card-icon i {
+            animation: iconSpin 4s linear infinite;
+        }
+
+        @keyframes iconSpin {
+            0%, 90%, 100% {
+                transform: rotate(0deg);
+            }
+            95% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .mlm-card:hover .mlm-card-icon i {
+            animation: iconPulse 0.6s ease-in-out;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
         }
 
         .mlm-card h3 {
