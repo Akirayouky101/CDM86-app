@@ -1128,6 +1128,7 @@
 
         window.supabase = supabase;
         let allUsers = [];
+        let allContracts = [];
         let pendingResetUser = null;
         let pendingDeleteUser = null;
 
@@ -1254,8 +1255,6 @@
         // ==========================================
         // CONTRACTS MANAGEMENT
         // ==========================================
-
-        let allContracts = [];
 
         // Load Contracts
         window.loadContracts = async function() {
@@ -1644,6 +1643,426 @@
             if (confirm('Vuoi davvero uscire?')) {
                 await supabase.auth.signOut();
                 window.location.href = '/index.html';
+            }
+        };
+
+        // ========================================
+        // CONTRACTS FUNCTIONS
+        // ========================================
+        
+        window.loadContracts = async function() {
+            const loading = document.getElementById('contractsLoading');
+            const container = document.getElementById('contractsListContainer');
+            
+            try {
+                loading.style.display = 'block';
+                container.innerHTML = '';
+                
+                const { data: contracts, error } = await supabase
+                    .from('contracts_with_details')
+                    .select('*')
+                    .order('end_date', { ascending: true });
+                
+                if (error) throw error;
+                
+                allContracts = contracts || [];
+                displayContracts(allContracts);
+                updateContractStats(allContracts);
+                
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading contracts:', error);
+                loading.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Errore caricamento contratti</p></div>';
+            }
+        };
+        
+        function displayContracts(contracts) {
+            const container = document.getElementById('contractsListContainer');
+            
+            if (!contracts || contracts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-file-contract"></i></div><p>Nessun contratto trovato</p></div>';
+                return;
+            }
+            
+            const statusColors = {
+                active: '#10b981',
+                expiring: '#f59e0b',
+                expired: '#ef4444',
+                cancelled: '#64748b',
+                renewed: '#3b82f6'
+            };
+            
+            const statusIcons = {
+                active: '✅',
+                expiring: '⚠️',
+                expired: '❌',
+                cancelled: '🚫',
+                renewed: '🔄'
+            };
+            
+            container.innerHTML = contracts.map(contract => `
+                <div class="card" style="border-left: 4px solid ${statusColors[contract.status]}; margin-bottom: 1rem;">
+                    <div class="card-header" style="cursor: pointer;">
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            ${statusIcons[contract.status]} ${contract.organization_name}
+                            <span class="badge badge-${contract.status}" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background: ${statusColors[contract.status]}; color: white; border-radius: 12px;">
+                                ${contract.status_label || contract.status}
+                            </span>
+                        </h3>
+                        <p style="margin: 0.5rem 0 0 0; color: var(--gray-500);">
+                            📄 ${contract.contract_code} • Scade: ${new Date(contract.end_date).toLocaleDateString('it-IT')}
+                            ${contract.days_remaining !== undefined ? ` • ${contract.days_remaining > 0 ? contract.days_remaining + ' giorni' : 'Scaduto'}` : ''}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateContractStats(contracts) {
+            const active = contracts.filter(c => c.status === 'active').length;
+            const expiring = contracts.filter(c => c.status === 'expiring').length;
+            const expired = contracts.filter(c => c.status === 'expired').length;
+            
+            document.getElementById('activeContractsCount').textContent = active;
+            document.getElementById('expiringContractsCount').textContent = expiring;
+            document.getElementById('expiredContractsCount').textContent = expired;
+            document.getElementById('totalContractsCount').textContent = contracts.length;
+        }
+        
+        window.filterContracts = function() {
+            const searchTerm = document.getElementById('contractsSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('contractsStatusFilter').value;
+            
+            let filtered = allContracts;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(contract =>
+                    (contract.organization_name && contract.organization_name.toLowerCase().includes(searchTerm)) ||
+                    (contract.contract_code && contract.contract_code.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(contract => contract.status === statusFilter);
+            }
+            
+            displayContracts(filtered);
+        };
+
+        // ========================================
+        // POINTS SYSTEM FUNCTIONS
+        // ========================================
+        
+        async function loadPointsStats() {
+            try {
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('points');
+                
+                if (error) throw error;
+                
+                const totalPoints = users.reduce((sum, u) => sum + (u.points || 0), 0);
+                const activeUsers = users.filter(u => (u.points || 0) > 0).length;
+                const avgPoints = activeUsers > 0 ? Math.round(totalPoints / activeUsers) : 0;
+                
+                document.getElementById('pointsTotalDistributed').textContent = totalPoints.toLocaleString();
+                document.getElementById('pointsActiveUsers').textContent = activeUsers;
+                document.getElementById('pointsAvgPerUser').textContent = avgPoints.toLocaleString();
+                
+                // Get rewards redeemed count
+                const { count, error: countError } = await supabase
+                    .from('reward_redemptions')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (!countError) {
+                    document.getElementById('pointsRewardsRedeemed').textContent = count || 0;
+                }
+            } catch (error) {
+                console.error('Error loading points stats:', error);
+            }
+        }
+        
+        window.loadPointsLeaderboard = async function() {
+            const loading = document.getElementById('leaderboardLoading');
+            const container = document.getElementById('leaderboardList');
+            
+            try {
+                loading.style.display = 'block';
+                container.innerHTML = '';
+                
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('email, first_name, last_name, points')
+                    .order('points', { ascending: false })
+                    .limit(50);
+                
+                if (error) throw error;
+                
+                loading.style.display = 'none';
+                
+                if (!users || users.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-trophy"></i></div><p>Nessun utente con punti</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = users.map((user, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                    const name = user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.email;
+                    
+                    return `
+                        <div class="card" style="margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 2rem; min-width: 50px; text-align: center;">${medal}</div>
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.25rem 0;">${name}</h4>
+                                    <p style="margin: 0; color: var(--gray-500); font-size: 0.875rem;">${user.email}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">${user.points || 0}</div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500);">punti</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                loading.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Errore caricamento classifica</p></div>';
+            }
+        };
+        
+        async function loadRewardsManagement() {
+            try {
+                const { data: rewards, error } = await supabase
+                    .from('rewards')
+                    .select('*')
+                    .order('points_required');
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('rewardsManagementList');
+                
+                if (!rewards || rewards.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-gift"></i></div><p>Nessun premio disponibile</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = rewards.map(reward => `
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 1.5rem;">
+                            <div style="font-size: 3rem;">${reward.icon || '🎁'}</div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0;">${reward.title}</h4>
+                                        <p style="margin: 0; color: var(--gray-600);">${reward.description}</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">${reward.points_required} pts</div>
+                                        <span class="badge" style="background: ${reward.active ? 'var(--secondary)' : 'var(--gray-400)'}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem;">
+                                            ${reward.active ? 'Attivo' : 'Disattivo'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                                    <button class="btn btn-secondary btn-sm" onclick="toggleRewardStatus('${reward.id}', ${!reward.active})">
+                                        <i class="fas fa-${reward.active ? 'ban' : 'check'}"></i> ${reward.active ? 'Disattiva' : 'Attiva'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading rewards:', error);
+            }
+        }
+        
+        window.toggleRewardStatus = async function(rewardId, newStatus) {
+            try {
+                const { error } = await supabase
+                    .from('rewards')
+                    .update({ active: newStatus })
+                    .eq('id', rewardId);
+                
+                if (error) throw error;
+                
+                alert(`✅ Premio ${newStatus ? 'attivato' : 'disattivato'} con successo!`);
+                loadRewardsManagement();
+            } catch (error) {
+                console.error('Error toggling reward:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+        
+        window.showAddRewardForm = function() {
+            alert('ℹ️ Funzionalità "Aggiungi Premio" in arrivo!');
+        };
+        
+        let currentRedemptionFilter = 'pending';
+        
+        window.filterRedemptions = function(filter) {
+            currentRedemptionFilter = filter;
+            
+            // Update button states
+            const buttons = document.querySelectorAll('#redemptionsList').parentElement.querySelectorAll('.btn-group .btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                const text = btn.textContent.toLowerCase();
+                if ((filter === 'all' && text.includes('tutti')) ||
+                    (filter === 'pending' && text.includes('attesa')) ||
+                    (filter === 'approved' && text.includes('approvati')) ||
+                    (filter === 'delivered' && text.includes('consegnati'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            loadRedemptions();
+        };
+        
+        async function loadRedemptions() {
+            try {
+                let query = supabase
+                    .from('reward_redemptions')
+                    .select(`
+                        *,
+                        users(email, first_name, last_name),
+                        rewards(title, points_required)
+                    `)
+                    .order('redeemed_at', { ascending: false });
+                
+                if (currentRedemptionFilter !== 'all') {
+                    query = query.eq('status', currentRedemptionFilter);
+                }
+                
+                const { data: redemptions, error } = await query;
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('redemptionsList');
+                
+                if (!redemptions || redemptions.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-inbox"></i></div><p>Nessun riscatto trovato</p></div>';
+                    return;
+                }
+                
+                const statusColors = {
+                    pending: 'var(--warning)',
+                    approved: 'var(--secondary)',
+                    rejected: 'var(--danger)',
+                    delivered: 'var(--accent)'
+                };
+                
+                const statusLabels = {
+                    pending: 'In Attesa',
+                    approved: 'Approvato',
+                    rejected: 'Rifiutato',
+                    delivered: 'Consegnato'
+                };
+                
+                container.innerHTML = redemptions.map(redemption => `
+                    <div class="card" style="border-left: 4px solid ${statusColors[redemption.status]}; margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 1.5rem;">
+                            <div style="font-size: 3rem;">🎁</div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0;">${redemption.rewards?.title || 'Premio'}</h4>
+                                        <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">
+                                            <i class="fas fa-user"></i> ${redemption.users?.email || 'Utente'}
+                                        </p>
+                                        <p style="margin: 0.25rem 0 0 0; color: var(--gray-500); font-size: 0.75rem;">
+                                            <i class="fas fa-clock"></i> ${new Date(redemption.redeemed_at).toLocaleDateString('it-IT')}
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">${redemption.points_spent} pts</div>
+                                        <span class="badge" style="background: ${statusColors[redemption.status]}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem;">
+                                            ${statusLabels[redemption.status]}
+                                        </span>
+                                    </div>
+                                </div>
+                                ${redemption.status === 'pending' ? `
+                                    <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                                        <button class="btn btn-primary btn-sm" onclick="approveRedemption('${redemption.id}')">
+                                            <i class="fas fa-check"></i> Approva
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" onclick="rejectRedemption('${redemption.id}')">
+                                            <i class="fas fa-times"></i> Rifiuta
+                                        </button>
+                                    </div>
+                                ` : redemption.status === 'approved' ? `
+                                    <div style="margin-top: 1rem;">
+                                        <button class="btn btn-secondary btn-sm" onclick="markAsDelivered('${redemption.id}')">
+                                            <i class="fas fa-truck"></i> Segna come Consegnato
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading redemptions:', error);
+            }
+        }
+        
+        window.approveRedemption = async function(redemptionId) {
+            if (!confirm('Approvare questo riscatto?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('reward_redemptions')
+                    .update({ status: 'approved' })
+                    .eq('id', redemptionId);
+                
+                if (error) throw error;
+                
+                alert('✅ Riscatto approvato!');
+                loadRedemptions();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+        
+        window.rejectRedemption = async function(redemptionId) {
+            if (!confirm('Rifiutare questo riscatto? I punti verranno restituiti.')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('reward_redemptions')
+                    .update({ status: 'rejected' })
+                    .eq('id', redemptionId);
+                
+                if (error) throw error;
+                
+                alert('✅ Riscatto rifiutato!');
+                loadRedemptions();
+                loadPointsStats();
+                loadPointsLeaderboard();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+        
+        window.markAsDelivered = async function(redemptionId) {
+            if (!confirm('Segnare come consegnato?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('reward_redemptions')
+                    .update({ status: 'delivered' })
+                    .eq('id', redemptionId);
+                
+                if (error) throw error;
+                
+                alert('✅ Riscatto consegnato!');
+                loadRedemptions();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
             }
         };
 
