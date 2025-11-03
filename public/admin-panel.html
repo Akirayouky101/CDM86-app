@@ -5145,31 +5145,27 @@
         let pendingResetEmail = null;
 
         window.resetUserPassword = function(userId, email) {
-            console.log('🔑 resetUserPassword chiamata:', userId, email);
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
             document.getElementById('reset-password-modal').style.display = 'flex';
-            console.log('✅ Modale reset aperta');
         }
 
         window.closeResetPasswordModal = function() {
-            console.log('❌ closeResetPasswordModal chiamata');
             document.getElementById('reset-password-modal').style.display = 'none';
             pendingResetUserId = null;
             pendingResetEmail = null;
         }
 
         window.confirmResetPassword = async function() {
-            console.log('✅ confirmResetPassword chiamata');
             if (!pendingResetUserId || !pendingResetEmail) {
-                console.error('DEBUG: Errore - pendingResetUserId o pendingResetEmail mancanti');
+                console.error('Errore: dati mancanti per reset password');
                 return;
             }
             
             const confirmBtn = document.getElementById('confirm-reset-btn');
             if (!confirmBtn) {
-                console.error('DEBUG: Errore - pulsante confirm-reset-btn non trovato!');
+                console.error('Errore: pulsante conferma non trovato');
                 return;
             }
             const originalText = confirmBtn.innerHTML;
@@ -5201,31 +5197,27 @@
         let pendingDeleteEmail = null;
 
         window.deleteUser = function(userId, email) {
-            console.log('🗑️ deleteUser chiamata:', userId, email);
             pendingDeleteUserId = userId;
             pendingDeleteEmail = email;
             document.getElementById('delete-user-email').textContent = email;
             document.getElementById('delete-user-modal').style.display = 'flex';
-            console.log('✅ Modale delete aperta');
         }
 
         window.closeDeleteUserModal = function() {
-            console.log('❌ closeDeleteUserModal chiamata');
             document.getElementById('delete-user-modal').style.display = 'none';
             pendingDeleteUserId = null;
             pendingDeleteEmail = null;
         }
 
         window.confirmDeleteUser = async function() {
-            console.log('✅ confirmDeleteUser chiamata');
             if (!pendingDeleteUserId || !pendingDeleteEmail) {
-                console.error('DEBUG: Errore - pendingDeleteUserId o pendingDeleteEmail mancanti');
+                console.error('Errore: dati mancanti per eliminazione utente');
                 return;
             }
             
             const confirmBtn = document.getElementById('confirm-delete-btn');
             if (!confirmBtn) {
-                console.error('DEBUG: Errore - pulsante confirm-delete-btn non trovato!');
+                console.error('Errore: pulsante conferma non trovato');
                 return;
             }
             const originalText = confirmBtn.innerHTML;
@@ -5267,31 +5259,15 @@
 
         // Close modals on outside click
         document.getElementById('reset-password-modal')?.addEventListener('click', (e) => {
-            console.log('Click su reset modal:', e.target, 'currentTarget:', e.currentTarget);
             if (e.target === e.currentTarget) {
-                console.log('Click sull\'overlay, chiudo modale');
                 closeResetPasswordModal();
             }
         });
 
-        // Stop propagation when clicking inside modal content
-        document.querySelector('#reset-password-modal .modal-content')?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Click dentro modal content, stop propagation');
-        });
-
         document.getElementById('delete-user-modal')?.addEventListener('click', (e) => {
-            console.log('Click su delete modal:', e.target, 'currentTarget:', e.currentTarget);
             if (e.target === e.currentTarget) {
-                console.log('Click sull\'overlay, chiudo modale');
                 closeDeleteUserModal();
             }
-        });
-
-        // Stop propagation when clicking inside modal content
-        document.querySelector('#delete-user-modal .modal-content')?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Click dentro modal content, stop propagation');
         });
 
         window.loadAllUsers = loadAllUsers;
@@ -5828,7 +5804,7 @@
 
     <!-- Reset Password Confirmation Modal -->
     <div id="reset-password-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
             <div class="modal-header">
                 <h2 class="modal-title">🔑 Reset Password</h2>
                 <button type="button" onclick="closeResetPasswordModal()" class="modal-close-btn">×</button>
@@ -5858,7 +5834,7 @@
 
     <!-- Delete User Confirmation Modal -->
     <div id="delete-user-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
             <div class="modal-header">
                 <h2 class="modal-title">🗑️ Elimina Utente</h2>
                 <button type="button" onclick="closeDeleteUserModal()" class="modal-close-btn">×</button>
