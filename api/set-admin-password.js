@@ -30,9 +30,16 @@ export default async function handler(req, res) {
 
     try {
         // Usa la service role key per operazioni admin
+        const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (!SUPABASE_SERVICE_KEY) {
+            throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured on Vercel');
+        }
+
         const supabaseAdmin = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
+            SUPABASE_URL,
+            SUPABASE_SERVICE_KEY
         );
 
         // Trova l'utente
