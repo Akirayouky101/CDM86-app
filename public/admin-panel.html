@@ -2125,12 +2125,14 @@
     </div>
     
     <script type="module">
+        console.log('🚀 Script starting...');
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
         const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
         const supabase = createClient(supabaseUrl, supabaseKey);
         window.supabase = supabase;
+        console.log('✅ Supabase initialized');
         
         let currentUser = null;
         let allRequests = [];
@@ -2140,6 +2142,7 @@
         
         // Tab Switching
         window.switchTab = function(tab, event) {
+            console.log('switchTab called:', tab);
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             if (event && event.target) {
@@ -5148,13 +5151,16 @@
         let pendingResetUserId = null;
         let pendingResetEmail = null;
 
+        console.log('✅ Defining resetUserPassword function...');
         window.resetUserPassword = function(userId, email) {
+            console.log('resetUserPassword called!', userId, email);
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
             document.getElementById('reset-password-modal').style.display = 'flex';
         }
 
+        console.log('✅ Defining closeResetPasswordModal function...');
         window.closeResetPasswordModal = function() {
             document.getElementById('reset-password-modal').style.display = 'none';
             pendingResetUserId = null;
@@ -5293,11 +5299,14 @@
         })();
 
         // Create User Modal Functions
+        console.log('✅ Defining openCreateUserModal function...');
         window.openCreateUserModal = function() {
+            console.log('openCreateUserModal called!');
             document.getElementById('create-user-modal').style.display = 'flex';
             document.getElementById('create-user-form').reset();
         }
 
+        console.log('✅ Defining closeCreateUserModal function...');
         window.closeCreateUserModal = function() {
             document.getElementById('create-user-modal').style.display = 'none';
             document.getElementById('create-user-form').reset();
@@ -5370,7 +5379,9 @@
         });
 
         // User Details Panel Functions
+        console.log('✅ Defining openUserDetailsPanel function...');
         window.openUserDetailsPanel = function() {
+            console.log('openUserDetailsPanel called!');
             document.getElementById('user-details-panel').style.display = 'flex';
             document.getElementById('userDetailsSearch').value = '';
             document.getElementById('userSelectionList').innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Usa la ricerca per trovare un utente</p>';
