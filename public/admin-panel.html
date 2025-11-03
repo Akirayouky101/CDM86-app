@@ -5243,10 +5243,6 @@
             }
         }
 
-        // Add click event to confirm buttons
-        document.getElementById('confirm-reset-btn')?.addEventListener('click', confirmResetPassword);
-        document.getElementById('confirm-delete-btn')?.addEventListener('click', confirmDeleteUser);
-
         // Close modals on outside click
         document.getElementById('reset-password-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'reset-password-modal') {
@@ -5814,7 +5810,7 @@
                     <button onclick="closeResetPasswordModal()" style="flex: 1; padding: 12px; background: #e5e7eb; color: #1f2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                         ❌ Annulla
                     </button>
-                    <button id="confirm-reset-btn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);">
+                    <button id="confirm-reset-btn" onclick="confirmResetPassword()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);">
                         ✅ Conferma Reset
                     </button>
                 </div>
@@ -5855,7 +5851,7 @@
                     <button onclick="closeDeleteUserModal()" style="flex: 1; padding: 12px; background: #e5e7eb; color: #1f2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                         ❌ Annulla
                     </button>
-                    <button id="confirm-delete-btn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);">
+                    <button id="confirm-delete-btn" onclick="confirmDeleteUser()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);">
                         🗑️ Elimina Definitivamente
                     </button>
                 </div>
