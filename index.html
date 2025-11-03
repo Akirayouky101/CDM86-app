@@ -1021,6 +1021,41 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="forgot-password-overlay" id="forgotPasswordOverlay">
+        <div class="forgot-password-modal">
+            <button class="forgot-password-close" onclick="LoginModal.closeForgotPassword()">&times;</button>
+            
+            <div class="forgot-password-header">
+                <div class="forgot-password-icon">🔑</div>
+                <h2 class="forgot-password-title">Recupera Password</h2>
+                <p class="forgot-password-subtitle">Ti invieremo un'email per reimpostare la password</p>
+            </div>
+            
+            <div class="forgot-password-body">
+                <form class="forgot-password-form" id="forgotPasswordForm" onsubmit="return LoginModal.handleForgotPassword(event)">
+                    <input 
+                        type="email" 
+                        class="forgot-password-input" 
+                        id="forgotPasswordEmail"
+                        placeholder="Inserisci la tua email"
+                        required
+                        autocomplete="email"
+                    />
+                    
+                    <div class="forgot-password-buttons">
+                        <button type="button" class="forgot-password-btn forgot-password-btn-secondary" onclick="LoginModal.closeForgotPassword()">
+                            Annulla
+                        </button>
+                        <button type="submit" class="forgot-password-btn forgot-password-btn-primary">
+                            Invia Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- PWA Service Worker Registration -->
     <script type="module" src="assets/js/login-modal.js"></script>
     <script type="module">

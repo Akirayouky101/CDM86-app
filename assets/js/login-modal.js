@@ -665,22 +665,55 @@ if (document.readyState === 'loading') {
 // FORGOT PASSWORD HANDLER
 // ==========================================
 
-async function showForgotPassword(event) {
+function showForgotPassword(event) {
     event.preventDefault();
     
-    const email = prompt('🔑 Inserisci la tua email per recuperare la password:');
+    // Chiudi login modal
+    closeLoginModal();
     
-    if (!email) return;
+    // Apri forgot password modal
+    const overlay = document.getElementById('forgotPasswordOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus sull'input email
+        setTimeout(() => {
+            const emailInput = document.getElementById('forgotPasswordEmail');
+            if (emailInput) emailInput.focus();
+        }, 300);
+    }
+}
+
+function closeForgotPassword() {
+    const overlay = document.getElementById('forgotPasswordOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Reset form
+        const form = document.getElementById('forgotPasswordForm');
+        if (form) form.reset();
+    }
+}
+
+async function handleForgotPassword(event) {
+    event.preventDefault();
     
-    // Valida email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showLoginAlert('❌ Email non valida', 'error');
-        return;
+    const emailInput = document.getElementById('forgotPasswordEmail');
+    const email = emailInput.value.trim();
+    
+    if (!email) {
+        showLoginAlert('❌ Inserisci un\'email valida', 'error');
+        return false;
     }
     
     try {
-        showLoginLoading(true);
+        // Disabilita il form durante l'invio
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Invio in corso...';
         
         // Invia email di recupero password
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -689,14 +722,26 @@ async function showForgotPassword(event) {
         
         if (error) throw error;
         
-        showLoginAlert(`✅ Email inviata! Controlla la tua casella di posta (${email})`, 'success');
+        // Chiudi modale e mostra successo
+        closeForgotPassword();
+        
+        // Riapri login modal con messaggio di successo
+        setTimeout(() => {
+            showLoginModal();
+            showLoginAlert(`✅ Email inviata! Controlla la tua casella di posta (${email})`, 'success');
+        }, 300);
         
     } catch (error) {
         console.error('Forgot password error:', error);
         showLoginAlert(`❌ Errore: ${error.message}`, 'error');
-    } finally {
-        showLoginLoading(false);
+        
+        // Riabilita il pulsante
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Invia Email';
     }
+    
+    return false;
 }
 
 // Export per uso globale
@@ -728,5 +773,7 @@ window.LoginModal = {
     wizardNext,
     handleLogin,
     handleRegister,
-    showForgotPassword
+    showForgotPassword,
+    closeForgotPassword,
+    handleForgotPassword
 };
