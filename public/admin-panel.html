@@ -5146,7 +5146,6 @@
 
         window.resetUserPassword = function(userId, email) {
             console.log('🔑 resetUserPassword chiamata:', userId, email);
-            alert('DEBUG: resetUserPassword chiamata per ' + email);
             pendingResetUserId = userId;
             pendingResetEmail = email;
             document.getElementById('reset-user-email').textContent = email;
@@ -5159,7 +5158,6 @@
 
         window.closeResetPasswordModal = function() {
             console.log('❌ closeResetPasswordModal chiamata');
-            console.trace('Stack trace di closeResetPasswordModal:');
             document.getElementById('reset-password-modal').style.display = 'none';
             pendingResetUserId = null;
             pendingResetEmail = null;
@@ -5167,15 +5165,14 @@
 
         window.confirmResetPassword = async function() {
             console.log('✅ confirmResetPassword chiamata');
-            alert('DEBUG: confirmResetPassword chiamata!');
             if (!pendingResetUserId || !pendingResetEmail) {
-                alert('DEBUG: Errore - pendingResetUserId o pendingResetEmail mancanti');
+                console.error('DEBUG: Errore - pendingResetUserId o pendingResetEmail mancanti');
                 return;
             }
             
             const confirmBtn = document.getElementById('confirm-reset-btn');
             if (!confirmBtn) {
-                alert('DEBUG: Errore - pulsante confirm-reset-btn non trovato!');
+                console.error('DEBUG: Errore - pulsante confirm-reset-btn non trovato!');
                 return;
             }
             const originalText = confirmBtn.innerHTML;
@@ -5208,7 +5205,6 @@
 
         window.deleteUser = function(userId, email) {
             console.log('🗑️ deleteUser chiamata:', userId, email);
-            alert('DEBUG: deleteUser chiamata per ' + email);
             pendingDeleteUserId = userId;
             pendingDeleteEmail = email;
             document.getElementById('delete-user-email').textContent = email;
@@ -5221,7 +5217,6 @@
 
         window.closeDeleteUserModal = function() {
             console.log('❌ closeDeleteUserModal chiamata');
-            console.trace('Stack trace di closeDeleteUserModal:');
             document.getElementById('delete-user-modal').style.display = 'none';
             pendingDeleteUserId = null;
             pendingDeleteEmail = null;
@@ -5229,15 +5224,14 @@
 
         window.confirmDeleteUser = async function() {
             console.log('✅ confirmDeleteUser chiamata');
-            alert('DEBUG: confirmDeleteUser chiamata!');
             if (!pendingDeleteUserId || !pendingDeleteEmail) {
-                alert('DEBUG: Errore - pendingDeleteUserId o pendingDeleteEmail mancanti');
+                console.error('DEBUG: Errore - pendingDeleteUserId o pendingDeleteEmail mancanti');
                 return;
             }
             
             const confirmBtn = document.getElementById('confirm-delete-btn');
             if (!confirmBtn) {
-                alert('DEBUG: Errore - pulsante confirm-delete-btn non trovato!');
+                console.error('DEBUG: Errore - pulsante confirm-delete-btn non trovato!');
                 return;
             }
             const originalText = confirmBtn.innerHTML;
