@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Debug Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>Dashboard Debug Test</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        // Import config
+        const SUPABASE_URL = 'https://qapyhztnrdnhcrkqpelc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhcHloenRucmRuaGNya3FwZWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg0OTc3NjAsImV4cCI6MjA0NDA3Mzc2MH0.OSlGVfv7tScXKhF6TcfQuVaAaLPmMFvlf8Ku9u4Mq6U';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const results = document.getElementById('results');
+        
+        async function testDashboard() {
+            try {
+                // Check session
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError || !session) {
+                    results.innerHTML += '<p style="color:red;">❌ NO SESSION - Please login first</p>';
+                    return;
+                }
+                
+                results.innerHTML += '<p style="color:green;">✅ Session OK - User: ' + session.user.email + '</p>';
+                
+                // Get user data
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+                
+                if (userError) {
+                    results.innerHTML += '<p style="color:red;">❌ User Error: ' + userError.message + '</p>';
+                    return;
+                }
+                
+                results.innerHTML += '<p style="color:green;">✅ User Data OK</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(userData, null, 2) + '</pre>';
+                
+                // Check referrer
+                if (userData.referred_by_id) {
+                    results.innerHTML += '<p style="color:blue;">🔍 Checking referrer: ' + userData.referred_by_id + '</p>';
+                    
+                    const { data: referrerData, error: referrerError } = await supabase
+                        .from('users')
+                        .select('id, first_name, last_name, referral_code')
+                        .eq('id', userData.referred_by_id)
+                        .maybeSingle();
+                    
+                    if (referrerError) {
+                        results.innerHTML += '<p style="color:red;">❌ Referrer Error: ' + referrerError.message + '</p>';
+                    } else if (referrerData) {
+                        results.innerHTML += '<p style="color:green;">✅ Referrer Found!</p>';
+                        results.innerHTML += '<pre>' + JSON.stringify(referrerData, null, 2) + '</pre>';
+                    } else {
+                        results.innerHTML += '<p style="color:orange;">⚠️ Referrer ID exists but user not found in database</p>';
+                    }
+                } else {
+                    results.innerHTML += '<p style="color:orange;">⚠️ No referred_by_id - This is an original user</p>';
+                }
+                
+                // Test QR Code
+                if (userData.referral_code) {
+                    results.innerHTML += '<p style="color:blue;">🎨 Testing QR Code generation...</p>';
+                    const qrDiv = document.createElement('div');
+                    qrDiv.id = 'qr-test';
+                    qrDiv.style.marginTop = '20px';
+                    results.appendChild(qrDiv);
+                    
+                    const referralUrl = `https://cdm86.com?ref=${userData.referral_code}`;
+                    
+                    if (typeof QRCode !== 'undefined') {
+                        new QRCode(qrDiv, {
+                            text: referralUrl,
+                            width: 200,
+                            height: 200,
+                            colorDark: '#667eea',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                        results.innerHTML += '<p style="color:green;">✅ QR Code generated!</p>';
+                    } else {
+                        results.innerHTML += '<p style="color:red;">❌ QRCode library not loaded</p>';
+                    }
+                }
+                
+            } catch (error) {
+                results.innerHTML += '<p style="color:red;">❌ ERROR: ' + error.message + '</p>';
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Run test
+        testDashboard();
+    </script>
+</body>
+</html>
