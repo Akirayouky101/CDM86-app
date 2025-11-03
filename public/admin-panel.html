@@ -831,8 +831,7 @@
 
                 <!-- Filters -->
                 <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="orgFilterSearch" placeholder="Cerca azienda, email, telefono..." onkeyup="applyOrgFilters()">
+                    <input type="text" id="orgFilterSearch" placeholder="🔍 Cerca azienda, email, telefono..." onkeyup="applyOrgFilters()">
                     <select id="orgFilterStatus" onchange="applyOrgFilters()" class="btn btn-secondary btn-sm">
                         <option value="">Tutti gli stati</option>
                         <option value="pending">⏳ Da Contattare</option>
@@ -909,9 +908,14 @@
                     <h2 class="card-title">
                         <i class="fas fa-file-contract"></i> Gestione Contratti
                     </h2>
-                    <button class="btn btn-secondary btn-sm" onclick="loadContracts()">
-                        <i class="fas fa-sync-alt"></i> Aggiorna
-                    </button>
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="openCreateContractModal()">
+                            <i class="fas fa-plus"></i> Nuovo Contratto
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadContracts()">
+                            <i class="fas fa-sync-alt"></i> Aggiorna
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Filters -->
@@ -1052,17 +1056,72 @@
 
         <!-- ANALYTICS TAB -->
         <div id="analyticsTab" class="tab-content">
+            <!-- Time Filter -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary btn-sm active" onclick="setTimeFilter('7d', event)">Ultimi 7 Giorni</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTimeFilter('30d', event)">Ultimo Mese</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTimeFilter('90d', event)">Ultimi 3 Mesi</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTimeFilter('365d', event)">Ultimo Anno</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTimeFilter('all', event)">Tutto</button>
+                </div>
+            </div>
+
+            <!-- Analytics Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotalUsers">0</div>
+                    <div class="stat-label">👥 Totale Utenti</div>
+                    <div id="trendUsers" class="stat-trend"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotalOrgs">0</div>
+                    <div class="stat-label">🏢 Totale Organizzazioni</div>
+                    <div id="trendOrgs" class="stat-trend"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotalRequests">0</div>
+                    <div class="stat-label">📧 Richieste Totali</div>
+                    <div id="trendRequests" class="stat-trend"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statApprovalRate">0%</div>
+                    <div class="stat-label">✅ Tasso Approvazione</div>
+                    <div id="trendApproval" class="stat-trend"></div>
+                </div>
+            </div>
+
+            <!-- Top Referrers -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-chart-line"></i> Analytics
+                        <i class="fas fa-trophy"></i> Top Referrer
                     </h2>
                 </div>
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-chart-bar"></i>
+                <div id="topReferrersList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <p>Nessun referrer trovato</p>
                     </div>
-                    <p>Statistiche in arrivo</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i> Attività Recente
+                    </h2>
+                </div>
+                <div id="recentActivityList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <p>Nessuna attività recente</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1185,6 +1244,52 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('deleteUserModal')">Annulla</button>
                 <button class="btn btn-danger" onclick="confirmDeleteUser()">Elimina Definitivamente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Contract Modal -->
+    <div id="createContractModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-contract"></i> Nuovo Contratto</h3>
+                <button class="close-btn" onclick="closeModal('createContractModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="contractOrgName">Nome Azienda *</label>
+                    <input type="text" id="contractOrgName" placeholder="Es: Acme Corporation" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractCode">Codice Contratto *</label>
+                    <input type="text" id="contractCode" placeholder="Es: CDM-2025-001" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractStartDate">Data Inizio *</label>
+                    <input type="date" id="contractStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractEndDate">Data Fine *</label>
+                    <input type="date" id="contractEndDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractType">Tipo Contratto</label>
+                    <select id="contractType">
+                        <option value="standard">Standard</option>
+                        <option value="premium">Premium</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contractNotes">Note</label>
+                    <textarea id="contractNotes" rows="3" placeholder="Note aggiuntive..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createContractModal')">Annulla</button>
+                <button class="btn btn-primary" onclick="handleCreateContract()">
+                    <i class="fas fa-save"></i> Crea Contratto
+                </button>
             </div>
         </div>
     </div>
@@ -1346,6 +1451,8 @@
                 loadPointsLeaderboard();
                 loadRewardsManagement();
                 loadRedemptions();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
             }
         };
 
@@ -1725,6 +1832,260 @@
             const body = encodeURIComponent(`Gentile ${orgName},\n\n`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
+
+        // ========================================
+        // CONTRACTS FUNCTIONS
+        // ========================================
+
+        window.openCreateContractModal = function() {
+            // Set default dates
+            const today = new Date();
+            const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+            
+            document.getElementById('contractStartDate').value = today.toISOString().split('T')[0];
+            document.getElementById('contractEndDate').value = nextYear.toISOString().split('T')[0];
+            
+            openModal('createContractModal');
+        };
+
+        window.handleCreateContract = async function() {
+            const orgName = document.getElementById('contractOrgName').value.trim();
+            const code = document.getElementById('contractCode').value.trim();
+            const startDate = document.getElementById('contractStartDate').value;
+            const endDate = document.getElementById('contractEndDate').value;
+            const type = document.getElementById('contractType').value;
+            const notes = document.getElementById('contractNotes').value.trim();
+
+            if (!orgName || !code || !startDate || !endDate) {
+                alert('⚠️ Compila tutti i campi obbligatori');
+                return;
+            }
+
+            try {
+                // Insert into contracts table (adjust table name and fields as needed)
+                const { error } = await supabase
+                    .from('contracts')
+                    .insert({
+                        organization_name: orgName,
+                        contract_code: code.toUpperCase(),
+                        start_date: startDate,
+                        end_date: endDate,
+                        contract_type: type,
+                        notes: notes,
+                        status: 'active'
+                    });
+
+                if (error) throw error;
+
+                alert('✅ Contratto creato con successo!');
+                closeModal('createContractModal');
+                
+                // Reset form
+                document.getElementById('contractOrgName').value = '';
+                document.getElementById('contractCode').value = '';
+                document.getElementById('contractNotes').value = '';
+                
+                // Reload contracts
+                loadContracts();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        // ========================================
+        // ANALYTICS FUNCTIONS
+        // ========================================
+
+        let analyticsTimeFilter = '7d';
+
+        window.setTimeFilter = function(period, event) {
+            analyticsTimeFilter = period;
+            
+            // Update button states
+            document.querySelectorAll('.btn-filter, .btn-primary, .btn-secondary').forEach(btn => {
+                if (btn.textContent.includes('7 Giorni') || btn.textContent.includes('Mese') || 
+                    btn.textContent.includes('3 Mesi') || btn.textContent.includes('Anno') || 
+                    btn.textContent.includes('Tutto')) {
+                    btn.classList.remove('btn-primary', 'active');
+                    btn.classList.add('btn-secondary');
+                }
+            });
+            
+            event.target.classList.remove('btn-secondary');
+            event.target.classList.add('btn-primary', 'active');
+            
+            loadAnalytics();
+        };
+
+        window.loadAnalytics = async function() {
+            try {
+                // Calculate date range
+                let dateFilter = null;
+                const now = new Date();
+                
+                if (analyticsTimeFilter !== 'all') {
+                    const days = {
+                        '7d': 7,
+                        '30d': 30,
+                        '90d': 90,
+                        '365d': 365
+                    }[analyticsTimeFilter];
+                    
+                    const startDate = new Date(now);
+                    startDate.setDate(startDate.getDate() - days);
+                    dateFilter = startDate.toISOString();
+                }
+
+                // Load users
+                let usersQuery = supabase.from('users').select('*', { count: 'exact' });
+                if (dateFilter) usersQuery = usersQuery.gte('created_at', dateFilter);
+                const { data: users, count: usersCount } = await usersQuery;
+
+                // Load organization requests
+                let requestsQuery = supabase.from('organization_requests').select('*', { count: 'exact' });
+                if (dateFilter) requestsQuery = requestsQuery.gte('created_at', dateFilter);
+                const { data: requests, count: requestsCount } = await requestsQuery;
+
+                // Count unique organizations
+                const uniqueOrgs = new Set(requests?.map(r => r.organization_name) || []).size;
+
+                // Calculate approval rate
+                const approvedCount = requests?.filter(r => r.status === 'approved' || r.status === 'completed').length || 0;
+                const approvalRate = requestsCount > 0 ? Math.round((approvedCount / requestsCount) * 100) : 0;
+
+                // Update stats
+                document.getElementById('statTotalUsers').textContent = usersCount || 0;
+                document.getElementById('statTotalOrgs').textContent = uniqueOrgs;
+                document.getElementById('statTotalRequests').textContent = requestsCount || 0;
+                document.getElementById('statApprovalRate').textContent = approvalRate + '%';
+
+                // Load top referrers
+                await loadTopReferrers(users || []);
+
+                // Load recent activity
+                await loadRecentActivity(users, requests);
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        };
+
+        async function loadTopReferrers(users) {
+            try {
+                // Count referrals per user
+                const referralCounts = {};
+                
+                users.forEach(user => {
+                    if (user.referred_by) {
+                        referralCounts[user.referred_by] = (referralCounts[user.referred_by] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 referrers
+                const topReferrers = Object.entries(referralCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const container = document.getElementById('topReferrersList');
+
+                if (topReferrers.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-award"></i></div><p>Nessun referrer trovato</p></div>';
+                    return;
+                }
+
+                // Get user details for each referrer
+                const referrerDetails = await Promise.all(
+                    topReferrers.map(async ([userId, count]) => {
+                        const { data } = await supabase
+                            .from('users')
+                            .select('name, email, referral_code')
+                            .eq('id', userId)
+                            .single();
+                        return { ...data, count };
+                    })
+                );
+
+                container.innerHTML = referrerDetails.map((ref, index) => `
+                    <div class="card" style="margin-bottom: 1rem; padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0; color: var(--primary);">
+                                    ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅'} 
+                                    ${ref.name || ref.email}
+                                </h3>
+                                <p style="margin: 0.25rem 0 0 0; color: var(--gray-600); font-size: 0.875rem;">
+                                    📧 ${ref.email} • 🎫 ${ref.referral_code}
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 2rem; font-weight: bold; color: var(--accent);">${ref.count}</div>
+                                <div style="color: var(--gray-600); font-size: 0.875rem;">referral</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading top referrers:', error);
+            }
+        }
+
+        async function loadRecentActivity(users, requests) {
+            const container = document.getElementById('recentActivityList');
+            
+            try {
+                // Combine and sort recent activities
+                const activities = [];
+                
+                // Recent users
+                (users || []).slice(0, 5).forEach(user => {
+                    activities.push({
+                        type: 'user',
+                        icon: 'fa-user-plus',
+                        color: 'var(--accent)',
+                        text: `Nuovo utente registrato: ${user.name || user.email}`,
+                        date: user.created_at
+                    });
+                });
+
+                // Recent requests
+                (requests || []).slice(0, 5).forEach(req => {
+                    activities.push({
+                        type: 'request',
+                        icon: 'fa-building',
+                        color: 'var(--secondary)',
+                        text: `Nuova richiesta da: ${req.organization_name}`,
+                        date: req.created_at
+                    });
+                });
+
+                // Sort by date
+                activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (activities.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-clock"></i></div><p>Nessuna attività recente</p></div>';
+                    return;
+                }
+
+                container.innerHTML = activities.slice(0, 10).map(activity => `
+                    <div style="display: flex; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: ${activity.color}; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas ${activity.icon}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0; font-weight: 500;">${activity.text}</p>
+                            <p style="margin: 0.25rem 0 0 0; color: var(--gray-600); font-size: 0.875rem;">
+                                ${new Date(activity.date).toLocaleDateString('it-IT')} - ${new Date(activity.date).toLocaleTimeString('it-IT')}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
 
         // Logout
         window.handleLogout = async function() {
