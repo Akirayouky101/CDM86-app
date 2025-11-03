@@ -661,6 +661,44 @@ if (document.readyState === 'loading') {
     checkAuthStatus();
 }
 
+// ==========================================
+// FORGOT PASSWORD HANDLER
+// ==========================================
+
+async function showForgotPassword(event) {
+    event.preventDefault();
+    
+    const email = prompt('🔑 Inserisci la tua email per recuperare la password:');
+    
+    if (!email) return;
+    
+    // Valida email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showLoginAlert('❌ Email non valida', 'error');
+        return;
+    }
+    
+    try {
+        showLoginLoading(true);
+        
+        // Invia email di recupero password
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/public/reset-password.html`
+        });
+        
+        if (error) throw error;
+        
+        showLoginAlert(`✅ Email inviata! Controlla la tua casella di posta (${email})`, 'success');
+        
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        showLoginAlert(`❌ Errore: ${error.message}`, 'error');
+    } finally {
+        showLoginLoading(false);
+    }
+}
+
 // Export per uso globale
 window.LoginModal = {
     // Selection Modal
@@ -689,5 +727,6 @@ window.LoginModal = {
     wizardBack,
     wizardNext,
     handleLogin,
-    handleRegister
+    handleRegister,
+    showForgotPassword
 };
