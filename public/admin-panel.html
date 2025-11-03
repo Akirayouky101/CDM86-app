@@ -267,6 +267,16 @@
             box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
         }
 
+        .stat-icon.orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+        }
+
+        .stat-icon.red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+
         .stat-icon.purple {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
             box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
@@ -656,6 +666,9 @@
             <button class="tab" onclick="switchTab('requests')">
                 <i class="fas fa-building"></i> Richieste
             </button>
+            <button class="tab" onclick="switchTab('contracts')">
+                <i class="fas fa-file-contract"></i> Contratti
+            </button>
             <button class="tab" onclick="switchTab('analytics')">
                 <i class="fas fa-chart-line"></i> Analytics
             </button>
@@ -764,6 +777,87 @@
                     </div>
                     <p>Sezione in sviluppo</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- CONTRACTS TAB -->
+        <div id="contractsTab" class="tab-content">
+            <!-- Alerts for expiring contracts -->
+            <div id="contractsAlerts"></div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="activeContractsCount">0</div>
+                    <div class="stat-label">Contratti Attivi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="expiringContractsCount">0</div>
+                    <div class="stat-label">In Scadenza</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon red">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="expiredContractsCount">0</div>
+                    <div class="stat-label">Scaduti</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalContractsCount">0</div>
+                    <div class="stat-label">Totale Contratti</div>
+                </div>
+            </div>
+
+            <!-- Contracts Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-file-contract"></i> Gestione Contratti
+                    </h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadContracts()">
+                        <i class="fas fa-sync-alt"></i> Aggiorna
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="contractsSearch" placeholder="Cerca per codice, organizzazione..." onkeyup="filterContracts()">
+                    <select id="contractsStatusFilter" onchange="filterContracts()" class="btn btn-secondary btn-sm">
+                        <option value="">Tutti gli stati</option>
+                        <option value="active">✅ Attivi</option>
+                        <option value="expiring">⚠️ In Scadenza</option>
+                        <option value="expired">❌ Scaduti</option>
+                        <option value="cancelled">🚫 Cancellati</option>
+                        <option value="renewed">🔄 Rinnovati</option>
+                    </select>
+                </div>
+
+                <!-- Loading -->
+                <div id="contractsLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Caricamento contratti...</p>
+                </div>
+
+                <!-- Contracts List -->
+                <div id="contractsListContainer"></div>
             </div>
         </div>
 
@@ -1033,6 +1127,252 @@
             renderUsers(filtered);
         };
 
+        // ==========================================
+        // CONTRACTS MANAGEMENT
+        // ==========================================
+
+        let allContracts = [];
+
+        // Load Contracts
+        window.loadContracts = async function() {
+            const loading = document.getElementById('contractsLoading');
+            const container = document.getElementById('contractsListContainer');
+
+            try {
+                loading.style.display = 'flex';
+                container.innerHTML = '';
+
+                // Per ora usiamo dati mock (se non esiste la view Supabase)
+                // Più avanti sostituiremo con: const { data, error } = await supabase.from('contracts_with_details').select('*');
+                
+                // Mock data per demo
+                const mockContracts = [
+                    {
+                        id: '1',
+                        contract_code: 'CTR-2024-001',
+                        organization_name: 'Azienda Test SRL',
+                        status: 'active',
+                        start_date: '2024-01-01',
+                        end_date: '2025-12-31',
+                        days_remaining: 425,
+                        referent_name: 'Mario Rossi',
+                        referent_email: 'mario.rossi@test.com',
+                        referent_phone: '+39 333 1234567'
+                    },
+                    {
+                        id: '2',
+                        contract_code: 'CTR-2024-002',
+                        organization_name: 'Beta Company',
+                        status: 'expiring',
+                        start_date: '2023-06-15',
+                        end_date: '2024-12-15',
+                        days_remaining: 25,
+                        referent_name: 'Laura Bianchi',
+                        referent_email: 'laura@beta.com',
+                        referent_phone: '+39 340 9876543'
+                    },
+                    {
+                        id: '3',
+                        contract_code: 'CTR-2023-015',
+                        organization_name: 'Gamma Services',
+                        status: 'expired',
+                        start_date: '2022-01-01',
+                        end_date: '2024-01-01',
+                        days_remaining: -305,
+                        referent_name: 'Paolo Verdi',
+                        referent_email: 'paolo@gamma.it',
+                        referent_phone: '+39 338 5556677'
+                    }
+                ];
+
+                allContracts = mockContracts;
+                displayContracts(allContracts);
+                updateContractStats(allContracts);
+                displayContractAlerts(allContracts);
+
+            } catch (error) {
+                console.error('Error loading contracts:', error);
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Errore caricamento contratti</p></div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        };
+
+        // Display Contracts
+        function displayContracts(contracts) {
+            const container = document.getElementById('contractsListContainer');
+
+            if (!contracts || contracts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-file-contract"></i></div><p>Nessun contratto trovato</p></div>';
+                return;
+            }
+
+            const statusColors = {
+                active: 'var(--secondary)',
+                expiring: 'var(--warning)',
+                expired: 'var(--danger)',
+                cancelled: 'var(--gray-500)',
+                renewed: 'var(--accent)'
+            };
+
+            const statusLabels = {
+                active: '✅ Attivo',
+                expiring: '⚠️ In Scadenza',
+                expired: '❌ Scaduto',
+                cancelled: '🚫 Cancellato',
+                renewed: '🔄 Rinnovato'
+            };
+
+            container.innerHTML = contracts.map(contract => `
+                <div class="card" style="margin-bottom: 1rem; border-left: 4px solid ${statusColors[contract.status]};">
+                    <div style="padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="margin: 0 0 0.5rem 0; color: var(--dark);">
+                                    <i class="fas fa-building"></i> ${contract.organization_name}
+                                </h3>
+                                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                    <span class="badge" style="background: ${statusColors[contract.status]}20; color: ${statusColors[contract.status]}; border: 1px solid ${statusColors[contract.status]};">
+                                        ${statusLabels[contract.status]}
+                                    </span>
+                                    <span style="color: var(--gray-500); font-size: 0.875rem;">
+                                        <i class="fas fa-file-alt"></i> ${contract.contract_code}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1rem; background: var(--gray-50); border-radius: 8px; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Data Inizio</div>
+                                <div style="font-weight: 600; color: var(--dark);">
+                                    <i class="fas fa-calendar-check"></i> ${new Date(contract.start_date).toLocaleDateString('it-IT')}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Scadenza</div>
+                                <div style="font-weight: 600; color: var(--dark);">
+                                    <i class="fas fa-calendar-times"></i> ${new Date(contract.end_date).toLocaleDateString('it-IT')}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Giorni Rimanenti</div>
+                                <div style="font-weight: 600; color: ${contract.days_remaining < 30 ? 'var(--danger)' : 'var(--secondary)'};">
+                                    <i class="fas fa-clock"></i> ${contract.days_remaining > 0 ? contract.days_remaining : 'Scaduto'}
+                                </div>
+                            </div>
+                        </div>
+
+                        ${contract.referent_name || contract.referent_email ? `
+                        <div style="padding: 1rem; background: var(--gray-50); border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">
+                                <i class="fas fa-user"></i> Referente
+                            </div>
+                            ${contract.referent_name ? `<div style="font-weight: 600; margin-bottom: 0.25rem;">${contract.referent_name}</div>` : ''}
+                            ${contract.referent_email ? `<div style="color: var(--gray-600); font-size: 0.875rem;"><i class="fas fa-envelope"></i> ${contract.referent_email}</div>` : ''}
+                            ${contract.referent_phone ? `<div style="color: var(--gray-600); font-size: 0.875rem;"><i class="fas fa-phone"></i> ${contract.referent_phone}</div>` : ''}
+                        </div>
+                        ` : ''}
+
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            ${contract.status === 'active' || contract.status === 'expiring' ? `
+                                <button class="btn btn-primary btn-sm" onclick="renewContract('${contract.id}')">
+                                    <i class="fas fa-redo"></i> Rinnova
+                                </button>
+                            ` : ''}
+                            ${contract.referent_email ? `
+                                <button class="btn btn-secondary btn-sm" onclick="emailContract('${contract.referent_email}', '${contract.organization_name}')">
+                                    <i class="fas fa-envelope"></i> Invia Email
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="viewContractDetails('${contract.id}')">
+                                <i class="fas fa-eye"></i> Dettagli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update Contract Stats
+        function updateContractStats(contracts) {
+            document.getElementById('activeContractsCount').textContent = contracts.filter(c => c.status === 'active').length;
+            document.getElementById('expiringContractsCount').textContent = contracts.filter(c => c.status === 'expiring').length;
+            document.getElementById('expiredContractsCount').textContent = contracts.filter(c => c.status === 'expired').length;
+            document.getElementById('totalContractsCount').textContent = contracts.length;
+        }
+
+        // Display Contract Alerts
+        function displayContractAlerts(contracts) {
+            const container = document.getElementById('contractsAlerts');
+            const expiring = contracts.filter(c => c.status === 'expiring' && c.days_remaining > 0 && c.days_remaining <= 30);
+
+            if (expiring.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--warning); background: #fffbeb;">
+                    <div style="padding: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: var(--warning);">
+                            <i class="fas fa-exclamation-triangle"></i> Contratti in Scadenza
+                        </h4>
+                        <p style="margin: 0; color: var(--gray-700);">
+                            Ci sono ${expiring.length} contratt${expiring.length === 1 ? 'o' : 'i'} che scad${expiring.length === 1 ? 'e' : 'ono'} nei prossimi 30 giorni
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Filter Contracts
+        window.filterContracts = function() {
+            const searchTerm = document.getElementById('contractsSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('contractsStatusFilter').value;
+
+            let filtered = allContracts;
+
+            if (searchTerm) {
+                filtered = filtered.filter(contract =>
+                    contract.contract_code.toLowerCase().includes(searchTerm) ||
+                    contract.organization_name.toLowerCase().includes(searchTerm) ||
+                    (contract.referent_name && contract.referent_name.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (statusFilter) {
+                filtered = filtered.filter(contract => contract.status === statusFilter);
+            }
+
+            displayContracts(filtered);
+        };
+
+        // Renew Contract
+        window.renewContract = function(contractId) {
+            const contract = allContracts.find(c => c.id === contractId);
+            if (!contract) return;
+            
+            if (confirm(`Vuoi rinnovare il contratto ${contract.contract_code} per ${contract.organization_name}?`)) {
+                alert('Funzionalità di rinnovo in arrivo!');
+            }
+        };
+
+        // View Contract Details
+        window.viewContractDetails = function(contractId) {
+            const contract = allContracts.find(c => c.id === contractId);
+            if (!contract) return;
+            
+            alert(`Dettagli contratto ${contract.contract_code}\n\nOrganizzazione: ${contract.organization_name}\nStato: ${contract.status}\nScadenza: ${new Date(contract.end_date).toLocaleDateString('it-IT')}`);
+        };
+
+        // Email Contract
+        window.emailContract = function(email, orgName) {
+            const subject = encodeURIComponent(`Rinnovo Contratto - ${orgName}`);
+            const body = encodeURIComponent(`Gentile ${orgName},\n\nVi contattiamo in merito al rinnovo del vostro contratto con CDM86.\n\n`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
         // Tab Switching
         window.switchTab = function(tabName) {
             // Update tab buttons
@@ -1046,6 +1386,8 @@
             // Load data if needed
             if (tabName === 'users') {
                 loadUsers();
+            } else if (tabName === 'contracts') {
+                loadContracts();
             }
         };
 
