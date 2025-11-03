@@ -1488,8 +1488,13 @@
             <!-- USERS MANAGEMENT TAB -->
             <div id="users-tab" class="tab-content hidden">
                 <div class="page-header">
-                    <h1><i class="fas fa-users"></i> Gestione Utenti</h1>
-                    <p>Visualizza, modifica ed elimina utenti</p>
+                    <div style="flex: 1;">
+                        <h1><i class="fas fa-users"></i> Gestione Utenti</h1>
+                        <p>Visualizza, modifica ed elimina utenti</p>
+                    </div>
+                    <button onclick="openCreateUserModal()" style="padding: 12px 24px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">
+                        <i class="fas fa-user-plus"></i> Crea Nuovo Utente
+                    </button>
                 </div>
 
                 <!-- Search and Filters -->
@@ -5186,6 +5191,83 @@
                 }
             }
         })();
+
+        // Create User Modal Functions
+        function openCreateUserModal() {
+            document.getElementById('create-user-modal').style.display = 'flex';
+            document.getElementById('create-user-form').reset();
+        }
+
+        function closeCreateUserModal() {
+            document.getElementById('create-user-modal').style.display = 'none';
+            document.getElementById('create-user-form').reset();
+        }
+
+        async function handleCreateUser(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('new-user-email').value.trim();
+            const password = document.getElementById('new-user-password').value;
+            const firstName = document.getElementById('new-user-first-name').value.trim();
+            const lastName = document.getElementById('new-user-last-name').value.trim();
+            const phone = document.getElementById('new-user-phone').value.trim();
+            const referralCode = document.getElementById('new-user-referral').value.trim().toUpperCase();
+
+            try {
+                // 1. Create user in Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                    email: email,
+                    password: password,
+                    email_confirm: true
+                });
+
+                if (authError) throw authError;
+
+                // 2. Find referrer if referral code provided
+                let referredById = null;
+                if (referralCode) {
+                    const { data: referrer } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    
+                    if (referrer) {
+                        referredById = referrer.id;
+                    }
+                }
+
+                // 3. Create user in users table (trigger will handle referral code generation)
+                const { error: userError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: authData.user.id,
+                        email: email,
+                        first_name: firstName,
+                        last_name: lastName,
+                        phone: phone || null,
+                        referred_by_id: referredById,
+                        role: 'user',
+                        points: 100
+                    });
+
+                if (userError) throw userError;
+
+                alert(`✅ Utente ${email} creato con successo!`);
+                closeCreateUserModal();
+                loadAllUsers(); // Reload users list
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert(`❌ Errore: ${error.message}`);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('create-user-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'create-user-modal') {
+                closeCreateUserModal();
+            }
+        });
     </script>
 
     <!-- Image Resize Modal -->
@@ -5414,6 +5496,52 @@
                     </button>
                     <button type="submit" class="btn-action-reject">
                         <i class="fas fa-ban"></i> Conferma Rifiuto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="create-user-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">👤 Crea Nuovo Utente</h2>
+                <button type="button" onclick="closeCreateUserModal()" class="modal-close-btn">×</button>
+            </div>
+            <form id="create-user-form" onsubmit="handleCreateUser(event)" class="form-container">
+                <div class="form-group">
+                    <label for="new-user-email" class="form-label">📧 Email *</label>
+                    <input type="email" id="new-user-email" required class="form-input" placeholder="utente@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-password" class="form-label">🔐 Password *</label>
+                    <input type="password" id="new-user-password" required minlength="8" class="form-input" placeholder="Minimo 8 caratteri">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-first-name" class="form-label">👤 Nome *</label>
+                    <input type="text" id="new-user-first-name" required class="form-input" placeholder="Mario">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-last-name" class="form-label">👤 Cognome *</label>
+                    <input type="text" id="new-user-last-name" required class="form-input" placeholder="Rossi">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-phone" class="form-label">📱 Telefono</label>
+                    <input type="tel" id="new-user-phone" class="form-input" placeholder="+39 123 456 7890">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-referral" class="form-label">🎁 Referral Code (opzionale)</label>
+                    <input type="text" id="new-user-referral" class="form-input" placeholder="ADMIN001" 
+                           pattern="[A-Z0-9]{6,10}" title="Codice referral (es: ADMIN001)">
+                    <small style="color: #6b7280; font-size: 13px;">Lascia vuoto per non associare nessun referrer</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeCreateUserModal()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="submit" class="btn-action-approve">
+                        <i class="fas fa-user-plus"></i> Crea Utente
                     </button>
                 </div>
             </form>
