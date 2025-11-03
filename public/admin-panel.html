@@ -1455,22 +1455,22 @@
     
     <!-- Tabs Navigation -->
     <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab('org-requests')">
+        <button class="tab-btn active" onclick="switchTab('org-requests', event)">
             <i class="fas fa-building"></i> Richieste Aziende
         </button>
-        <button class="tab-btn" onclick="switchTab('users')">
+        <button class="tab-btn" onclick="switchTab('users', event)">
             <i class="fas fa-users"></i> Gestione Utenti
         </button>
-        <button class="tab-btn" onclick="switchTab('contracts')">
+        <button class="tab-btn" onclick="switchTab('contracts', event)">
             <i class="fas fa-file-contract"></i> Contratti
         </button>
-        <button class="tab-btn" onclick="switchTab('analytics')">
+        <button class="tab-btn" onclick="switchTab('analytics', event)">
             <i class="fas fa-chart-line"></i> Analytics
         </button>
-        <button class="tab-btn" onclick="switchTab('promotions')">
+        <button class="tab-btn" onclick="switchTab('promotions', event)">
             <i class="fas fa-tags"></i> Promozioni
         </button>
-        <button class="tab-btn" onclick="switchTab('points')">
+        <button class="tab-btn" onclick="switchTab('points', event)">
             <i class="fas fa-trophy"></i> Sistema Punti
         </button>
     </div>
@@ -1591,11 +1591,11 @@
                 
                 <!-- Time Filter -->
                 <div class="time-filter">
-                    <button class="btn-filter active" onclick="setTimeFilter('7d')">Ultimi 7 Giorni</button>
-                    <button class="btn-filter" onclick="setTimeFilter('30d')">Ultimo Mese</button>
-                    <button class="btn-filter" onclick="setTimeFilter('90d')">Ultimi 3 Mesi</button>
-                    <button class="btn-filter" onclick="setTimeFilter('365d')">Ultimo Anno</button>
-                    <button class="btn-filter" onclick="setTimeFilter('all')">Tutto</button>
+                    <button class="btn-filter active" onclick="setTimeFilter('7d', event)">Ultimi 7 Giorni</button>
+                    <button class="btn-filter" onclick="setTimeFilter('30d', event)">Ultimo Mese</button>
+                    <button class="btn-filter" onclick="setTimeFilter('90d', event)">Ultimi 3 Mesi</button>
+                    <button class="btn-filter" onclick="setTimeFilter('365d', event)">Ultimo Anno</button>
+                    <button class="btn-filter" onclick="setTimeFilter('all', event)">Tutto</button>
                 </div>
                 
                 <!-- Analytics Stats Grid -->
@@ -2139,10 +2139,12 @@
         let timelineChart = null;
         
         // Tab Switching
-        window.switchTab = function(tab) {
+        window.switchTab = function(tab, event) {
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -2161,10 +2163,12 @@
         };
         
         // Time Filter
-        window.setTimeFilter = function(filter) {
+        window.setTimeFilter = function(filter, event) {
             currentTimeFilter = filter;
             document.querySelectorAll('.time-filter .btn-filter').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             loadAnalytics();
         };
         
