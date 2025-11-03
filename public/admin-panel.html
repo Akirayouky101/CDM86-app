@@ -151,6 +151,16 @@
             font-size: 0.875rem;
         }
 
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn {
+            margin: 0;
+        }
+
         /* Main Container */
         .container {
             max-width: 1400px;
@@ -669,6 +679,9 @@
             <button class="tab" onclick="switchTab('contracts')">
                 <i class="fas fa-file-contract"></i> Contratti
             </button>
+            <button class="tab" onclick="switchTab('points')">
+                <i class="fas fa-trophy"></i> Sistema Punti
+            </button>
             <button class="tab" onclick="switchTab('analytics')">
                 <i class="fas fa-chart-line"></i> Analytics
             </button>
@@ -858,6 +871,117 @@
 
                 <!-- Contracts List -->
                 <div id="contractsListContainer"></div>
+            </div>
+        </div>
+
+        <!-- POINTS SYSTEM TAB -->
+        <div id="pointsTab" class="tab-content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="pointsTotalDistributed">0</div>
+                    <div class="stat-label">Punti Totali Distribuiti</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="pointsActiveUsers">0</div>
+                    <div class="stat-label">Utenti Attivi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="pointsRewardsRedeemed">0</div>
+                    <div class="stat-label">Premi Riscattati</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="pointsAvgPerUser">0</div>
+                    <div class="stat-label">Media Punti/Utente</div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-trophy"></i> 🥇 Classifica Utenti
+                    </h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadPointsLeaderboard()">
+                        <i class="fas fa-sync-alt"></i> Aggiorna
+                    </button>
+                </div>
+
+                <!-- Loading -->
+                <div id="leaderboardLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Caricamento classifica...</p>
+                </div>
+
+                <!-- Leaderboard List -->
+                <div id="leaderboardList"></div>
+            </div>
+
+            <!-- Rewards Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-gift"></i> Gestione Premi
+                    </h2>
+                    <button class="btn btn-primary btn-sm" onclick="showAddRewardForm()">
+                        <i class="fas fa-plus"></i> Nuovo Premio
+                    </button>
+                </div>
+
+                <!-- Rewards List -->
+                <div id="rewardsManagementList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <p>Nessun premio disponibile</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redemptions Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-box-open"></i> Riscatti in Attesa
+                    </h2>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary btn-sm" onclick="filterRedemptions('all')">Tutti</button>
+                        <button class="btn btn-secondary btn-sm active" onclick="filterRedemptions('pending')">In Attesa</button>
+                        <button class="btn btn-secondary btn-sm" onclick="filterRedemptions('approved')">Approvati</button>
+                        <button class="btn btn-secondary btn-sm" onclick="filterRedemptions('delivered')">Consegnati</button>
+                    </div>
+                </div>
+
+                <!-- Redemptions List -->
+                <div id="redemptionsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <p>Nessun riscatto trovato</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1388,6 +1512,11 @@
                 loadUsers();
             } else if (tabName === 'contracts') {
                 loadContracts();
+            } else if (tabName === 'points') {
+                loadPointsStats();
+                loadPointsLeaderboard();
+                loadRewardsManagement();
+                loadRedemptions();
             }
         };
 
