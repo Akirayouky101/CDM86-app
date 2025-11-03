@@ -1051,6 +1051,13 @@
                         <label>Telefono</label>
                         <input type="tel" id="newUserPhone">
                     </div>
+                    <div class="form-group">
+                        <label>Codice Referral (opzionale)</label>
+                        <input type="text" id="newUserReferralCode" placeholder="Es: ABC123">
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                            Inserisci il codice referral di chi ha invitato questo utente
+                        </small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createUserModal')">Annulla</button>
@@ -1307,8 +1314,26 @@
             const firstName = document.getElementById('newUserFirstName').value.trim();
             const lastName = document.getElementById('newUserLastName').value.trim();
             const phone = document.getElementById('newUserPhone').value.trim();
+            const referralCode = document.getElementById('newUserReferralCode').value.trim().toUpperCase();
 
             try {
+                // Check if referral code exists and get referrer ID
+                let referrerId = null;
+                if (referralCode) {
+                    const { data: referrer, error: refError } = await supabase
+                        .from('users')
+                        .select('id, email')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    
+                    if (refError || !referrer) {
+                        alert('⚠️ Codice referral non valido. L\'utente verrà creato senza referral.');
+                    } else {
+                        referrerId = referrer.id;
+                        console.log('✅ Referral valido:', referrer.email);
+                    }
+                }
+
                 const { data: authData, error: authError } = await supabase.auth.admin.createUser({
                     email: email,
                     password: password,
@@ -1326,12 +1351,28 @@
                         last_name: lastName,
                         phone: phone || null,
                         role: 'user',
-                        points: 100
+                        points: 100,
+                        referred_by: referrerId
                     });
 
                 if (userError) throw userError;
 
-                alert('✅ Utente creato con successo!');
+                // If referral was valid, award points to referrer
+                if (referrerId) {
+                    const { error: pointsError } = await supabase.rpc('add_points_to_user', {
+                        p_user_id: referrerId,
+                        p_points: 50,
+                        p_description: `Bonus referral per invito di ${email}`
+                    });
+                    
+                    if (pointsError) {
+                        console.error('Error awarding referral points:', pointsError);
+                    } else {
+                        console.log('✅ Assegnati 50 punti al referrer');
+                    }
+                }
+
+                alert('✅ Utente creato con successo!' + (referrerId ? ' Referral applicato!' : ''));
                 closeModal('createUserModal');
                 document.getElementById('createUserForm').reset();
                 loadUsers();
