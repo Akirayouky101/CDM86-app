@@ -445,6 +445,13 @@ export async function handleLogin(event) {
         if (data.user) {
             showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
 
+            // Check user role first
+            const { data: userData } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', data.user.id)
+                .maybeSingle();
+
             // Check if user is an organization
             const { data: orgData } = await supabase
                 .from('organizations')
@@ -454,7 +461,9 @@ export async function handleLogin(event) {
 
             // Redirect based on user type
             setTimeout(() => {
-                if (orgData) {
+                if (userData && userData.role === 'admin') {
+                    window.location.href = '/public/admin-panel.html';
+                } else if (orgData) {
                     window.location.href = '/public/organization-dashboard.html';
                 } else {
                     window.location.href = '/public/promotions.html';
