@@ -30,6 +30,7 @@ WHERE referral_code = 'DCA3F142';
 INSERT INTO users (
     id,
     email,
+    password_hash,
     first_name,
     last_name,
     referral_code,
@@ -42,6 +43,7 @@ INSERT INTO users (
 SELECT 
     au.id,  -- ID di giovanni da auth.users
     au.email,
+    'auth_managed',
     COALESCE(au.raw_user_meta_data->>'first_name', 'Giovanni'),
     COALESCE(au.raw_user_meta_data->>'last_name', 'Rossi'),
     UPPER(SUBSTRING(MD5(RANDOM()::TEXT), 1, 8)),  -- Genera codice random
