@@ -687,14 +687,17 @@
             </div>
             
             <!-- ========================================
-                 REWARDS CATALOG
+                 REWARDS CATALOG (COLLASSABILE)
                  ======================================== -->
             <div class="rewards-section">
-                <h3>
-                    <i class="fas fa-gift"></i>
-                    Premi Disponibili
-                </h3>
-                <div class="rewards-grid" id="rewards-grid">
+                <div class="rewards-header" onclick="toggleRewardsSection()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-gift"></i>
+                        Premi Disponibili
+                    </h3>
+                    <i class="fas fa-chevron-down" id="rewards-chevron" style="transition: transform 0.3s;"></i>
+                </div>
+                <div class="rewards-grid" id="rewards-grid" style="display: none;">
                     <!-- Rewards will be loaded here dynamically -->
                     <div class="loading-state">
                         <i class="fas fa-spinner fa-spin loading-spinner"></i>
@@ -2534,6 +2537,20 @@
                 document.getElementById('next-level-info').textContent = `Prossimo: ${nextLevelName} (${nextLevelPoints} punti)`;
             }
         }
+        
+        // Toggle Rewards Section
+        window.toggleRewardsSection = function() {
+            const rewardsGrid = document.getElementById('rewards-grid');
+            const chevron = document.getElementById('rewards-chevron');
+            
+            if (rewardsGrid.style.display === 'none') {
+                rewardsGrid.style.display = 'grid';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                rewardsGrid.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        };
         
         // Load Rewards
         async function loadRewards() {
