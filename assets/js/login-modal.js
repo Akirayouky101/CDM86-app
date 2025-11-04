@@ -541,7 +541,8 @@ export async function handleRegister(event) {
             options: {
                 data: {
                     first_name: firstName,
-                    last_name: lastName
+                    last_name: lastName,
+                    referral_code_used: referralCode  // 👈 AGGIUNTO!
                 }
             }
         });

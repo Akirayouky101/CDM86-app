@@ -33,7 +33,6 @@ BEGIN
     INSERT INTO users (
         id,
         email,
-        password_hash,
         first_name,
         last_name,
         referral_code,
@@ -45,7 +44,6 @@ BEGIN
     ) VALUES (
         NEW.id,
         NEW.email,
-        COALESCE(NEW.encrypted_password, 'auth_managed'),
         COALESCE(NEW.raw_user_meta_data->>'first_name', 'User'),
         COALESCE(NEW.raw_user_meta_data->>'last_name', 'Unknown'),
         new_referral_code,
