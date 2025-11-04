@@ -839,12 +839,6 @@
                     <button class="btn-copy" onclick="downloadQR()">⬇️ Scarica QR</button>
                 </div>
             </div>
-            
-            <!-- Lista persone invitate -->
-            <div class="section">
-                <h3>📋 Persone che hai invitato (<span id="count-invited">0</span>)</h3>
-                <ul id="referred-users" class="referred-users"></ul>
-            </div>
         </div>
     </div>
     
@@ -1103,67 +1097,6 @@
                                 <div class="organization-code">Codice Organizzazione: ${orgData.referral_code}</div>
                             </div>
                         `;
-                    }
-                }
-                
-                
-                // Get referral stats (persone che hai invitato)
-                const { data: referrals, error: refError } = await supabase
-                    .from('users')
-                    .select('id, first_name, last_name, referral_code, created_at')
-                    .eq('referred_by_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-                
-                if (!refError && referrals) {
-                    const statReferrals = document.getElementById('stat-referrals');
-                    if (statReferrals) statReferrals.textContent = referrals.length;
-                    
-                    const countInvited = document.getElementById('count-invited');
-                    if (countInvited) countInvited.textContent = referrals.length;
-                    
-                    // Populate the list of invited users
-                    const referredList = document.getElementById('referred-users');
-                    if (referredList) {
-                        if (referrals.length > 0) {
-                            referredList.innerHTML = referrals.map(user => {
-                                const initials = `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase();
-                                const joinDate = new Date(user.created_at).toLocaleDateString('it-IT', { 
-                                    day: 'numeric', 
-                                    month: 'short', 
-                                    year: 'numeric' 
-                                });
-                                
-                                return `
-                                    <li class="referral-user-card">
-                                        <div class="referral-user-info">
-                                            <div class="referral-user-avatar">
-                                                ${initials}
-                                            </div>
-                                            <div>
-                                                <div class="referral-user-name">
-                                                    ${user.first_name} ${user.last_name}
-                                                </div>
-                                                <div class="referral-user-date">
-                                                    Iscritto il ${joinDate}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="referral-user-code-section">
-                                            <div class="referral-code-label">Codice Referral</div>
-                                            <div class="referral-code-value">${user.referral_code}</div>
-                                        </div>
-                                    </li>
-                                `;
-                            }).join('');
-                        } else {
-                            referredList.innerHTML = `
-                                <div class="empty-referrals-card">
-                                    <div class="empty-referrals-icon">👥</div>
-                                    <div class="empty-referrals-title">Non hai ancora invitato nessuno</div>
-                                    <div class="empty-referrals-subtitle">Condividi il tuo codice referral per iniziare!</div>
-                                </div>
-                            `;
-                        }
                     }
                 }
                 
@@ -2892,29 +2825,37 @@
                 const user = window.getCurrentUser();
                 if (!user) return;
                 
-                // Carica rete referral
-                const { data: network, error } = await window.supabaseClient
-                    .from('referral_network')
-                    .select(`
-                        *,
-                        referral:users!referral_network_referral_id_fkey(
-                            id,
-                            email,
-                            first_name,
-                            last_name,
-                            referral_code,
-                            created_at
-                        )
-                    `)
-                    .eq('user_id', user.id)
-                    .order('level', { ascending: true })
+                // NUOVO SISTEMA: Leggi diretti e indiretti da users.referred_by_id
+                
+                // 1. Carica referral DIRETTI (livello 1)
+                const { data: directReferrals, error: directError } = await window.supabaseClient
+                    .from('users')
+                    .select('id, email, first_name, last_name, referral_code, created_at')
+                    .eq('referred_by_id', user.id)
                     .order('created_at', { ascending: true });
                 
-                if (error) throw error;
+                if (directError) throw directError;
+                
+                // 2. Carica referral INDIRETTI (livello 2) - tutti i referral dei miei diretti
+                let indirectReferrals = [];
+                
+                if (directReferrals && directReferrals.length > 0) {
+                    const directIds = directReferrals.map(r => r.id);
+                    
+                    const { data: indirects, error: indirectError } = await window.supabaseClient
+                        .from('users')
+                        .select('id, email, first_name, last_name, referral_code, created_at, referred_by_id')
+                        .in('referred_by_id', directIds)
+                        .order('created_at', { ascending: true });
+                    
+                    if (!indirectError && indirects) {
+                        indirectReferrals = indirects;
+                    }
+                }
                 
                 const modalContent = document.getElementById('network-chart');
                 
-                if (!network || network.length === 0) {
+                if (!directReferrals || directReferrals.length === 0) {
                     modalContent.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-users-slash" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
@@ -2925,9 +2866,12 @@
                     return;
                 }
                 
-                // Raggruppa per livello
-                const level1 = network.filter(n => n.level === 1);
-                const level2 = network.filter(n => n.level === 2);
+                // Ottieni i dati dell'utente corrente
+                const { data: currentUserData } = await window.supabaseClient
+                    .from('users')
+                    .select('referral_code')
+                    .eq('id', user.id)
+                    .single();
                 
                 let html = '<div class="network-tree">';
                 
@@ -2937,50 +2881,53 @@
                         <div class="network-node root-node">
                             <div class="node-icon">👤</div>
                             <div class="node-name">Tu</div>
-                            <div class="node-code">${user.user_metadata?.referral_code || 'N/A'}</div>
+                            <div class="node-code">${currentUserData?.referral_code || 'N/A'}</div>
                         </div>
                     </div>
                 `;
                 
-                // Livello 1 (Referral Diretti)
-                if (level1.length > 0) {
-                    html += `
-                        <div class="network-level level-1">
-                            <div class="level-title">
-                                <span class="level-badge">Livello 1</span>
-                                <span>${level1.length} referral dirett${level1.length === 1 ? 'o' : 'i'}</span>
-                            </div>
-                            <div class="network-nodes">
-                                ${level1.map(item => `
-                                    <div class="network-node">
-                                        <div class="node-icon">👥</div>
-                                        <div class="node-name">${item.referral?.first_name || 'User'} ${item.referral?.last_name || ''}</div>
-                                        <div class="node-email">${item.referral?.email || 'N/A'}</div>
-                                        <div class="node-points">+${item.points_awarded} punti</div>
-                                    </div>
-                                `).join('')}
-                            </div>
+                // Livello 1 (Referral Diretti) - TUTTI i diretti
+                html += `
+                    <div class="network-level level-1">
+                        <div class="level-title">
+                            <span class="level-badge">Livello 1</span>
+                            <span>${directReferrals.length} referral dirett${directReferrals.length === 1 ? 'o' : 'i'}</span>
                         </div>
-                    `;
-                }
+                        <div class="network-nodes">
+                            ${directReferrals.map(ref => `
+                                <div class="network-node">
+                                    <div class="node-icon">👥</div>
+                                    <div class="node-name">${ref.first_name || 'User'} ${ref.last_name || ''}</div>
+                                    <div class="node-email">${ref.email || 'N/A'}</div>
+                                    <div class="node-code">${ref.referral_code}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
                 
                 // Livello 2 (Referral Indiretti)
-                if (level2.length > 0) {
+                if (indirectReferrals.length > 0) {
                     html += `
                         <div class="network-level level-2">
                             <div class="level-title">
                                 <span class="level-badge secondary">Livello 2</span>
-                                <span>${level2.length} referral indirett${level2.length === 1 ? 'o' : 'i'}</span>
+                                <span>${indirectReferrals.length} referral indirett${indirectReferrals.length === 1 ? 'o' : 'i'}</span>
                             </div>
                             <div class="network-nodes">
-                                ${level2.map(item => `
-                                    <div class="network-node secondary">
-                                        <div class="node-icon">👥</div>
-                                        <div class="node-name">${item.referral?.first_name || 'User'} ${item.referral?.last_name || ''}</div>
-                                        <div class="node-email">${item.referral?.email || 'N/A'}</div>
-                                        <div class="node-points">+${item.points_awarded} punti</div>
-                                    </div>
-                                `).join('')}
+                                ${indirectReferrals.map(ref => {
+                                    // Trova il genitore diretto
+                                    const parent = directReferrals.find(d => d.id === ref.referred_by_id);
+                                    return `
+                                        <div class="network-node secondary">
+                                            <div class="node-icon">👥</div>
+                                            <div class="node-name">${ref.first_name || 'User'} ${ref.last_name || ''}</div>
+                                            <div class="node-email">${ref.email || 'N/A'}</div>
+                                            <div class="node-code">${ref.referral_code}</div>
+                                            <div class="node-parent">↳ da ${parent?.first_name || 'Unknown'}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     `;
@@ -2989,20 +2936,19 @@
                 html += '</div>';
                 
                 // Statistiche
-                const totalPoints = network.reduce((sum, n) => sum + parseFloat(n.points_awarded), 0);
                 html += `
                     <div class="network-stats">
                         <div class="network-stat">
-                            <div class="stat-value">${level1.length}</div>
+                            <div class="stat-value">${directReferrals.length}</div>
                             <div class="stat-label">Diretti</div>
                         </div>
                         <div class="network-stat">
-                            <div class="stat-value">${level2.length}</div>
+                            <div class="stat-value">${indirectReferrals.length}</div>
                             <div class="stat-label">Indiretti</div>
                         </div>
                         <div class="network-stat primary">
-                            <div class="stat-value">${totalPoints}</div>
-                            <div class="stat-label">Punti Totali dalla Rete</div>
+                            <div class="stat-value">${directReferrals.length + indirectReferrals.length}</div>
+                            <div class="stat-label">Totale Rete</div>
                         </div>
                     </div>
                 `;
