@@ -2825,6 +2825,8 @@
                 const user = window.getCurrentUser();
                 if (!user) return;
                 
+                console.log('🔍 Loading referral network for user:', user.id, user.email);
+                
                 // NUOVO SISTEMA: Leggi diretti e indiretti da users.referred_by_id
                 
                 // 1. Carica referral DIRETTI (livello 1)
@@ -2834,6 +2836,8 @@
                     .eq('referred_by_id', user.id)
                     .order('created_at', { ascending: true });
                 
+                console.log('📊 Direct referrals found:', directReferrals?.length || 0, directReferrals);
+                
                 if (directError) throw directError;
                 
                 // 2. Carica referral INDIRETTI (livello 2) - tutti i referral dei miei diretti
@@ -2842,11 +2846,15 @@
                 if (directReferrals && directReferrals.length > 0) {
                     const directIds = directReferrals.map(r => r.id);
                     
+                    console.log('🔄 Loading indirect referrals for direct IDs:', directIds);
+                    
                     const { data: indirects, error: indirectError } = await window.supabaseClient
                         .from('users')
                         .select('id, email, first_name, last_name, referral_code, created_at, referred_by_id')
                         .in('referred_by_id', directIds)
                         .order('created_at', { ascending: true });
+                    
+                    console.log('📊 Indirect referrals found:', indirects?.length || 0, indirects);
                     
                     if (!indirectError && indirects) {
                         indirectReferrals = indirects;
