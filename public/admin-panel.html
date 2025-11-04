@@ -1823,7 +1823,7 @@
                         phone: phone || null,
                         role: 'user',
                         points: 100,
-                        referred_by: referrerId
+                        referred_by_id: referrerId
                     });
 
                 if (userError) throw userError;
@@ -2274,8 +2274,8 @@
                 const referralCounts = {};
                 
                 users.forEach(user => {
-                    if (user.referred_by) {
-                        referralCounts[user.referred_by] = (referralCounts[user.referred_by] || 0) + 1;
+                    if (user.referred_by_id) {
+                        referralCounts[user.referred_by_id] = (referralCounts[user.referred_by_id] || 0) + 1;
                     }
                 });
 
