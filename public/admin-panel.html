@@ -2622,9 +2622,10 @@
 
                 if (error) throw error;
 
+                const statusText = newStatus ? 'attivata' : 'disattivata';
                 showNotification(
                     'Successo',
-                    `Promozione ${newStatus ? 'attivata' : 'disattivata'} con successo!`,
+                    `Promozione ${statusText} con successo!`,
                     'success'
                 );
                 loadPromotions();
@@ -2955,11 +2956,7 @@
             try {
                 let query = supabase
                     .from('reward_redemptions')
-                    .select(`
-                        *,
-                        users(email, first_name, last_name),
-                        rewards(title, points_required)
-                    `)
+                    .select('*')
                     .order('redeemed_at', { ascending: false });
                 
                 if (currentRedemptionFilter !== 'all') {
@@ -2976,6 +2973,27 @@
                     container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-inbox"></i></div><p>Nessun riscatto trovato</p></div>';
                     return;
                 }
+
+                // Fetch related data separately
+                const userIds = [...new Set(redemptions.map(r => r.user_id))];
+                const rewardIds = [...new Set(redemptions.map(r => r.reward_id))];
+
+                const { data: users } = await supabase
+                    .from('users')
+                    .select('id, email, first_name, last_name')
+                    .in('id', userIds);
+
+                const { data: rewards } = await supabase
+                    .from('rewards')
+                    .select('id, title, points_required')
+                    .in('id', rewardIds);
+
+                // Create lookup maps
+                const usersMap = {};
+                users?.forEach(u => usersMap[u.id] = u);
+
+                const rewardsMap = {};
+                rewards?.forEach(r => rewardsMap[r.id] = r);
                 
                 const statusColors = {
                     pending: 'var(--warning)',
@@ -2991,16 +3009,20 @@
                     delivered: 'Consegnato'
                 };
                 
-                container.innerHTML = redemptions.map(redemption => `
+                container.innerHTML = redemptions.map(redemption => {
+                    const user = usersMap[redemption.user_id];
+                    const reward = rewardsMap[redemption.reward_id];
+                    
+                    return `
                     <div class="card" style="border-left: 4px solid ${statusColors[redemption.status]}; margin-bottom: 1rem;">
                         <div style="display: flex; gap: 1.5rem;">
                             <div style="font-size: 3rem;">🎁</div>
                             <div style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                     <div>
-                                        <h4 style="margin: 0 0 0.25rem 0;">${redemption.rewards?.title || 'Premio'}</h4>
+                                        <h4 style="margin: 0 0 0.25rem 0;">${reward?.title || 'Premio'}</h4>
                                         <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">
-                                            <i class="fas fa-user"></i> ${redemption.users?.email || 'Utente'}
+                                            <i class="fas fa-user"></i> ${user?.email || 'Utente'}
                                         </p>
                                         <p style="margin: 0.25rem 0 0 0; color: var(--gray-500); font-size: 0.75rem;">
                                             <i class="fas fa-clock"></i> ${new Date(redemption.redeemed_at).toLocaleDateString('it-IT')}
@@ -3032,7 +3054,8 @@
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             } catch (error) {
                 console.error('Error loading redemptions:', error);
             }
