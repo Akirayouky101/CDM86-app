@@ -2566,8 +2566,8 @@
                             <button class="btn btn-secondary btn-sm" onclick="editPromo('${promo.id}')">
                                 <i class="fas fa-edit"></i> Modifica
                             </button>
-                            <button class="btn ${isActive ? 'btn-danger' : 'btn-primary'} btn-sm" onclick="togglePromoStatus('${promo.id}', ${!promo.is_active})">
-                                <i class="fas fa-${isActive ? 'pause' : 'play'}"></i> ${isActive ? 'Disattiva' : 'Attiva'}
+                            <button class="btn ${promo.is_active ? 'btn-danger' : 'btn-primary'} btn-sm" onclick="togglePromoStatus('${promo.id}', ${!promo.is_active})">
+                                <i class="fas fa-${promo.is_active ? 'pause' : 'play'}"></i> ${promo.is_active ? 'Disattiva' : 'Attiva'}
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="deletePromo('${promo.id}')">
                                 <i class="fas fa-trash"></i> Elimina
