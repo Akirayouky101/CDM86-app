@@ -454,6 +454,17 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: modalSlideIn 0.3s ease;
+        }
+
         .modal-header {
             padding: 1.75rem;
             border-bottom: 2px solid var(--gray-200);
@@ -484,6 +495,28 @@
         }
 
         .modal-close:hover {
+            background: var(--gray-200);
+            color: var(--gray-900);
+            transform: rotate(90deg);
+        }
+
+        .close-btn {
+            background: var(--gray-100);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
             background: var(--gray-200);
             color: var(--gray-900);
             transform: rotate(90deg);
@@ -1468,6 +1501,25 @@
                 <button class="btn btn-secondary" onclick="closeModal('createContractModal')">Annulla</button>
                 <button class="btn btn-primary" onclick="handleCreateContract()">
                     <i class="fas fa-save"></i> Crea Contratto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sign-out-alt"></i> Conferma Uscita</h3>
+                <button class="close-btn" onclick="closeModal('logoutModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin: 0; font-size: 1.1rem;">Sei sicuro di voler uscire dal pannello di amministrazione?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('logoutModal')">Annulla</button>
+                <button class="btn btn-danger" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Esci
                 </button>
             </div>
         </div>
@@ -2538,11 +2590,13 @@
         };
 
         // Logout
-        window.handleLogout = async function() {
-            if (confirm('Vuoi davvero uscire?')) {
-                await supabase.auth.signOut();
-                window.location.href = '/index.html';
-            }
+        window.handleLogout = function() {
+            openModal('logoutModal');
+        };
+
+        window.confirmLogout = async function() {
+            await supabase.auth.signOut();
+            window.location.href = '/index.html';
         };
 
         // ========================================
