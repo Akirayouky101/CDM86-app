@@ -1058,15 +1058,26 @@
 
     <!-- PWA Service Worker Registration -->
     
-    <!-- Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase JS Library - VERSIONE UMD (non ES6) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     
-    <!-- Supabase Config - WAIT FOR LOAD -->
+    <!-- Supabase Config -->
     <script>
-        // Wait for Supabase to be fully loaded
+        console.log('🔍 Checking Supabase...');
+        console.log('Supabase available:', typeof supabase);
+        console.log('Supabase object:', supabase);
+        
+        // Wait for Supabase UMD to load
         function initSupabase() {
-            if (typeof supabase === 'undefined' || !supabase.createClient) {
-                console.warn('⚠️ Supabase not ready, retrying...');
+            if (typeof supabase === 'undefined') {
+                console.warn('⚠️ Supabase not loaded yet, retrying...');
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            
+            if (!supabase.createClient) {
+                console.error('❌ Supabase loaded but createClient not found!');
+                console.log('Supabase keys:', Object.keys(supabase));
                 setTimeout(initSupabase, 100);
                 return;
             }
@@ -1078,13 +1089,21 @@
             try {
                 window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
                 console.log('✅ Supabase initialized successfully');
+                console.log('Client:', window.supabaseClient);
+                
+                // Trigger event for other scripts
+                window.dispatchEvent(new Event('supabase-ready'));
             } catch (error) {
                 console.error('❌ Supabase init error:', error);
             }
         }
         
         // Start initialization
-        initSupabase();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
     </script>
     
     <script type="module" src="assets/js/login-modal.js"></script>

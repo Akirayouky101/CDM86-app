@@ -8,12 +8,22 @@ function getSupabase() {
     return new Promise((resolve) => {
         const check = () => {
             if (window.supabaseClient) {
+                console.log('✅ Supabase client found');
                 resolve(window.supabaseClient);
             } else {
-                console.warn('⚠️ Waiting for Supabase...');
+                console.warn('⚠️ Waiting for Supabase client...');
                 setTimeout(check, 100);
             }
         };
+        
+        // Listen for supabase-ready event
+        window.addEventListener('supabase-ready', () => {
+            if (window.supabaseClient) {
+                resolve(window.supabaseClient);
+            }
+        }, { once: true });
+        
+        // Also check immediately
         check();
     });
 }
@@ -23,13 +33,15 @@ let supabase = null;
 
 // Initialize supabase
 (async () => {
+    console.log('🔄 LoginModal: Initializing Supabase...');
     supabase = await getSupabase();
-    console.log('✅ LoginModal: Supabase ready');
+    console.log('✅ LoginModal: Supabase ready', supabase);
 })();
 
 // Helper to ensure supabase is ready
 async function ensureSupabase() {
     if (!supabase) {
+        console.log('⏳ ensureSupabase: Getting instance...');
         supabase = await getSupabase();
     }
     return supabase;
