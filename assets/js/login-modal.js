@@ -3,13 +3,18 @@
    Gestisce login/registrazione nell'homepage
    ============================================ */
 
-// Import Supabase
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-// Inizializza Supabase
-const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Use global Supabase instance
+const supabase = window.supabase || (() => {
+    console.warn('⚠️ Supabase not initialized yet, will retry...');
+    // Fallback: create instance if not available
+    if (window.supabase && window.supabase.createClient) {
+        return window.supabase.createClient(
+            'https://uchrjlngfzfibcpdxtky.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
+        );
+    }
+    return null;
+})();
 
 // Variabili globali
 let currentWizardStep = 1;

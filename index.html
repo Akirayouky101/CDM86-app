@@ -1058,10 +1058,17 @@
 
     <!-- PWA Service Worker Registration -->
     
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Supabase Config -->
     <script>
         window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
         window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        
+        // Initialize Supabase globally
+        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        console.log('✅ Supabase initialized');
     </script>
     
     <script type="module" src="assets/js/login-modal.js"></script>
@@ -1078,15 +1085,13 @@
         });
     </script>
     
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
-        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    <script>
+        // Main app logic
         let currentUser = null;
         
         // Check authentication
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await window.supabase.auth.getSession();
             currentUser = session?.user || null;
             console.log('Index - Current user:', currentUser);
             return currentUser;
