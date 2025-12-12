@@ -1126,6 +1126,10 @@
         
         // Check authentication
         async function checkAuth() {
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAuth: Supabase not ready yet');
+                return null;
+            }
             const { data: { session } } = await window.supabaseClient.auth.getSession();
             currentUser = session?.user || null;
             console.log('Index - Current user:', currentUser);
@@ -1157,9 +1161,21 @@
             hideLoginRequiredModal();
         }
         
-        // Initialize
-        (async () => {
-            await checkAuth();
+        // Initialize - WAIT FOR SUPABASE
+        function initApp() {
+            console.log('🚀 initApp: Starting...');
+            
+            // Wait for Supabase to be ready
+            if (!window.supabaseClient) {
+                console.log('⏳ Waiting for Supabase...');
+                window.addEventListener('supabase-ready', initApp, { once: true });
+                return;
+            }
+            
+            console.log('✅ initApp: Supabase ready, initializing app...');
+            
+            (async () => {
+                await checkAuth();
             
             // Setup login required modal buttons
             const loginBtn = document.getElementById('loginRequiredLogin');
@@ -1232,6 +1248,10 @@
                 });
             });
         })();
+        }
+        
+        // Start initialization
+        initApp();
     </script>
     <script>
         // Register Service Worker

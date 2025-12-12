@@ -669,14 +669,15 @@ export async function handleRegister(event) {
 // ==========================================
 
 export async function checkAuthStatus() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const sb = await ensureSupabase();
+    const { data: { session } } = await sb.auth.getSession();
     
     const loginBtn = document.getElementById('login-btn');
     if (!loginBtn) return;
 
     if (session && session.user) {
         // User is logged in
-        const { data: userData } = await supabase
+        const { data: userData } = await sb
             .from('users')
             .select('first_name, last_name')
             .eq('id', session.user.id)
