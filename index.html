@@ -1061,14 +1061,30 @@
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Supabase Config -->
+    <!-- Supabase Config - WAIT FOR LOAD -->
     <script>
-        window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-        window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        // Wait for Supabase to be fully loaded
+        function initSupabase() {
+            if (typeof supabase === 'undefined' || !supabase.createClient) {
+                console.warn('⚠️ Supabase not ready, retrying...');
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            
+            window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+            window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+            
+            // Initialize Supabase globally
+            try {
+                window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+                console.log('✅ Supabase initialized successfully');
+            } catch (error) {
+                console.error('❌ Supabase init error:', error);
+            }
+        }
         
-        // Initialize Supabase globally
-        window.supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-        console.log('✅ Supabase initialized');
+        // Start initialization
+        initSupabase();
     </script>
     
     <script type="module" src="assets/js/login-modal.js"></script>
@@ -1091,7 +1107,7 @@
         
         // Check authentication
         async function checkAuth() {
-            const { data: { session } } = await window.supabase.auth.getSession();
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
             currentUser = session?.user || null;
             console.log('Index - Current user:', currentUser);
             return currentUser;

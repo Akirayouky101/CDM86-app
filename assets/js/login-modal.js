@@ -3,18 +3,37 @@
    Gestisce login/registrazione nell'homepage
    ============================================ */
 
-// Use global Supabase instance
-const supabase = window.supabase || (() => {
-    console.warn('⚠️ Supabase not initialized yet, will retry...');
-    // Fallback: create instance if not available
-    if (window.supabase && window.supabase.createClient) {
-        return window.supabase.createClient(
-            'https://uchrjlngfzfibcpdxtky.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
-        );
-    }
-    return null;
+// Wait for Supabase to be initialized
+function getSupabase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (window.supabaseClient) {
+                resolve(window.supabaseClient);
+            } else {
+                console.warn('⚠️ Waiting for Supabase...');
+                setTimeout(check, 100);
+            }
+        };
+        check();
+    });
+}
+
+// Global supabase instance (will be set after initialization)
+let supabase = null;
+
+// Initialize supabase
+(async () => {
+    supabase = await getSupabase();
+    console.log('✅ LoginModal: Supabase ready');
 })();
+
+// Helper to ensure supabase is ready
+async function ensureSupabase() {
+    if (!supabase) {
+        supabase = await getSupabase();
+    }
+    return supabase;
+}
 
 // Variabili globali
 let currentWizardStep = 1;
@@ -427,6 +446,9 @@ function hideAlert() {
 
 export async function handleLogin(event) {
     event.preventDefault();
+    
+    // Ensure Supabase is ready
+    const sb = await ensureSupabase();
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -440,7 +462,7 @@ export async function handleLogin(event) {
     }
 
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await sb.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -491,6 +513,9 @@ export async function handleLogin(event) {
 
 export async function handleRegister(event) {
     event.preventDefault();
+    
+    // Ensure Supabase is ready
+    const sb = await ensureSupabase();
 
     const firstName = document.getElementById('registerFirstname').value.trim();
     const lastName = document.getElementById('registerLastname').value.trim();
@@ -514,7 +539,7 @@ export async function handleRegister(event) {
         if (referralCode) {
             // Check if it's an organization code (ORG####)
             if (referralCode.startsWith('ORG')) {
-                const { data: orgData, error: orgError } = await supabase
+                const { data: orgData, error: orgError } = await sb
                     .from('organizations')
                     .select('id, referral_code, name')
                     .eq('referral_code', referralCode)
