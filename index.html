@@ -1057,7 +1057,27 @@
     </div>
 
     <!-- PWA Service Worker Registration -->
+    
+    <!-- Supabase Config -->
+    <script>
+        window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+    </script>
+    
     <script type="module" src="assets/js/login-modal.js"></script>
+    
+    <!-- Wait for LoginModal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkLoginModal = setInterval(() => {
+                if (window.LoginModal) {
+                    console.log('✅ LoginModal ready!');
+                    clearInterval(checkLoginModal);
+                }
+            }, 100);
+        });
+    </script>
+    
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
