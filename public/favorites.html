@@ -256,15 +256,44 @@
 
     
     <script src="/assets/js/config.js"></script>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    <!-- Supabase UMD Build -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Initialize Supabase
+        function initSupabase() {
+            if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+                console.error('❌ Supabase config missing');
+                return;
+            }
+            
+            const { createClient } = supabase;
+            const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+            
+            window.supabaseClient = supabaseClient;
+            console.log('✅ Favorites: Supabase initialized');
+            window.dispatchEvent(new Event('supabase-ready'));
+        }
         
-        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
+    </script>
+    
+    <script>
         let currentUser = null;
         
         // Check auth
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAuth: Supabase not ready');
+                return null;
+            }
+            
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
             if (!session) {
                 window.location.href = '/index.html';
                 return null;
@@ -272,7 +301,7 @@
             currentUser = session.user;
             
             // Load and update user name in navbar
-            const { data: userData } = await supabase
+            const { data: userData } = await window.supabaseClient
                 .from('users')
                 .select('first_name')
                 .eq('id', currentUser.id)
@@ -285,13 +314,13 @@
             return currentUser;
         }
         
-        // Initialize
-        (async () => {
+        // Initialize - Wait for Supabase to be ready
+        window.addEventListener('supabase-ready', async () => {
             const user = await checkAuth();
             if (!user) return;
             
             await loadFavorites();
-        })();
+        });
         
         // Load favorites
         async function loadFavorites() {
@@ -300,7 +329,7 @@
             
             try {
                 // Get user's favorite promotion IDs
-                const { data: favorites, error: favError } = await supabase
+                const { data: favorites, error: favError } = await window.supabaseClient
                     .from('favorites')
                     .select('promotion_id')
                     .eq('user_id', currentUser.id);
@@ -316,7 +345,7 @@
                 // Get promotion details
                 const promotionIds = favorites.map(f => f.promotion_id);
                 
-                const { data: promotions, error: promoError } = await supabase
+                const { data: promotions, error: promoError } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
                     .in('id', promotionIds);
@@ -410,7 +439,7 @@
             if (!pendingRemovalId) return;
             
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('favorites')
                     .delete()
                     .eq('user_id', currentUser.id)
@@ -486,7 +515,7 @@
                         try {
                             localStorage.clear();
                             sessionStorage.clear();
-                            await supabase.auth.signOut({ scope: 'global' });
+                            await window.supabaseClient.auth.signOut({ scope: 'global' });
                             window.location.replace('/index.html');
                         } catch (error) {
                             console.error('Logout error:', error);
