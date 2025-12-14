@@ -1049,34 +1049,26 @@
         // Load promotions
         async function loadPromotions() {
             try {
-                console.log('Loading promotions...');
                 const { data: promotions, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
                     .eq('is_active', true)
                     .order('created_at', { ascending: false });
                 
-                if (error) {
-                    console.error('Error from Supabase:', error);
-                    throw error;
-                }
-                
-                console.log('Promotions loaded:', promotions?.length || 0);
+                if (error) throw error;
                 
                 // Store all promotions
                 allPromotions = promotions || [];
                 
                 // Load favorites only if user is logged in
-                favoriteIds = new Set(); // Reset global cache
+                favoriteIds = new Set();
                 if (currentUser) {
                     const { data: favorites } = await window.supabaseClient
                         .from('favorites')
-                        .select('*')
-                        .eq('user_id', currentUser.id)
-                        .order('created_at', { ascending: false });
+                        .select('promotion_id')
+                        .eq('user_id', currentUser.id);
                     
                     favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
-                    console.log('❤️ Loaded favorites:', favoriteIds.size, 'items');
                 }
                 
                 displayPromotions(allPromotions, favoriteIds);
@@ -1144,7 +1136,7 @@
             }).join('');
         }
         
-        // Toggle favorite
+        // Toggle favorite (simplified version that works)
         window.toggleFavorite = async function(promotionId, event) {
             event.stopPropagation();
             const btn = event.currentTarget;
@@ -1161,55 +1153,26 @@
                         .eq('user_id', currentUser.id)
                         .eq('promotion_id', promotionId);
                     
-                    if (error) {
-                        console.error('Error removing favorite:', error);
-                        throw error;
-                    }
+                    if (error) throw error;
                     
                     btn.classList.remove('active');
                     icon.className = 'far fa-heart';
-                    console.log('✅ Removed from favorites');
-                    
-                    // Remove from local cache immediately for instant UI feedback
                     favoriteIds.delete(promotionId);
                 } else {
-                    // Add to favorites - Use upsert to avoid duplicates
-                    console.log('➕ Adding to favorites:', {
-                        user_id: currentUser.id,
-                        promotion_id: promotionId,
-                        auth_uid: (await window.supabaseClient.auth.getUser()).data.user?.id
-                    });
-                    
-                    const { data, error } = await window.supabaseClient
+                    // Add to favorites
+                    const { error } = await window.supabaseClient
                         .from('favorites')
-                        .upsert({
+                        .insert({
                             user_id: currentUser.id,
                             promotion_id: promotionId
-                        }, {
-                            onConflict: 'user_id,promotion_id'
-                        })
-                        .select();
+                        });
                     
-                    console.log('📊 Upsert result:', { data, error });
-                    
-                    if (error) {
-                        console.error('❌ Error adding favorite:', error);
-                        throw error;
-                    }
+                    if (error) throw error;
                     
                     btn.classList.add('active');
                     icon.className = 'fas fa-heart';
-                    console.log('✅ Added to favorites');
-                    
-                    // Add to local cache immediately for instant UI feedback
                     favoriteIds.add(promotionId);
                 }
-                
-                // Force reload promotions to sync with database (longer delay for DB propagation)
-                setTimeout(() => {
-                    console.log('🔄 Reloading promotions to sync with database...');
-                    loadPromotions();
-                }, 1500);
                 
             } catch (error) {
                 console.error('Error toggling favorite:', error);
