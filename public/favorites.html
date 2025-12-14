@@ -361,10 +361,13 @@
                 // Get user's favorite promotion IDs
                 console.log('🔍 Querying favorites for user:', currentUser.id);
                 
+                // Add timestamp to bypass cache
+                const timestamp = new Date().getTime();
                 const { data: favorites, error: favError } = await window.supabaseClient
                     .from('favorites')
                     .select('*')
-                    .eq('user_id', currentUser.id);
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
                 
                 console.log('📦 Raw query result:', { data: favorites, error: favError });
                 

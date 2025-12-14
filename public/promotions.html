@@ -1070,10 +1070,12 @@
                 if (currentUser) {
                     const { data: favorites } = await window.supabaseClient
                         .from('favorites')
-                        .select('promotion_id')
-                        .eq('user_id', currentUser.id);
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .order('created_at', { ascending: false });
                     
                     favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                    console.log('❤️ Loaded favorites:', favoriteIds.size, 'items');
                 }
                 
                 displayPromotions(allPromotions, favoriteIds);
@@ -1195,6 +1197,12 @@
                     icon.className = 'fas fa-heart';
                     console.log('✅ Added to favorites');
                 }
+                
+                // Force reload promotions to update all hearts
+                setTimeout(() => {
+                    console.log('🔄 Reloading promotions to update hearts...');
+                    loadPromotions();
+                }, 500);
                 
             } catch (error) {
                 console.error('Error toggling favorite:', error);
