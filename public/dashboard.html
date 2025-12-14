@@ -1047,7 +1047,7 @@
                 let referrerError = null;
                 
                 if (user.referred_by_id) {
-                    const result = await supabase
+                    const result = await window.supabaseClient
                         .from('users')
                         .select('id, first_name, last_name, referral_code')
                         .eq('id', user.referred_by_id)
@@ -1085,7 +1085,7 @@
                 }
                 // Get organization data if user belongs to one
                 if (user.organization_id) {
-                    const { data: orgData, error: orgError } = await supabase
+                    const { data: orgData, error: orgError } = await window.supabaseClient
                         .from('organizations')
                         .select('id, name, organization_type, referral_code')
                         .eq('id', user.organization_id)
@@ -1135,7 +1135,7 @@
         // Load organization requests (segnalazioni aziende)
         async function loadOrganizationRequests() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('organization_requests')
                     .select('*')
                     .eq('referred_by_id', currentUser.id)
@@ -2360,7 +2360,7 @@
             
             try {
                 // Get current user's referral code
-                const { data: userData } = await supabase
+                const { data: userData } = await window.supabaseClient
                     .from('users')
                     .select('referral_code')
                     .eq('id', currentUser.id)
@@ -2372,7 +2372,7 @@
                 }
                 
                 // Insert into organization_requests table
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('organization_requests')
                     .insert({
                         organization_name: companyName,
