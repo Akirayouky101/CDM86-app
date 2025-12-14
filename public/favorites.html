@@ -320,64 +320,21 @@
             if (!user) return;
             
             await loadFavorites();
-            
-            // 🔥 Setup Realtime subscription for favorites
-            console.log('🔄 Setting up Realtime subscription...');
-            const channel = window.supabaseClient
-                .channel('favorites-changes')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-                        schema: 'public',
-                        table: 'favorites',
-                        filter: `user_id=eq.${currentUser.id}`
-                    },
-                    (payload) => {
-                        console.log('🔔 Favorites changed:', payload);
-                        // Reload favorites when any change happens
-                        loadFavorites();
-                    }
-                )
-                .subscribe((status) => {
-                    console.log('📡 Realtime status:', status);
-                });
-            
-            // Cleanup on page unload
-            window.addEventListener('beforeunload', () => {
-                console.log('🧹 Cleaning up Realtime subscription...');
-                channel.unsubscribe();
-            });
         });
         
         // Load favorites
         async function loadFavorites() {
-            console.log('📥 loadFavorites called');
-            console.log('👤 Current user ID:', currentUser?.id);
             const loading = document.getElementById('loading');
             const grid = document.getElementById('favorites-grid');
             
             try {
                 // Get user's favorite promotion IDs
-                console.log('🔍 Querying favorites for user:', currentUser.id);
-                
-                // Add timestamp to bypass cache
-                const timestamp = new Date().getTime();
                 const { data: favorites, error: favError } = await window.supabaseClient
                     .from('favorites')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
+                    .select('promotion_id')
+                    .eq('user_id', currentUser.id);
                 
-                console.log('📦 Raw query result:', { data: favorites, error: favError });
-                
-                if (favError) {
-                    console.error('❌ Query error:', favError);
-                    throw favError;
-                }
-                
-                console.log('📊 Favorites loaded:', favorites?.length || 0);
-                console.log('📋 Favorite IDs:', favorites?.map(f => f.promotion_id));
+                if (favError) throw favError;
                 
                 if (!favorites || favorites.length === 0) {
                     if (loading) loading.style.display = 'none';
@@ -408,7 +365,6 @@
         
         // Display favorites
         function displayFavorites(promotions) {
-            console.log('🎨 displayFavorites called with', promotions?.length || 0, 'promotions');
             const grid = document.getElementById('favorites-grid');
             const loading = document.getElementById('loading');
             
@@ -481,39 +437,25 @@
         };
         
         window.confirmRemoveFavorite = async function() {
-            console.log('🗑️ confirmRemoveFavorite called, pendingRemovalId:', pendingRemovalId);
-            
-            if (!pendingRemovalId) {
-                console.error('❌ No pendingRemovalId');
-                return;
-            }
+            if (!pendingRemovalId) return;
             
             try {
-                console.log('🔄 Deleting favorite:', {
-                    user_id: currentUser.id,
-                    promotion_id: pendingRemovalId
-                });
-                
                 const { error } = await window.supabaseClient
                     .from('favorites')
                     .delete()
                     .eq('user_id', currentUser.id)
                     .eq('promotion_id', pendingRemovalId);
                 
-                if (error) {
-                    console.error('❌ Delete error:', error);
-                    throw error;
-                }
+                if (error) throw error;
                 
-                console.log('✅ Favorite removed successfully');
                 closeRemoveModal();
                 
                 // Reload favorites
                 await loadFavorites();
                 
             } catch (error) {
-                console.error('❌ Error removing favorite:', error);
-                alert('Errore nella rimozione: ' + (error.message || 'Errore sconosciuto'));
+                console.error('Error removing favorite:', error);
+                alert('Errore nella rimozione');
             }
         };
         
