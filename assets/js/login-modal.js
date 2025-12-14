@@ -3,9 +3,6 @@
    Gestisce login/registrazione nell'homepage
    ============================================ */
 
-// Initialize global LoginModal object
-window.LoginModal = {};
-
 // Wait for Supabase to be initialized
 function getSupabase() {
     return new Promise((resolve) => {
@@ -38,7 +35,7 @@ let supabase = null;
 (async () => {
     console.log('🔄 LoginModal: Initializing Supabase...');
     supabase = await getSupabase();
-    console.log('✅ LoginModal: Supabase ready', supabase);
+    console.log('✅ LoginModal: Supabase ready');
 })();
 
 // Helper to ensure supabase is ready
@@ -58,7 +55,7 @@ let companyHasReferral = false;
 // SELECTION MODAL (Prima schermata)
 // ==========================================
 
-window.LoginModal.showSelectionModal = function() {
+function showSelectionModal() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -66,7 +63,7 @@ window.LoginModal.showSelectionModal = function() {
     }
 }
 
-window.LoginModal.closeSelectionModal = function() {
+function closeSelectionModal() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -74,17 +71,17 @@ window.LoginModal.closeSelectionModal = function() {
     }
 }
 
-window.LoginModal.selectUser = function() {
+function selectUser() {
     closeSelectionModal();
     showReferralModal();
 }
 
-window.LoginModal.selectCompany = function() {
+function selectCompany() {
     closeSelectionModal();
     showCompanyRequestModal();
 }
 
-window.LoginModal.showExistingUserLogin = function() {
+function showExistingUserLogin() {
     closeSelectionModal();
     showLoginModal();
 }
@@ -93,7 +90,7 @@ window.LoginModal.showExistingUserLogin = function() {
 // COMPANY REQUEST MODAL
 // ==========================================
 
-window.LoginModal.showCompanyRequestModal = function() {
+function showCompanyRequestModal() {
     const overlay = document.getElementById('companyRequestModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -105,7 +102,7 @@ window.LoginModal.showCompanyRequestModal = function() {
     }
 }
 
-window.LoginModal.closeCompanyRequestModal = function() {
+function closeCompanyRequestModal() {
     const overlay = document.getElementById('companyRequestModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -114,13 +111,13 @@ window.LoginModal.closeCompanyRequestModal = function() {
     }
 }
 
-window.LoginModal.companyHasReferralYes = function() {
+function companyHasReferralYes() {
     document.getElementById('companyReferralQuestion').style.display = 'none';
     document.getElementById('companyFormWithReferral').classList.add('active');
     companyHasReferral = true;
 }
 
-window.LoginModal.companyHasReferralNo = function() {
+function companyHasReferralNo() {
     document.getElementById('companyReferralQuestion').style.display = 'none';
     document.getElementById('companyFormWithoutReferral').classList.add('active');
     companyHasReferral = false;
@@ -130,7 +127,7 @@ window.LoginModal.companyHasReferralNo = function() {
 // COMPANY REQUEST SUBMISSION
 // ==========================================
 
-window.LoginModal.handleCompanyRequest = async function(event) {
+async function handleCompanyRequest(event) {
     event.preventDefault();
 
     const loading = document.getElementById('companyRequestLoading');
@@ -177,7 +174,7 @@ window.LoginModal.handleCompanyRequest = async function(event) {
     }
 }
 
-window.LoginModal.handleCompanyRequestNoRef = async function(event) {
+async function handleCompanyRequestNoRef(event) {
     event.preventDefault();
 
     const loading = document.getElementById('companyRequestLoadingNoRef');
@@ -244,7 +241,7 @@ L'azienda NON ha un codice referral.`);
 // MODAL MANAGEMENT
 // ==========================================
 
-window.LoginModal.showLoginModal = function() {
+function showLoginModal() {
     const overlay = document.getElementById('loginModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -252,7 +249,7 @@ window.LoginModal.showLoginModal = function() {
     }
 }
 
-window.LoginModal.closeLoginModal = function() {
+function closeLoginModal() {
     const overlay = document.getElementById('loginModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -260,7 +257,7 @@ window.LoginModal.closeLoginModal = function() {
     }
 }
 
-window.LoginModal.showReferralModal = function() {
+function showReferralModal() {
     const overlay = document.getElementById('referralModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -270,7 +267,7 @@ window.LoginModal.showReferralModal = function() {
     }
 }
 
-window.LoginModal.closeReferralModal = function() {
+function closeReferralModal() {
     const overlay = document.getElementById('referralModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -281,7 +278,7 @@ window.LoginModal.closeReferralModal = function() {
 // TAB SWITCHING
 // ==========================================
 
-window.LoginModal.switchLoginTab = function(tabName) {
+function switchLoginTab(tabName) {
     // Se si clicca su "Registrati", mostra il modal referral
     if (tabName === 'register') {
         closeLoginModal();
@@ -312,7 +309,7 @@ window.LoginModal.switchLoginTab = function(tabName) {
 // REFERRAL MODAL HANDLERS
 // ==========================================
 
-window.LoginModal.handleHasCode = function() {
+function handleHasCode() {
     closeReferralModal();
     showLoginModal();
     // Attiva il tab di registrazione
@@ -328,7 +325,7 @@ window.LoginModal.handleHasCode = function() {
     document.getElementById('registerPanel').classList.add('active');
 }
 
-window.LoginModal.showWizard = function() {
+function showWizard() {
     document.getElementById('referralModalQuestion').style.display = 'none';
     document.getElementById('referralModalWizard').classList.add('active');
     currentWizardStep = 1;
@@ -367,14 +364,14 @@ function updateWizardStep() {
     }
 }
 
-window.LoginModal.wizardBack = function() {
+function wizardBack() {
     if (currentWizardStep > 1) {
         currentWizardStep--;
         updateWizardStep();
     }
 }
 
-window.LoginModal.wizardNext = function() {
+function wizardNext() {
     if (currentWizardStep === 4) {
         closeReferralModal();
         return;
@@ -459,7 +456,7 @@ function hideAlert() {
 // LOGIN HANDLER
 // ==========================================
 
-window.LoginModal.handleLogin = async function(event) {
+async function handleLogin(event) {
     event.preventDefault();
     
     // Ensure Supabase is ready
@@ -526,7 +523,7 @@ window.LoginModal.handleLogin = async function(event) {
 // REGISTER HANDLER
 // ==========================================
 
-window.LoginModal.handleRegister = async function(event) {
+async function handleRegister(event) {
     event.preventDefault();
     
     // Ensure Supabase is ready
@@ -671,7 +668,7 @@ window.LoginModal.handleRegister = async function(event) {
 // CHECK IF USER IS LOGGED IN
 // ==========================================
 
-window.LoginModal.checkAuthStatus = async function() {
+async function checkAuthStatus() {
     const sb = await ensureSupabase();
     const { data: { session } } = await sb.auth.getSession();
     
@@ -702,19 +699,6 @@ window.LoginModal.checkAuthStatus = async function() {
             showSelectionModal();
         };
     }
-}
-
-// ==========================================
-// INITIALIZE
-// ==========================================
-
-// Wait for DOM to load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        checkAuthStatus();
-    });
-} else {
-    checkAuthStatus();
 }
 
 // ==========================================
@@ -836,3 +820,16 @@ window.LoginModal = {
     closeForgotPassword,
     handleForgotPassword
 };
+
+// ==========================================
+// AUTO-INITIALIZE
+// ==========================================
+
+// Wait for DOM to load and check auth status
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        checkAuthStatus();
+    });
+} else {
+    checkAuthStatus();
+}

@@ -1073,7 +1073,7 @@
         // Initialize Supabase using UMD build
         const { createClient } = supabase;
         window.supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-        console.log('✅ Supabase initialized (UMD):', window.supabaseClient);
+        console.log('✅ Supabase initialized (UMD)');
         
         // Dispatch event to notify other scripts
         window.dispatchEvent(new Event('supabase-ready'));
