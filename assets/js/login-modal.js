@@ -3,6 +3,9 @@
    Gestisce login/registrazione nell'homepage
    ============================================ */
 
+// Initialize global LoginModal object
+window.LoginModal = {};
+
 // Wait for Supabase to be initialized
 function getSupabase() {
     return new Promise((resolve) => {
@@ -55,7 +58,7 @@ let companyHasReferral = false;
 // SELECTION MODAL (Prima schermata)
 // ==========================================
 
-export function showSelectionModal() {
+window.LoginModal.showSelectionModal = function() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -63,7 +66,7 @@ export function showSelectionModal() {
     }
 }
 
-export function closeSelectionModal() {
+window.LoginModal.closeSelectionModal = function() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -71,17 +74,17 @@ export function closeSelectionModal() {
     }
 }
 
-export function selectUser() {
+window.LoginModal.selectUser = function() {
     closeSelectionModal();
     showReferralModal();
 }
 
-export function selectCompany() {
+window.LoginModal.selectCompany = function() {
     closeSelectionModal();
     showCompanyRequestModal();
 }
 
-export function showExistingUserLogin() {
+window.LoginModal.showExistingUserLogin = function() {
     closeSelectionModal();
     showLoginModal();
 }
@@ -90,7 +93,7 @@ export function showExistingUserLogin() {
 // COMPANY REQUEST MODAL
 // ==========================================
 
-export function showCompanyRequestModal() {
+window.LoginModal.showCompanyRequestModal = function() {
     const overlay = document.getElementById('companyRequestModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -102,7 +105,7 @@ export function showCompanyRequestModal() {
     }
 }
 
-export function closeCompanyRequestModal() {
+window.LoginModal.closeCompanyRequestModal = function() {
     const overlay = document.getElementById('companyRequestModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -111,13 +114,13 @@ export function closeCompanyRequestModal() {
     }
 }
 
-export function companyHasReferralYes() {
+window.LoginModal.companyHasReferralYes = function() {
     document.getElementById('companyReferralQuestion').style.display = 'none';
     document.getElementById('companyFormWithReferral').classList.add('active');
     companyHasReferral = true;
 }
 
-export function companyHasReferralNo() {
+window.LoginModal.companyHasReferralNo = function() {
     document.getElementById('companyReferralQuestion').style.display = 'none';
     document.getElementById('companyFormWithoutReferral').classList.add('active');
     companyHasReferral = false;
@@ -127,7 +130,7 @@ export function companyHasReferralNo() {
 // COMPANY REQUEST SUBMISSION
 // ==========================================
 
-export async function handleCompanyRequest(event) {
+window.LoginModal.handleCompanyRequest = async function(event) {
     event.preventDefault();
 
     const loading = document.getElementById('companyRequestLoading');
@@ -174,7 +177,7 @@ export async function handleCompanyRequest(event) {
     }
 }
 
-export async function handleCompanyRequestNoRef(event) {
+window.LoginModal.handleCompanyRequestNoRef = async function(event) {
     event.preventDefault();
 
     const loading = document.getElementById('companyRequestLoadingNoRef');
@@ -241,7 +244,7 @@ L'azienda NON ha un codice referral.`);
 // MODAL MANAGEMENT
 // ==========================================
 
-export function showLoginModal() {
+window.LoginModal.showLoginModal = function() {
     const overlay = document.getElementById('loginModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -249,7 +252,7 @@ export function showLoginModal() {
     }
 }
 
-export function closeLoginModal() {
+window.LoginModal.closeLoginModal = function() {
     const overlay = document.getElementById('loginModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -257,7 +260,7 @@ export function closeLoginModal() {
     }
 }
 
-export function showReferralModal() {
+window.LoginModal.showReferralModal = function() {
     const overlay = document.getElementById('referralModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
@@ -267,7 +270,7 @@ export function showReferralModal() {
     }
 }
 
-export function closeReferralModal() {
+window.LoginModal.closeReferralModal = function() {
     const overlay = document.getElementById('referralModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -278,7 +281,7 @@ export function closeReferralModal() {
 // TAB SWITCHING
 // ==========================================
 
-export function switchLoginTab(tabName) {
+window.LoginModal.switchLoginTab = function(tabName) {
     // Se si clicca su "Registrati", mostra il modal referral
     if (tabName === 'register') {
         closeLoginModal();
@@ -309,7 +312,7 @@ export function switchLoginTab(tabName) {
 // REFERRAL MODAL HANDLERS
 // ==========================================
 
-export function handleHasCode() {
+window.LoginModal.handleHasCode = function() {
     closeReferralModal();
     showLoginModal();
     // Attiva il tab di registrazione
@@ -325,7 +328,7 @@ export function handleHasCode() {
     document.getElementById('registerPanel').classList.add('active');
 }
 
-export function showWizard() {
+window.LoginModal.showWizard = function() {
     document.getElementById('referralModalQuestion').style.display = 'none';
     document.getElementById('referralModalWizard').classList.add('active');
     currentWizardStep = 1;
@@ -364,14 +367,14 @@ function updateWizardStep() {
     }
 }
 
-export function wizardBack() {
+window.LoginModal.wizardBack = function() {
     if (currentWizardStep > 1) {
         currentWizardStep--;
         updateWizardStep();
     }
 }
 
-export function wizardNext() {
+window.LoginModal.wizardNext = function() {
     if (currentWizardStep === 4) {
         closeReferralModal();
         return;
@@ -456,7 +459,7 @@ function hideAlert() {
 // LOGIN HANDLER
 // ==========================================
 
-export async function handleLogin(event) {
+window.LoginModal.handleLogin = async function(event) {
     event.preventDefault();
     
     // Ensure Supabase is ready
@@ -523,7 +526,7 @@ export async function handleLogin(event) {
 // REGISTER HANDLER
 // ==========================================
 
-export async function handleRegister(event) {
+window.LoginModal.handleRegister = async function(event) {
     event.preventDefault();
     
     // Ensure Supabase is ready
@@ -668,7 +671,7 @@ export async function handleRegister(event) {
 // CHECK IF USER IS LOGGED IN
 // ==========================================
 
-export async function checkAuthStatus() {
+window.LoginModal.checkAuthStatus = async function() {
     const sb = await ensureSupabase();
     const { data: { session } } = await sb.auth.getSession();
     
@@ -799,6 +802,9 @@ async function handleForgotPassword(event) {
 
 // Export per uso globale
 window.LoginModal = {
+    // Alias per compatibilità
+    open: showLoginModal,
+    
     // Selection Modal
     showSelection: showSelectionModal,
     closeSelection: closeSelectionModal,
