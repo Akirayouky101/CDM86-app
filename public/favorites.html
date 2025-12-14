@@ -331,12 +331,19 @@
             
             try {
                 // Get user's favorite promotion IDs
+                console.log('🔍 Querying favorites for user:', currentUser.id);
+                
                 const { data: favorites, error: favError } = await window.supabaseClient
                     .from('favorites')
-                    .select('promotion_id')
+                    .select('*')
                     .eq('user_id', currentUser.id);
                 
-                if (favError) throw favError;
+                console.log('📦 Raw query result:', { data: favorites, error: favError });
+                
+                if (favError) {
+                    console.error('❌ Query error:', favError);
+                    throw favError;
+                }
                 
                 console.log('📊 Favorites loaded:', favorites?.length || 0);
                 console.log('📋 Favorite IDs:', favorites?.map(f => f.promotion_id));
