@@ -1168,6 +1168,9 @@
                     btn.classList.remove('active');
                     icon.className = 'far fa-heart';
                     console.log('✅ Removed from favorites');
+                    
+                    // Remove from local cache immediately for instant UI feedback
+                    favoriteIds.delete(promotionId);
                 } else {
                     // Add to favorites - Use upsert to avoid duplicates
                     console.log('➕ Adding to favorites:', {
@@ -1196,13 +1199,16 @@
                     btn.classList.add('active');
                     icon.className = 'fas fa-heart';
                     console.log('✅ Added to favorites');
+                    
+                    // Add to local cache immediately for instant UI feedback
+                    favoriteIds.add(promotionId);
                 }
                 
-                // Force reload promotions to update all hearts
+                // Force reload promotions to sync with database (longer delay for DB propagation)
                 setTimeout(() => {
-                    console.log('🔄 Reloading promotions to update hearts...');
+                    console.log('🔄 Reloading promotions to sync with database...');
                     loadPromotions();
-                }, 500);
+                }, 1500);
                 
             } catch (error) {
                 console.error('Error toggling favorite:', error);
