@@ -320,6 +320,34 @@
             if (!user) return;
             
             await loadFavorites();
+            
+            // 🔥 Setup Realtime subscription for favorites
+            console.log('🔄 Setting up Realtime subscription...');
+            const channel = window.supabaseClient
+                .channel('favorites-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+                        schema: 'public',
+                        table: 'favorites',
+                        filter: `user_id=eq.${currentUser.id}`
+                    },
+                    (payload) => {
+                        console.log('🔔 Favorites changed:', payload);
+                        // Reload favorites when any change happens
+                        loadFavorites();
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('📡 Realtime status:', status);
+                });
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                console.log('🧹 Cleaning up Realtime subscription...');
+                channel.unsubscribe();
+            });
         });
         
         // Load favorites
