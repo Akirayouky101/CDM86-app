@@ -325,6 +325,7 @@
         // Load favorites
         async function loadFavorites() {
             console.log('📥 loadFavorites called');
+            console.log('👤 Current user ID:', currentUser?.id);
             const loading = document.getElementById('loading');
             const grid = document.getElementById('favorites-grid');
             
@@ -338,6 +339,7 @@
                 if (favError) throw favError;
                 
                 console.log('📊 Favorites loaded:', favorites?.length || 0);
+                console.log('📋 Favorite IDs:', favorites?.map(f => f.promotion_id));
                 
                 if (!favorites || favorites.length === 0) {
                     if (loading) loading.style.display = 'none';
