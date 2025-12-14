@@ -875,8 +875,8 @@
             }
         }
         
-        // Initialize
-        (async () => {
+        // Initialize - Wait for Supabase to be ready
+        window.addEventListener('supabase-ready', async () => {
             console.log('🚀 Initializing page...');
             const user = await checkAuth();
             console.log('Current user:', user);
@@ -900,7 +900,7 @@
             setupEventListeners();
             setupLoginRequiredModal();
             console.log('✅ Page initialization complete');
-        })();
+        });
         
         // Setup login required modal
         function setupLoginRequiredModal() {

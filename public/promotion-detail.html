@@ -212,10 +212,30 @@
     <!-- Supabase UMD Build -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        const { createClient } = supabase;
-        const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-        window.supabaseClient = supabaseClient;
+        // Wait for Supabase UMD to load
+        function initSupabase() {
+            if (typeof supabase === 'undefined' || !supabase.createClient) {
+                console.warn('⚠️ Supabase not ready, retrying...');
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            
+            const { createClient } = supabase;
+            const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+            window.supabaseClient = supabaseClient;
+            
+            console.log('✅ Promotion Detail: Supabase initialized');
+            window.dispatchEvent(new Event('supabase-ready'));
+        }
         
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
+    </script>
+    
+    <script>
         let currentUser = null;
         let currentPromotion = null;
         
@@ -225,7 +245,12 @@
         
         // Check auth
         async function checkAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAuth: Supabase not ready');
+                return null;
+            }
+            
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
             if (!session) {
                 // Redirect to index where they can login via modal
                 window.location.href = '/index.html';
@@ -234,7 +259,7 @@
             currentUser = session.user;
             
             // Update navbar
-            const { data: userData } = await supabase
+            const { data: userData } = await window.supabaseClient
                 .from('users')
                 .select('first_name')
                 .eq('id', currentUser.id)
@@ -448,13 +473,13 @@
             }
         };
         
-        // Initialize
-        (async () => {
+        // Initialize - Wait for Supabase to be ready
+        window.addEventListener('supabase-ready', async () => {
             const user = await checkAuth();
             if (user) {
                 await loadPromotion();
             }
-        })();
+        });
     </script>
 </body>
 </html>

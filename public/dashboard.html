@@ -832,17 +832,43 @@
     <!-- Supabase UMD Build -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        const { createClient } = supabase;
-        const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-        let currentUser = null;
+        // Wait for Supabase UMD to load
+        function initSupabase() {
+            if (typeof supabase === 'undefined' || !supabase.createClient) {
+                console.warn('⚠️ Supabase not ready, retrying...');
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            
+            const { createClient } = supabase;
+            const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+            
+            // Make supabase and currentUser globally accessible
+            window.supabaseClient = supabaseClient;
+            
+            console.log('✅ Dashboard: Supabase initialized');
+            window.dispatchEvent(new Event('supabase-ready'));
+        }
         
-        // Make supabase and currentUser globally accessible
-        window.supabaseClient = supabaseClient;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
+    </script>
+    
+    <script>
+        let currentUser = null;
         window.getCurrentUser = () => currentUser;
         
         // Check authentication
         async function checkAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAuth: Supabase not ready');
+                return null;
+            }
+            
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
             
             if (!session) {
                 window.location.href = '/index.html';
@@ -850,7 +876,7 @@
             }
             
             // Check if user is an organization - redirect to org dashboard
-            const { data: orgData, error: orgError } = await supabase
+            const { data: orgData, error: orgError } = await window.supabaseClient
                 .from('organizations')
                 .select('id')
                 .eq('id', session.user.id)
@@ -866,13 +892,13 @@
             return currentUser;
         }
         
-        // Initialize
-        (async () => {
+        // Initialize - Wait for Supabase to be ready
+        window.addEventListener('supabase-ready', async () => {
             const user = await checkAuth();
             if (!user) return;
             
             await loadDashboardData();
-        })();
+        });
         
         
         // Load dashboard data
