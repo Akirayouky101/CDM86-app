@@ -1063,12 +1063,14 @@
                 // Load favorites only if user is logged in
                 favoriteIds = new Set();
                 if (currentUser) {
-                    const { data: favorites } = await window.supabaseClient
+                    const { data: favorites, error: favError } = await window.supabaseClient
                         .from('favorites')
                         .select('promotion_id')
                         .eq('user_id', currentUser.id);
                     
+                    console.log('🔍 DEBUG favorites query:', { favorites, favError, userId: currentUser.id });
                     favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                    console.log('❤️ favoriteIds loaded:', Array.from(favoriteIds));
                 }
                 
                 displayPromotions(allPromotions, favoriteIds);
@@ -1159,12 +1161,14 @@
                     icon.className = 'far fa-heart';
                     favoriteIds.delete(promotionId);
                 } else {
-                    // Add to favorites
+                    // Add to favorites - use upsert to handle duplicates
                     const { error } = await window.supabaseClient
                         .from('favorites')
-                        .insert({
+                        .upsert({
                             user_id: currentUser.id,
                             promotion_id: promotionId
+                        }, {
+                            onConflict: 'user_id,promotion_id'
                         });
                     
                     if (error) throw error;
