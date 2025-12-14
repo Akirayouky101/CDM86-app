@@ -1158,23 +1158,33 @@
                         .eq('user_id', currentUser.id)
                         .eq('promotion_id', promotionId);
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error removing favorite:', error);
+                        throw error;
+                    }
                     
                     btn.classList.remove('active');
                     icon.className = 'far fa-heart';
+                    console.log('✅ Removed from favorites');
                 } else {
-                    // Add to favorites
+                    // Add to favorites - Use upsert to avoid duplicates
                     const { error } = await window.supabaseClient
                         .from('favorites')
-                        .insert({
+                        .upsert({
                             user_id: currentUser.id,
                             promotion_id: promotionId
+                        }, {
+                            onConflict: 'user_id,promotion_id'
                         });
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error adding favorite:', error);
+                        throw error;
+                    }
                     
                     btn.classList.add('active');
                     icon.className = 'fas fa-heart';
+                    console.log('✅ Added to favorites');
                 }
                 
             } catch (error) {
