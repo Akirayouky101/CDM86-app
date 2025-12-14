@@ -1168,17 +1168,26 @@
                     console.log('✅ Removed from favorites');
                 } else {
                     // Add to favorites - Use upsert to avoid duplicates
-                    const { error } = await window.supabaseClient
+                    console.log('➕ Adding to favorites:', {
+                        user_id: currentUser.id,
+                        promotion_id: promotionId,
+                        auth_uid: (await window.supabaseClient.auth.getUser()).data.user?.id
+                    });
+                    
+                    const { data, error } = await window.supabaseClient
                         .from('favorites')
                         .upsert({
                             user_id: currentUser.id,
                             promotion_id: promotionId
                         }, {
                             onConflict: 'user_id,promotion_id'
-                        });
+                        })
+                        .select();
+                    
+                    console.log('📊 Upsert result:', { data, error });
                     
                     if (error) {
-                        console.error('Error adding favorite:', error);
+                        console.error('❌ Error adding favorite:', error);
                         throw error;
                     }
                     
