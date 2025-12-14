@@ -829,20 +829,20 @@
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
-    
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
-        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    <!-- Supabase UMD Build -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const { createClient } = supabase;
+        const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
         let currentUser = null;
         
         // Make supabase and currentUser globally accessible
-        window.supabaseClient = supabase;
+        window.supabaseClient = supabaseClient;
         window.getCurrentUser = () => currentUser;
         
         // Check authentication
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             
             if (!session) {
                 window.location.href = '/index.html';
@@ -967,7 +967,7 @@
                             sessionStorage.clear();
                             
                             // Sign out from Supabase
-                            await supabase.auth.signOut({ scope: 'global' });
+                            await supabaseClient.auth.signOut({ scope: 'global' });
                             
                             // Force redirect
                             window.location.replace('/index.html');
@@ -1384,7 +1384,7 @@
                 sessionStorage.clear();
                 
                 // Sign out
-                await supabase.auth.signOut({ scope: 'global' });
+                await supabaseClient.auth.signOut({ scope: 'global' });
                 
                 // Force redirect (replace prevents back button)
                 window.location.replace('/index.html');

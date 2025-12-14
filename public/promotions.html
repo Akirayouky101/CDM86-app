@@ -837,7 +837,7 @@
             }
             
             // Check if user is an organization - redirect to org dashboard
-            const { data: orgData, error: orgError } = await supabase
+            const { data: orgData, error: orgError } = await window.supabaseClient
                 .from('organizations')
                 .select('id')
                 .eq('id', session.user.id)
@@ -932,7 +932,7 @@
         // Load user info
         async function loadUserInfo() {
             try {
-                const { data: userData, error } = await supabase
+                const { data: userData, error } = await window.supabaseClient
                     .from('users')
                     .select('*')
                     .eq('id', currentUser.id)
@@ -1049,7 +1049,7 @@
         async function loadPromotions() {
             try {
                 console.log('Loading promotions...');
-                const { data: promotions, error } = await supabase
+                const { data: promotions, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
                     .eq('is_active', true)
@@ -1068,7 +1068,7 @@
                 // Load favorites only if user is logged in
                 let favoriteIds = new Set();
                 if (currentUser) {
-                    const { data: favorites } = await supabase
+                    const { data: favorites } = await window.supabaseClient
                         .from('favorites')
                         .select('promotion_id')
                         .eq('user_id', currentUser.id);
@@ -1152,7 +1152,7 @@
                 
                 if (isCurrentlyFavorite) {
                     // Remove from favorites
-                    const { error } = await supabase
+                    const { error } = await window.supabaseClient
                         .from('favorites')
                         .delete()
                         .eq('user_id', currentUser.id)
@@ -1164,7 +1164,7 @@
                     icon.className = 'far fa-heart';
                 } else {
                     // Add to favorites
-                    const { error } = await supabase
+                    const { error } = await window.supabaseClient
                         .from('favorites')
                         .insert({
                             user_id: currentUser.id,
@@ -1237,7 +1237,7 @@
             
             // Refresh favorites only if user is logged in
             if (currentUser) {
-                const { data: favorites } = await supabase
+                const { data: favorites } = await window.supabaseClient
                     .from('favorites')
                     .select('promotion_id')
                     .eq('user_id', currentUser.id);

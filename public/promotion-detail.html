@@ -208,10 +208,14 @@
     </div>
     
     <script src="/assets/js/config.js"></script>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    <!-- Supabase UMD Build -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const { createClient } = supabase;
+        const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        window.supabaseClient = supabaseClient;
         
-        const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
         let currentUser = null;
         let currentPromotion = null;
         
@@ -221,7 +225,7 @@
         
         // Check auth
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 // Redirect to index where they can login via modal
                 window.location.href = '/index.html';
@@ -434,7 +438,7 @@
             try {
                 localStorage.clear();
                 sessionStorage.clear();
-                await supabase.auth.signOut({ scope: 'global' });
+                await supabaseClient.auth.signOut({ scope: 'global' });
                 window.location.replace('/index.html');
             } catch (error) {
                 console.error('Logout error:', error);
