@@ -821,6 +821,7 @@
     
     <script>
         let currentUser = null;
+        let favoriteIds = new Set(); // Global favorites cache
         
         // Check authentication
         async function checkAuth() {
@@ -1066,7 +1067,7 @@
                 allPromotions = promotions || [];
                 
                 // Load favorites only if user is logged in
-                let favoriteIds = new Set();
+                favoriteIds = new Set(); // Reset global cache
                 if (currentUser) {
                     const { data: favorites } = await window.supabaseClient
                         .from('favorites')
