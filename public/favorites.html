@@ -436,25 +436,39 @@
         };
         
         window.confirmRemoveFavorite = async function() {
-            if (!pendingRemovalId) return;
+            console.log('🗑️ confirmRemoveFavorite called, pendingRemovalId:', pendingRemovalId);
+            
+            if (!pendingRemovalId) {
+                console.error('❌ No pendingRemovalId');
+                return;
+            }
             
             try {
+                console.log('🔄 Deleting favorite:', {
+                    user_id: currentUser.id,
+                    promotion_id: pendingRemovalId
+                });
+                
                 const { error } = await window.supabaseClient
                     .from('favorites')
                     .delete()
                     .eq('user_id', currentUser.id)
                     .eq('promotion_id', pendingRemovalId);
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('❌ Delete error:', error);
+                    throw error;
+                }
                 
+                console.log('✅ Favorite removed successfully');
                 closeRemoveModal();
                 
                 // Reload favorites
                 await loadFavorites();
                 
             } catch (error) {
-                console.error('Error removing favorite:', error);
-                alert('Errore nella rimozione');
+                console.error('❌ Error removing favorite:', error);
+                alert('Errore nella rimozione: ' + (error.message || 'Errore sconosciuto'));
             }
         };
         
