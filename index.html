@@ -1058,85 +1058,29 @@
 
     <!-- PWA Service Worker Registration -->
     
-    <!-- Supabase JS Library - VERSIONE UMD (non ES6) -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
-    
     <!-- Supabase Config -->
     <script>
-        console.log('🔍 Checking Supabase...');
-        console.log('Supabase available:', typeof supabase);
-        console.log('Supabase object:', supabase);
-        
-        // Wait for Supabase UMD to load
-        function initSupabase() {
-            if (typeof supabase === 'undefined') {
-                console.warn('⚠️ Supabase not loaded yet, retrying...');
-                setTimeout(initSupabase, 100);
-                return;
-            }
-            
-            if (!supabase.createClient) {
-                console.error('❌ Supabase loaded but createClient not found!');
-                console.log('Supabase keys:', Object.keys(supabase));
-                setTimeout(initSupabase, 100);
-                return;
-            }
-            
-            window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-            window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
-            
-            // Initialize Supabase globally
-            try {
-                window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-                console.log('✅ Supabase initialized successfully');
-                console.log('Client:', window.supabaseClient);
-                
-                // Trigger event for other scripts
-                window.dispatchEvent(new Event('supabase-ready'));
-            } catch (error) {
-                console.error('❌ Supabase init error:', error);
-            }
-        }
-        
-        // Start initialization
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initSupabase);
-        } else {
-            initSupabase();
-        }
+        window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
     </script>
     
+    <!-- Supabase UMD Build (funziona meglio di ES6 modules) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase using UMD build
+        const { createClient } = supabase;
+        window.supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+        console.log('✅ Supabase initialized (UMD):', window.supabaseClient);
+        
+        // Dispatch event to notify other scripts
+        window.dispatchEvent(new Event('supabase-ready'));
+    </script>
+    
+    <!-- Login Modal System -->
     <script type="module" src="assets/js/login-modal.js"></script>
     
-    <!-- Wait for LoginModal -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkLoginModal = setInterval(() => {
-                if (window.LoginModal) {
-                    console.log('✅ LoginModal ready!');
-                    clearInterval(checkLoginModal);
-                }
-            }, 100);
-        });
-    </script>
-    
-    <script>
-        // Main app logic
-        let currentUser = null;
-        
-        // Check authentication
-        async function checkAuth() {
-            if (!window.supabaseClient) {
-                console.warn('⚠️ checkAuth: Supabase not ready yet');
-                return null;
-            }
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
-            currentUser = session?.user || null;
-            console.log('Index - Current user:', currentUser);
-            return currentUser;
-        }
-        
-        // Show login required modal
+        // Simple helper functions
         function showLoginRequiredModal() {
             const overlay = document.getElementById('loginRequiredOverlay');
             if (overlay) {
@@ -1144,7 +1088,6 @@
             }
         }
         
-        // Hide login required modal
         function hideLoginRequiredModal() {
             const overlay = document.getElementById('loginRequiredOverlay');
             if (overlay) {
@@ -1152,35 +1095,45 @@
             }
         }
         
-        // Show selection modal (existing modal system)
-        function showSelectionModal() {
-            const selectionOverlay = document.getElementById('selectionModalOverlay');
-            if (selectionOverlay) {
-                selectionOverlay.classList.add('active');
+        // Simple initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for LoginModal to be ready
+            const checkLoginModal = setInterval(() => {
+                if (window.LoginModal) {
+                    console.log('✅ LoginModal ready!');
+                    clearInterval(checkLoginModal);
+                    
+                    // Setup login button to open modal
+                    const loginBtn = document.getElementById('login-btn');
+                    if (loginBtn) {
+                        loginBtn.addEventListener('click', () => {
+                            window.LoginModal.open();
+                        });
+                    }
+                }
+            }, 100);
+            
+            // Check if user is logged in (simple localStorage check)
+            const token = localStorage.getItem('sb-uchrjlngfzfibcpdxtky-auth-token');
+            const userSession = localStorage.getItem('userSession');
+            let currentUser = null;
+            
+            if (token && userSession) {
+                try {
+                    currentUser = JSON.parse(userSession);
+                    console.log('✅ User logged in:', currentUser.email);
+                } catch (e) {
+                    console.log('❌ Invalid session data');
+                }
             }
-            hideLoginRequiredModal();
-        }
-        
-        // Initialize - WAIT FOR SUPABASE
-        function initApp() {
-            console.log('🚀 initApp: Starting...');
-            
-            // Wait for Supabase to be ready
-            if (!window.supabaseClient) {
-                console.log('⏳ Waiting for Supabase...');
-                window.addEventListener('supabase-ready', initApp, { once: true });
-                return;
-            }
-            
-            console.log('✅ initApp: Supabase ready, initializing app...');
-            
-            (async () => {
-                await checkAuth();
             
             // Setup login required modal buttons
             const loginBtn = document.getElementById('loginRequiredLogin');
             if (loginBtn) {
-                loginBtn.addEventListener('click', showSelectionModal);
+                loginBtn.addEventListener('click', () => {
+                    hideLoginRequiredModal();
+                    window.location.href = '/public/login.html';
+                });
             }
             
             const closeBtn = document.getElementById('loginRequiredClose');
@@ -1213,9 +1166,6 @@
                         showLoginRequiredModal();
                         return;
                     }
-                    
-                    // User is logged in, allow navigation
-                    // (promo cards should have onclick or href)
                 }
             });
             
@@ -1225,21 +1175,16 @@
             
             categoryChips.forEach(chip => {
                 chip.addEventListener('click', () => {
-                    // Update active state
                     categoryChips.forEach(c => c.classList.remove('active'));
                     chip.classList.add('active');
                     
-                    // Get selected category
                     const selectedCategory = chip.dataset.category;
-                    console.log('Filter by category:', selectedCategory);
                     
-                    // Filter promo cards
                     promoCards.forEach(card => {
                         const cardCategory = card.dataset.category;
                         
                         if (selectedCategory === 'all' || cardCategory === selectedCategory) {
                             card.style.display = 'flex';
-                            // Add animation
                             card.style.animation = 'fadeIn 0.3s ease-out';
                         } else {
                             card.style.display = 'none';
@@ -1247,11 +1192,7 @@
                     });
                 });
             });
-        })();
-        }
-        
-        // Start initialization
-        initApp();
+        });
     </script>
     <script>
         // Register Service Worker
@@ -1292,70 +1233,16 @@
             console.log('📱 PWA can be installed');
         });
         
-        // Check for referral code in URL
+        // Check for referral code in URL - save for later use
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
             
             if (refCode) {
                 console.log('🎯 Referral code detected:', refCode);
-                
-                // Save referral code to localStorage
                 localStorage.setItem('referral_code', refCode);
-                
-                // Wait for LoginModal to be loaded
-                setTimeout(() => {
-                    if (window.LoginModal) {
-                        // Show selection modal first
-                        window.LoginModal.showSelection();
-                        
-                        // Auto-select "Utente" option
-                        setTimeout(() => {
-                            window.LoginModal.selectUser();
-                            
-                            // Switch to register tab
-                            setTimeout(() => {
-                                const registerTab = document.querySelector('[onclick="window.LoginModal.switchTab(\'register\')"]');
-                                if (registerTab) {
-                                    registerTab.click();
-                                    
-                                    // Pre-fill referral code
-                                    setTimeout(() => {
-                                        const referralInput = document.getElementById('registerReferralCode');
-                                        if (referralInput) {
-                                            referralInput.value = refCode.toUpperCase();
-                                            
-                                            // Visual feedback
-                                            referralInput.style.borderColor = '#10b981';
-                                            referralInput.style.background = '#f0fdf4';
-                                            
-                                            // Show success message
-                                            const message = document.createElement('div');
-                                            message.style.cssText = `
-                                                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                                                color: white;
-                                                padding: 12px 20px;
-                                                border-radius: 10px;
-                                                margin-bottom: 15px;
-                                                font-weight: 600;
-                                                text-align: center;
-                                                animation: slideDown 0.3s ease;
-                                            `;
-                                            message.innerHTML = `✅ Codice referral <strong>${refCode.toUpperCase()}</strong> applicato!`;
-                                            
-                                            const form = referralInput.closest('form');
-                                            if (form) {
-                                                form.insertBefore(message, form.firstChild);
-                                            }
-                                        }
-                                    }, 300);
-                                }
-                            }, 200);
-                        }, 200);
-                    } else {
-                        console.warn('⚠️ LoginModal not loaded yet');
-                    }
-                }, 500);
+                // Redirect to login page with referral code
+                window.location.href = '/public/login.html?ref=' + refCode;
             }
         })();
     </script>
