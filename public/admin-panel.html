@@ -1565,16 +1565,32 @@
         </div>
     </div>
 
-    <!-- Supabase + JavaScript -->
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
-        const supabase = createClient(
-            'https://uchrjlngfzfibcpdxtky.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
-        );
+    <!-- Supabase UMD Build -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Initialize Supabase
+        function initSupabase() {
+            const { createClient } = supabase;
+            const supabaseClient = createClient(
+                'https://uchrjlngfzfibcpdxtky.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
+            );
 
-        window.supabase = supabase;
+            window.supabaseClient = supabaseClient;
+            window.supabase = supabaseClient; // Keep backward compatibility
+            console.log('✅ Admin Panel: Supabase initialized');
+            window.dispatchEvent(new Event('supabase-ready'));
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
+    </script>
+    
+    <script>
         let allUsers = [];
         let allContracts = [];
         let pendingResetUser = null;
@@ -1582,8 +1598,13 @@
 
         // Check Admin Access
         async function checkAdminAccess() {
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAdminAccess: Supabase not ready');
+                return false;
+            }
+            
             try {
-                const { data: { user }, error } = await supabase.auth.getUser();
+                const { data: { user }, error } = await window.supabaseClient.auth.getUser();
                 
                 if (error || !user) {
                     window.location.href = '/index.html';
@@ -1805,7 +1826,7 @@
                     }
                 }
 
-                const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                const { data: authData, error: authError } = await window.supabaseClient.auth.admin.createUser({
                     email: email,
                     password: password,
                     email_confirm: true
@@ -1830,7 +1851,7 @@
 
                 // If referral was valid, award points to referrer
                 if (referrerId) {
-                    const { error: pointsError } = await supabase.rpc('add_points_to_user', {
+                    const { error: pointsError } = await window.supabaseClient.rpc('add_points_to_user', {
                         p_user_id: referrerId,
                         p_points: 50,
                         p_description: `Bonus referral per invito di ${email}`
@@ -1864,7 +1885,7 @@
             if (!pendingResetUser) return;
 
             try {
-                const { error } = await supabase.auth.admin.generateLink({
+                const { error } = await window.supabaseClient.auth.admin.generateLink({
                     type: 'recovery',
                     email: pendingResetUser.email
                 });
@@ -1891,7 +1912,7 @@
             if (!pendingDeleteUser) return;
 
             try {
-                const { error } = await supabase.auth.admin.deleteUser(pendingDeleteUser.id);
+                const { error } = await window.supabaseClient.auth.admin.deleteUser(pendingDeleteUser.id);
 
                 if (error) throw error;
 
@@ -2235,12 +2256,12 @@
                 }
 
                 // Load users
-                let usersQuery = supabase.from('users').select('*', { count: 'exact' });
+                let usersQuery = window.supabaseClient.from('users').select('*', { count: 'exact' });
                 if (dateFilter) usersQuery = usersQuery.gte('created_at', dateFilter);
                 const { data: users, count: usersCount } = await usersQuery;
 
                 // Load organization requests
-                let requestsQuery = supabase.from('organization_requests').select('*', { count: 'exact' });
+                let requestsQuery = window.supabaseClient.from('organization_requests').select('*', { count: 'exact' });
                 if (dateFilter) requestsQuery = requestsQuery.gte('created_at', dateFilter);
                 const { data: requests, count: requestsCount } = await requestsQuery;
 
@@ -2674,7 +2695,7 @@
         };
 
         window.confirmLogout = async function() {
-            await supabase.auth.signOut();
+            await window.supabaseClient.auth.signOut();
             window.location.href = '/index.html';
         };
 

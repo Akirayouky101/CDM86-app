@@ -782,12 +782,17 @@
         </div>
     </div>
     
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
+    <!-- Supabase UMD Build -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
         const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        window.supabaseClient = supabaseClient;
+        console.log('✅ Register Organization: Supabase initialized');
         
         let currentWizardStep = 0;
         let validatedReferralId = null; // Store the referral ID from step 0
@@ -1069,7 +1074,7 @@
             
             try {
                 // Salva la richiesta nel database
-                const { data, error } = await supabase.rpc('create_organization_request', {
+                const { data, error } = await window.supabaseClient.rpc('create_organization_request', {
                     p_referred_by_code: referralCode,
                     p_organization_name: orgname,
                     p_contact_first_name: firstname,
@@ -1198,7 +1203,7 @@ Per favore, invia un codice contratto per questa organizzazione.`);
                 }
                 
                 // Register in Supabase Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
+                const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
