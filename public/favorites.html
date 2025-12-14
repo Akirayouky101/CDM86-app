@@ -324,6 +324,7 @@
         
         // Load favorites
         async function loadFavorites() {
+            console.log('📥 loadFavorites called');
             const loading = document.getElementById('loading');
             const grid = document.getElementById('favorites-grid');
             
@@ -335,6 +336,8 @@
                     .eq('user_id', currentUser.id);
                 
                 if (favError) throw favError;
+                
+                console.log('📊 Favorites loaded:', favorites?.length || 0);
                 
                 if (!favorites || favorites.length === 0) {
                     if (loading) loading.style.display = 'none';
@@ -355,7 +358,7 @@
                 displayFavorites(promotions || []);
                 
             } catch (error) {
-                console.error('Error loading favorites:', error);
+                console.error('❌ Error loading favorites:', error);
                 if (loading) loading.style.display = 'none';
                 if (grid) {
                     grid.innerHTML = `<p class="text-center padding-2rem color-error">Errore: ${error.message}</p>`;
@@ -365,6 +368,7 @@
         
         // Display favorites
         function displayFavorites(promotions) {
+            console.log('🎨 displayFavorites called with', promotions?.length || 0, 'promotions');
             const grid = document.getElementById('favorites-grid');
             const loading = document.getElementById('loading');
             
@@ -373,6 +377,7 @@
             
             // Check if empty
             if (!promotions || promotions.length === 0) {
+                console.log('📭 No favorites to display');
                 grid.innerHTML = `
                     <div class="empty-state-container">
                         <i class="far fa-heart empty-state-icon"></i>
