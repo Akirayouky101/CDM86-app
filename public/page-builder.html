@@ -732,9 +732,9 @@
                         <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
                         <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
                     </div>
-                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title}</h2>
+                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title || 'Titolo'}</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-                        ${section.data.cards.map(card => `
+                        ${(section.data.cards || []).map(card => `
                             <div style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 2rem; border-radius: 1rem; text-align: center; color: #1e3a8a;">
                                 <i class="fas ${card.icon}" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
                                 <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem;">${card.title}</h3>
@@ -749,9 +749,9 @@
                         <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
                         <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
                     </div>
-                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title}</h2>
+                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title || 'Titolo'}</h2>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
-                        ${section.data.cards.map(card => `
+                        ${(section.data.cards || []).map(card => `
                             <div style="background: #fff; border: 2px solid #e2e8f0; padding: 1.5rem; border-radius: 0.75rem; text-align: center;">
                                 <i class="fas ${card.icon}" style="font-size: 2rem; color: #fbbf24; margin-bottom: 1rem;"></i>
                                 <h4 style="font-size: 1.125rem; margin-bottom: 0.5rem; color: #1e293b;">${card.title}</h4>
@@ -767,7 +767,7 @@
                         <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-                        ${section.data.stats.map(stat => `
+                        ${(section.data.stats || []).map(stat => `
                             <div style="text-align: center; padding: 2rem; background: rgba(37, 99, 235, 0.05); border-radius: 0.75rem;">
                                 <div style="font-size: 3rem; font-weight: 800; color: #fbbf24; margin-bottom: 0.5rem;">${stat.number}</div>
                                 <div style="font-size: 1.125rem; color: #475569;">${stat.label}</div>
