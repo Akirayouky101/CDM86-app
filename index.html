@@ -351,7 +351,7 @@
     <section class="promotions-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Promozioni Attive</h2>
+                <h2 class="section-title">Aziende Partner</h2>
                 <div class="view-toggle">
                     <button class="toggle-btn active" data-view="grid" aria-label="Vista griglia">
                         <i class="fas fa-th-large"></i>
@@ -363,279 +363,11 @@
             </div>
 
             <div class="promotions-grid" id="promotions-grid">
-                
-                <!-- Promotion Card 1 -->
-                <div class="promo-card" data-category="food">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500" alt="Pizza">
-                        <div class="promo-badge">-50%</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Pizza Margherita</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-utensils"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">Due pizze margherita al prezzo di una</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Pizzeria Da Mario</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€20.00</span>
-                                <span class="price-final">€10.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 5 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                234 riscatti
-                            </span>
-                        </div>
-                    </div>
+                <!-- Organization cards loaded from database -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Caricamento aziende partner...</p>
                 </div>
-
-                <!-- Promotion Card 2 -->
-                <div class="promo-card" data-category="shopping">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=500" alt="Shopping">
-                        <div class="promo-badge">-30%</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Sconto Shopping</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-shopping-bag"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">30% su tutto l'abbigliamento</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Fashion Store</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€100.00</span>
-                                <span class="price-final">€70.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 10 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                156 riscatti
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Promotion Card 3 -->
-                <div class="promo-card" data-category="services">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500" alt="Wellness">
-                        <div class="promo-badge">2x1</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Massaggio Relax</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-spa"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">Due massaggi al prezzo di uno</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Spa Harmony</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€120.00</span>
-                                <span class="price-final">€60.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 15 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                89 riscatti
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Promotion Card 4 -->
-                <div class="promo-card" data-category="entertainment">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500" alt="Cinema">
-                        <div class="promo-badge">-40%</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Cinema 2x1</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-film"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">Due biglietti cinema al prezzo di uno</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Cinema Multiplex</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€18.00</span>
-                                <span class="price-final">€9.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 7 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                312 riscatti
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Promotion Card 5 -->
-                <div class="promo-card" data-category="food">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500" alt="Sushi">
-                        <div class="promo-badge">-25%</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Menu Sushi</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-utensils"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">25% di sconto su menu completo</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Sushi Bar Zen</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€40.00</span>
-                                <span class="price-final">€30.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 12 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                178 riscatti
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Promotion Card 6 -->
-                <div class="promo-card" data-category="travel">
-                    <div class="promo-image">
-                        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=500" alt="Travel">
-                        <div class="promo-badge">GRATIS</div>
-                        <button class="promo-favorite" aria-label="Aggiungi ai preferiti">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="promo-content">
-                        <div class="promo-header">
-                            <h3 class="promo-title">Weekend Romantico</h3>
-                            <div class="promo-category-badge">
-                                <i class="fas fa-plane"></i>
-                            </div>
-                        </div>
-                        <p class="promo-description">Colazione inclusa gratis</p>
-                        <div class="promo-partner">
-                            <i class="fas fa-store"></i>
-                            <span>Hotel Paradise</span>
-                        </div>
-                        <div class="promo-footer">
-                            <div class="promo-price">
-                                <span class="price-original">€200.00</span>
-                                <span class="price-final">€150.00</span>
-                            </div>
-                            <button class="btn-promo">
-                                <span>Riscatta</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                        <div class="promo-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                Scade tra 20 giorni
-                            </span>
-                            <span class="meta-item">
-                                <i class="fas fa-users"></i>
-                                45 riscatti
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Load More -->
-            <div class="load-more-section">
-                <button class="btn-load-more">
-                    <span>Carica Altre Promozioni</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
             </div>
         </div>
     </section>
@@ -1081,6 +813,105 @@
         
         // Dispatch event to notify other scripts
         window.dispatchEvent(new Event('supabase-ready'));
+        
+        // Load organization cards from database
+        async function loadOrganizationCards() {
+            console.log('🏢 Loading organization cards...');
+            const container = document.getElementById('promotions-grid');
+            
+            if (!window.supabaseClient) {
+                console.error('❌ Supabase not ready');
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+                return;
+            }
+
+            try {
+                // Query organization_pages for published cards
+                const { data: orgPages, error } = await window.supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('card_published', true)
+                    .order('updated_at', { ascending: false });
+
+                if (error) {
+                    console.error('❌ Error loading organization cards:', error);
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+                    return;
+                }
+
+                console.log('✅ Loaded organization cards:', orgPages);
+
+                // If no cards, show empty state
+                if (!orgPages || orgPages.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;"><p>Nessuna azienda partner al momento</p></div>';
+                    return;
+                }
+
+                // Fetch organization data
+                const orgIds = [...new Set(orgPages.map(p => p.organization_id))];
+                const { data: orgs, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('id, name, logo_url')
+                    .in('id', orgIds);
+
+                if (orgError) {
+                    console.error('❌ Error loading organizations:', orgError);
+                }
+
+                // Create org lookup map
+                const orgMap = {};
+                if (orgs) {
+                    orgs.forEach(org => {
+                        orgMap[org.id] = org;
+                    });
+                }
+
+                // Render cards
+                container.innerHTML = orgPages.map(page => {
+                    const card = page.card_data || {};
+                    const org = orgMap[page.organization_id] || {};
+                    const badge = card.badge || '';
+                    const features = card.features || [];
+                    
+                    return `
+                        <div class="promo-card">
+                            <div class="promo-image">
+                                ${card.image ? `<img src="${card.image}" alt="${card.title || org.name}">` : ''}
+                                ${badge ? `<div class="promo-badge">${badge}</div>` : ''}
+                            </div>
+                            <div class="promo-content">
+                                <h3>${card.title || org.name || 'Azienda Partner'}</h3>
+                                <p>${card.description || ''}</p>
+                                ${features.length > 0 ? `
+                                    <ul class="promo-features">
+                                        ${features.map(f => `
+                                            <li>
+                                                <i class="${f.icon || 'fas fa-check'}"></i>
+                                                <span>${f.text || ''}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                            <div class="promo-cta">
+                                <a href="${card.ctaLink || '#'}" class="cta-btn" ${card.ctaLink ? 'target="_blank"' : ''}>
+                                    ${card.ctaText || 'Scopri di più'}
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                console.log('✅ Organization cards rendered');
+
+            } catch (err) {
+                console.error('❌ Exception loading organization cards:', err);
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+            }
+        }
+        
+        // Load cards when ready
+        loadOrganizationCards();
     </script>
     
     <!-- Login Modal System (NO module type - plain script) -->
