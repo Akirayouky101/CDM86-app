@@ -540,17 +540,71 @@
         }
 
         // Handle image upload
-        function handleImageUpload(event) {
+        // Handle image upload to Supabase Storage
+        async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentImage = e.target.result;
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                alert('⚠️ Per favore carica solo file immagine!');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('⚠️ Immagine troppo grande! Max 5MB');
+                return;
+            }
+
+            try {
+                // Show loading
+                const upload = document.getElementById('imageUpload');
+                upload.innerHTML = '<div style="padding: 2rem; text-align: center;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i><p style="margin-top: 1rem; color: #64748b;">Caricamento...</p></div>';
+
+                // Get current user
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    throw new Error('Devi essere loggato per caricare immagini');
+                }
+
+                // Generate unique filename
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+
+                // Upload to Supabase Storage
+                const { data, error } = await supabaseClient.storage
+                    .from('organization-images')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('organization-images')
+                    .getPublicUrl(fileName);
+
+                currentImage = publicUrlData.publicUrl;
                 showImagePreview(currentImage);
                 updatePreview();
-            };
-            reader.readAsDataURL(file);
+
+                console.log('✅ Image uploaded:', currentImage);
+
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('❌ Errore nel caricamento: ' + error.message);
+                
+                // Fallback to preview for now
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentImage = e.target.result;
+                    showImagePreview(currentImage);
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function showImagePreview(src) {
