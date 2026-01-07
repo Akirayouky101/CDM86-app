@@ -734,22 +734,23 @@
 
                     if (error) throw error;
                 } else {
-                    // Insert - need to generate slug
-                    const { data: slugData, error: slugError } = await supabaseClient
-                        .rpc('generate_organization_slug', { org_name: org.name });
-
-                    if (slugError) {
-                        console.error('Slug generation error:', slugError);
-                        throw new Error('Errore nella generazione dello slug');
-                    }
+                    // Insert - generate slug client-side
+                    const slug = org.name
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+                        .replace(/[^a-z0-9]+/g, '-')     // Replace non-alphanumeric with -
+                        .replace(/^-+|-+$/g, '');        // Remove leading/trailing -
 
                     const { error } = await supabaseClient
                         .from('organization_pages')
                         .insert({
                             organization_id: org.id,
-                            slug: slugData,
+                            slug: slug,
                             card_data: cardData,
-                            card_published: publish
+                            card_published: publish,
+                            page_data: { sections: [], style: 'modern' }, // Default empty page
+                            status: 'draft'
                         });
 
                     if (error) throw error;
