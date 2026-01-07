@@ -944,10 +944,7 @@
                 return;
             }
 
-            const pageTitle = prompt('Titolo della pagina:', 'La mia pagina aziendale') || 'Pagina Aziendale';
-            const pageDescription = prompt('Descrizione (per SEO):', '') || '';
-
-            await savePageToDatabase('draft', pageTitle, pageDescription);
+            await savePageToDatabase('draft');
         }
 
         async function publishPage() {
@@ -955,14 +952,11 @@
                 alert('⚠️ Aggiungi almeno una sezione prima di pubblicare!');
                 return;
             }
-            
-            const pageTitle = prompt('Titolo della pagina:', 'La mia pagina aziendale') || 'Pagina Aziendale';
-            const pageDescription = prompt('Descrizione (per SEO):', '') || '';
 
-            await savePageToDatabase('published', pageTitle, pageDescription);
+            await savePageToDatabase('published');
         }
 
-        async function savePageToDatabase(status, pageTitle, pageDescription) {
+        async function savePageToDatabase(status) {
             try {
                 // Get current session
                 const { data: { session } } = await supabaseClient.auth.getSession();
@@ -973,33 +967,101 @@
                     return;
                 }
 
-                const pageData = {
-                    page_data: {
-                        sections: sections,
-                        style: currentStyle
-                    },
-                    page_title: pageTitle,
-                    page_description: pageDescription,
-                    status: status
-                };
-
-                const response = await fetch(
-                    `${window.SUPABASE_URL}/functions/v1/save-organization-page`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${session.access_token}`,
-                            'apikey': window.SUPABASE_ANON_KEY,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(pageData)
+                // Get organization info - try both methods
+                let org = null;
+                
+                // First try: get by user_id
+                const { data: orgByUser } = await supabaseClient
+                    .from('organizations')
+                    .select('id, name')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+                
+                if (orgByUser) {
+                    org = orgByUser;
+                } else {
+                    // Second try: get by id (in case user is the organization)
+                    const { data: orgById } = await supabaseClient
+                        .from('organizations')
+                        .select('id, name')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    
+                    if (orgById) {
+                        org = orgById;
                     }
-                );
+                }
 
-                const result = await response.json();
+                if (!org) {
+                    alert('❌ Organizzazione non trovata!');
+                    return;
+                }
 
-                if (!response.ok || !result.success) {
-                    throw new Error(result.error || 'Errore nel salvataggio');
+                // Use organization name as page title
+                const pageTitle = org.name;
+                const pageDescription = `Pagina ufficiale di ${org.name}`;
+
+                // Check if page already exists
+                const { data: existing } = await supabaseClient
+                    .from('organization_pages')
+                    .select('id, slug')
+                    .eq('organization_id', org.id)
+                    .maybeSingle();
+
+                let result;
+                
+                if (existing) {
+                    // Update existing page
+                    const { data, error } = await supabaseClient
+                        .from('organization_pages')
+                        .update({
+                            page_data: {
+                                sections: sections,
+                                style: currentStyle
+                            },
+                            page_title: pageTitle,
+                            page_description: pageDescription,
+                            status: status
+                        })
+                        .eq('id', existing.id)
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    result = { success: true, page: data };
+                } else {
+                    // Create new page - generate slug
+                    const { data: slugData, error: slugError } = await supabaseClient
+                        .rpc('generate_organization_slug', { org_name: org.name });
+
+                    if (slugError) {
+                        console.error('Slug generation error:', slugError);
+                        throw new Error('Errore nella generazione dello slug');
+                    }
+
+                    // Insert new page
+                    const { data, error } = await supabaseClient
+                        .from('organization_pages')
+                        .insert({
+                            organization_id: org.id,
+                            slug: slugData,
+                            page_data: {
+                                sections: sections,
+                                style: currentStyle
+                            },
+                            page_title: pageTitle,
+                            page_description: pageDescription,
+                            status: status
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    result = { success: true, page: data };
+                }
+
+                if (!result.success) {
+                    throw new Error('Errore nel salvataggio');
                 }
 
                 if (status === 'draft') {
