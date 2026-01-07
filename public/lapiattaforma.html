@@ -12,103 +12,336 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .coming-soon-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
-        }
-        
-        .coming-soon-card {
+        .platform-section {
+            padding: var(--space-16) 0;
             background: white;
-            border-radius: 24px;
-            padding: 4rem 3rem;
-            max-width: 600px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
-        .coming-soon-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .platform-section.blue-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        .platform-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+        
+        .platform-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: var(--space-20) 0 var(--space-16);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .platform-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(-15deg);
+        }
+        
+        .platform-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+        
+        .platform-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: var(--space-6);
+            line-height: 1.1;
+        }
+        
+        .platform-subtitle {
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-weight: 700;
+            margin-bottom: var(--space-8);
+            color: #fbbf24;
+        }
+        
+        .platform-text {
+            font-size: clamp(1.125rem, 2.5vw, 1.375rem);
+            line-height: 1.8;
+            margin-bottom: var(--space-6);
+            opacity: 0.95;
+        }
+        
+        .platform-text strong {
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        
+        .cta-section {
+            padding: var(--space-12) 0;
+            text-align: center;
+            background: white;
+        }
+        
+        .cta-big-text {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: var(--space-6);
+        }
+        
+        .cta-big-link {
+            display: inline-block;
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: underline;
+            text-underline-offset: 8px;
+            text-decoration-thickness: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-big-link:hover {
+            color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: var(--space-12);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .compensi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-8);
+            margin-top: var(--space-10);
+        }
+        
+        .compensi-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: var(--space-8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .compensi-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .compensi-icon {
+            width: 80px;
+            height: 80px;
+            background: #fbbf24;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse 2s ease-in-out infinite;
+            margin: 0 auto var(--space-4);
         }
         
-        .coming-soon-icon i {
-            font-size: 60px;
-            color: white;
+        .compensi-icon i {
+            font-size: 40px;
+            color: var(--primary);
         }
         
-        .coming-soon-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .compensi-card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            text-align: center;
         }
         
-        .coming-soon-text {
+        .compensi-card p {
             font-size: 1.125rem;
-            color: #666;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            opacity: 0.9;
+            text-align: center;
         }
         
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            text-decoration: none;
+        .bonus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-10);
+        }
+        
+        .bonus-card {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 20px;
+            padding: var(--space-6);
+            color: var(--primary-dark);
+            text-align: center;
             transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
         }
         
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        .bonus-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4);
         }
         
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
+        .bonus-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-3);
+        }
+        
+        .bonus-card p {
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .platform-hero {
+                padding: var(--space-12) 0;
             }
-            50% {
-                transform: scale(1.05);
+            
+            .platform-text {
+                font-size: 1.0625rem;
+            }
+            
+            .compensi-grid,
+            .bonus-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="coming-soon-container">
-        <div class="coming-soon-card">
-            <div class="coming-soon-icon">
-                <i class="fas fa-rocket"></i>
-            </div>
-            <h1 class="coming-soon-title">In Arrivo</h1>
-            <p class="coming-soon-text">
-                Stiamo preparando contenuti esclusivi per te.<br>
-                Questa pagina sarà presto disponibile con tutte le informazioni sulla piattaforma e il programma referral.
+    <!-- Hero Section -->
+    <section class="platform-hero">
+        <div class="platform-hero-content">
+            <h1 class="platform-title">La Piattaforma del Risparmio</h1>
+            
+            <p class="platform-text">
+                <strong>CDM86 nasce da un'idea semplice ma potente:</strong> rendere il risparmio e le opportunità accessibili a tutti, non solo a chi appartiene a categorie privilegiate o a gruppi selezionati.
             </p>
-            <a href="../index.html" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-                <span>Torna alla Home</span>
+            
+            <p class="platform-text">
+                Nasce dal desiderio di cambiare le regole, di aprire le porte di un mondo fatto di vantaggi reali, concreti, quotidiani.
+            </p>
+            
+            <p class="platform-text">
+                Abbiamo osservato da vicino i giganti che hanno rivoluzionato il mercato — <strong>Carrefour, OVS, Satispay, Conad, Auchan, Norauto, Amazon e molti altri</strong> — e abbiamo trasformato ciò che li rende vincenti in qualcosa di ancora più grande: <strong>un modello pensato per le persone, non per le élite.</strong>
+            </p>
+            
+            <p class="platform-subtitle">
+                IL RISULTATO?
+            </p>
+            
+            <p class="platform-text">
+                Un modello di business unico, costruito per generare valore vero.
+            </p>
+            
+            <p class="platform-text">
+                Una soluzione che permette a ogni iscritto non solo di risparmiare, ma di sentirsi parte di un progetto che cresce, evolve e crea un guadagno costante nel tempo.
+            </p>
+            
+            <p class="platform-text" style="font-weight: 600; font-size: clamp(1.25rem, 3vw, 1.5rem); margin-top: var(--space-8);">
+                CDM 86 non è solo un'opportunità. È un nuovo modo di vivere il risparmio. È la possibilità di cambiare il proprio presente, un vantaggio alla volta.
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="platform-container">
+            <p class="cta-big-text">
+                Vuoi farne parte anche tu? <a href="/index.html#register" class="cta-big-link">clicca qua</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- I COMPENSI Section -->
+    <section class="platform-section blue-bg">
+        <div class="platform-container">
+            <h2 class="section-title">I COMPENSI</h2>
+            
+            <div class="compensi-grid">
+                <div class="compensi-card">
+                    <div class="compensi-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <h3>Referral Diretti</h3>
+                    <p>Guadagna fino a <strong>10€</strong> per ogni persona che si iscrive tramite il tuo codice referral personale.</p>
+                </div>
+                
+                <div class="compensi-card">
+                    <div class="compensi-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Referral Indiretti</h3>
+                    <p>Ricevi <strong>5€</strong> per ogni iscritto portato dalle persone che hai invitato tu. Il tuo network cresce e tu guadagni!</p>
+                </div>
+                
+                <div class="compensi-card">
+                    <div class="compensi-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>Aziende Partner</h3>
+                    <p>Porta un'azienda partner e guadagna <strong>fino a 30€</strong>. Più aziende porti, più il tuo guadagno cresce!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- I BONUS Section -->
+    <section class="platform-section">
+        <div class="platform-container">
+            <h2 class="section-title">I BONUS</h2>
+            
+            <div class="bonus-grid">
+                <div class="bonus-card">
+                    <h3>🎯 Bonus Iscrizione</h3>
+                    <p>Ricevi <strong>punti bonus</strong> appena ti iscrivi per iniziare subito a risparmiare!</p>
+                </div>
+                
+                <div class="bonus-card">
+                    <h3>🔥 Bonus Fedeltà</h3>
+                    <p>Più usi la piattaforma, più guadagni! Bonus mensili per gli utenti più attivi.</p>
+                </div>
+                
+                <div class="bonus-card">
+                    <h3>⭐ Bonus Milestone</h3>
+                    <p>Raggiungi traguardi di referral e sblocca bonus esclusivi e premi speciali!</p>
+                </div>
+                
+                <div class="bonus-card">
+                    <h3>🎁 Bonus Stagionali</h3>
+                    <p>Promozioni speciali durante le festività e eventi. Occasioni uniche per guadagnare di più!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="platform-section blue-bg" style="padding: var(--space-12) 0; text-align: center;">
+        <div class="platform-container">
+            <h2 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: var(--space-6);">
+                Inizia Subito a Guadagnare!
+            </h2>
+            <p style="font-size: clamp(1.125rem, 2.5vw, 1.5rem); margin-bottom: var(--space-8); opacity: 0.95;">
+                Iscriviti ora e scopri quanto puoi risparmiare e guadagnare con CDM86
+            </p>
+            <a href="/index.html" style="display: inline-block; padding: 18px 48px; background: #fbbf24; color: var(--primary-dark); font-size: 1.25rem; font-weight: 700; border-radius: 50px; text-decoration: none; transition: all 0.3s; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);">
+                Registrati Gratis
             </a>
         </div>
-    </div>
+    </section>
 </body>
 </html>
