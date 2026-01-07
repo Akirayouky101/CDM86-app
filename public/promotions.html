@@ -533,9 +533,6 @@
     <!-- Supabase JS Library - VERSIONE UMD -->
     <script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     
-    <!-- Login Modal System -->
-    <script src="/assets/js/login-modal.js"></script>
-    
     <!-- Supabase Config -->
     <script>
         // Wait for Supabase UMD to load
@@ -553,6 +550,11 @@
                 window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
                 console.log('✅ Promotions: Supabase initialized');
                 window.dispatchEvent(new Event('supabase-ready'));
+                
+                // Load login modal script AFTER Supabase is ready
+                const script = document.createElement('script');
+                script.src = '/assets/js/login-modal.js';
+                document.body.appendChild(script);
             } catch (error) {
                 console.error('❌ Supabase init error:', error);
             }
