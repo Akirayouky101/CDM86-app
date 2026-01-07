@@ -775,21 +775,31 @@ Per favore, invia un codice referral a questo utente.`);
                 if (error) throw error;
                 
                 if (data.user) {
-                    showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
-                    
                     // Check user role from metadata
                     const userRole = data.user.user_metadata?.role || data.user.raw_user_meta_data?.role;
+                    
+                    console.log('🔍 Login Debug:', {
+                        email: data.user.email,
+                        userRole: userRole,
+                        metadata: data.user.user_metadata,
+                        raw_metadata: data.user.raw_user_meta_data
+                    });
+                    
+                    showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
                     
                     // Redirect based on user role
                     setTimeout(() => {
                         if (userRole === 'admin') {
                             // Admin login -> admin panel
+                            console.log('➡️ Redirect to admin panel');
                             window.location.href = '/public/admin-panel.html';
                         } else if (userRole === 'organization') {
                             // Organization login -> organization dashboard
+                            console.log('➡️ Redirect to organization dashboard');
                             window.location.href = '/public/organization-dashboard.html';
                         } else {
                             // Normal user -> promotions/dashboard
+                            console.log('➡️ Redirect to promotions (default user)');
                             window.location.href = '/public/promotions.html';
                         }
                     }, 1500);
