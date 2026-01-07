@@ -402,15 +402,8 @@
             justify-content: center;
             font-size: 1.5rem;
             opacity: 0;
-        }
-
-        .network-node.center {
-            animation: pulse 2s ease-in-out infinite;
-            opacity: 1;
-        }
-
-        .network-node.euro {
-            animation: euroPopLoop 3s ease-in-out infinite;
+            animation: nodeAppear 0.5s ease forwards;
+            transition: opacity 1s ease;
         }
 
         .network-line {
@@ -419,36 +412,16 @@
             background: rgba(251,191,36,0.5);
             transform-origin: left center;
             opacity: 0;
+            animation: lineGrow 0.8s ease forwards;
+            transition: opacity 1s ease;
         }
 
-        .network-line.animate {
-            animation: lineLoop 3s ease-in-out infinite;
+        @keyframes nodeAppear {
+            to { opacity: 1; }
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-        }
-
-        @keyframes euroPopLoop {
-            0%, 100% { 
-                opacity: 0; 
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            20%, 80% { 
-                opacity: 1; 
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        @keyframes lineLoop {
-            0%, 100% { 
-                opacity: 0;
-                width: 0;
-            }
-            20%, 80% { 
-                opacity: 1;
-            }
+        @keyframes lineGrow {
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -644,6 +617,7 @@
 
         // Section-specific animations
         let walkingInterval = null;
+        let networkInterval = null;
         
         function triggerSectionAnimation(index) {
             if (index === 1) {
@@ -684,6 +658,38 @@
             if (index === 2) {
                 // Create network visualization
                 createNetworkVisualization();
+                
+                // Start network loop animation
+                if (networkInterval) clearInterval(networkInterval);
+                
+                setTimeout(() => {
+                    const container = document.getElementById('networkViz');
+                    const euroNodes = container.querySelectorAll('.network-node:not(:first-child)');
+                    const lines = container.querySelectorAll('.network-line');
+                    
+                    // Make everything visible first time
+                    euroNodes.forEach(node => node.style.opacity = '1');
+                    lines.forEach(line => line.style.opacity = '1');
+                    
+                    // Start loop: hide and show again
+                    networkInterval = setInterval(() => {
+                        // Fade out
+                        euroNodes.forEach(node => node.style.opacity = '0');
+                        lines.forEach(line => line.style.opacity = '0');
+                        
+                        // Fade in after delay
+                        setTimeout(() => {
+                            euroNodes.forEach(node => node.style.opacity = '1');
+                            lines.forEach(line => line.style.opacity = '1');
+                        }, 1000);
+                    }, 4000); // Loop every 4 seconds
+                }, 1000);
+            } else {
+                // Stop network animation when leaving section 2
+                if (networkInterval) {
+                    clearInterval(networkInterval);
+                    networkInterval = null;
+                }
             }
         }
 
@@ -692,32 +698,30 @@
             const container = document.getElementById('networkViz');
             if (container.children.length > 0) return; // Already created
             
-            // Center node (you) - always visible with pulse
+            // Center node (you)
             const centerNode = document.createElement('div');
-            centerNode.className = 'network-node center';
+            centerNode.className = 'network-node';
             centerNode.innerHTML = '👤';
             centerNode.style.left = '50%';
             centerNode.style.top = '50%';
             centerNode.style.transform = 'translate(-50%, -50%)';
             centerNode.style.background = '#fff';
             centerNode.style.color = '#2563eb';
-            centerNode.style.width = '80px';
-            centerNode.style.height = '80px';
-            centerNode.style.fontSize = '2rem';
+            centerNode.style.animationDelay = '0s';
             container.appendChild(centerNode);
             
-            // Euro nodes with loop animation
+            // Direct referrals
             const positions = [
-                { left: '20%', top: '30%', delay: '0s' },
-                { left: '80%', top: '30%', delay: '0.75s' },
-                { left: '20%', top: '70%', delay: '1.5s' },
-                { left: '80%', top: '70%', delay: '2.25s' }
+                { left: '20%', top: '30%', delay: '0.3s' },
+                { left: '80%', top: '30%', delay: '0.4s' },
+                { left: '20%', top: '70%', delay: '0.5s' },
+                { left: '80%', top: '70%', delay: '0.6s' }
             ];
             
             positions.forEach((pos, i) => {
-                // Node with loop animation
+                // Node
                 const node = document.createElement('div');
-                node.className = 'network-node euro';
+                node.className = 'network-node';
                 node.innerHTML = '€';
                 node.style.left = pos.left;
                 node.style.top = pos.top;
@@ -725,27 +729,27 @@
                 node.style.animationDelay = pos.delay;
                 container.appendChild(node);
                 
-                // Line connecting to center with loop animation
-                const line = document.createElement('div');
-                line.className = 'network-line animate';
-                
-                const centerX = 50;
-                const centerY = 50;
-                const nodeX = parseFloat(pos.left);
-                const nodeY = parseFloat(pos.top);
-                
-                const dx = nodeX - centerX;
-                const dy = nodeY - centerY;
-                const length = Math.sqrt(dx * dx + dy * dy);
-                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                
-                line.style.width = length + '%';
-                line.style.left = centerX + '%';
-                line.style.top = centerY + '%';
-                line.style.transform = `rotate(${angle}deg)`;
-                line.style.animationDelay = pos.delay;
-                
-                container.appendChild(line);
+                // Line connecting to center
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'network-line';
+                    
+                    const centerX = container.offsetWidth / 2;
+                    const centerY = container.offsetHeight / 2;
+                    const nodeX = (parseInt(pos.left) / 100) * container.offsetWidth;
+                    const nodeY = (parseInt(pos.top) / 100) * container.offsetHeight;
+                    
+                    const length = Math.sqrt(Math.pow(nodeX - centerX, 2) + Math.pow(nodeY - centerY, 2));
+                    const angle = Math.atan2(nodeY - centerY, nodeX - centerX) * (180 / Math.PI);
+                    
+                    line.style.width = length + 'px';
+                    line.style.left = centerX + 'px';
+                    line.style.top = centerY + 'px';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    line.style.animationDelay = pos.delay;
+                    
+                    container.appendChild(line);
+                }, parseFloat(pos.delay) * 1000);
             });
         }
 
