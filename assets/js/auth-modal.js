@@ -204,12 +204,18 @@ class AuthModal {
         console.log('🔑 Login selected');
         this.close();
         
-        // Callback personalizzato o redirect default
+        // Callback personalizzato o apri login modal
         if (this.onLogin) {
             this.onLogin();
         } else {
-            // Redirect alla pagina di login
-            window.location.href = '/index.html';
+            // Apri il login modal invece di redirect
+            if (window.LoginModal && window.LoginModal.open) {
+                window.LoginModal.open();
+            } else {
+                console.error('Login modal not available');
+                // Fallback: redirect
+                window.location.href = '/public/promotions.html';
+            }
         }
     }
 
