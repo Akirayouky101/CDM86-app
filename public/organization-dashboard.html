@@ -278,6 +278,31 @@
             opacity: 0.3;
         }
         
+        /* Action Button */
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0);
+        }
+        
         /* Loading */
         .loading {
             text-align: center;
@@ -373,6 +398,20 @@
                 </div>
             </div>
             
+            <!-- Organization Custom Page -->
+            <div class="card">
+                <h2><i class="fas fa-paint-brush"></i> Pagina Aziendale Personalizzata</h2>
+                <div id="page-status">
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Crea una pagina di presentazione personalizzata per la tua azienda con il nostro page builder visuale.
+                    </p>
+                    <button class="action-btn" onclick="openPageBuilder()">
+                        <i class="fas fa-plus"></i> Crea/Modifica Pagina
+                    </button>
+                    <div id="page-info" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+            
             <!-- Employees List -->
             <div class="card">
                 <h2><i class="fas fa-users"></i> Dipendenti/Membri Registrati</h2>
@@ -442,6 +481,7 @@
                 displayReferralCode(orgData.referral_code);
                 generateQRCode(orgData.referral_code);
                 displayEmployees(employees || []);
+                loadPageStatus(); // Load custom page status
                 
                 // Show dashboard
                 document.getElementById('loading').style.display = 'none';
@@ -589,6 +629,76 @@
                     btn.innerHTML = originalText;
                 }, 2000);
             });
+        }
+        
+        async function loadPageStatus() {
+            if (!currentOrg) return;
+
+            try {
+                const { data: page, error } = await supabase
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', currentOrg.id)
+                    .maybeSingle();
+
+                const pageInfo = document.getElementById('page-info');
+
+                if (page) {
+                    const statusBadge = page.status === 'published' 
+                        ? '<span style="color: #10b981; font-weight: 600;">✅ Pubblicata</span>'
+                        : '<span style="color: #f59e0b; font-weight: 600;">📝 Bozza</span>';
+                    
+                    const lastUpdate = new Date(page.updated_at).toLocaleDateString('it-IT', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    pageInfo.innerHTML = `
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                <div>
+                                    <h4 style="margin: 0 0 5px 0; color: #333;">${page.page_title || 'Pagina senza titolo'}</h4>
+                                    <p style="margin: 0; color: #666; font-size: 14px;">Stato: ${statusBadge}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; color: #999; font-size: 12px;">Visualizzazioni</p>
+                                    <p style="margin: 0; font-size: 24px; font-weight: 700; color: #667eea;">${page.views_count || 0}</p>
+                                </div>
+                            </div>
+                            <p style="margin: 10px 0 0 0; color: #999; font-size: 13px;">
+                                Ultimo aggiornamento: ${lastUpdate}
+                            </p>
+                            ${page.status === 'published' ? `
+                                <a href="/public/azienda.html?slug=${page.slug}" target="_blank" 
+                                   style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                                    <i class="fas fa-eye"></i> Visualizza Pagina Pubblica
+                                </a>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    pageInfo.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <i class="fas fa-info-circle" style="font-size: 32px; color: #f59e0b; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; color: #92400e; font-weight: 600;">
+                                Non hai ancora creato una pagina aziendale
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #78350f;">
+                                Usa il page builder per creare una pagina di presentazione personalizzata
+                            </p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading page status:', error);
+            }
+        }
+
+        function openPageBuilder() {
+            window.location.href = '/public/page-builder.html';
         }
         
         async function logout() {

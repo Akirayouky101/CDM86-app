@@ -930,40 +930,144 @@
             window.open('page-preview.html', '_blank');
         }
 
-        function saveDraft() {
-            const pageData = {
-                sections: sections,
-                style: currentStyle,
-                savedAt: new Date().toISOString()
-            };
-            
-            localStorage.setItem('pageDraft', JSON.stringify(pageData));
-            alert('✅ Bozza salvata con successo!');
+        async function saveDraft() {
+            if (sections.length === 0) {
+                alert('⚠️ Aggiungi almeno una sezione prima di salvare!');
+                return;
+            }
+
+            const pageTitle = prompt('Titolo della pagina:', 'La mia pagina aziendale') || 'Pagina Aziendale';
+            const pageDescription = prompt('Descrizione (per SEO):', '') || '';
+
+            await savePageToDatabase('draft', pageTitle, pageDescription);
         }
 
-        function publishPage() {
+        async function publishPage() {
             if (sections.length === 0) {
                 alert('⚠️ Aggiungi almeno una sezione prima di pubblicare!');
                 return;
             }
             
-            const pageData = {
-                sections: sections,
-                style: currentStyle
-            };
-            
-            // Save to localStorage for now (you can implement backend save later)
-            localStorage.setItem('publishedPage', JSON.stringify(pageData));
-            
-            if (confirm('✅ Pagina pubblicata!\n\nVuoi aprirla in una nuova tab?')) {
-                window.open('lapiattaforma.html', '_blank');
+            const pageTitle = prompt('Titolo della pagina:', 'La mia pagina aziendale') || 'Pagina Aziendale';
+            const pageDescription = prompt('Descrizione (per SEO):', '') || '';
+
+            await savePageToDatabase('published', pageTitle, pageDescription);
+        }
+
+        async function savePageToDatabase(status, pageTitle, pageDescription) {
+            try {
+                // Get current session
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (!session) {
+                    alert('❌ Devi essere autenticato per salvare la pagina!');
+                    window.location.href = '/public/organization-dashboard.html';
+                    return;
+                }
+
+                const pageData = {
+                    page_data: {
+                        sections: sections,
+                        style: currentStyle
+                    },
+                    page_title: pageTitle,
+                    page_description: pageDescription,
+                    status: status
+                };
+
+                const response = await fetch(
+                    `${window.SUPABASE_URL}/functions/v1/save-organization-page`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${session.access_token}`,
+                            'apikey': window.SUPABASE_ANON_KEY,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(pageData)
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Errore nel salvataggio');
+                }
+
+                if (status === 'draft') {
+                    alert('✅ Bozza salvata con successo!');
+                } else {
+                    const viewPage = confirm(
+                        `✅ Pagina pubblicata con successo!\n\n` +
+                        `URL: /public/azienda.html?slug=${result.page.slug}\n\n` +
+                        `Vuoi visualizzarla ora?`
+                    );
+                    
+                    if (viewPage) {
+                        window.open(`/public/azienda.html?slug=${result.page.slug}`, '_blank');
+                    }
+                }
+
+                // Save to localStorage as backup
+                localStorage.setItem('pageDraft', JSON.stringify({
+                    sections: sections,
+                    style: currentStyle,
+                    savedAt: new Date().toISOString()
+                }));
+
+            } catch (error) {
+                console.error('Error saving page:', error);
+                alert('❌ Errore: ' + error.message);
+                
+                // Fallback to localStorage
+                localStorage.setItem('pageDraft', JSON.stringify({
+                    sections: sections,
+                    style: currentStyle,
+                    savedAt: new Date().toISOString()
+                }));
+                alert('⚠️ Salvato solo in locale. Verifica la connessione.');
             }
         }
 
         // Load draft on init
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            // Try to load from database first
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    // Get organization ID
+                    const { data: org } = await supabase
+                        .from('organizations')
+                        .select('id')
+                        .eq('user_id', session.user.id)
+                        .single();
+
+                    if (org) {
+                        // Load existing page
+                        const { data: page } = await supabase
+                            .from('organization_pages')
+                            .select('*')
+                            .eq('organization_id', org.id)
+                            .maybeSingle();
+
+                        if (page && page.page_data) {
+                            if (confirm('📄 Trovata una pagina esistente. Vuoi caricarla?')) {
+                                sections = page.page_data.sections || [];
+                                currentStyle = page.page_data.style || 'modern';
+                                rerenderCanvas();
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading page from database:', error);
+            }
+
+            // Fallback: load from localStorage
             const draft = localStorage.getItem('pageDraft');
-            if (draft && confirm('📄 Trovata una bozza salvata. Vuoi caricarla?')) {
+            if (draft && confirm('📄 Trovata una bozza salvata in locale. Vuoi caricarla?')) {
                 const data = JSON.parse(draft);
                 sections = data.sections;
                 currentStyle = data.style;
