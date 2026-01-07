@@ -851,11 +851,23 @@
                 </div>
             </div>
 
+            <!-- Add Organization Button -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-building"></i> Gestione Aziende
+                    </h2>
+                    <button class="btn btn-primary" onclick="openAddOrganizationModal()">
+                        <i class="fas fa-plus"></i> Aggiungi Azienda
+                    </button>
+                </div>
+            </div>
+
             <!-- Requests Card -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-building"></i> Richieste Aziende (<span id="countOrgRequests">0</span>)
+                        <i class="fas fa-envelope"></i> Richieste Aziende (<span id="countOrgRequests">0</span>)
                     </h2>
                     <button class="btn btn-secondary btn-sm" onclick="loadOrgRequests()">
                         <i class="fas fa-sync-alt"></i> Aggiorna
@@ -1460,6 +1472,207 @@
         </div>
     </div>
 
+    <!-- ADD ORGANIZATION MODAL -->
+    <div id="addOrganizationModal" class="modal">
+        <div class="modal-dialog">
+            <form onsubmit="handleCreateOrganization(event)">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fas fa-building"></i> Aggiungi Nuova Azienda
+                    </h3>
+                    <button type="button" class="modal-close" onclick="closeModal('addOrganizationModal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden field for organization type (always company) -->
+                    <input type="hidden" id="orgType" value="company">
+
+                    <!-- Basic Info -->
+                    <div class="form-group">
+                        <label for="orgName">Nome Azienda *</label>
+                        <input type="text" id="orgName" required placeholder="Es: CDM86 SRL">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgEmail">Email *</label>
+                        <input type="email" id="orgEmail" required placeholder="info@azienda.com">
+                    </div>
+
+                    <!-- Fiscal Data -->
+                    <div class="form-group">
+                        <label for="orgVatNumber">Partita IVA *</label>
+                        <input type="text" id="orgVatNumber" required placeholder="12345678901" maxlength="11">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgTaxCode">Codice Fiscale (opzionale)</label>
+                        <input type="text" id="orgTaxCode" placeholder="RSSMRA80A01H501U" maxlength="16">
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group">
+                        <label for="orgAddress">Indirizzo</label>
+                        <input type="text" id="orgAddress" placeholder="Via Roma 123">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgCity">Città</label>
+                        <input type="text" id="orgCity" placeholder="Milano">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgProvince">Provincia</label>
+                        <input type="text" id="orgProvince" placeholder="MI" maxlength="2">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgZipCode">CAP</label>
+                        <input type="text" id="orgZipCode" placeholder="20100" maxlength="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orgPhone">Telefono</label>
+                        <input type="tel" id="orgPhone" placeholder="+39 02 12345678">
+                    </div>
+
+                    <!-- Referral Source -->
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="fromReferral" onchange="toggleReferralSelect()">
+                            Questa azienda proviene da segnalazione utente
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="referralSelectGroup" style="display: none;">
+                        <label for="referralRequest">Seleziona Richiesta</label>
+                        <select id="referralRequest">
+                            <option value="">Caricamento...</option>
+                        </select>
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                            Seleziona la richiesta da completare. L'utente che ha segnalato riceverà i punti.
+                        </small>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle alert-icon"></i>
+                        <div>
+                            <strong>ℹ️ Generazione Automatica</strong><br>
+                            Il sistema genererà automaticamente:
+                            <ul style="margin: 0.5rem 0 0 1.5rem; padding-left: 0;">
+                                <li>Codice Contratto (es: ORG001)</li>
+                                <li>Codice Referral Dipendenti</li>
+                                <li>Codice Referral Esterni</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addOrganizationModal')">Annulla</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crea Azienda
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ORGANIZATION SUCCESS MODAL -->
+    <div id="organizationSuccessModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i> Azienda Creata!
+                </h3>
+                <button class="modal-close" onclick="closeModal('organizationSuccessModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert" style="background: #d1fae5; border-left: 4px solid var(--secondary); color: #065f46;">
+                    <i class="fas fa-check-circle alert-icon" style="color: var(--secondary);"></i>
+                    <div>
+                        <strong>✅ Azienda registrata con successo!</strong>
+                    </div>
+                </div>
+
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                    <h4 style="font-size: 1rem; margin-bottom: 1rem; color: var(--gray-700);">
+                        <i class="fas fa-info-circle"></i> Informazioni Azienda
+                    </h4>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.875rem; color: var(--gray-600); display: block; margin-bottom: 0.25rem;">
+                            <i class="fas fa-file-contract"></i> Codice Contratto
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="text" id="generatedContractCode" readonly style="font-size: 1.5rem; font-weight: 700; color: var(--primary); border: 2px solid var(--gray-300); background: white;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="copyContractCode()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.875rem; color: var(--gray-600); display: block; margin-bottom: 0.25rem;">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <div id="generatedOrgEmail" style="font-size: 1rem; color: var(--gray-800);"></div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.875rem; color: var(--gray-600); display: block; margin-bottom: 0.25rem;">
+                            <i class="fas fa-users"></i> Codice Dipendenti
+                        </label>
+                        <div id="generatedEmployeeCode" style="font-family: monospace; font-size: 1.125rem; font-weight: 600;"></div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.875rem; color: var(--gray-600); display: block; margin-bottom: 0.25rem;">
+                            <i class="fas fa-globe"></i> Codice Esterni
+                        </label>
+                        <div id="generatedExternalCode" style="font-family: monospace; font-size: 1.125rem; font-weight: 600;"></div>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 12px; margin-top: 1rem; color: white;">
+                    <h4 style="font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-key"></i> Credenziali di Accesso
+                    </h4>
+                    
+                    <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                        <label style="font-size: 0.75rem; opacity: 0.9; display: block; margin-bottom: 0.25rem;">
+                            Email Login
+                        </label>
+                        <div id="generatedLoginEmail" style="font-size: 1rem; font-weight: 600;"></div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px;">
+                        <label style="font-size: 0.75rem; opacity: 0.9; display: block; margin-bottom: 0.25rem;">
+                            Password
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div id="generatedPassword" style="font-family: monospace; font-size: 1.125rem; font-weight: 700; flex: 1;"></div>
+                            <button type="button" class="btn btn-sm" onclick="copyPassword()" style="background: rgba(255,255,255,0.3); border: none; color: white;">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.875rem;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Importante:</strong> Comunicare queste credenziali all'azienda. La password non sarà più visibile dopo la chiusura di questa finestra.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="printContract()">
+                    <i class="fas fa-print"></i> Stampa Proforma
+                </button>
+                <button class="btn btn-primary" onclick="closeModal('organizationSuccessModal'); location.reload();">
+                    <i class="fas fa-check"></i> Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Contract Modal -->
     <div id="createContractModal" class="modal">
         <div class="modal-content">
@@ -1923,6 +2136,282 @@
                 console.error('Error:', error);
                 alert('❌ Errore: ' + error.message);
             }
+        };
+
+        // ========================================
+        // ADD ORGANIZATION FUNCTIONS
+        // ========================================
+
+        window.openAddOrganizationModal = async function() {
+            openModal('addOrganizationModal');
+            await loadPendingRequests();
+        };
+
+        // Toggle referral select
+        window.toggleReferralSelect = function() {
+            const checkbox = document.getElementById('fromReferral');
+            const selectGroup = document.getElementById('referralSelectGroup');
+            selectGroup.style.display = checkbox.checked ? 'block' : 'none';
+        };
+
+        // Load pending requests for dropdown
+        async function loadPendingRequests() {
+            try {
+                const { data, error } = await supabase
+                    .from('admin_organization_requests')
+                    .select('*')
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const select = document.getElementById('referralRequest');
+                select.innerHTML = '<option value="">Seleziona richiesta...</option>';
+
+                if (data && data.length > 0) {
+                    data.forEach(req => {
+                        const option = document.createElement('option');
+                        option.value = req.id;
+                        option.textContent = `${req.organization_name} - ${req.contact_email} (da ${req.referred_by_name || 'Utente'})`;
+                        option.dataset.referredById = req.referred_by_id;
+                        option.dataset.referredByCode = req.referred_by_code;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">Nessuna richiesta pending</option>';
+                }
+            } catch (error) {
+                console.error('Error loading requests:', error);
+            }
+        }
+
+        // Generate unique referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Get next contract code
+        async function getNextContractCode() {
+            try {
+                const { data, error } = await supabase
+                    .from('organizations')
+                    .select('id')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (error) throw error;
+
+                const count = data ? data.length : 0;
+                const nextNumber = count + 1;
+                return `ORG${String(nextNumber).padStart(3, '0')}`;
+            } catch (error) {
+                console.error('Error getting next contract code:', error);
+                return `ORG${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+            }
+        }
+
+        // Generate random password
+        function generatePassword(length = 12) {
+            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+            const numbers = '0123456789';
+            const symbols = '!@#$%&*';
+            const allChars = uppercase + lowercase + numbers + symbols;
+            
+            let password = '';
+            // Ensure at least one of each type
+            password += uppercase[Math.floor(Math.random() * uppercase.length)];
+            password += lowercase[Math.floor(Math.random() * lowercase.length)];
+            password += numbers[Math.floor(Math.random() * numbers.length)];
+            password += symbols[Math.floor(Math.random() * symbols.length)];
+            
+            // Fill the rest randomly
+            for (let i = password.length; i < length; i++) {
+                password += allChars[Math.floor(Math.random() * allChars.length)];
+            }
+            
+            // Shuffle the password
+            return password.split('').sort(() => Math.random() - 0.5).join('');
+        }
+
+        // Handle create organization
+        window.handleCreateOrganization = async function(event) {
+            event.preventDefault();
+
+            const type = 'company'; // Always company in this section
+            const name = document.getElementById('orgName').value;
+            const email = document.getElementById('orgEmail').value;
+            const vatNumber = document.getElementById('orgVatNumber').value;
+            const taxCode = document.getElementById('orgTaxCode').value;
+            const address = document.getElementById('orgAddress').value;
+            const city = document.getElementById('orgCity').value;
+            const province = document.getElementById('orgProvince').value;
+            const zipCode = document.getElementById('orgZipCode').value;
+            const phone = document.getElementById('orgPhone').value;
+            const fromReferral = document.getElementById('fromReferral').checked;
+
+            // Get current admin user
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (!currentUser) {
+                alert('❌ Utente non autenticato');
+                return;
+            }
+
+            let referredById = currentUser.id; // Default: admin corrente
+            let referredByCode = null;
+            let requestId = null;
+
+            // Se proviene da segnalazione, prendi i dati del referral
+            if (fromReferral) {
+                const select = document.getElementById('referralRequest');
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    requestId = selectedOption.value;
+                    referredById = selectedOption.dataset.referredById;
+                    referredByCode = selectedOption.dataset.referredByCode;
+                }
+            }
+
+            try {
+                // Generate codes
+                const referralCode = generateReferralCode();
+                const referralCodeExternal = `${referralCode}_EXT`;
+                const contractCode = await getNextContractCode();
+                const generatedPassword = generatePassword();
+
+                // Create organization
+                const { data: org, error: orgError } = await supabase
+                    .from('organizations')
+                    .insert({
+                        organization_type: type,
+                        name: name,
+                        email: email,
+                        vat_number: vatNumber || null,
+                        tax_code: taxCode || null,
+                        address: address || null,
+                        city: city || null,
+                        province: province ? province.toUpperCase() : null,
+                        zip_code: zipCode || null,
+                        phone: phone || null,
+                        referral_code: referralCode,
+                        referral_code_external: referralCodeExternal,
+                        referred_by_id: referredById,
+                        points: 0,
+                        total_points: 0,
+                        active: true
+                    })
+                    .select()
+                    .single();
+
+                if (orgError) throw orgError;
+
+                // Crea utente auth tramite Edge Function
+                try {
+                    const { data: session } = await supabase.auth.getSession();
+                    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-organization-user`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${session.session.access_token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: generatedPassword,
+                            organizationId: org.id,
+                            organizationName: name,
+                            organizationType: type
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (!result.success) {
+                        console.error('Error creating auth user:', result.error);
+                        // Continua comunque, l'admin può creare l'utente manualmente
+                    }
+                } catch (authError) {
+                    console.error('Error calling create-organization-user function:', authError);
+                    // Continua comunque, mostriamo le credenziali all'admin
+                }
+
+                // If from referral, update request status to completed
+                if (requestId) {
+                    const { error: updateError } = await supabase
+                        .from('organization_requests')
+                        .update({
+                            status: 'completed',
+                            contract_code: contractCode,
+                            completed_at: new Date().toISOString()
+                        })
+                        .eq('id', requestId);
+
+                    if (updateError) console.error('Error updating request:', updateError);
+
+                    // Award points to user who referred
+                    if (referredById) {
+                        const REFERRAL_POINTS = 50; // Configurable
+                        const { error: pointsError } = await supabase
+                            .from('users')
+                            .update({
+                                points: supabase.sql`points + ${REFERRAL_POINTS}`,
+                                total_points_earned: supabase.sql`total_points_earned + ${REFERRAL_POINTS}`
+                            })
+                            .eq('id', referredById);
+
+                        if (pointsError) console.error('Error awarding points:', pointsError);
+                    }
+                }
+
+                // Close form modal
+                closeModal('addOrganizationModal');
+
+                // Show success modal with generated codes
+                document.getElementById('generatedContractCode').value = contractCode;
+                document.getElementById('generatedOrgEmail').textContent = email;
+                document.getElementById('generatedEmployeeCode').textContent = referralCode;
+                document.getElementById('generatedExternalCode').textContent = referralCodeExternal;
+                document.getElementById('generatedLoginEmail').textContent = email;
+                document.getElementById('generatedPassword').textContent = generatedPassword;
+                
+                openModal('organizationSuccessModal');
+
+                // Reset form
+                event.target.reset();
+                document.getElementById('fromReferral').checked = false;
+                document.getElementById('referralSelectGroup').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error creating organization:', error);
+                alert('❌ Errore durante la creazione dell\'azienda: ' + error.message);
+            }
+        };
+
+        // Copy contract code
+        window.copyContractCode = function() {
+            const input = document.getElementById('generatedContractCode');
+            input.select();
+            document.execCommand('copy');
+            alert('✅ Codice contratto copiato negli appunti!');
+        };
+
+        // Copy password
+        window.copyPassword = function() {
+            const password = document.getElementById('generatedPassword').textContent;
+            navigator.clipboard.writeText(password).then(() => {
+                alert('✅ Password copiata negli appunti!');
+            }).catch(err => {
+                console.error('Error copying password:', err);
+                alert('❌ Errore durante la copia della password');
+            });
+        };
+
+        // Print contract (placeholder)
+        window.printContract = function() {
+            window.print();
         };
 
         // ========================================

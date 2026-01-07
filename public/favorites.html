@@ -450,14 +450,30 @@
                 
                 closeRemoveModal();
                 
-                // Reload favorites
-                await loadFavorites();
+                // Show removed modal
+                showFavoriteRemovedModal();
+                
+                // Reload favorites after modal
+                setTimeout(async () => {
+                    await loadFavorites();
+                }, 2000);
                 
             } catch (error) {
                 console.error('Error removing favorite:', error);
                 alert('Errore nella rimozione');
             }
         };
+        
+        // Show removed confirmation modal
+        function showFavoriteRemovedModal() {
+            const modal = document.getElementById('favoriteRemovedModal');
+            modal.classList.add('show');
+            
+            // Auto close after 2 seconds
+            setTimeout(() => {
+                modal.classList.remove('show');
+            }, 2000);
+        }
         
         // View promotion
         window.viewPromotion = function(promotionId) {
@@ -543,5 +559,59 @@
             }
         });
     </script>
+    
+    <!-- Favorite Removed Confirmation Modal -->
+    <div id="favoriteRemovedModal" class="favorite-modal">
+        <div class="favorite-modal-content">
+            <div>
+                <i class="fas fa-heart-broken" style="color: #6b7280; font-size: 48px;"></i>
+            </div>
+            <p>Rimosso dai preferiti</p>
+        </div>
+    </div>
+    
+    <style>
+        .favorite-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .favorite-modal.show {
+            display: block;
+            opacity: 1;
+            animation: modalBounce 0.5s ease;
+        }
+        
+        @keyframes modalBounce {
+            0% { transform: translate(-50%, -50%) scale(0.5); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .favorite-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .favorite-modal-content p {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+    </style>
 </body>
 </html>

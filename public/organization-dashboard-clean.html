@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CDM86 - Dashboard Organizzazione</title>
+
+        
+
+    <!-- Font Awesome -->    <!-- Font Awesome -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        
+
+    <style>    <style>
+
+        * {        * {
+
+            margin: 0;            margin: 0;
+
+            padding: 0;            padding: 0;
+
+box-sizing: border-box;
+
+        }        }
+
+                
+
+        body {        body {
+
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+background: #f5f7fa;
+
+min-height: 100vh;
+
+            padding: 20px;        }
+
+        }        
+
+                /* Navbar */
+
+        /* Top Bar */        .top-nav {
+
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+color: white;
+
+padding: 16px 20px;
+
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+position: sticky;
+
+top: 0;
+
+z-index: 100;
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+        }        }
+
+                
+
+        .logo-section {        .nav-brand {
+
+font-size: 24px;
+
+font-weight: 800;
+
+            gap: 15px;        }
+
+        }        
+
+                .nav-actions {
+
+        .logo-icon {            display: flex;
+
+            font-size: 32px;            gap: 15px;
+
+align-items: center;
+
+}
+
+-webkit-text-fill-color: transparent;
+
+        }        .nav-btn {
+
+background: rgba(255,255,255,0.2);
+
+        .logo-text h1 {            border: none;
+
+color: white;
+
+padding: 10px 20px;
+
+        }            border-radius: 8px;
+
+                    cursor: pointer;
+
+transition: all 0.3s;
+
+font-size: 14px;
+
+font-weight: 600;
+
+            margin-top: 2px;        }
+
+        }        
+
+                .nav-btn:hover {
+
+background: rgba(255,255,255,0.3);
+
+            display: flex;        }
+
+            align-items: center;        
+
+            gap: 20px;        /* Container */
+
+        }        .container {
+
+                    max-width: 1200px;
+
+        .org-badge {            margin: 30px auto;
+
+padding: 0 20px;
+
+            color: white;        }
+
+            padding: 8px 20px;        
+
+/* Cards */
+
+            font-weight: 600;        .card {
+
+background: white;
+
+border-radius: 16px;
+
+            gap: 8px;            padding: 30px;
+
+        }            margin-bottom: 25px;
+
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+        .logout-btn {        }
+
+            background: #ef4444;        
+
+            color: white;        .card h2 {
+
+color: #667eea;
+
+font-size: 24px;
+
+margin-bottom: 20px;
+
+display: flex;
+
+align-items: center;
+
+gap: 10px;
+
+        }        }
+
+                
+
+        .logout-btn:hover {        .card h3 {
+
+color: #333;
+
+font-size: 18px;
+
+        }            margin-bottom: 15px;
+
+                }
+
+        /* Main Container */        
+
+        .container {        /* Stats Grid */
+
+.stats-grid {
+
+display: grid;
+
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+                    gap: 20px;
+
+margin-bottom: 30px;
+
+        .stats-grid {        }
+
+            display: grid;        
+
+.stat-card {
+
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+color: white;
+
+        }            padding: 25px;
+
+                    border-radius: 12px;
+
+text-align: center;
+
+            background: white;        }
+
+            padding: 25px;        
+
+.stat-value {
+
+font-size: 36px;
+
+font-weight: 800;
+
+margin-bottom: 8px;
+
+            overflow: hidden;        }
+
+        }        
+
+                .stat-label {
+
+font-size: 14px;
+
+            content: '';            opacity: 0.9;
+
+            position: absolute;        }
+
+            top: 0;        
+
+/* Organization Info */
+
+            right: 0;        .org-info {
+
+            height: 4px;            display: grid;
+
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+        }            gap: 20px;
+
+                    margin-bottom: 30px;
+
+        .stat-card:hover {        }
+
+            transform: translateY(-5px);        
+
+.info-item {
+
+        }            display: flex;
+
+                    align-items: flex-start;
+
+        .stat-icon {            gap: 12px;
+
+            font-size: 36px;        }
+
+            margin-bottom: 15px;        
+
+.info-icon {
+
+color: #667eea;
+
+font-size: 20px;
+
+        }            margin-top: 2px;
+
+                }
+
+        .stat-label {        
+
+.info-content {
+
+            color: #718096;            flex: 1;
+
+            text-transform: uppercase;        }
+
+            font-weight: 600;        
+
+.info-label {
+
+font-size: 12px;
+
+        }            color: #999;
+
+                    margin-bottom: 4px;
+
+        .stat-value {        }
+
+            font-size: 32px;        
+
+            font-weight: 800;        .info-value {
+
+font-size: 16px;
+
+        }            color: #333;
+
+                    font-weight: 600;
+
+        .stat-change {        }
+
+            font-size: 12px;        
+
+/* Referral Section */
+
+.referral-code-box {
+
+background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+
+            gap: 5px;            padding: 25px;
+
+        }            border-radius: 12px;
+
+                    text-align: center;
+
+margin-bottom: 25px;
+
+            color: #10b981;        }
+
+        }        
+
+                .referral-code-large {
+
+font-size: 42px;
+
+font-weight: 800;
+
+        }            color: #667eea;
+
+                    letter-spacing: 4px;
+
+margin: 15px 0;
+
+        .referral-section {        }
+
+            background: white;        
+
+            padding: 30px;        .copy-btn {
+
+background: #667eea;
+
+color: white;
+
+border: none;
+
+        }            padding: 12px 30px;
+
+                    border-radius: 8px;
+
+cursor: pointer;
+
+font-size: 14px;
+
+font-weight: 600;
+
+margin-top: 10px;
+
+transition: all 0.3s;
+
+        }        }
+
+                
+
+        .section-title {        .copy-btn:hover {
+
+background: #5568d3;
+
+transform: translateY(-2px);
+
+            color: #2d3748;        }
+
+            display: flex;        
+
+/* QR Code */
+
+            gap: 10px;        .qr-container {
+
+        }            text-align: center;
+
+                    padding: 25px;
+
+background: #f9f9f9;
+
+border-radius: 12px;
+
+        }        }
+
+                
+
+        .codes-grid {        #qr-canvas {
+
+display: inline-block;
+
+padding: 15px;
+
+background: white;
+
+        }            border-radius: 8px;
+
+                }
+
+        .code-card {        
+
+/* Employees List */
+
+.employees-list {
+
+list-style: none;
+
+            border: 2px dashed #cbd5e0;        }
+
+            position: relative;        
+
+        }        .employee-item {
+
+                    display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+padding: 18px;
+
+background: #f9f9f9;
+
+border-radius: 12px;
+
+margin-bottom: 12px;
+
+transition: all 0.3s;
+
+            align-items: center;        }
+
+            gap: 8px;        
+
+        }        .employee-item:hover {
+
+                    background: #f0f0f0;
+
+transform: translateX(5px);
+
+            color: #667eea;        }
+
+        }        
+
+                .employee-info {
+
+display: flex;
+
+align-items: center;
+
+        }            gap: 15px;
+
+                }
+
+        .code-value {        
+
+.employee-avatar {
+
+width: 50px;
+
+height: 50px;
+
+border-radius: 50%;
+
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+color: white;
+
+display: flex;
+
+align-items: center;
+
+        }            justify-content: center;
+
+                    font-weight: 600;
+
+        .copy-btn {            font-size: 18px;
+
+}
+
+            color: white;        
+
+.employee-details {
+
+            padding: 8px 16px;            flex: 1;
+
+            border-radius: 8px;        }
+
+            cursor: pointer;        
+
+.employee-name {
+
+font-weight: 600;
+
+color: #333;
+
+margin-bottom: 4px;
+
+            align-items: center;        }
+
+            gap: 8px;        
+
+        }        .employee-email {
+
+                    font-size: 14px;
+
+        .copy-btn:hover {            color: #999;
+
+            transform: scale(1.05);        }
+
+box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+        }        .employee-date {
+
+                    font-size: 12px;
+
+color: #999;
+
+            font-size: 13px;        }
+
+            color: #718096;        
+
+.empty-state {
+
+        }            text-align: center;
+
+                    padding: 60px 20px;
+
+        /* Tabs */            color: #999;
+
+        .tabs-container {        }
+
+            background: white;        
+
+.empty-state i {
+
+font-size: 64px;
+
+margin-bottom: 20px;
+
+        }            opacity: 0.3;
+
+                }
+
+        .tabs-header {        
+
+            display: flex;        /* Loading */
+
+            background: #f7fafc;        .loading {
+
+text-align: center;
+
+        }            padding: 60px;
+
+                }
+
+        .tab-btn {        
+
+            flex: 1;        .spinner {
+
+border: 4px solid #f3f3f3;
+
+border-top: 4px solid #667eea;
+
+border-radius: 50%;
+
+width: 50px;
+
+height: 50px;
+
+animation: spin 1s linear infinite;
+
+margin: 0 auto 20px;
+
+            position: relative;        }
+
+            display: flex;        
+
+@keyframes spin {
+
+0% { transform: rotate(0deg); }
+
+100% { transform: rotate(360deg); }
+
+        }        }
+
+                
+
+        .tab-btn i {        /* Utility Classes */
+
+            font-size: 18px;        .hidden {
+
+        }            display: none !important;
+
+                }
+
+        .tab-btn.active {        
+
+            color: #667eea;        .qr-title {
+
+text-align: center;
+
+        }            margin-top: 30px;
+
+                    margin-bottom: 20px;
+
+        .tab-btn.active::after {        }
+
+            content: '';        
+
+.qr-subtitle {
+
+margin-top: 15px;
+
+            left: 0;            color: #666;
+
+            right: 0;        }
+
+            height: 3px;        
+
+.margin-top-10 {
+
+        }            margin-top: 10px;
+
+                }
+
+        .tab-badge {        
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+.stats-grid {
+
+grid-template-columns: 1fr;
+
+            font-size: 12px;            }
+
+            font-weight: 700;            
+
+        }            .org-info {
+
+grid-template-columns: 1fr;
+
+        .tab-content {            }
+
+            display: none;            
+
+.referral-code-large {
+
+        }                font-size: 32px;
+
+                    }
+
+        .tab-content.active {        }
+
+            display: block;    </style>
+
+            animation: fadeIn 0.3s ease-in;</head>
+
+        }<body>
+
+            <!-- Top Navigation -->
+
+<nav class="top-nav">
+
+<div class="nav-brand">
+
+🏢 CDM86 - Dashboard Organizzazione
+
+        }        </div>
+
+                <div class="nav-actions">
+
+<button class="nav-btn" onclick="logout()">
+
+<i class="fas fa-sign-out-alt"></i> Logout
+
+            display: grid;            </button>
+
+            gap: 15px;        </div>
+
+        }    </nav>
+
+            
+
+        .user-card {    <div class="container">
+
+<div id="loading" class="loading">
+
+<div class="spinner"></div>
+
+<p>Caricamento dashboard...</p>
+
+            display: flex;        </div>
+
+            align-items: center;        
+
+<div id="dashboard" class="hidden">
+
+<!-- Organization Info Card -->
+
+<div class="card">
+
+<h2><i class="fas fa-building"></i> Informazioni Organizzazione</h2>
+
+<div class="org-info" id="org-info">
+
+<!-- Populated by JS -->
+
+</div>
+
+</div>
+
+border-left-color: #667eea;
+
+        }            <!-- Stats -->
+
+                    <div class="stats-grid">
+
+<div class="stat-card">
+
+<div class="stat-value" id="employees-count">0</div>
+
+<div class="stat-label">Dipendenti/Membri</div>
+
+            gap: 15px;                </div>
+
+        }                <div class="stat-card">
+
+<div class="stat-value" id="points-count">0</div>
+
+<div class="stat-label">Punti Totali</div>
+
+            width: 50px;                </div>
+
+            height: 50px;            </div>
+
+            border-radius: 50%;            
+
+<!-- Referral Code -->
+
+<div class="card">
+
+<h2><i class="fas fa-qrcode"></i> Codice Referral</h2>
+
+<div class="referral-code-box">
+
+<p>Condividi questo codice con i tuoi dipendenti/membri</p>
+
+<div class="referral-code-large" id="referral-code">ORG0000</div>
+
+<button class="copy-btn" onclick="copyReferralCode()">
+
+<i class="fas fa-copy"></i> Copia Codice
+
+                            </button>
+
+        .user-details h4 {                </div>
+
+            font-size: 16px;                
+
+<h3 class="qr-title">QR Code per Registrazione</h3>
+
+<div class="qr-container">
+
+<div id="qr-canvas"></div>
+
+<p class="qr-subtitle">Scansiona per registrarti automaticamente</p>
+
+        .user-details p {                </div>
+
+            font-size: 13px;            </div>
+
+            color: #718096;            
+
+        }            <!-- Employees List -->
+
+                    <div class="card">
+
+<h2><i class="fas fa-users"></i> Dipendenti/Membri Registrati</h2>
+
+<ul class="employees-list" id="employees-list">
+
+<!-- Populated by JS -->
+
+            gap: 20px;                </ul>
+
+        }            </div>
+
+                </div>
+
+        .user-points {    </div>
+
+            text-align: right;    
+
+        }    <!-- QRCode.js Library -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+        .points-value {    
+
+<script type="module">
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+            color: #667eea;        
+
+const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+            font-size: 11px;        
+
+let currentOrg = null;
+
+            text-transform: uppercase;        
+
+        }        // Make functions global
+
+                window.logout = logout;
+
+window.copyReferralCode = copyReferralCode;
+
+            padding: 6px 14px;        
+
+// Check authentication and load data
+
+async function init() {
+
+            font-weight: 600;            try {
+
+const { data: { session } } = await supabase.auth.getSession();
+
+                        
+
+if (!session) {
+
+window.location.href = '/index.html';
+
+return;
+
+        }                }
+
+                        
+
+// Get organization data
+
+const { data: orgData, error: orgError } = await supabase
+
+.from('organizations')
+
+        }                    .select('*')
+
+.eq('id', session.user.id)
+
+.single();
+
+        .benefits-grid {                
+
+if (orgError || !orgData) {
+
+alert('Errore: account organizzazione non trovato');
+
+window.location.href = '/index.html';
+
+        }                    return;
+
+                        }
+
+        .benefit-card {                
+
+currentOrg = orgData;
+
+border: 2px solid #e2e8f0;
+
+// Load employees
+
+const { data: employees, error: empError } = await supabase
+
+.from('users')
+
+.select('*')
+
+.eq('organization_id', orgData.id)
+
+.order('created_at', { ascending: false });
+
+        .benefit-card:hover {                
+
+if (empError) {
+
+console.error('Error loading employees:', empError);
+
+}
+
+        }                
+
+                        // Display data
+
+displayOrganizationInfo(orgData);
+
+displayStats(orgData, employees || []);
+
+displayReferralCode(orgData.referral_code);
+
+generateQRCode(orgData.referral_code);
+
+displayEmployees(employees || []);
+
+        .benefit-title {                
+
+// Show dashboard
+
+document.getElementById('loading').style.display = 'none';
+
+document.getElementById('dashboard').style.display = 'block';
+
+            margin-bottom: 8px;                
+
+        }            } catch (error) {
+
+console.error('Init error:', error);
+
+alert('Errore durante il caricamento');
+
+            font-size: 14px;            }
+
+            color: #718096;        }
+
+            line-height: 1.6;        
+
+function displayOrganizationInfo(org) {
+
+const typeLabel = org.organization_type === 'company' ? 'Azienda' : 'Associazione';
+
+const typeIcon = org.organization_type === 'company' ? 'fa-building' : 'fa-hands-helping';
+
+        .benefit-points {            
+
+const html = `
+
+<div class="info-item">
+
+<i class="fas ${typeIcon} info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">Tipo</div>
+
+<div class="info-value">${typeLabel}</div>
+
+        }                    </div>
+
+                        </div>
+
+<div class="info-item">
+
+<i class="fas fa-signature info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">Nome</div>
+
+<div class="info-value">${org.name}</div>
+
+</div>
+
+            color: white;                </div>
+
+<div class="info-item">
+
+<i class="fas fa-envelope info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">Email</div>
+
+<div class="info-value">${org.email}</div>
+
+</div>
+
+            display: flex;                </div>
+
+${org.vat_number ? `
+
+<div class="info-item">
+
+<i class="fas fa-file-invoice info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">P.IVA</div>
+
+<div class="info-value">${org.vat_number}</div>
+
+</div>
+
+</div>
+
+` : ''}
+
+        }                ${org.tax_code ? `
+
+                        <div class="info-item">
+
+<i class="fas fa-file-alt info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">Codice Fiscale</div>
+
+<div class="info-value">${org.tax_code}</div>
+
+</div>
+
+        }                </div>
+
+                        ` : ''}
+
+${org.city ? `
+
+<div class="info-item">
+
+<i class="fas fa-map-marker-alt info-icon"></i>
+
+<div class="info-content">
+
+<div class="info-label">Sede</div>
+
+<div class="info-value">${org.city}${org.province ? ' (' + org.province + ')' : ''}</div>
+
+</div>
+
+            font-size: 20px;                </div>
+
+` : ''}
+
+            color: #2d3748;            `;
+
+        }            
+
+document.getElementById('org-info').innerHTML = html;
+
+        .empty-state p {        }
+
+            font-size: 14px;        
+
+function displayStats(org, employees) {
+
+document.getElementById('employees-count').textContent = employees.length;
+
+document.getElementById('points-count').textContent = org.points || 0;
+
+        .loading {        }
+
+            text-align: center;        
+
+function displayReferralCode(code) {
+
+document.getElementById('referral-code').textContent = code;
+
+                }
+
+        .spinner {        
+
+function generateQRCode(referralCode) {
+
+const qrContainer = document.getElementById('qr-canvas');
+
+qrContainer.innerHTML = '';
+
+            width: 50px;            
+
+const referralUrl = `https://cdm86.com/index.html?ref=${referralCode}`;
+
+animation: spin 1s linear infinite;
+
+if (typeof QRCode !== 'undefined') {
+
+        }                new QRCode(qrContainer, {
+
+                            text: referralUrl,
+
+width: 200,
+
+height: 200,
+
+colorDark: '#667eea',
+
+colorLight: '#ffffff',
+
+correctLevel: QRCode.CorrectLevel.H
+
+        /* Responsive */                });
+
+        @media (max-width: 768px) {            }
+
+            body {        }
+
+                padding: 10px;        
+
+function displayEmployees(employees) {
+
+const list = document.getElementById('employees-list');
+
+            .top-bar {            
+
+if (employees.length === 0) {
+
+list.innerHTML = `
+
+<div class="empty-state">
+
+<i class="fas fa-users"></i>
+
+<p>Nessun dipendente/membro registrato ancora</p>
+
+<p class="margin-top-10">Condividi il codice referral per iniziare!</p>
+
+</div>
+
+            }                `;
+
+                            return;
+
+            .codes-grid {            }
+
+grid-template-columns: 1fr;
+
+const html = employees.map(emp => {
+
+const initials = `${emp.first_name.charAt(0)}${emp.last_name.charAt(0)}`.toUpperCase();
+
+const joinDate = new Date(emp.created_at).toLocaleDateString('it-IT', {
+
+day: 'numeric',
+
+            }                    month: 'short',
+
+                                year: 'numeric'
+
+            .user-card {                });
+
+flex-direction: column;
+
+                gap: 15px;                return `
+
+<li class="employee-item">
+
+<div class="employee-info">
+
+<div class="employee-avatar">${initials}</div>
+
+<div class="employee-details">
+
+<div class="employee-name">${emp.first_name} ${emp.last_name}</div>
+
+<div class="employee-email">${emp.email}</div>
+
+                                        </div>
+
+</div>
+
+<div class="employee-date">
+
+Iscritto il ${joinDate}
+
+</div>
+
+            }                    </li>
+
+        }                `;
+
+    </style>            }).join('');
+
+</head>            
+
+<body>            list.innerHTML = html;
+
+    <!-- Top Bar -->        }
+
+    <div class="top-bar">        
+
+function copyReferralCode() {
+
+const code = document.getElementById('referral-code').textContent;
+
+navigator.clipboard.writeText(code).then(() => {
+
+const btn = event.target.closest('.copy-btn');
+
+const originalText = btn.innerHTML;
+
+btn.innerHTML = '<i class="fas fa-check"></i> Copiato!';
+
+        </div>                setTimeout(() => {
+
+btn.innerHTML = originalText;
+
+}, 2000);
+
+});
+
+}
+
+            </div>        
+
+async function logout() {
+
+try {
+
+localStorage.clear();
+
+sessionStorage.clear();
+
+await supabase.auth.signOut({ scope: 'global' });
+
+window.location.replace('/index.html');
+
+} catch (error) {
+
+console.error('Logout error:', error);
+
+localStorage.clear();
+
+sessionStorage.clear();
+
+window.location.replace('/index.html');
+
+}
+
+}
+
+<div class="stat-change positive">
+
+// Initialize
+
+init();
+
+                </div>    </script>
+
+            </div></body>
+
+            </html>
+
+            <div class="stat-card">
+<i class="fas fa-user-friends stat-icon"></i>
+<div class="stat-label">Referral Esterni</div>
+<div class="stat-value" id="total-externals">0</div>
+                <div class="stat-change positive">
+<i class="fas fa-arrow-up"></i>
+                    <span>Codice esterno</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+<i class="fas fa-coins stat-icon"></i>
+<div class="stat-label">Punti Totali</div>
+<div class="stat-value" id="total-points">0</div>
+                <div class="stat-change positive">
+<i class="fas fa-arrow-up"></i>
+                    <span>Punti accumulati</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+<i class="fas fa-chart-line stat-icon"></i>
+<div class="stat-label">Utenti Attivi</div>
+<div class="stat-value" id="active-users">0</div>
+                <div class="stat-change positive">
+<i class="fas fa-arrow-up"></i>
+<span>Verificati e attivi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referral Codes Section -->
+        <div class="referral-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-qrcode"></i>
+                    Codici Referral Azienda
+                </h2>
+            </div>
+            
+            <div class="codes-grid">
+                <!-- Employee Code -->
+                <div class="code-card">
+<div class="code-type employee">
+<i class="fas fa-briefcase"></i>
+                        Codice Dipendenti
+                    </div>
+                    <div class="code-value">
+<span id="employee-code">LOADING...</span>
+<button class="copy-btn" onclick="copyCode('employee')">
+<i class="fas fa-copy"></i>
+                            Copia
+                        </button>
+                    </div>
+                    <div class="code-description">
+👔 Usa questo codice per invitare <strong>dipendenti</strong>. Avranno accesso ai benefit aziendali e supporto prioritario.
+                    </div>
+                </div>
+                
+                <!-- External Code -->
+                <div class="code-card">
+<div class="code-type external">
+<i class="fas fa-globe"></i>
+                        Codice Amici Esterni
+                    </div>
+                    <div class="code-value">
+<span id="external-code">LOADING...</span>
+<button class="copy-btn" onclick="copyCode('external')">
+<i class="fas fa-copy"></i>
+                            Copia
+                        </button>
+                    </div>
+                    <div class="code-description">
+🌍 Usa questo codice per invitare <strong>amici/clienti esterni</strong>. Accumuleranno punti per l'azienda senza benefit.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Container -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+<button class="tab-btn active" onclick="switchTab('employees')">
+<i class="fas fa-user-tie"></i>
+                    Dipendenti
+<span class="tab-badge" id="employees-badge">0</span>
+                </button>
+<button class="tab-btn" onclick="switchTab('externals')">
+                    <i class="fas fa-users"></i>
+                    Referral Esterni
+<span class="tab-badge" id="externals-badge">0</span>
+                </button>
+<button class="tab-btn" onclick="switchTab('benefits')">
+                    <i class="fas fa-gift"></i>
+                    Benefit Aziendali
+<span class="tab-badge" id="benefits-badge">0</span>
+                </button>
+            </div>
+            
+            <!-- Employees Tab -->
+<div class="tab-content active" id="employees-tab">
+<div class="loading" id="employees-loading">
+                    <div class="spinner"></div>
+<p>Caricamento dipendenti...</p>
+                </div>
+<div class="users-grid" id="employees-grid" style="display: none;">
+<!-- Will be populated by JS -->
+                </div>
+<div class="empty-state" id="employees-empty" style="display: none;">
+<i class="fas fa-user-tie"></i>
+<h3>Nessun dipendente ancora</h3>
+<p>Condividi il codice dipendenti per iniziare!</p>
+                </div>
+            </div>
+            
+            <!-- Externals Tab -->
+<div class="tab-content" id="externals-tab">
+<div class="loading" id="externals-loading">
+                    <div class="spinner"></div>
+<p>Caricamento referral esterni...</p>
+                </div>
+<div class="users-grid" id="externals-grid" style="display: none;">
+<!-- Will be populated by JS -->
+                </div>
+<div class="empty-state" id="externals-empty" style="display: none;">
+                    <i class="fas fa-users"></i>
+<h3>Nessun referral esterno</h3>
+<p>Condividi il codice esterno per accumulare punti!</p>
+                </div>
+            </div>
+            
+            <!-- Benefits Tab -->
+<div class="tab-content" id="benefits-tab">
+<button class="add-benefit-btn" onclick="addBenefit()">
+<i class="fas fa-plus-circle"></i>
+                    Aggiungi Nuovo Benefit
+                </button>
+                
+<div class="loading" id="benefits-loading">
+                    <div class="spinner"></div>
+                    <p>Caricamento benefit...</p>
+                </div>
+<div class="benefits-grid" id="benefits-grid" style="display: none;">
+<!-- Will be populated by JS -->
+                </div>
+<div class="empty-state" id="benefits-empty" style="display: none;">
+                    <i class="fas fa-gift"></i>
+<h3>Nessun benefit configurato</h3>
+<p>Aggiungi benefit per premiare i tuoi dipendenti!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    
+    <script>
+        // Initialize Supabase
+        const { createClient } = supabase;
+const supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        
+        let currentOrganization = null;
+        
+        // Initialize on load
+document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadOrganizationData();
+            await loadAllData();
+        });
+        
+        // Check authentication
+        async function checkAuth() {
+const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            if (!user) {
+window.location.href = '/login.html';
+                return;
+            }
+            
+console.log('✅ User autenticato:', user.email);
+            
+            // Check if user is an organization
+const { data: org, error } = await supabaseClient
+                .from('organizations')
+                .select('*')
+                .eq('email', user.email)
+                .single();
+            
+            if (error) {
+console.error('❌ Errore caricamento org:', error);
+            }
+            
+            if (!org) {
+alert('Accesso negato. Solo le aziende possono accedere a questa pagina.');
+window.location.href = '/dashboard.html';
+                return;
+            }
+            
+console.log('✅ Organizzazione trovata:', org);
+            currentOrganization = org;
+        }
+        
+        // Load organization data
+        async function loadOrganizationData() {
+            if (!currentOrganization) return;
+            
+document.getElementById('org-name').textContent = currentOrganization.name;
+document.getElementById('org-email').textContent = currentOrganization.email;
+document.getElementById('employee-code').textContent = currentOrganization.referral_code || 'N/A';
+document.getElementById('external-code').textContent = currentOrganization.referral_code_external || 'N/A';
+            
+            console.log('📊 Codici:', {
+dipendenti: currentOrganization.referral_code,
+esterni: currentOrganization.referral_code_external
+            });
+        }
+        
+        // Load all data
+        async function loadAllData() {
+            await Promise.all([
+                loadEmployees(),
+                loadExternals(),
+                loadBenefits(),
+                loadStats()
+            ]);
+        }
+        
+        // Load employees
+        async function loadEmployees() {
+const loadingEl = document.getElementById('employees-loading');
+const gridEl = document.getElementById('employees-grid');
+const emptyEl = document.getElementById('employees-empty');
+            
+            try {
+console.log('🔍 Cerco dipendenti per org:', currentOrganization.id);
+                
+const { data: employees, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+.eq('organization_id', currentOrganization.id)
+                    .eq('is_employee', true)
+.order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+console.log('👔 Dipendenti trovati:', employees);
+                
+                loadingEl.style.display = 'none';
+                
+if (!employees || employees.length === 0) {
+emptyEl.style.display = 'block';
+document.getElementById('employees-badge').textContent = '0';
+                    return;
+                }
+                
+                gridEl.style.display = 'grid';
+gridEl.innerHTML = employees.map(user => createUserCard(user, 'employee')).join('');
+document.getElementById('employees-badge').textContent = employees.length;
+                
+            } catch (error) {
+console.error('❌ Errore caricamento dipendenti:', error);
+loadingEl.innerHTML = '<p style="color: #ef4444;">Errore: ' + error.message + '</p>';
+            }
+        }
+        
+        // Load externals
+        async function loadExternals() {
+const loadingEl = document.getElementById('externals-loading');
+const gridEl = document.getElementById('externals-grid');
+const emptyEl = document.getElementById('externals-empty');
+            
+            try {
+console.log('🔍 Cerco referral esterni per org:', currentOrganization.id);
+                
+const { data: externals, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+.eq('organization_id', currentOrganization.id)
+.eq('referred_by_organization_external', true)
+.order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+console.log('🌍 Referral esterni trovati:', externals);
+                
+                loadingEl.style.display = 'none';
+                
+if (!externals || externals.length === 0) {
+emptyEl.style.display = 'block';
+document.getElementById('externals-badge').textContent = '0';
+                    return;
+                }
+                
+                gridEl.style.display = 'grid';
+gridEl.innerHTML = externals.map(user => createUserCard(user, 'external')).join('');
+document.getElementById('externals-badge').textContent = externals.length;
+                
+            } catch (error) {
+console.error('❌ Errore caricamento esterni:', error);
+loadingEl.innerHTML = '<p style="color: #ef4444;">Errore: ' + error.message + '</p>';
+            }
+        }
+        
+        // Load benefits
+        async function loadBenefits() {
+const loadingEl = document.getElementById('benefits-loading');
+const gridEl = document.getElementById('benefits-grid');
+const emptyEl = document.getElementById('benefits-empty');
+            
+            try {
+console.log('🔍 Cerco benefit per org:', currentOrganization.id);
+                
+const { data: benefits, error } = await supabaseClient
+                    .from('organization_benefits')
+                    .select('*')
+.eq('organization_id', currentOrganization.id)
+                    .eq('active', true)
+.order('points_required', { ascending: true });
+                
+                if (error) throw error;
+                
+console.log('🎁 Benefit trovati:', benefits);
+                
+                loadingEl.style.display = 'none';
+                
+if (!benefits || benefits.length === 0) {
+emptyEl.style.display = 'block';
+document.getElementById('benefits-badge').textContent = '0';
+                    return;
+                }
+                
+                gridEl.style.display = 'grid';
+gridEl.innerHTML = benefits.map(benefit => createBenefitCard(benefit)).join('');
+document.getElementById('benefits-badge').textContent = benefits.length;
+                
+            } catch (error) {
+console.error('❌ Errore caricamento benefit:', error);
+loadingEl.innerHTML = '<p style="color: #ef4444;">Errore: ' + error.message + '</p>';
+            }
+        }
+        
+        // Load stats
+        async function loadStats() {
+            try {
+console.log('📊 Calcolo statistiche...');
+                
+                // Count employees
+const { count: employeeCount } = await supabaseClient
+                    .from('users')
+.select('*', { count: 'exact', head: true })
+.eq('organization_id', currentOrganization.id)
+                    .eq('is_employee', true);
+                
+                // Count externals
+const { count: externalCount } = await supabaseClient
+                    .from('users')
+.select('*', { count: 'exact', head: true })
+.eq('organization_id', currentOrganization.id)
+.eq('referred_by_organization_external', true);
+                
+                // Count active users
+const { count: activeCount } = await supabaseClient
+                    .from('users')
+.select('*', { count: 'exact', head: true })
+.eq('organization_id', currentOrganization.id)
+                    .eq('is_active', true);
+                
+                // Calculate total points
+const { data: users } = await supabaseClient
+                    .from('users')
+                    .select('points')
+.eq('organization_id', currentOrganization.id);
+                
+const totalPoints = users?.reduce((sum, user) => sum + (user.points || 0), 0) || 0;
+                
+                console.log('📊 Stats:', {
+                    employees: employeeCount,
+                    externals: externalCount,
+                    active: activeCount,
+                    points: totalPoints
+                });
+                
+document.getElementById('total-employees').textContent = employeeCount || 0;
+document.getElementById('total-externals').textContent = externalCount || 0;
+document.getElementById('total-points').textContent = totalPoints.toLocaleString();
+document.getElementById('active-users').textContent = activeCount || 0;
+                
+            } catch (error) {
+console.error('❌ Errore caricamento statistiche:', error);
+            }
+        }
+        
+        // Create user card HTML
+        function createUserCard(user, type) {
+const initials = (user.first_name?.[0] || '') + (user.last_name?.[0] || '');
+const statusClass = user.is_active ? 'status-active' : 'status-inactive';
+const statusText = user.is_active ? 'Attivo' : 'Inattivo';
+const typeIcon = type === 'employee' ? '👔' : '🌍';
+            
+            return `
+                <div class="user-card">
+                    <div class="user-info">
+<div class="user-avatar">${initials || '?'}</div>
+                        <div class="user-details">
+<h4>${typeIcon} ${user.first_name || ''} ${user.last_name || ''}</h4>
+                            <p>${user.email}</p>
+                        </div>
+                    </div>
+                    <div class="user-meta">
+                        <div class="user-points">
+<div class="points-value">${user.points || 0}</div>
+<div class="points-label">Punti</div>
+                        </div>
+<div class="user-status ${statusClass}">${statusText}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Create benefit card HTML
+        function createBenefitCard(benefit) {
+            return `
+                <div class="benefit-card">
+<div class="benefit-icon">🎁</div>
+<div class="benefit-title">${benefit.title}</div>
+<div class="benefit-description">${benefit.description || ''}</div>
+                    <div class="benefit-points">
+<i class="fas fa-coins"></i>
+${benefit.points_required} punti
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update buttons
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+event.target.closest('.tab-btn').classList.add('active');
+            
+            // Update content
+document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+        
+        // Copy referral code
+        function copyCode(type) {
+            const code = type === 'employee' 
+? document.getElementById('employee-code').textContent
+: document.getElementById('external-code').textContent;
+            
+navigator.clipboard.writeText(code).then(() => {
+alert(`✅ Codice ${type === 'employee' ? 'dipendenti' : 'esterno'} copiato: ${code}`);
+            });
+        }
+        
+        // Add benefit (placeholder)
+        async function addBenefit() {
+const title = prompt('Nome del benefit:');
+            if (!title) return;
+            
+const description = prompt('Descrizione:');
+const points = prompt('Punti richiesti:');
+            
+            if (!points || isNaN(points)) {
+                alert('Punti non validi');
+                return;
+            }
+            
+            try {
+const { data, error } = await supabaseClient
+                    .from('organization_benefits')
+                    .insert({
+organization_id: currentOrganization.id,
+                        title: title,
+                        description: description,
+points_required: parseInt(points),
+                        active: true
+                    });
+                
+                if (error) throw error;
+                
+alert('✅ Benefit aggiunto con successo!');
+                await loadBenefits();
+                
+            } catch (error) {
+                console.error('❌ Errore:', error);
+alert('Errore durante l\'aggiunta del benefit');
+            }
+        }
+        
+        // Logout
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>
