@@ -275,7 +275,7 @@ body {
 .hero-section-unified .hero-subtitle {
     font-size: 1.25rem;
     opacity: 0.9;
-    margin-bottom: var(--space-12);
+    margin-bottom: var(--space-6);
 }
 
 .cta-block {
@@ -285,7 +285,7 @@ body {
 
 .cta-text {
     font-size: clamp(1.25rem, 3vw, 1.75rem);
-    font-weight: 500;
+    font-weight: 400;
     color: white;
     line-height: 1.6;
     margin: 0;
@@ -1161,11 +1161,11 @@ body {
     
     .hero-section-unified .hero-subtitle {
         font-size: 1.125rem;
-        margin-bottom: var(--space-8);
+        margin-bottom: var(--space-4);
     }
     
     .cta-block {
-        padding: var(--space-6) 0;
+        padding: var(--space-4) 0;
         margin-bottom: var(--space-8);
     }
     
