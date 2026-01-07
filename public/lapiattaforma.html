@@ -614,13 +614,42 @@
         });
 
         // Section-specific animations
+        let walkingInterval = null;
+        
         function triggerSectionAnimation(index) {
             if (index === 1) {
-                // Walking animation for strategy section
+                // Walking animation for strategy section - loop avanti e indietro
                 const walkingFigure = sections[1].querySelector('.stick-figure');
+                let goingRight = true;
+                
+                // Clear previous interval if exists
+                if (walkingInterval) clearInterval(walkingInterval);
+                
+                // Start walking loop
                 setTimeout(() => {
                     walkingFigure.style.left = '80%';
+                    goingRight = false;
+                    
+                    walkingInterval = setInterval(() => {
+                        if (goingRight) {
+                            // Flip to walk right
+                            walkingFigure.style.transform = 'translate(-50%, -50%) scaleX(1)';
+                            walkingFigure.style.left = '80%';
+                            goingRight = false;
+                        } else {
+                            // Flip to walk left
+                            walkingFigure.style.transform = 'translate(-50%, -50%) scaleX(-1)';
+                            walkingFigure.style.left = '20%';
+                            goingRight = true;
+                        }
+                    }, 3000); // Change direction every 3 seconds
                 }, 500);
+            } else {
+                // Stop walking when leaving section 1
+                if (walkingInterval) {
+                    clearInterval(walkingInterval);
+                    walkingInterval = null;
+                }
             }
             
             if (index === 2) {
