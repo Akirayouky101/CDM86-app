@@ -732,9 +732,9 @@
                 if (loginBtn) {
                     loginBtn.innerHTML = '<i class="fas fa-user"></i><span>Accedi</span>';
                     loginBtn.onclick = () => {
-                        // Open auth modal instead of redirecting
-                        if (window.openAuthModal) {
-                            window.openAuthModal();
+                        // Open auth modal
+                        if (window.authModal && window.authModal.open) {
+                            window.authModal.open();
                         } else {
                             console.error('Auth modal not available');
                         }
@@ -762,9 +762,9 @@
             if (loginBtn) {
                 loginBtn.addEventListener('click', () => {
                     hideLoginRequiredModal();
-                    // Open auth modal instead of redirecting
-                    if (window.openAuthModal) {
-                        window.openAuthModal();
+                    // Open auth modal
+                    if (window.authModal && window.authModal.open) {
+                        window.authModal.open();
                     } else {
                         console.error('Auth modal not available');
                     }
