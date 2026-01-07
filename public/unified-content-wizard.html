@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creazione Contenuto Completo - CDM86</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .wizard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .wizard-header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .close-wizard {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-wizard:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: white;
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+
+        .progress-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: 3px solid white;
+        }
+
+        .progress-step.active .step-number {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .wizard-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .step-container {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .step-description {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Image Upload */
+        .image-upload-area {
+            border: 3px dashed #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.02);
+        }
+
+        .image-upload-area.has-image {
+            padding: 0;
+            border-style: solid;
+            border-color: #10b981;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+
+        /* Layout Selection */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .layout-option {
+            border: 3px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .layout-option:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+        }
+
+        .layout-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .layout-preview {
+            width: 100%;
+            height: 150px;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .layout-name {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .layout-description {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        /* Color Palette Selection */
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .palette-option {
+            border: 3px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .palette-option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .palette-option.selected {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .palette-colors {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
+            height: 60px;
+        }
+
+        .palette-color {
+            flex: 1;
+            border-radius: 0.25rem;
+        }
+
+        .palette-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #1e293b;
+        }
+
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.02);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Navigation Buttons */
+        .wizard-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-back:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-publish {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .spinner {
+            font-size: 3rem;
+            color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .palette-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="wizard-header">
+        <h1>
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Creazione Contenuto Completo
+        </h1>
+        <button class="close-wizard" onclick="closeWizard()">×</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Info Base</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Immagine</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Contenuti</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Design</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Sezioni</div>
+            </div>
+            <div class="progress-step" data-step="6">
+                <div class="step-number">6</div>
+                <div class="step-label">Offerta</div>
+            </div>
+            <div class="progress-step" data-step="7">
+                <div class="step-number">7</div>
+                <div class="step-label">Finalizza</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="wizard-content">
+        <!-- Step 1: Info Base -->
+        <div class="step-container active" data-step="1">
+            <h2 class="step-title">📝 Informazioni di Base</h2>
+            <p class="step-description">Iniziamo con le informazioni principali della tua azienda</p>
+
+            <div class="form-group">
+                <label>Nome dell'azienda <span class="required">*</span></label>
+                <input type="text" id="companyName" placeholder="Es: Ristorante Da Mario">
+                <small>Il nome verrà usato come titolo della pagina e nella card</small>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria <span class="required">*</span></label>
+                <select id="category">
+                    <option value="">Seleziona categoria...</option>
+                    <option value="ristorazione">🍕 Ristorazione</option>
+                    <option value="sport">⚽ Sport & Fitness</option>
+                    <option value="moda">👕 Moda & Abbigliamento</option>
+                    <option value="bellezza">💄 Bellezza & Benessere</option>
+                    <option value="tecnologia">💻 Tecnologia</option>
+                    <option value="intrattenimento">🎬 Intrattenimento</option>
+                    <option value="servizi">🔧 Servizi</option>
+                    <option value="istruzione">📚 Istruzione</option>
+                    <option value="salute">🏥 Salute</option>
+                    <option value="altro">🎯 Altro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descrizione breve <span class="required">*</span></label>
+                <textarea id="description" placeholder="Es: Cucina italiana autentica nel cuore di Milano. Dal 1985 offriamo piatti tradizionali preparati con ingredienti freschi e genuini." rows="4"></textarea>
+                <small>Una breve descrizione dell'attività (2-3 frasi)</small>
+            </div>
+        </div>
+
+        <!-- Step 2: Immagine Principale -->
+        <div class="step-container" data-step="2">
+            <h2 class="step-title">🖼️ Immagine Principale</h2>
+            <p class="step-description">Carica un'immagine che rappresenti la tua attività</p>
+
+            <div class="form-group">
+                <label>Immagine copertina <span class="required">*</span></label>
+                <div class="image-upload-area" id="mainImageUpload" onclick="document.getElementById('mainImageInput').click()">
+                    <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="handleMainImageUpload(event)">
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Clicca per caricare l'immagine</div>
+                        <small>JPG o PNG, max 5MB. Verrà usata sia per la pagina che per la card.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Contenuti Pagina -->
+        <div class="step-container" data-step="3">
+            <h2 class="step-title">✍️ Contenuti della Pagina</h2>
+            <p class="step-description">Aggiungi i contenuti che appariranno sulla tua pagina</p>
+
+            <div class="form-group">
+                <label>Slogan principale <span class="required">*</span></label>
+                <input type="text" id="slogan" placeholder="Es: Il gusto della tradizione italiana">
+                <small>Una frase d'impatto che rappresenta la tua azienda</small>
+            </div>
+
+            <div class="form-group">
+                <label>Punti di forza (Features)</label>
+                <input type="text" id="feature1" placeholder="Es: Ingredienti freschi e biologici">
+                <input type="text" id="feature2" placeholder="Es: Chef con esperienza ventennale" style="margin-top: 0.75rem;">
+                <input type="text" id="feature3" placeholder="Es: Ambiente familiare e accogliente" style="margin-top: 0.75rem;">
+                <small>Inserisci 2-3 caratteristiche distintive della tua attività</small>
+            </div>
+
+            <div class="form-group">
+                <label>Call-to-Action (opzionale)</label>
+                <div class="form-row">
+                    <input type="text" id="ctaText" placeholder="Es: Prenota ora">
+                    <input type="url" id="ctaLink" placeholder="https://...">
+                </div>
+                <small>Testo e link del bottone d'azione (es: prenotazioni, contatti)</small>
+            </div>
+        </div>
+
+        <!-- Step 4: Layout e Colori -->
+        <div class="step-container" data-step="4">
+            <h2 class="step-title">🎨 Design della Pagina</h2>
+            <p class="step-description">Scegli il layout e la palette colori per la tua pagina</p>
+
+            <div class="form-group">
+                <label>Seleziona Layout <span class="required">*</span></label>
+                <div class="layout-grid">
+                    <div class="layout-option" data-layout="modern" onclick="selectLayout('modern')">
+                        <div class="layout-preview">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="layout-name">Modern Gradient</div>
+                        <div class="layout-description">Design moderno con gradienti e animazioni fluide</div>
+                    </div>
+                    <div class="layout-option" data-layout="minimal" onclick="selectLayout('minimal')">
+                        <div class="layout-preview">
+                            <i class="fas fa-square"></i>
+                        </div>
+                        <div class="layout-name">Minimal Clean</div>
+                        <div class="layout-description">Design pulito e minimalista con molto spazio bianco</div>
+                    </div>
+                    <div class="layout-option" data-layout="bold" onclick="selectLayout('bold')">
+                        <div class="layout-preview">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="layout-name">Bold & Vibrant</div>
+                        <div class="layout-description">Design audace con colori vivaci e contrasti forti</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 2.5rem;">
+                <label>Seleziona Palette Colori <span class="required">*</span></label>
+                <div class="palette-grid">
+                    <div class="palette-option" data-palette="ocean" onclick="selectPalette('ocean')">
+                        <div class="palette-colors">
+                            <div class="palette-color" style="background: #0ea5e9;"></div>
+                            <div class="palette-color" style="background: #06b6d4;"></div>
+                            <div class="palette-color" style="background: #0891b2;"></div>
+                        </div>
+                        <div class="palette-name">Ocean Blue</div>
+                    </div>
+                    <div class="palette-option" data-palette="sunset" onclick="selectPalette('sunset')">
+                        <div class="palette-colors">
+                            <div class="palette-color" style="background: #f97316;"></div>
+                            <div class="palette-color" style="background: #fb923c;"></div>
+                            <div class="palette-color" style="background: #fdba74;"></div>
+                        </div>
+                        <div class="palette-name">Sunset Orange</div>
+                    </div>
+                    <div class="palette-option" data-palette="forest" onclick="selectPalette('forest')">
+                        <div class="palette-colors">
+                            <div class="palette-color" style="background: #10b981;"></div>
+                            <div class="palette-color" style="background: #34d399;"></div>
+                            <div class="palette-color" style="background: #6ee7b7;"></div>
+                        </div>
+                        <div class="palette-name">Forest Green</div>
+                    </div>
+                    <div class="palette-option" data-palette="royal" onclick="selectPalette('royal')">
+                        <div class="palette-colors">
+                            <div class="palette-color" style="background: #8b5cf6;"></div>
+                            <div class="palette-color" style="background: #a78bfa;"></div>
+                            <div class="palette-color" style="background: #c4b5fd;"></div>
+                        </div>
+                        <div class="palette-name">Royal Purple</div>
+                    </div>
+                    <div class="palette-option" data-palette="mono" onclick="selectPalette('mono')">
+                        <div class="palette-colors">
+                            <div class="palette-color" style="background: #1e293b;"></div>
+                            <div class="palette-color" style="background: #475569;"></div>
+                            <div class="palette-color" style="background: #64748b;"></div>
+                        </div>
+                        <div class="palette-name">Monochrome</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Sezioni Pagina -->
+        <div class="step-container" data-step="5">
+            <h2 class="step-title">📄 Sezioni della Pagina</h2>
+            <p class="step-description">Seleziona quali sezioni includere nella tua pagina</p>
+
+            <div class="form-group">
+                <label>Scegli le sezioni <span class="required">*</span></label>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionHero" checked>
+                        <label for="sectionHero">🎯 Hero / Intro (obbligatorio)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionAbout" checked>
+                        <label for="sectionAbout">📖 Chi Siamo</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionFeatures" checked>
+                        <label for="sectionFeatures">⭐ Punti di Forza</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionGallery">
+                        <label for="sectionGallery">🖼️ Galleria Immagini</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionTestimonials">
+                        <label for="sectionTestimonials">💬 Testimonianze</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sectionCTA" checked>
+                        <label for="sectionCTA">🚀 Call-to-Action Finale</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: Dettagli Offerta (Card) -->
+        <div class="step-container" data-step="6">
+            <h2 class="step-title">💰 Dettagli dell'Offerta</h2>
+            <p class="step-description">Ora creiamo la card promozionale che apparirà nella pagina Promozioni</p>
+
+            <div class="form-group">
+                <label>Cosa vuoi promuovere? <span class="required">*</span></label>
+                <input type="text" id="offerTitle" placeholder="Es: Menu degustazione 5 portate">
+                <small>Il prodotto o servizio in promozione</small>
+            </div>
+
+            <div class="form-group">
+                <label>Prezzi</label>
+                <div class="form-row">
+                    <div>
+                        <input type="number" id="originalPrice" placeholder="Prezzo originale €" min="0" step="0.01">
+                        <small>Prezzo normale (opzionale)</small>
+                    </div>
+                    <div>
+                        <input type="number" id="offerPrice" placeholder="Prezzo offerta €" min="0" step="0.01">
+                        <small>Prezzo in promozione (opzionale)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Validità offerta (opzionale)</label>
+                <div class="form-row">
+                    <input type="date" id="validFrom">
+                    <input type="date" id="validUntil">
+                </div>
+                <small>Lascia vuoto se l'offerta è sempre valida</small>
+            </div>
+        </div>
+
+        <!-- Step 7: Target e Features Card -->
+        <div class="step-container" data-step="7">
+            <h2 class="step-title">🎯 Finalizza la Card</h2>
+            <p class="step-description">Ultimi dettagli per rendere la card più accattivante</p>
+
+            <div class="form-group">
+                <label>A chi è rivolto? <span class="required">*</span></label>
+                <input type="text" id="targetAudience" placeholder="Es: Studenti universitari, Famiglie, Over 65...">
+                <small>Il pubblico target dell'offerta</small>
+            </div>
+
+            <div class="form-group">
+                <label>Vantaggi dell'offerta</label>
+                <input type="text" id="cardFeature1" placeholder="Es: Sconto esclusivo per studenti">
+                <input type="text" id="cardFeature2" placeholder="Es: Valido tutti i giorni" style="margin-top: 0.75rem;">
+                <input type="text" id="cardFeature3" placeholder="Es: Nessun costo aggiuntivo" style="margin-top: 0.75rem;">
+                <small>Inserisci 2-3 vantaggi specifici dell'offerta</small>
+            </div>
+
+            <div class="form-group">
+                <label>Anteprima</label>
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 0.5rem; text-align: center;">
+                    <p style="color: #64748b;">
+                        <i class="fas fa-info-circle"></i>
+                        Dopo aver cliccato "Pubblica", la tua pagina e la card saranno create automaticamente.
+                        <br>La card avrà un bottone che porta direttamente alla tua pagina!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="wizard-navigation">
+            <button class="btn btn-back" id="btnBack" onclick="previousStep()" style="display: none;">
+                <i class="fas fa-arrow-left"></i>
+                Indietro
+            </button>
+            <div></div>
+            <button class="btn btn-next" id="btnNext" onclick="nextStep()">
+                Avanti
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="btn btn-publish" id="btnPublish" onclick="publishContent()" style="display: none;">
+                <i class="fas fa-rocket"></i>
+                Pubblica Tutto
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <i class="fas fa-spinner spinner"></i>
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Creazione in corso...</h3>
+            <p style="color: #64748b;">Stiamo creando la tua pagina e la card promozionale</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <script>
+        // Initialize Supabase
+        const supabaseClient = window.supabase.createClient(
+            window.CDM86_CONFIG.supabase.url,
+            window.CDM86_CONFIG.supabase.anonKey
+        );
+
+        // Wizard State
+        let currentStep = 1;
+        const totalSteps = 7;
+        let wizardData = {
+            mainImage: null,
+            selectedLayout: null,
+            selectedPalette: null
+        };
+
+        // Step Navigation
+        function nextStep() {
+            if (!validateStep(currentStep)) return;
+            
+            saveStepData(currentStep);
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateWizardUI();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateWizardUI();
+            }
+        }
+
+        function updateWizardUI() {
+            // Update step containers
+            document.querySelectorAll('.step-container').forEach((container, index) => {
+                container.classList.toggle('active', index + 1 === currentStep);
+            });
+
+            // Update progress
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.toggle('active', stepNum === currentStep);
+                step.classList.toggle('completed', stepNum < currentStep);
+            });
+
+            // Update buttons
+            document.getElementById('btnBack').style.display = currentStep === 1 ? 'none' : 'flex';
+            document.getElementById('btnNext').style.display = currentStep === totalSteps ? 'none' : 'flex';
+            document.getElementById('btnPublish').style.display = currentStep === totalSteps ? 'flex' : 'none';
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Validation
+        function validateStep(step) {
+            switch(step) {
+                case 1:
+                    if (!document.getElementById('companyName').value.trim()) {
+                        alert('⚠️ Inserisci il nome dell\'azienda');
+                        return false;
+                    }
+                    if (!document.getElementById('category').value) {
+                        alert('⚠️ Seleziona una categoria');
+                        return false;
+                    }
+                    if (!document.getElementById('description').value.trim()) {
+                        alert('⚠️ Inserisci una descrizione');
+                        return false;
+                    }
+                    break;
+                case 2:
+                    if (!wizardData.mainImage) {
+                        alert('⚠️ Carica un\'immagine principale');
+                        return false;
+                    }
+                    break;
+                case 3:
+                    if (!document.getElementById('slogan').value.trim()) {
+                        alert('⚠️ Inserisci uno slogan');
+                        return false;
+                    }
+                    break;
+                case 4:
+                    if (!wizardData.selectedLayout) {
+                        alert('⚠️ Seleziona un layout');
+                        return false;
+                    }
+                    if (!wizardData.selectedPalette) {
+                        alert('⚠️ Seleziona una palette colori');
+                        return false;
+                    }
+                    break;
+                case 5:
+                    if (!document.getElementById('sectionHero').checked) {
+                        alert('⚠️ La sezione Hero è obbligatoria');
+                        return false;
+                    }
+                    break;
+                case 6:
+                    if (!document.getElementById('offerTitle').value.trim()) {
+                        alert('⚠️ Inserisci cosa vuoi promuovere');
+                        return false;
+                    }
+                    break;
+                case 7:
+                    if (!document.getElementById('targetAudience').value.trim()) {
+                        alert('⚠️ Indica a chi è rivolto');
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        // Save Step Data
+        function saveStepData(step) {
+            switch(step) {
+                case 1:
+                    wizardData.companyName = document.getElementById('companyName').value.trim();
+                    wizardData.category = document.getElementById('category').value;
+                    wizardData.description = document.getElementById('description').value.trim();
+                    break;
+                case 3:
+                    wizardData.slogan = document.getElementById('slogan').value.trim();
+                    wizardData.feature1 = document.getElementById('feature1').value.trim();
+                    wizardData.feature2 = document.getElementById('feature2').value.trim();
+                    wizardData.feature3 = document.getElementById('feature3').value.trim();
+                    wizardData.ctaText = document.getElementById('ctaText').value.trim();
+                    wizardData.ctaLink = document.getElementById('ctaLink').value.trim();
+                    break;
+                case 5:
+                    wizardData.sections = {
+                        hero: document.getElementById('sectionHero').checked,
+                        about: document.getElementById('sectionAbout').checked,
+                        features: document.getElementById('sectionFeatures').checked,
+                        gallery: document.getElementById('sectionGallery').checked,
+                        testimonials: document.getElementById('sectionTestimonials').checked,
+                        cta: document.getElementById('sectionCTA').checked
+                    };
+                    break;
+                case 6:
+                    wizardData.offerTitle = document.getElementById('offerTitle').value.trim();
+                    wizardData.originalPrice = parseFloat(document.getElementById('originalPrice').value) || null;
+                    wizardData.offerPrice = parseFloat(document.getElementById('offerPrice').value) || null;
+                    wizardData.validFrom = document.getElementById('validFrom').value;
+                    wizardData.validUntil = document.getElementById('validUntil').value;
+                    break;
+                case 7:
+                    wizardData.targetAudience = document.getElementById('targetAudience').value.trim();
+                    wizardData.cardFeature1 = document.getElementById('cardFeature1').value.trim();
+                    wizardData.cardFeature2 = document.getElementById('cardFeature2').value.trim();
+                    wizardData.cardFeature3 = document.getElementById('cardFeature3').value.trim();
+                    break;
+            }
+        }
+
+        // Image Upload
+        async function handleMainImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('⚠️ Per favore carica solo file immagine!');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('⚠️ Immagine troppo grande! Max 5MB');
+                return;
+            }
+
+            try {
+                const uploadArea = document.getElementById('mainImageUpload');
+                uploadArea.innerHTML = '<div style="padding: 3rem; text-align: center;"><i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i><p style="margin-top: 1rem; color: #64748b;">Caricamento...</p></div>';
+
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    throw new Error('Devi essere loggato');
+                }
+
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${session.user.id}/main-${Date.now()}.${fileExt}`;
+
+                const { data, error } = await supabaseClient.storage
+                    .from('organization-images')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('organization-images')
+                    .getPublicUrl(fileName);
+
+                wizardData.mainImage = publicUrlData.publicUrl;
+                
+                uploadArea.classList.add('has-image');
+                uploadArea.innerHTML = `<img src="${publicUrlData.publicUrl}" class="image-preview" alt="Main image">`;
+
+                console.log('✅ Image uploaded:', wizardData.mainImage);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+                document.getElementById('mainImageUpload').innerHTML = `
+                    <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="handleMainImageUpload(event)">
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Clicca per caricare l'immagine</div>
+                        <small>JPG o PNG, max 5MB</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Layout Selection
+        function selectLayout(layout) {
+            wizardData.selectedLayout = layout;
+            document.querySelectorAll('.layout-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.layout === layout);
+            });
+        }
+
+        // Palette Selection
+        function selectPalette(palette) {
+            wizardData.selectedPalette = palette;
+            document.querySelectorAll('.palette-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.palette === palette);
+            });
+        }
+
+        // Publish Content
+        async function publishContent() {
+            if (!validateStep(7)) return;
+            saveStepData(7);
+
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) throw new Error('Non sei loggato');
+
+                // Get organization
+                const { data: orgs } = await supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (!orgs) {
+                    const { data: orgById } = await supabaseClient
+                        .from('organizations')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    
+                    if (!orgById) throw new Error('Organization non trovata');
+                    org = orgById;
+                } else {
+                    org = orgs;
+                }
+
+                // Generate slug
+                const slug = wizardData.companyName
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+
+                const pageUrl = `/page/${slug}`;
+
+                // Generate page_data (simplified for now)
+                const pageData = {
+                    layout: wizardData.selectedLayout,
+                    palette: wizardData.selectedPalette,
+                    sections: wizardData.sections,
+                    content: {
+                        companyName: wizardData.companyName,
+                        slogan: wizardData.slogan,
+                        description: wizardData.description,
+                        features: [wizardData.feature1, wizardData.feature2, wizardData.feature3].filter(Boolean),
+                        mainImage: wizardData.mainImage,
+                        cta: {
+                            text: wizardData.ctaText || 'Scopri di più',
+                            link: wizardData.ctaLink || '#'
+                        }
+                    }
+                };
+
+                // Generate card_data
+                let badge = '';
+                if (wizardData.originalPrice && wizardData.offerPrice) {
+                    const discount = Math.round(((wizardData.originalPrice - wizardData.offerPrice) / wizardData.originalPrice) * 100);
+                    if (discount > 0) badge = `SCONTO ${discount}%`;
+                }
+
+                const cardData = {
+                    title: wizardData.offerTitle,
+                    description: wizardData.description.substring(0, 150) + '...',
+                    image: wizardData.mainImage,
+                    badge: badge,
+                    features: [
+                        { icon: 'fa-users', text: `Per ${wizardData.targetAudience}` },
+                        wizardData.cardFeature1 ? { icon: 'fa-check', text: wizardData.cardFeature1 } : null,
+                        wizardData.cardFeature2 ? { icon: 'fa-star', text: wizardData.cardFeature2 } : null,
+                        wizardData.cardFeature3 ? { icon: 'fa-heart', text: wizardData.cardFeature3 } : null
+                    ].filter(Boolean),
+                    ctaText: 'Scopri di più',
+                    ctaLink: pageUrl
+                };
+
+                // Check if exists
+                const { data: existing } = await supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', org.id)
+                    .maybeSingle();
+
+                if (existing) {
+                    // Update
+                    const { error } = await supabaseClient
+                        .from('organization_pages')
+                        .update({
+                            page_data: pageData,
+                            card_data: cardData,
+                            card_published: true,
+                            status: 'published'
+                        })
+                        .eq('organization_id', org.id);
+
+                    if (error) throw error;
+                } else {
+                    // Insert
+                    const { error } = await supabaseClient
+                        .from('organization_pages')
+                        .insert({
+                            organization_id: org.id,
+                            slug: slug,
+                            page_data: pageData,
+                            card_data: cardData,
+                            card_published: true,
+                            status: 'published'
+                        });
+
+                    if (error) throw error;
+                }
+
+                document.getElementById('loadingOverlay').classList.remove('active');
+                alert('✅ Contenuto pubblicato con successo!');
+                
+                setTimeout(() => {
+                    window.location.href = '/public/organization-dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingOverlay').classList.remove('active');
+                alert('❌ Errore: ' + error.message);
+            }
+        }
+
+        // Close Wizard
+        function closeWizard() {
+            if (confirm('Sei sicuro di voler uscire? I dati non salvati andranno persi.')) {
+                window.location.href = '/public/organization-dashboard.html';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                alert('Devi essere loggato');
+                window.location.href = '/index.html';
+                return;
+            }
+
+            console.log('✅ Unified Content Wizard loaded');
+        });
+    </script>
+</body>
+</html>
