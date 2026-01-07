@@ -330,9 +330,79 @@ Dopo aver completato questo test:
 1. ✅ organization-dashboard.html sistemato
 2. ✅ Implementata creazione promozioni
 3. ✅ Implementata pagina presentazione aziendale
-4. 🔄 Creare pagina pubblica per visualizzare aziende e promozioni
+4. ✅ **NUOVO: Sistema pagine aziendali personalizzate**
 5. 🔄 Sistema referral dipendenti/esterni
 6. 🔄 Fix sistema favoriti (se necessario)
+
+---
+
+## 🆕 SISTEMA PAGINE AZIENDALI - SETUP
+
+### 1️⃣ Crea tabella organization_pages sul database
+
+Su Supabase SQL Editor, esegui:
+
+```bash
+/Users/akirayouky/Desktop/Siti/CDM86-NEW/database/CREATE_ORGANIZATION_PAGES_TABLE.sql
+```
+
+Oppure copia il contenuto del file e incollalo su Supabase SQL Editor.
+
+✅ Verifica che la tabella sia stata creata:
+
+```sql
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'organization_pages'
+ORDER BY ordinal_position;
+```
+
+### 2️⃣ Deploy Edge Functions
+
+```bash
+cd /Users/akirayouky/Desktop/Siti/CDM86-NEW
+
+# Deploy funzione per salvare pagine
+supabase functions deploy save-organization-page
+
+# Deploy funzione per caricare pagine pubbliche
+supabase functions deploy get-organization-page
+```
+
+### 3️⃣ Test creazione pagina aziendale
+
+1. Login come azienda su `/public/organization-dashboard.html`
+2. Click su "Crea Pagina Aziendale" (da implementare nel pannello)
+3. Si apre il page builder
+4. Crea le sezioni con drag & drop
+5. Salva come bozza o pubblica
+
+### 4️⃣ Test visualizzazione pagina pubblica
+
+URL formato: `/public/azienda.html?slug=nome-azienda`
+
+Esempio: `https://cdm86-xxx.vercel.app/public/azienda.html?slug=test-srl`
+
+---
+
+## 📁 FILES CREATI PER SISTEMA PAGINE AZIENDALI
+
+### Database:
+- ✅ `database/CREATE_ORGANIZATION_PAGES_TABLE.sql` - Tabella + funzioni + policies
+
+### Supabase Functions:
+- ✅ `supabase/functions/save-organization-page/index.ts` - Salva/aggiorna pagina
+- ✅ `supabase/functions/get-organization-page/index.ts` - Carica pagina pubblica
+
+### Frontend:
+- ✅ `public/page-builder.html` - Editor visuale (già esistente)
+- ✅ `public/azienda.html` - Visualizzazione pagina pubblica
+
+### Da fare ancora:
+- [ ] Aggiungere bottone "Crea Pagina" nel pannello azienda
+- [ ] Collegare page-builder al save-organization-page function
+- [ ] Aggiungere preview della pagina nel pannello
+- [ ] Sistema per gestire slug personalizzati
 
 ---
 
