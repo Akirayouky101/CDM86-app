@@ -863,6 +863,8 @@
             selectedLayout: null,
             selectedPalette: null
         };
+        let isEditMode = false;
+        let existingPageId = null;
 
         // Step Navigation
         function nextStep() {
@@ -1236,28 +1238,33 @@
                     ctaLink: pageUrl
                 };
 
-                // Check if exists
+                // Check if exists or in edit mode
                 const { data: existing } = await supabaseClient
                     .from('organization_pages')
                     .select('*')
                     .eq('organization_id', org.id)
                     .maybeSingle();
 
-                if (existing) {
+                if (existing || isEditMode) {
                     // Update
+                    console.log('📝 Updating existing page...');
                     const { error } = await supabaseClient
                         .from('organization_pages')
                         .update({
                             page_data: pageData,
                             card_data: cardData,
                             card_published: true,
-                            status: 'published'
+                            status: 'published',
+                            updated_at: new Date().toISOString()
                         })
                         .eq('organization_id', org.id);
 
                     if (error) throw error;
+
+                    console.log('✅ Page updated successfully');
                 } else {
                     // Insert
+                    console.log('✨ Creating new page...');
                     const { error } = await supabaseClient
                         .from('organization_pages')
                         .insert({
@@ -1270,10 +1277,14 @@
                         });
 
                     if (error) throw error;
+
+                    console.log('✅ Page created successfully');
                 }
 
                 document.getElementById('loadingOverlay').classList.remove('active');
-                alert('✅ Contenuto pubblicato con successo!');
+                
+                const successMessage = isEditMode ? 'Modifiche salvate con successo!' : 'Contenuto pubblicato con successo!';
+                alert('✅ ' + successMessage);
                 
                 setTimeout(() => {
                     window.location.href = '/public/organization-dashboard.html';
@@ -1303,8 +1314,154 @@
                 return;
             }
 
-            console.log('✅ Unified Content Wizard loaded');
+            // Check if edit mode
+            await loadExistingContent(session);
+
+            console.log('✅ Unified Content Wizard loaded', isEditMode ? '(EDIT MODE)' : '(CREATE MODE)');
         });
+
+        // Load existing content for editing
+        async function loadExistingContent(session) {
+            try {
+                // Get organization
+                const { data: orgs } = await supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                let org = orgs;
+                if (!org) {
+                    const { data: orgById } = await supabaseClient
+                        .from('organizations')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    org = orgById;
+                }
+
+                if (!org) return;
+
+                // Check if page exists
+                const { data: page, error } = await supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', org.id)
+                    .maybeSingle();
+
+                if (error || !page || !page.page_data || !page.card_data) {
+                    console.log('📝 Create mode - no existing content');
+                    return;
+                }
+
+                // Edit mode!
+                isEditMode = true;
+                existingPageId = page.id;
+
+                console.log('✏️ Edit mode - loading existing content:', page);
+
+                const pageData = page.page_data;
+                const cardData = page.card_data;
+                const content = pageData.content || {};
+
+                // Populate Step 1 - Info Base
+                document.getElementById('companyName').value = content.companyName || '';
+                const categorySelect = document.getElementById('category');
+                if (categorySelect) {
+                    // Map category if needed
+                    categorySelect.value = content.category || '';
+                }
+                document.getElementById('description').value = content.description || '';
+
+                // Populate Step 2 - Main Image
+                if (content.mainImage) {
+                    wizardData.mainImage = content.mainImage;
+                    const uploadArea = document.getElementById('mainImageUpload');
+                    uploadArea.classList.add('has-image');
+                    uploadArea.innerHTML = `<img src="${content.mainImage}" class="image-preview" alt="Main image">`;
+                }
+
+                // Populate Step 3 - Content
+                document.getElementById('slogan').value = content.slogan || '';
+                const features = content.features || [];
+                document.getElementById('feature1').value = features[0] || '';
+                document.getElementById('feature2').value = features[1] || '';
+                document.getElementById('feature3').value = features[2] || '';
+                document.getElementById('ctaText').value = content.cta?.text || '';
+                document.getElementById('ctaLink').value = content.cta?.link || '';
+
+                // Populate Step 4 - Design
+                if (pageData.layout) {
+                    wizardData.selectedLayout = pageData.layout;
+                    document.querySelector(`.layout-option[data-layout="${pageData.layout}"]`)?.classList.add('selected');
+                }
+                if (pageData.palette) {
+                    wizardData.selectedPalette = pageData.palette;
+                    document.querySelector(`.palette-option[data-palette="${pageData.palette}"]`)?.classList.add('selected');
+                }
+                updateLivePreview();
+
+                // Populate Step 5 - Sections
+                const sections = pageData.sections || {};
+                document.getElementById('sectionHero').checked = sections.hero !== false;
+                document.getElementById('sectionAbout').checked = sections.about === true;
+                document.getElementById('sectionFeatures').checked = sections.features === true;
+                document.getElementById('sectionGallery').checked = sections.gallery === true;
+                document.getElementById('sectionTestimonials').checked = sections.testimonials === true;
+                document.getElementById('sectionCTA').checked = sections.cta === true;
+
+                // Populate Step 6 - Offer
+                document.getElementById('offerTitle').value = cardData.title || '';
+                
+                // Extract prices from features or description if stored there
+                // For now, leave empty if not stored separately
+                document.getElementById('originalPrice').value = '';
+                document.getElementById('offerPrice').value = '';
+                document.getElementById('validFrom').value = '';
+                document.getElementById('validUntil').value = '';
+
+                // Populate Step 7 - Card Details
+                // Extract target audience from features
+                const targetFeature = cardData.features?.find(f => f.icon === 'fa-users');
+                if (targetFeature) {
+                    const target = targetFeature.text.replace('Per ', '');
+                    document.getElementById('targetAudience').value = target;
+                }
+
+                // Populate card features
+                const cardFeatures = cardData.features?.filter(f => f.icon !== 'fa-users') || [];
+                document.getElementById('cardFeature1').value = cardFeatures[0]?.text || '';
+                document.getElementById('cardFeature2').value = cardFeatures[1]?.text || '';
+                document.getElementById('cardFeature3').value = cardFeatures[2]?.text || '';
+
+                // Update all wizardData
+                wizardData.companyName = content.companyName;
+                wizardData.category = content.category;
+                wizardData.description = content.description;
+                wizardData.slogan = content.slogan;
+                wizardData.feature1 = features[0];
+                wizardData.feature2 = features[1];
+                wizardData.feature3 = features[2];
+                wizardData.ctaText = content.cta?.text;
+                wizardData.ctaLink = content.cta?.link;
+                wizardData.sections = sections;
+
+                // Update header to show edit mode
+                const headerTitle = document.querySelector('.wizard-header h1');
+                if (headerTitle) {
+                    headerTitle.innerHTML = '<i class="fas fa-edit"></i> Modifica Contenuto';
+                }
+
+                // Update publish button text
+                const publishBtn = document.getElementById('btnPublish');
+                if (publishBtn) {
+                    publishBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';
+                }
+
+            } catch (error) {
+                console.error('Error loading existing content:', error);
+            }
+        }
     </script>
 </body>
 </html>
