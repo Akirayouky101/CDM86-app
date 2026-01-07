@@ -555,8 +555,16 @@
         </div>
     </div>
 
+    <!-- Supabase UMD -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
     <script src="../assets/js/config.js"></script>
     <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
         let selectedSection = null;
         let sections = [];
         let currentStyle = 'modern';
@@ -957,7 +965,7 @@
         async function savePageToDatabase(status, pageTitle, pageDescription) {
             try {
                 // Get current session
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
                     alert('❌ Devi essere autenticato per salvare la pagina!');
@@ -1033,11 +1041,11 @@
         window.addEventListener('load', async () => {
             // Try to load from database first
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (session) {
                     // Get organization ID
-                    const { data: org } = await supabase
+                    const { data: org } = await supabaseClient
                         .from('organizations')
                         .select('id')
                         .eq('user_id', session.user.id)
@@ -1045,7 +1053,7 @@
 
                     if (org) {
                         // Load existing page
-                        const { data: page } = await supabase
+                        const { data: page } = await supabaseClient
                             .from('organization_pages')
                             .select('*')
                             .eq('organization_id', org.id)
