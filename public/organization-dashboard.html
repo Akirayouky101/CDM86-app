@@ -450,7 +450,7 @@
                 }
                 
                 // Get organization data
-                const { data: orgData, error: orgError } = await supabase
+                const { data: orgData, error: orgError } = await supabaseClient
                     .from('organizations')
                     .select('*')
                     .eq('user_id', session.user.id)
@@ -465,7 +465,7 @@
                 currentOrg = orgData;
                 
                 // Load employees
-                const { data: employees, error: empError } = await supabase
+                const { data: employees, error: empError } = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('organization_id', orgData.id)
@@ -635,7 +635,7 @@
             if (!currentOrg) return;
 
             try {
-                const { data: page, error } = await supabase
+                const { data: page, error } = await supabaseClient
                     .from('organization_pages')
                     .select('*')
                     .eq('organization_id', currentOrg.id)
