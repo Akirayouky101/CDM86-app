@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Builder - CDM86</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Header */
+        .builder-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .builder-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main Layout */
+        .builder-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Editor Panel */
+        .editor-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .editor-section {
+            margin-bottom: 2rem;
+        }
+
+        .editor-section h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+        }
+
+        .image-upload.has-image {
+            padding: 0;
+            border-style: solid;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .upload-placeholder {
+            color: #94a3b8;
+        }
+
+        .upload-placeholder i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Features List */
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .feature-item input {
+            flex: 1;
+        }
+
+        .feature-item select {
+            width: 120px;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-add {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .preview-panel h2 {
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        /* Card Preview */
+        .card-preview {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .card-preview:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #fbbf24;
+            color: #1e3a8a;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #1e293b;
+        }
+
+        .card-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .card-features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .card-feature i {
+            color: #667eea;
+        }
+
+        .card-cta {
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .card-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Badge Selector */
+        .badge-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .badge-option {
+            padding: 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .badge-option:hover {
+            border-color: #667eea;
+        }
+
+        .badge-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="builder-header">
+        <h1><i class="fas fa-id-card"></i> Card Builder</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='/public/organization-dashboard.html'">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </button>
+            <button class="btn btn-secondary" onclick="saveDraft()">
+                <i class="fas fa-save"></i> Salva Bozza
+            </button>
+            <button class="btn btn-primary" onclick="publishCard()">
+                <i class="fas fa-check"></i> Pubblica Card
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="builder-container">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <!-- Image Section -->
+            <div class="editor-section">
+                <h3><i class="fas fa-image"></i> Immagine Copertina</h3>
+                <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>Click per caricare immagine</div>
+                        <small>JPG, PNG, max 5MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Info -->
+            <div class="editor-section">
+                <h3><i class="fas fa-info-circle"></i> Informazioni Base</h3>
+                <div class="form-group">
+                    <label>Titolo Card</label>
+                    <input type="text" id="cardTitle" placeholder="Es: Offerta Speciale McDonald's" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Descrizione Breve</label>
+                    <textarea id="cardDescription" placeholder="Descrizione coinvolgente della tua offerta..." oninput="updatePreview()"></textarea>
+                </div>
+            </div>
+
+            <!-- Badge -->
+            <div class="editor-section">
+                <h3><i class="fas fa-tag"></i> Badge</h3>
+                <div class="badge-options">
+                    <div class="badge-option" onclick="selectBadge('')">Nessuno</div>
+                    <div class="badge-option" onclick="selectBadge('NUOVO')">NUOVO</div>
+                    <div class="badge-option" onclick="selectBadge('TOP')">TOP</div>
+                    <div class="badge-option" onclick="selectBadge('OFFERTA')">OFFERTA</div>
+                    <div class="badge-option" onclick="selectBadge('HOT')">HOT</div>
+                    <div class="badge-option" onclick="selectBadge('PROMO')">PROMO</div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="editor-section">
+                <h3><i class="fas fa-list-check"></i> Caratteristiche</h3>
+                <div class="features-list" id="featuresList"></div>
+                <button class="btn-add" onclick="addFeature()">
+                    <i class="fas fa-plus"></i> Aggiungi Caratteristica
+                </button>
+            </div>
+
+            <!-- CTA -->
+            <div class="editor-section">
+                <h3><i class="fas fa-hand-pointer"></i> Pulsante</h3>
+                <div class="form-group">
+                    <label>Testo Pulsante</label>
+                    <input type="text" id="ctaText" placeholder="Scopri di più" value="Scopri di più" oninput="updatePreview()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <h2><i class="fas fa-eye"></i> Anteprima Live</h2>
+            <div class="card-preview" id="cardPreview">
+                <div style="position: relative;">
+                    <img class="card-image" id="previewImage" src="" alt="Immagine card">
+                    <div class="card-badge" id="previewBadge" style="display: none;"></div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title" id="previewTitle">Titolo della tua Card</h3>
+                    <p class="card-description" id="previewDescription">Inserisci una descrizione accattivante per la tua card promozionale...</p>
+                    <div class="card-features" id="previewFeatures"></div>
+                    <a href="#" class="card-cta" id="previewCTA">Scopri di più</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentBadge = '';
+        let currentImage = '';
+        let features = [];
+
+        // Initialize
+        window.addEventListener('load', loadExistingCard);
+
+        // Load existing card
+        async function loadExistingCard() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    alert('Devi essere loggato!');
+                    window.location.href = '/public/login.html';
+                    return;
+                }
+
+                // Get organization
+                const { data: org } = await supabaseClient
+                    .from('organizations')
+                    .select('id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (!org) return;
+
+                // Load existing card
+                const { data: page } = await supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', org.id)
+                    .maybeSingle();
+
+                if (page && page.card_data) {
+                    const card = page.card_data;
+                    document.getElementById('cardTitle').value = card.title || '';
+                    document.getElementById('cardDescription').value = card.description || '';
+                    document.getElementById('ctaText').value = card.ctaText || 'Scopri di più';
+                    
+                    if (card.image) {
+                        currentImage = card.image;
+                        showImagePreview(card.image);
+                    }
+                    
+                    if (card.badge) {
+                        selectBadge(card.badge);
+                    }
+                    
+                    if (card.features && card.features.length > 0) {
+                        features = card.features;
+                        features.forEach(() => addFeature());
+                        features.forEach((f, i) => {
+                            document.querySelectorAll('.feature-item input')[i].value = f.text;
+                            document.querySelectorAll('.feature-item select')[i].value = f.icon;
+                        });
+                    }
+                    
+                    updatePreview();
+                }
+            } catch (error) {
+                console.error('Error loading card:', error);
+            }
+        }
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = e.target.result;
+                showImagePreview(currentImage);
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showImagePreview(src) {
+            const upload = document.getElementById('imageUpload');
+            upload.classList.add('has-image');
+            upload.innerHTML = `<img src="${src}" class="image-preview" alt="Preview">`;
+        }
+
+        // Select badge
+        function selectBadge(badge) {
+            currentBadge = badge;
+            document.querySelectorAll('.badge-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.textContent === badge || (badge === '' && opt.textContent === 'Nessuno')) {
+                    opt.classList.add('selected');
+                }
+            });
+            updatePreview();
+        }
+
+        // Add feature
+        function addFeature() {
+            const list = document.getElementById('featuresList');
+            const item = document.createElement('div');
+            item.className = 'feature-item';
+            item.innerHTML = `
+                <select onchange="updatePreview()">
+                    <option value="fa-check">✓ Check</option>
+                    <option value="fa-star">★ Stella</option>
+                    <option value="fa-heart">♥ Cuore</option>
+                    <option value="fa-gift">🎁 Regalo</option>
+                    <option value="fa-trophy">🏆 Trofeo</option>
+                    <option value="fa-bolt">⚡ Fulmine</option>
+                </select>
+                <input type="text" placeholder="Es: Consegna gratuita" oninput="updatePreview()">
+                <button class="btn-remove" onclick="removeFeature(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            list.appendChild(item);
+            updatePreview();
+        }
+
+        function removeFeature(btn) {
+            btn.parentElement.remove();
+            updatePreview();
+        }
+
+        // Update preview
+        function updatePreview() {
+            const title = document.getElementById('cardTitle').value || 'Titolo della tua Card';
+            const description = document.getElementById('cardDescription').value || 'Inserisci una descrizione accattivante...';
+            const ctaText = document.getElementById('ctaText').value || 'Scopri di più';
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewDescription').textContent = description;
+            document.getElementById('previewCTA').textContent = ctaText;
+
+            if (currentImage) {
+                document.getElementById('previewImage').src = currentImage;
+                document.getElementById('previewImage').style.display = 'block';
+            }
+
+            const badgeEl = document.getElementById('previewBadge');
+            if (currentBadge) {
+                badgeEl.textContent = currentBadge;
+                badgeEl.style.display = 'block';
+            } else {
+                badgeEl.style.display = 'none';
+            }
+
+            // Update features
+            const featuresContainer = document.getElementById('previewFeatures');
+            featuresContainer.innerHTML = '';
+            document.querySelectorAll('.feature-item').forEach(item => {
+                const icon = item.querySelector('select').value;
+                const text = item.querySelector('input').value;
+                if (text) {
+                    const featureEl = document.createElement('div');
+                    featureEl.className = 'card-feature';
+                    featureEl.innerHTML = `<i class="fas ${icon}"></i> <span>${text}</span>`;
+                    featuresContainer.appendChild(featureEl);
+                }
+            });
+        }
+
+        // Save draft
+        async function saveDraft() {
+            await saveCard(false);
+        }
+
+        // Publish card
+        async function publishCard() {
+            if (!document.getElementById('cardTitle').value) {
+                alert('Inserisci un titolo!');
+                return;
+            }
+            if (!currentImage) {
+                alert('Carica un\'immagine!');
+                return;
+            }
+            await saveCard(true);
+        }
+
+        // Save card to database
+        async function saveCard(publish) {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    alert('Sessione scaduta!');
+                    return;
+                }
+
+                // Get organization
+                const { data: org } = await supabaseClient
+                    .from('organizations')
+                    .select('id, name')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (!org) {
+                    alert('Organizzazione non trovata!');
+                    return;
+                }
+
+                // Collect features
+                const featuresData = [];
+                document.querySelectorAll('.feature-item').forEach(item => {
+                    const icon = item.querySelector('select').value;
+                    const text = item.querySelector('input').value;
+                    if (text) {
+                        featuresData.push({ icon, text });
+                    }
+                });
+
+                // Build card data
+                const cardData = {
+                    title: document.getElementById('cardTitle').value,
+                    description: document.getElementById('cardDescription').value,
+                    image: currentImage,
+                    badge: currentBadge,
+                    features: featuresData,
+                    ctaText: document.getElementById('ctaText').value || 'Scopri di più'
+                };
+
+                // Check if page exists
+                const { data: existing } = await supabaseClient
+                    .from('organization_pages')
+                    .select('id')
+                    .eq('organization_id', org.id)
+                    .maybeSingle();
+
+                if (existing) {
+                    // Update
+                    const { error } = await supabaseClient
+                        .from('organization_pages')
+                        .update({
+                            card_data: cardData,
+                            card_published: publish
+                        })
+                        .eq('id', existing.id);
+
+                    if (error) throw error;
+                } else {
+                    // Insert - need to generate slug
+                    const { data: slugData } = await supabaseClient
+                        .rpc('generate_organization_slug', { org_name: org.name });
+
+                    const { error } = await supabaseClient
+                        .from('organization_pages')
+                        .insert({
+                            organization_id: org.id,
+                            slug: slugData,
+                            card_data: cardData,
+                            card_published: publish
+                        });
+
+                    if (error) throw error;
+                }
+
+                alert(publish ? '✅ Card pubblicata con successo!' : '💾 Bozza salvata!');
+                
+                if (publish) {
+                    setTimeout(() => {
+                        window.location.href = '/public/organization-dashboard.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error saving card:', error);
+                alert('Errore nel salvataggio: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

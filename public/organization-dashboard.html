@@ -412,6 +412,20 @@
                 </div>
             </div>
             
+            <!-- Promotion Card -->
+            <div class="card">
+                <h2><i class="fas fa-id-card"></i> Card Promozione</h2>
+                <div id="card-status">
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Crea la card che apparirà nella pagina Promozioni per attrarre nuovi clienti.
+                    </p>
+                    <button class="action-btn" onclick="openCardBuilder()">
+                        <i class="fas fa-plus"></i> Crea/Modifica Card
+                    </button>
+                    <div id="card-info" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
             <!-- Employees List -->
             <div class="card">
                 <h2><i class="fas fa-users"></i> Dipendenti/Membri Registrati</h2>
@@ -482,6 +496,7 @@
                 generateQRCode(orgData.referral_code);
                 displayEmployees(employees || []);
                 loadPageStatus(); // Load custom page status
+                loadCardStatus(); // Load card status
                 
                 // Show dashboard
                 document.getElementById('loading').style.display = 'none';
@@ -698,6 +713,67 @@
         }
 
         function openPageBuilder() {
+            window.location.href = "/public/page-builder.html";
+        }
+
+        function openCardBuilder() {
+            window.location.href = '/public/card-builder.html';
+        }
+
+        // Load card status
+        async function loadCardStatus() {
+            if (!currentOrg) return;
+
+            try {
+                const { data: page, error } = await supabaseClient
+                    .from('organization_pages')
+                    .select('card_data, card_published, slug')
+                    .eq('organization_id', currentOrg.id)
+                    .maybeSingle();
+
+                const cardInfo = document.getElementById('card-info');
+
+                if (page && page.card_data && page.card_data.title) {
+                    const statusBadge = page.card_published ? 
+                        '<span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">✓ Pubblicata</span>' :
+                        '<span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">📝 Bozza</span>';
+                    
+                    cardInfo.innerHTML = \`
+                        <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <strong style="color: #1e293b;">\${page.card_data.title}</strong>
+                                \${statusBadge}
+                            </div>
+                            \${page.card_published ? \`
+                                <p style="margin: 5px 0; color: #64748b; font-size: 0.9rem;">
+                                    <i class="fas fa-check-circle" style="color: #10b981;"></i> 
+                                    Visibile in <a href="/public/promotions.html" style="color: #667eea;">Promozioni</a>
+                                </p>
+                            \` : \`
+                                <p style="margin: 5px 0; color: #64748b; font-size: 0.9rem;">
+                                    <i class="fas fa-info-circle" style="color: #f59e0b;"></i> 
+                                    Card non ancora pubblicata
+                                </p>
+                            \`}
+                        </div>
+                    \`;
+                } else {
+                    cardInfo.innerHTML = \`
+                        <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <i class="fas fa-info-circle" style="font-size: 32px; color: #f59e0b; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; color: #92400e; font-weight: 600;">
+                                Non hai ancora creato una card promozione
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #78350f;">
+                                Crea la tua card per apparire nella pagina Promozioni
+                            </p>
+                        </div>
+                    \`;
+                }
+            } catch (error) {
+                console.error('Error loading card status:', error);
+            }
+        }
             window.location.href = '/public/page-builder.html';
         }
         

@@ -487,26 +487,6 @@
                 </div>
             </div>
 
-            <!-- Organization Cards Section -->
-            <div id="organization-cards-section" style="margin-bottom: 3rem;">
-                <h2 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-building" style="color: #667eea;"></i>
-                    Aziende Partner
-                </h2>
-                <div class="promotions-grid" id="organization-cards">
-                    <!-- Loaded dynamically from database -->
-                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>Caricamento aziende partner...</p>
-                    </div>
-                </div>
-            </div>
-
-            <h2 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-gift" style="color: #667eea;"></i>
-                Promozioni in Evidenza
-            </h2>
-
             <div class="promotions-grid" id="promotions-grid">
                 
                 <!-- Promotion Card 1 -->
@@ -895,102 +875,6 @@
                 overlay.classList.remove('active');
             }
         }
-
-        // Load organization cards from database
-        async function loadOrganizationCards() {
-            console.log('🏢 Loading organization cards...');
-            const container = document.getElementById('organization-cards');
-            
-            if (!window.supabaseClient) {
-                console.error('❌ Supabase not ready');
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
-                return;
-            }
-
-            try {
-                // Query organization_pages for published cards with organization data
-                const { data: orgPages, error } = await window.supabaseClient
-                    .from('organization_pages')
-                    .select('*')
-                    .eq('card_published', true)
-                    .order('updated_at', { ascending: false });
-
-                if (error) {
-                    console.error('❌ Error loading organization cards:', error);
-                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
-                    return;
-                }
-
-                console.log('✅ Loaded organization cards:', orgPages);
-
-                // If no cards, hide the section
-                if (!orgPages || orgPages.length === 0) {
-                    document.getElementById('organization-cards-section').style.display = 'none';
-                    return;
-                }
-
-                // Fetch organization data for each card
-                const orgIds = [...new Set(orgPages.map(p => p.organization_id))];
-                const { data: orgs, error: orgError } = await window.supabaseClient
-                    .from('organizations')
-                    .select('id, name, logo_url')
-                    .in('id', orgIds);
-
-                if (orgError) {
-                    console.error('❌ Error loading organizations:', orgError);
-                }
-
-                // Create org lookup map
-                const orgMap = {};
-                if (orgs) {
-                    orgs.forEach(org => {
-                        orgMap[org.id] = org;
-                    });
-                }
-
-                // Render cards
-                container.innerHTML = orgPages.map(page => {
-                    const card = page.card_data || {};
-                    const org = orgMap[page.organization_id] || {};
-                    const badge = card.badge || '';
-                    const features = card.features || [];
-                    
-                    return `
-                        <div class="promo-card">
-                            <div class="promo-image">
-                                ${card.image ? `<img src="${card.image}" alt="${card.title || org.name}">` : ''}
-                                ${badge ? `<div class="promo-badge">${badge}</div>` : ''}
-                            </div>
-                            <div class="promo-content">
-                                <h3>${card.title || org.name || 'Azienda Partner'}</h3>
-                                <p>${card.description || ''}</p>
-                                ${features.length > 0 ? `
-                                    <ul class="promo-features">
-                                        ${features.map(f => `
-                                            <li>
-                                                <i class="${f.icon || 'fas fa-check'}"></i>
-                                                <span>${f.text || ''}</span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                ` : ''}
-                            </div>
-                            <div class="promo-cta">
-                                <a href="/public/azienda.html?slug=${page.slug}" class="cta-btn">
-                                    ${card.ctaText || 'Scopri di più'}
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                console.log('✅ Organization cards rendered');
-
-            } catch (err) {
-                console.error('❌ Exception loading organization cards:', err);
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
-            }
-        }
         
         // Initialize - Wait for Supabase to be ready
         window.addEventListener('supabase-ready', async () => {
@@ -1013,7 +897,6 @@
                 }
             }
             
-            await loadOrganizationCards(); // Load organization cards first
             await loadPromotions();
             setupEventListeners();
             setupLoginRequiredModal();
