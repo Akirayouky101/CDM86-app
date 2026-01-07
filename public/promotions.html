@@ -976,7 +976,7 @@
                                 ` : ''}
                             </div>
                             <div class="promo-cta">
-                                <a href="/public/azienda.html?slug=${page.slug}" class="cta-btn">
+                                <a href="${card.ctaLink || '#'}" class="cta-btn" ${card.ctaLink ? 'target="_blank"' : ''}>
                                     ${card.ctaText || 'Scopri di più'}
                                 </a>
                             </div>
