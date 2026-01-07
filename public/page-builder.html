@@ -708,6 +708,54 @@
             margin: 0;
             font-weight: 500;
         }
+
+        /* Image Upload in Wizard */
+        .image-upload-wizard {
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .image-upload-wizard:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .image-upload-wizard i {
+            font-size: 2.5rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .image-upload-wizard.has-image {
+            padding: 0;
+            border-style: solid;
+            border-color: #10b981;
+        }
+
+        .wizard-image-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .image-upload-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .image-upload-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
     </style>
 </head>
 <body>
@@ -726,10 +774,14 @@
                 </div>
                 <div class="progress-step" id="progressStep2">
                     <div class="progress-number">2</div>
-                    <div class="progress-label">Contenuti</div>
+                    <div class="progress-label">Immagini</div>
                 </div>
                 <div class="progress-step" id="progressStep3">
                     <div class="progress-number">3</div>
+                    <div class="progress-label">Contenuti</div>
+                </div>
+                <div class="progress-step" id="progressStep4">
+                    <div class="progress-number">4</div>
                     <div class="progress-label">Sezioni</div>
                 </div>
             </div>
@@ -765,8 +817,37 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Contenuti -->
+                <!-- Step 2: Immagini -->
                 <div class="wizard-step" id="wizardStep2">
+                    <div class="image-upload-group">
+                        <label>Immagine Hero (copertina) <span style="color: #ef4444;">*</span></label>
+                        <div class="image-upload-wizard" id="heroImageUpload" onclick="document.getElementById('heroImageInput').click()">
+                            <input type="file" id="heroImageInput" accept="image/*" style="display: none;" onchange="handleWizardImageUpload(event, 'hero')">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>Clicca per caricare immagine principale</div>
+                                <small>JPG, PNG, max 5MB</small>
+                            </div>
+                        </div>
+                        <small>Immagine grande che appare in cima alla pagina</small>
+                    </div>
+
+                    <div class="image-upload-group">
+                        <label>Immagine "Chi Siamo" (opzionale)</label>
+                        <div class="image-upload-wizard" id="aboutImageUpload" onclick="document.getElementById('aboutImageInput').click()">
+                            <input type="file" id="aboutImageInput" accept="image/*" style="display: none;" onchange="handleWizardImageUpload(event, 'about')">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>Clicca per caricare (opzionale)</div>
+                                <small>JPG, PNG, max 5MB</small>
+                            </div>
+                        </div>
+                        <small>Immagine che accompagna la sezione "Chi Siamo"</small>
+                    </div>
+                </div>
+
+                <!-- Step 3: Contenuti -->
+                <div class="wizard-step" id="wizardStep3">
                     <div class="wizard-field">
                         <label>Slogan o frase principale <span style="color: #ef4444;">*</span></label>
                         <input type="text" id="wizardSlogan" placeholder="Es: Il gusto della tradizione italiana">
@@ -789,8 +870,8 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Sezioni da includere -->
-                <div class="wizard-step" id="wizardStep3">
+                <!-- Step 4: Sezioni da includere -->
+                <div class="wizard-step" id="wizardStep4">
                     <div class="wizard-field">
                         <label>Seleziona le sezioni da includere <span style="color: #ef4444;">*</span></label>
                         <small style="margin-bottom: 1rem;">Scegli quali elementi vuoi nella tua pagina</small>
@@ -1042,7 +1123,8 @@
                     text: 'Testo del paragrafo principale',
                     ctaText: 'Inizia Ora',
                     ctaLink: '#',
-                    background: '#2563eb'
+                    background: '#2563eb',
+                    backgroundImage: null
                 },
                 'text-image': {
                     title: 'Titolo Sezione',
@@ -1115,11 +1197,11 @@
                         <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
                         <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div style="background: ${section.data.background}; color: white; padding: 4rem 2rem; text-align: center; border-radius: 0.5rem;">
-                        <h1 style="font-size: 3rem; margin-bottom: 1rem;">${section.data.title}</h1>
-                        <h2 style="font-size: 1.5rem; color: #fbbf24; margin-bottom: 1rem;">${section.data.subtitle}</h2>
-                        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95;">${section.data.text}</p>
-                        <button style="background: #fbbf24; color: #1e3a8a; padding: 1rem 2rem; border: none; border-radius: 2rem; font-weight: 700; font-size: 1.125rem;">${section.data.ctaText}</button>
+                    <div style="background: ${section.data.backgroundImage ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${section.data.backgroundImage})` : section.data.background}; background-size: cover; background-position: center; color: white; padding: 4rem 2rem; text-align: center; border-radius: 0.5rem;">
+                        <h1 style="font-size: 3rem; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${section.data.title}</h1>
+                        <h2 style="font-size: 1.5rem; color: #fbbf24; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${section.data.subtitle}</h2>
+                        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${section.data.text}</p>
+                        <button style="background: #fbbf24; color: #1e3a8a; padding: 1rem 2rem; border: none; border-radius: 2rem; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">${section.data.ctaText}</button>
                     </div>
                 `,
                 'text-image': `
@@ -1582,7 +1664,83 @@
         // ============================================
 
         let currentWizardStep = 1;
-        const wizardData = {};
+        const wizardData = {
+            images: {
+                hero: null,
+                about: null
+            }
+        };
+
+        // Handle wizard image upload
+        async function handleWizardImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                alert('⚠️ Per favore carica solo file immagine!');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('⚠️ Immagine troppo grande! Max 5MB');
+                return;
+            }
+
+            try {
+                const uploadDiv = document.getElementById(`${type}ImageUpload`);
+                uploadDiv.innerHTML = '<div style="padding: 2rem; text-align: center;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #2563eb;"></i><p style="margin-top: 1rem; color: #64748b;">Caricamento...</p></div>';
+
+                // Get current user
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    throw new Error('Devi essere loggato per caricare immagini');
+                }
+
+                // Generate unique filename
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${session.user.id}/page-${type}-${Date.now()}.${fileExt}`;
+
+                // Upload to Supabase Storage
+                const { data, error } = await supabaseClient.storage
+                    .from('organization-images')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('organization-images')
+                    .getPublicUrl(fileName);
+
+                wizardData.images[type] = publicUrlData.publicUrl;
+                
+                // Show preview
+                uploadDiv.classList.add('has-image');
+                uploadDiv.innerHTML = `<img src="${publicUrlData.publicUrl}" class="wizard-image-preview" alt="${type} preview">`;
+
+                console.log(`✅ ${type} image uploaded:`, publicUrlData.publicUrl);
+
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('❌ Errore nel caricamento: ' + error.message);
+                
+                // Reset upload
+                const uploadDiv = document.getElementById(`${type}ImageUpload`);
+                uploadDiv.classList.remove('has-image');
+                uploadDiv.innerHTML = `
+                    <input type="file" id="${type}ImageInput" accept="image/*" style="display: none;" onchange="handleWizardImageUpload(event, '${type}')">
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>Clicca per caricare${type === 'about' ? ' (opzionale)' : ' immagine principale'}</div>
+                        <small>JPG, PNG, max 5MB</small>
+                    </div>
+                `;
+            }
+        }
 
         function openWizard() {
             document.getElementById('wizardModal').classList.add('active');
@@ -1640,8 +1798,8 @@
             const btnGenerate = document.getElementById('btnGenerate');
 
             btnPrev.style.display = currentWizardStep === 1 ? 'none' : 'block';
-            btnNext.style.display = currentWizardStep === 3 ? 'none' : 'block';
-            btnGenerate.style.display = currentWizardStep === 3 ? 'block' : 'none';
+            btnNext.style.display = currentWizardStep === 4 ? 'none' : 'block';
+            btnGenerate.style.display = currentWizardStep === 4 ? 'block' : 'none';
         }
 
         function validateWizardStep(step) {
@@ -1665,6 +1823,13 @@
             }
 
             if (step === 2) {
+                if (!wizardData.images.hero) {
+                    alert('⚠️ Per favore carica almeno l\'immagine principale (Hero)');
+                    return false;
+                }
+            }
+
+            if (step === 3) {
                 const slogan = document.getElementById('wizardSlogan').value.trim();
                 
                 if (!slogan) {
@@ -1673,7 +1838,7 @@
                 }
             }
 
-            if (step === 3) {
+            if (step === 4) {
                 const hasSection = document.querySelector('.section-checkboxes input[type="checkbox"]:checked');
                 
                 if (!hasSection) {
@@ -1693,6 +1858,10 @@
             }
 
             if (step === 2) {
+                // Images already saved in wizardData.images by upload function
+            }
+
+            if (step === 3) {
                 wizardData.slogan = document.getElementById('wizardSlogan').value.trim();
                 wizardData.feature1 = document.getElementById('wizardFeature1').value.trim();
                 wizardData.feature2 = document.getElementById('wizardFeature2').value.trim();
@@ -1701,7 +1870,7 @@
                 wizardData.ctaLink = document.getElementById('wizardCTALink').value.trim();
             }
 
-            if (step === 3) {
+            if (step === 4) {
                 wizardData.sections = {
                     hero: document.getElementById('sectionHero').checked,
                     about: document.getElementById('sectionAbout').checked,
@@ -1714,12 +1883,12 @@
 
         function generatePage() {
             // Validate last step
-            if (!validateWizardStep(3)) {
+            if (!validateWizardStep(4)) {
                 return;
             }
 
             // Save last step data
-            saveWizardStepData(3);
+            saveWizardStepData(4);
 
             // Clear existing sections
             sections = [];
@@ -1749,6 +1918,7 @@
                     heroSection.data.ctaText = wizardData.cta || 'Scopri di più';
                     heroSection.data.ctaLink = wizardData.ctaLink || '#';
                     heroSection.data.background = categoryColors[wizardData.category] || '#2563eb';
+                    heroSection.data.backgroundImage = wizardData.images.hero; // Add hero image
                 }
 
                 // Generate About section (text-image) if selected
@@ -1757,6 +1927,7 @@
                     const aboutSection = sections[sections.length - 1];
                     aboutSection.data.title = `Chi siamo`;
                     aboutSection.data.text = wizardData.description;
+                    aboutSection.data.imageUrl = wizardData.images.about || 'https://via.placeholder.com/500x400';
                     aboutSection.data.imagePosition = 'right';
                 }
 
