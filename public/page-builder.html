@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Builder - CDM86</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Header */
+        .builder-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .builder-header h1 {
+            font-size: 1.5rem;
+            color: #2563eb;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Main Layout */
+        .builder-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            height: calc(100vh - 73px);
+        }
+
+        /* Left Sidebar - Templates */
+        .templates-sidebar {
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .template-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: move;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .template-card i {
+            font-size: 1.5rem;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .template-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .template-card p {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Canvas - Center */
+        .canvas-area {
+            background: #e2e8f0;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .canvas-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 500px;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .canvas-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            color: #94a3b8;
+            font-size: 1.125rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .canvas-empty i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Section in Canvas */
+        .section-block {
+            position: relative;
+            padding: 3rem 2rem;
+            border: 2px dashed transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .section-block:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .section-block.selected {
+            border-color: #2563eb;
+            border-style: solid;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .section-controls {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: none;
+            gap: 0.5rem;
+        }
+
+        .section-block:hover .section-controls,
+        .section-block.selected .section-controls {
+            display: flex;
+        }
+
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 0.25rem;
+            background: #fff;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .control-btn.danger:hover {
+            background: #ef4444;
+        }
+
+        /* Right Sidebar - Properties */
+        .properties-sidebar {
+            background: #fff;
+            border-left: 1px solid #e2e8f0;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .properties-empty {
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .properties-empty i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .property-group {
+            margin-bottom: 2rem;
+        }
+
+        .property-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-group input[type="text"],
+        .property-group input[type="url"],
+        .property-group textarea,
+        .property-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .property-group input:focus,
+        .property-group textarea:focus,
+        .property-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .property-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .color-picker input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+
+        .image-upload {
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .image-upload:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .image-upload i {
+            font-size: 2rem;
+            color: #94a3b8;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .template-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-option:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .template-option.selected {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .template-option i {
+            font-size: 2.5rem;
+            color: #2563eb;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .template-option h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-option p {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="builder-header">
+        <h1><i class="fas fa-magic"></i> Page Builder</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="previewPage()">
+                <i class="fas fa-eye"></i> Preview
+            </button>
+            <button class="btn btn-secondary" onclick="saveDraft()">
+                <i class="fas fa-save"></i> Salva Bozza
+            </button>
+            <button class="btn btn-success" onclick="publishPage()">
+                <i class="fas fa-rocket"></i> Pubblica
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="builder-container">
+        <!-- Left Sidebar - Templates -->
+        <div class="templates-sidebar">
+            <div class="sidebar-section">
+                <h3>📐 Layout Sezioni</h3>
+                
+                <div class="template-card" draggable="true" data-type="hero">
+                    <i class="fas fa-heading"></i>
+                    <h4>Hero Section</h4>
+                    <p>Titolo grande + testo + CTA</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="text-image">
+                    <i class="fas fa-columns"></i>
+                    <h4>Testo + Immagine</h4>
+                    <p>Due colonne affiancate</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="cards-3">
+                    <i class="fas fa-th"></i>
+                    <h4>3 Card</h4>
+                    <p>Griglia 3 colonne</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="cards-4">
+                    <i class="fas fa-th-large"></i>
+                    <h4>4 Card</h4>
+                    <p>Griglia 4 colonne</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="stats">
+                    <i class="fas fa-chart-bar"></i>
+                    <h4>Statistiche</h4>
+                    <p>Numeri + etichette</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="cta">
+                    <i class="fas fa-bullhorn"></i>
+                    <h4>Call to Action</h4>
+                    <p>Testo + bottone centrale</p>
+                </div>
+
+                <div class="template-card" draggable="true" data-type="animation">
+                    <i class="fas fa-running"></i>
+                    <h4>Animazione Omini</h4>
+                    <p>Stick figures animati</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-area">
+            <div class="canvas-inner" id="canvas">
+                <div class="canvas-empty">
+                    <div>
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Trascina qui i componenti dalla barra laterale<br>per iniziare a costruire la tua pagina</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Properties -->
+        <div class="properties-sidebar" id="properties">
+            <div class="properties-empty">
+                <i class="fas fa-sliders-h"></i>
+                <p>Seleziona una sezione per modificarne le proprietà</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Selection Modal -->
+    <div class="modal" id="templateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Scegli uno Stile</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            
+            <div class="template-grid">
+                <div class="template-option" data-style="modern">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Moderno</h3>
+                    <p>Gradiente blu, cards glassmorphism</p>
+                </div>
+
+                <div class="template-option" data-style="minimal">
+                    <i class="fas fa-square"></i>
+                    <h3>Minimale</h3>
+                    <p>Bianco e nero, linee pulite</p>
+                </div>
+
+                <div class="template-option" data-style="colorful">
+                    <i class="fas fa-palette"></i>
+                    <h3>Colorato</h3>
+                    <p>Colori vivaci, energico</p>
+                </div>
+
+                <div class="template-option" data-style="dark">
+                    <i class="fas fa-moon"></i>
+                    <h3>Dark Mode</h3>
+                    <p>Sfondo scuro, accenti luminosi</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="applyTemplate()">
+                Applica Stile
+            </button>
+        </div>
+    </div>
+
+    <script src="../assets/js/config.js"></script>
+    <script>
+        let selectedSection = null;
+        let sections = [];
+        let currentStyle = 'modern';
+        let draggedType = null;
+
+        // Drag and Drop
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedType = e.target.dataset.type;
+                e.target.style.opacity = '0.5';
+            });
+
+            card.addEventListener('dragend', (e) => {
+                e.target.style.opacity = '1';
+            });
+        });
+
+        const canvas = document.getElementById('canvas');
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvas.style.background = 'rgba(37, 99, 235, 0.05)';
+        });
+
+        canvas.addEventListener('dragleave', () => {
+            canvas.style.background = '#fff';
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.style.background = '#fff';
+            
+            if (draggedType) {
+                addSection(draggedType);
+                draggedType = null;
+            }
+        });
+
+        // Add Section
+        function addSection(type) {
+            const emptyState = canvas.querySelector('.canvas-empty');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const sectionId = `section-${Date.now()}`;
+            const section = {
+                id: sectionId,
+                type: type,
+                data: getSectionDefaultData(type)
+            };
+
+            sections.push(section);
+            renderSection(section);
+        }
+
+        // Get Default Data for Section Type
+        function getSectionDefaultData(type) {
+            const defaults = {
+                hero: {
+                    title: 'Il Tuo Titolo Qui',
+                    subtitle: 'Sottotitolo descrittivo',
+                    text: 'Testo del paragrafo principale',
+                    ctaText: 'Inizia Ora',
+                    ctaLink: '#',
+                    background: '#2563eb'
+                },
+                'text-image': {
+                    title: 'Titolo Sezione',
+                    text: 'Descrizione della sezione con testo a sinistra e immagine a destra',
+                    imageUrl: 'https://via.placeholder.com/500x400',
+                    imagePosition: 'right'
+                },
+                'cards-3': {
+                    title: 'Le Nostre Card',
+                    cards: [
+                        { icon: 'fa-star', title: 'Card 1', text: 'Descrizione prima card' },
+                        { icon: 'fa-heart', title: 'Card 2', text: 'Descrizione seconda card' },
+                        { icon: 'fa-rocket', title: 'Card 3', text: 'Descrizione terza card' }
+                    ]
+                },
+                'cards-4': {
+                    title: 'I Nostri Servizi',
+                    cards: [
+                        { icon: 'fa-gift', title: 'Card 1', text: 'Descrizione' },
+                        { icon: 'fa-star', title: 'Card 2', text: 'Descrizione' },
+                        { icon: 'fa-trophy', title: 'Card 3', text: 'Descrizione' },
+                        { icon: 'fa-medal', title: 'Card 4', text: 'Descrizione' }
+                    ]
+                },
+                stats: {
+                    stats: [
+                        { number: '10€', label: 'Referral Diretto' },
+                        { number: '5€', label: 'Referral Indiretto' },
+                        { number: '30€', label: 'Azienda Partner' }
+                    ]
+                },
+                cta: {
+                    text: 'Vuoi farne parte anche tu?',
+                    ctaText: 'Registrati Gratis',
+                    ctaLink: '#',
+                    background: '#2563eb'
+                },
+                animation: {
+                    title: 'Animazione',
+                    description: 'Omino animato che cammina',
+                    animationType: 'walking'
+                }
+            };
+
+            return defaults[type] || {};
+        }
+
+        // Render Section
+        function renderSection(section) {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'section-block';
+            sectionDiv.id = section.id;
+            sectionDiv.innerHTML = getSectionHTML(section);
+            
+            sectionDiv.addEventListener('click', (e) => {
+                if (!e.target.closest('.control-btn')) {
+                    selectSection(section.id);
+                }
+            });
+
+            canvas.appendChild(sectionDiv);
+        }
+
+        // Get Section HTML based on type
+        function getSectionHTML(section) {
+            const templates = {
+                hero: `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="background: ${section.data.background}; color: white; padding: 4rem 2rem; text-align: center; border-radius: 0.5rem;">
+                        <h1 style="font-size: 3rem; margin-bottom: 1rem;">${section.data.title}</h1>
+                        <h2 style="font-size: 1.5rem; color: #fbbf24; margin-bottom: 1rem;">${section.data.subtitle}</h2>
+                        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95;">${section.data.text}</p>
+                        <button style="background: #fbbf24; color: #1e3a8a; padding: 1rem 2rem; border: none; border-radius: 2rem; font-weight: 700; font-size: 1.125rem;">${section.data.ctaText}</button>
+                    </div>
+                `,
+                'text-image': `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                        <div ${section.data.imagePosition === 'right' ? '' : 'style="order: 2;"'}>
+                            <h2 style="font-size: 2rem; margin-bottom: 1rem; color: #2563eb;">${section.data.title}</h2>
+                            <p style="font-size: 1.125rem; line-height: 1.7; color: #475569;">${section.data.text}</p>
+                        </div>
+                        <div ${section.data.imagePosition === 'right' ? 'style="order: 2;"' : ''}>
+                            <img src="${section.data.imageUrl}" style="width: 100%; border-radius: 0.75rem;" alt="Section image">
+                        </div>
+                    </div>
+                `,
+                'cards-3': `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title}</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                        ${section.data.cards.map(card => `
+                            <div style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 2rem; border-radius: 1rem; text-align: center; color: #1e3a8a;">
+                                <i class="fas ${card.icon}" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                                <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem;">${card.title}</h3>
+                                <p style="font-size: 1rem;">${card.text}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `,
+                'cards-4': `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: #2563eb;">${section.data.title}</h2>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+                        ${section.data.cards.map(card => `
+                            <div style="background: #fff; border: 2px solid #e2e8f0; padding: 1.5rem; border-radius: 0.75rem; text-align: center;">
+                                <i class="fas ${card.icon}" style="font-size: 2rem; color: #fbbf24; margin-bottom: 1rem;"></i>
+                                <h4 style="font-size: 1.125rem; margin-bottom: 0.5rem; color: #1e293b;">${card.title}</h4>
+                                <p style="font-size: 0.9rem; color: #64748b;">${card.text}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `,
+                stats: `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                        ${section.data.stats.map(stat => `
+                            <div style="text-align: center; padding: 2rem; background: rgba(37, 99, 235, 0.05); border-radius: 0.75rem;">
+                                <div style="font-size: 3rem; font-weight: 800; color: #fbbf24; margin-bottom: 0.5rem;">${stat.number}</div>
+                                <div style="font-size: 1.125rem; color: #475569;">${stat.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `,
+                cta: `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="background: ${section.data.background}; color: white; padding: 4rem 2rem; text-align: center; border-radius: 0.5rem;">
+                        <p style="font-size: 1.75rem; margin-bottom: 2rem;">${section.data.text}</p>
+                        <button style="background: #fbbf24; color: #1e3a8a; padding: 1.25rem 3rem; border: none; border-radius: 2rem; font-weight: 700; font-size: 1.25rem;">${section.data.ctaText}</button>
+                    </div>
+                `,
+                animation: `
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="moveUp('${section.id}')"><i class="fas fa-arrow-up"></i></button>
+                        <button class="control-btn" onclick="moveDown('${section.id}')"><i class="fas fa-arrow-down"></i></button>
+                        <button class="control-btn danger" onclick="deleteSection('${section.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="text-align: center; padding: 3rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 0.5rem; color: white;">
+                        <h2 style="font-size: 2rem; margin-bottom: 1rem;">${section.data.title}</h2>
+                        <p style="font-size: 1.125rem; margin-bottom: 2rem; opacity: 0.95;">${section.data.description}</p>
+                        <div style="font-size: 4rem; animation: walk 1s infinite;">🚶</div>
+                    </div>
+                `
+            };
+
+            return templates[section.type] || '<p>Tipo sezione non supportato</p>';
+        }
+
+        // Select Section
+        function selectSection(sectionId) {
+            document.querySelectorAll('.section-block').forEach(s => s.classList.remove('selected'));
+            document.getElementById(sectionId).classList.add('selected');
+            
+            selectedSection = sections.find(s => s.id === sectionId);
+            showProperties(selectedSection);
+        }
+
+        // Show Properties Panel
+        function showProperties(section) {
+            const props = document.getElementById('properties');
+            props.innerHTML = `<h3 style="margin-bottom: 1.5rem; color: #1e293b;">Proprietà ${section.type.toUpperCase()}</h3>`;
+            
+            const form = document.createElement('div');
+            
+            // Generate form based on section type
+            Object.keys(section.data).forEach(key => {
+                const value = section.data[key];
+                const group = document.createElement('div');
+                group.className = 'property-group';
+                
+                if (typeof value === 'string') {
+                    if (key.includes('background') || key.includes('color')) {
+                        group.innerHTML = `
+                            <label>${capitalizeFirst(key)}</label>
+                            <div class="color-picker">
+                                <input type="color" value="${value}" onchange="updateProperty('${section.id}', '${key}', this.value)">
+                                <input type="text" value="${value}" onchange="updateProperty('${section.id}', '${key}', this.value)" style="flex: 1;">
+                            </div>
+                        `;
+                    } else if (key.includes('Url') || key.includes('Link')) {
+                        group.innerHTML = `
+                            <label>${capitalizeFirst(key)}</label>
+                            <input type="url" value="${value}" oninput="updateProperty('${section.id}', '${key}', this.value)">
+                        `;
+                    } else if (value.length > 50) {
+                        group.innerHTML = `
+                            <label>${capitalizeFirst(key)}</label>
+                            <textarea oninput="updateProperty('${section.id}', '${key}', this.value)">${value}</textarea>
+                        `;
+                    } else {
+                        group.innerHTML = `
+                            <label>${capitalizeFirst(key)}</label>
+                            <input type="text" value="${value}" oninput="updateProperty('${section.id}', '${key}', this.value)">
+                        `;
+                    }
+                    form.appendChild(group);
+                }
+            });
+            
+            props.appendChild(form);
+        }
+
+        // Update Property
+        function updateProperty(sectionId, key, value) {
+            const section = sections.find(s => s.id === sectionId);
+            if (section) {
+                section.data[key] = value;
+                
+                // Re-render section
+                const sectionEl = document.getElementById(sectionId);
+                const wasSelected = sectionEl.classList.contains('selected');
+                sectionEl.innerHTML = getSectionHTML(section);
+                if (wasSelected) {
+                    sectionEl.classList.add('selected');
+                }
+            }
+        }
+
+        // Section Controls
+        function moveUp(sectionId) {
+            const index = sections.findIndex(s => s.id === sectionId);
+            if (index > 0) {
+                [sections[index], sections[index - 1]] = [sections[index - 1], sections[index]];
+                rerenderCanvas();
+            }
+        }
+
+        function moveDown(sectionId) {
+            const index = sections.findIndex(s => s.id === sectionId);
+            if (index < sections.length - 1) {
+                [sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
+                rerenderCanvas();
+            }
+        }
+
+        function deleteSection(sectionId) {
+            if (confirm('Sei sicuro di voler eliminare questa sezione?')) {
+                sections = sections.filter(s => s.id !== sectionId);
+                rerenderCanvas();
+                
+                if (selectedSection && selectedSection.id === sectionId) {
+                    document.getElementById('properties').innerHTML = `
+                        <div class="properties-empty">
+                            <i class="fas fa-sliders-h"></i>
+                            <p>Seleziona una sezione per modificarne le proprietà</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function rerenderCanvas() {
+            canvas.innerHTML = '';
+            if (sections.length === 0) {
+                canvas.innerHTML = `
+                    <div class="canvas-empty">
+                        <div>
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Trascina qui i componenti dalla barra laterale<br>per iniziare a costruire la tua pagina</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                sections.forEach(renderSection);
+            }
+        }
+
+        // Utility
+        function capitalizeFirst(str) {
+            return str.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        }
+
+        // Actions
+        function previewPage() {
+            const pageData = {
+                sections: sections,
+                style: currentStyle
+            };
+            
+            localStorage.setItem('pagePreview', JSON.stringify(pageData));
+            window.open('page-preview.html', '_blank');
+        }
+
+        function saveDraft() {
+            const pageData = {
+                sections: sections,
+                style: currentStyle,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('pageDraft', JSON.stringify(pageData));
+            alert('✅ Bozza salvata con successo!');
+        }
+
+        function publishPage() {
+            if (sections.length === 0) {
+                alert('⚠️ Aggiungi almeno una sezione prima di pubblicare!');
+                return;
+            }
+            
+            const pageData = {
+                sections: sections,
+                style: currentStyle
+            };
+            
+            // Save to localStorage for now (you can implement backend save later)
+            localStorage.setItem('publishedPage', JSON.stringify(pageData));
+            
+            if (confirm('✅ Pagina pubblicata!\n\nVuoi aprirla in una nuova tab?')) {
+                window.open('lapiattaforma.html', '_blank');
+            }
+        }
+
+        // Load draft on init
+        window.addEventListener('load', () => {
+            const draft = localStorage.getItem('pageDraft');
+            if (draft && confirm('📄 Trovata una bozza salvata. Vuoi caricarla?')) {
+                const data = JSON.parse(draft);
+                sections = data.sections;
+                currentStyle = data.style;
+                rerenderCanvas();
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('templateModal').classList.remove('active');
+        }
+
+        function applyTemplate() {
+            const selected = document.querySelector('.template-option.selected');
+            if (selected) {
+                currentStyle = selected.dataset.style;
+                closeModal();
+                alert(`✅ Stile "${selected.querySelector('h3').textContent}" applicato!`);
+            }
+        }
+
+        // Template option selection
+        document.querySelectorAll('.template-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.template-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
