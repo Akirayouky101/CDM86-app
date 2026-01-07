@@ -474,12 +474,30 @@
                     return;
                 }
 
-                // Get organization
-                const { data: org } = await supabaseClient
+                // Get organization - try both methods
+                let org = null;
+                
+                // First try: get by user_id
+                const { data: orgByUser } = await supabaseClient
                     .from('organizations')
                     .select('id')
                     .eq('user_id', session.user.id)
-                    .single();
+                    .maybeSingle();
+                
+                if (orgByUser) {
+                    org = orgByUser;
+                } else {
+                    // Second try: get by id (in case user is the organization)
+                    const { data: orgById } = await supabaseClient
+                        .from('organizations')
+                        .select('id')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    
+                    if (orgById) {
+                        org = orgById;
+                    }
+                }
 
                 if (!org) return;
 
@@ -646,15 +664,34 @@
                     return;
                 }
 
-                // Get organization
-                const { data: org } = await supabaseClient
+                // Get organization - try both methods
+                let org = null;
+                
+                // First try: get by user_id
+                const { data: orgByUser, error: userError } = await supabaseClient
                     .from('organizations')
                     .select('id, name')
                     .eq('user_id', session.user.id)
-                    .single();
+                    .maybeSingle();
+                
+                if (orgByUser) {
+                    org = orgByUser;
+                } else {
+                    // Second try: get by id (in case user is the organization)
+                    const { data: orgById, error: idError } = await supabaseClient
+                        .from('organizations')
+                        .select('id, name')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    
+                    if (orgById) {
+                        org = orgById;
+                    }
+                }
 
                 if (!org) {
-                    alert('Organizzazione non trovata!');
+                    alert('Organizzazione non trovata! Assicurati di essere loggato come organizzazione.');
+                    console.error('Organization lookup failed:', { userError, session });
                     return;
                 }
 
@@ -698,8 +735,13 @@
                     if (error) throw error;
                 } else {
                     // Insert - need to generate slug
-                    const { data: slugData } = await supabaseClient
+                    const { data: slugData, error: slugError } = await supabaseClient
                         .rpc('generate_organization_slug', { org_name: org.name });
+
+                    if (slugError) {
+                        console.error('Slug generation error:', slugError);
+                        throw new Error('Errore nella generazione dello slug');
+                    }
 
                     const { error } = await supabaseClient
                         .from('organization_pages')
