@@ -903,6 +903,11 @@
             document.getElementById('btnNext').style.display = currentStep === totalSteps ? 'none' : 'flex';
             document.getElementById('btnPublish').style.display = currentStep === totalSteps ? 'flex' : 'none';
 
+            // Update live preview if on step 4
+            if (currentStep === 4) {
+                updateLivePreview();
+            }
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -983,6 +988,7 @@
                     wizardData.feature3 = document.getElementById('feature3').value.trim();
                     wizardData.ctaText = document.getElementById('ctaText').value.trim();
                     wizardData.ctaLink = document.getElementById('ctaLink').value.trim();
+                    updateLivePreview(); // Update preview when content changes
                     break;
                 case 5:
                     wizardData.sections = {
