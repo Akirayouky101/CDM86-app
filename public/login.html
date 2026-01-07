@@ -777,16 +777,15 @@ Per favore, invia un codice referral a questo utente.`);
                 if (data.user) {
                     showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
                     
-                    // Check if user is an organization
-                    const { data: orgData } = await supabase
-                        .from('organizations')
-                        .select('id')
-                        .eq('id', data.user.id)
-                        .single();
+                    // Check user role from metadata
+                    const userRole = data.user.user_metadata?.role || data.user.raw_user_meta_data?.role;
                     
-                    // Redirect based on user type
+                    // Redirect based on user role
                     setTimeout(() => {
-                        if (orgData) {
+                        if (userRole === 'admin') {
+                            // Admin login -> admin panel
+                            window.location.href = '/public/admin-panel.html';
+                        } else if (userRole === 'organization') {
                             // Organization login -> organization dashboard
                             window.location.href = '/public/organization-dashboard.html';
                         } else {
