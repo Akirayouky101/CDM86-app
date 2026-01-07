@@ -5,219 +5,469 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Piattaforma - CDM86</title>
     
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/promotions.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .platform-section {
-            padding: var(--space-16) 0;
-            background: white;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #fbbf24;
+            --bg-dark: #0f172a;
+            --text-light: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
         }
-        
-        .platform-section.blue-bg {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .platform-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--space-6);
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-        
+
+        /* Platform Hero Section - Design più arioso */
         .platform-hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: var(--space-20) 0 var(--space-16);
-            text-align: center;
+            padding: 5rem 2rem 4rem;
             position: relative;
             overflow: hidden;
         }
-        
+
         .platform-hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 100%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            transform: rotate(-15deg);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
-        
-        .platform-hero-content {
+
+        .platform-hero .container {
+            max-width: 1100px;
+            margin: 0 auto;
             position: relative;
             z-index: 1;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 var(--space-6);
         }
-        
-        .platform-title {
+
+        .platform-hero h1 {
             font-size: clamp(2.5rem, 6vw, 4rem);
             font-weight: 800;
-            margin-bottom: var(--space-6);
-            line-height: 1.1;
-        }
-        
-        .platform-subtitle {
-            font-size: clamp(1.25rem, 3vw, 1.75rem);
-            font-weight: 700;
-            margin-bottom: var(--space-8);
-            color: #fbbf24;
-        }
-        
-        .platform-text {
-            font-size: clamp(1.125rem, 2.5vw, 1.375rem);
-            line-height: 1.8;
-            margin-bottom: var(--space-6);
-            opacity: 0.95;
-        }
-        
-        .platform-text strong {
-            font-weight: 700;
-            color: #fbbf24;
-        }
-        
-        .cta-section {
-            padding: var(--space-12) 0;
+            margin-bottom: 3rem;
             text-align: center;
-            background: white;
+            background: linear-gradient(to right, #fff, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease;
         }
-        
-        .cta-big-text {
-            font-size: clamp(1.5rem, 4vw, 2.25rem);
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: var(--space-6);
+
+        /* Vision cards - non più mattone */
+        .vision-cards {
+            display: grid;
+            gap: 2rem;
         }
-        
-        .cta-big-link {
-            display: inline-block;
-            font-size: clamp(1.25rem, 3vw, 1.75rem);
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: underline;
-            text-underline-offset: 8px;
-            text-decoration-thickness: 3px;
+
+        .vision-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            padding: 2rem 2.5rem;
+            transform: translateX(-30px);
+            opacity: 0;
             transition: all 0.3s ease;
         }
-        
-        .cta-big-link:hover {
-            color: var(--primary-dark);
-            transform: scale(1.05);
+
+        .vision-card.visible {
+            animation: slideInLeft 0.8s ease forwards;
         }
-        
+
+        .vision-card:nth-child(even) {
+            transform: translateX(30px);
+        }
+
+        .vision-card:nth-child(even).visible {
+            animation: slideInRight 0.8s ease forwards;
+        }
+
+        .vision-card h3 {
+            color: var(--secondary);
+            font-size: 1.375rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+        }
+
+        .vision-card h3::before {
+            content: '✦';
+            font-size: 1.75rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .vision-card p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .vision-card .brands {
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(251, 191, 36, 0.3);
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .vision-card .highlight {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .vision-card:hover {
+            transform: translateY(-5px) !important;
+            border-color: var(--secondary);
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.7; transform: scale(1.2) rotate(180deg); }
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: #fff;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .cta-text {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .cta-link {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 700;
+            border-bottom: 3px solid var(--secondary);
+            transition: all 0.3s ease;
+            padding-bottom: 2px;
+        }
+
+        .cta-link:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* I COMPENSI Section */
+        .compensi-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 5rem 2rem;
+            position: relative;
+            overflow: visible;
+        }
+
         .section-title {
+            text-align: center;
             font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 800;
-            text-align: center;
-            margin-bottom: var(--space-12);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 4rem;
+            color: #fff;
         }
-        
+
         .compensi-grid {
+            max-width: 1200px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-8);
-            margin-top: var(--space-10);
+            gap: 3rem;
+            position: relative;
+            padding: 2rem 0;
         }
-        
+
         .compensi-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: var(--space-8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
+            border: 2px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
         }
-        
+
+        .compensi-card.visible {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
         .compensi-card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-10px) !important;
+            border-color: var(--secondary);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3);
         }
-        
+
         .compensi-icon {
             width: 80px;
             height: 80px;
-            background: #fbbf24;
+            background: var(--secondary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto var(--space-4);
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--primary-dark);
+            transition: all 0.3s ease;
         }
-        
-        .compensi-icon i {
-            font-size: 40px;
-            color: var(--primary);
+
+        .compensi-card:hover .compensi-icon {
+            transform: rotate(360deg) scale(1.1);
         }
-        
+
         .compensi-card h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: var(--space-4);
-            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
         }
-        
+
         .compensi-card p {
             font-size: 1.125rem;
-            line-height: 1.6;
-            opacity: 0.9;
-            text-align: center;
+            line-height: 1.7;
+            opacity: 0.95;
+            margin-bottom: 1rem;
         }
-        
+
+        .compensi-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-top: 1rem;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Walking Character Animation */
+        .walking-character {
+            position: absolute;
+            font-size: 3rem;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .walking-character.walking {
+            animation: walk 0.5s steps(2) infinite;
+        }
+
+        @keyframes walk {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* I BONUS Section */
+        .bonus-section {
+            background: #fff;
+            padding: 5rem 2rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        .bonus-section .section-title {
+            color: var(--primary);
+        }
+
         .bonus-grid {
+            max-width: 1200px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--space-6);
-            margin-top: var(--space-10);
+            gap: 2rem;
+            position: relative;
+            padding: 2rem 0;
         }
-        
+
         .bonus-card {
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border-radius: 20px;
-            padding: var(--space-6);
-            color: var(--primary-dark);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
             text-align: center;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
+            color: var(--primary-dark);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
         }
-        
+
+        .bonus-card.visible {
+            animation: popIn 0.6s ease forwards;
+        }
+
         .bonus-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4);
+            transform: scale(1.05) rotate(-2deg) !important;
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.5);
         }
-        
+
+        .bonus-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
         .bonus-card h3 {
             font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: var(--space-3);
+            margin-bottom: 1rem;
+            font-weight: 700;
         }
-        
+
         .bonus-card p {
-            font-size: 1rem;
-            line-height: 1.5;
-            opacity: 0.9;
+            font-size: 1.125rem;
+            line-height: 1.6;
+            opacity: 0.95;
         }
-        
+
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Climbing Character for Bonus Section */
+        .climbing-character {
+            position: absolute;
+            font-size: 3rem;
+            z-index: 10;
+            transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .climbing-character.climbing {
+            animation: climb 1s ease-in-out infinite;
+        }
+
+        @keyframes climb {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        /* Final CTA Section */
+        .final-cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .final-cta p {
+            font-size: clamp(1.125rem, 2.5vw, 1.375rem);
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.95);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--secondary);
+            color: var(--primary-dark);
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 1.25rem 3rem;
+            border-radius: 3rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.5);
+            background: #fcd34d;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .platform-hero {
-                padding: var(--space-12) 0;
+                padding: 3rem 1rem 2rem;
             }
-            
-            .platform-text {
-                font-size: 1.0625rem;
+
+            .vision-cards {
+                gap: 1.5rem;
             }
-            
+
+            .vision-card {
+                padding: 1.5rem 1.75rem;
+            }
+
             .compensi-grid,
             .bonus-grid {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .walking-character,
+            .climbing-character {
+                font-size: 2rem;
             }
         }
     </style>
@@ -225,123 +475,244 @@
 <body>
     <!-- Hero Section -->
     <section class="platform-hero">
-        <div class="platform-hero-content">
-            <h1 class="platform-title">La Piattaforma del Risparmio</h1>
+        <div class="container">
+            <h1>La Piattaforma del Risparmio</h1>
             
-            <p class="platform-text">
-                <strong>CDM86 nasce da un'idea semplice ma potente:</strong> rendere il risparmio e le opportunità accessibili a tutti, non solo a chi appartiene a categorie privilegiate o a gruppi selezionati.
-            </p>
-            
-            <p class="platform-text">
-                Nasce dal desiderio di cambiare le regole, di aprire le porte di un mondo fatto di vantaggi reali, concreti, quotidiani.
-            </p>
-            
-            <p class="platform-text">
-                Abbiamo osservato da vicino i giganti che hanno rivoluzionato il mercato — <strong>Carrefour, OVS, Satispay, Conad, Auchan, Norauto, Amazon e molti altri</strong> — e abbiamo trasformato ciò che li rende vincenti in qualcosa di ancora più grande: <strong>un modello pensato per le persone, non per le élite.</strong>
-            </p>
-            
-            <p class="platform-subtitle">
-                IL RISULTATO?
-            </p>
-            
-            <p class="platform-text">
-                Un modello di business unico, costruito per generare valore vero.
-            </p>
-            
-            <p class="platform-text">
-                Una soluzione che permette a ogni iscritto non solo di risparmiare, ma di sentirsi parte di un progetto che cresce, evolve e crea un guadagno costante nel tempo.
-            </p>
-            
-            <p class="platform-text" style="font-weight: 600; font-size: clamp(1.25rem, 3vw, 1.5rem); margin-top: var(--space-8);">
-                CDM 86 non è solo un'opportunità. È un nuovo modo di vivere il risparmio. È la possibilità di cambiare il proprio presente, un vantaggio alla volta.
-            </p>
+            <div class="vision-cards">
+                <div class="vision-card">
+                    <h3>L'Idea</h3>
+                    <p>
+                        <span class="highlight">CDM86 nasce da un'idea semplice ma potente:</span> rendere il risparmio e le opportunità accessibili a tutti, non solo a chi appartiene a categorie privilegiate o a gruppi selezionati.
+                    </p>
+                    <p style="margin-top: 1rem;">
+                        Nasce dal desiderio di cambiare le regole, di aprire le porte di un mondo fatto di vantaggi reali, concreti, quotidiani.
+                    </p>
+                </div>
+
+                <div class="vision-card">
+                    <h3>La Strategia</h3>
+                    <p>
+                        Abbiamo osservato da vicino i giganti che hanno rivoluzionato il mercato e abbiamo trasformato ciò che li rende vincenti in qualcosa di ancora più grande: <span class="highlight">un modello pensato per le persone, non per le élite.</span>
+                    </p>
+                    <div class="brands">
+                        ⭐ Carrefour • OVS • Satispay • Conad • Auchan • Norauto • Amazon e molti altri
+                    </div>
+                </div>
+
+                <div class="vision-card">
+                    <h3>Il Risultato</h3>
+                    <p>
+                        Un <span class="highlight">modello di business unico</span>, costruito per generare valore vero. Una soluzione che permette a ogni iscritto non solo di risparmiare, ma di sentirsi parte di un progetto che cresce, evolve e crea un guadagno costante nel tempo.
+                    </p>
+                    <p style="margin-top: 1rem; font-weight: 600; color: var(--secondary); font-size: 1.25rem;">
+                        CDM86 non è solo un'opportunità. È un nuovo modo di vivere il risparmio.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- CTA Section -->
     <section class="cta-section">
-        <div class="platform-container">
-            <p class="cta-big-text">
-                Vuoi farne parte anche tu? <a href="/index.html#register" class="cta-big-link">clicca qua</a>
-            </p>
-        </div>
+        <p class="cta-text">
+            Vuoi farne parte anche tu? <a href="#" class="cta-link" onclick="openRegistration(event)">Clicca qui</a>
+        </p>
     </section>
 
     <!-- I COMPENSI Section -->
-    <section class="platform-section blue-bg">
-        <div class="platform-container">
-            <h2 class="section-title">I COMPENSI</h2>
+    <section class="compensi-section" id="compensi">
+        <h2 class="section-title">I COMPENSI</h2>
+        
+        <div class="compensi-grid">
+            <!-- Walking character -->
+            <div class="walking-character" id="walkingChar" style="top: -60px; left: 10%;">🚶</div>
             
-            <div class="compensi-grid">
-                <div class="compensi-card">
-                    <div class="compensi-icon">
-                        <i class="fas fa-euro-sign"></i>
-                    </div>
-                    <h3>Referral Diretti</h3>
-                    <p>Guadagna fino a <strong>10€</strong> per ogni persona che si iscrive tramite il tuo codice referral personale.</p>
+            <div class="compensi-card">
+                <div class="compensi-icon">
+                    <i class="fas fa-euro-sign"></i>
                 </div>
-                
-                <div class="compensi-card">
-                    <div class="compensi-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Referral Indiretti</h3>
-                    <p>Ricevi <strong>5€</strong> per ogni iscritto portato dalle persone che hai invitato tu. Il tuo network cresce e tu guadagni!</p>
+                <h3>Referral Diretti</h3>
+                <p>Ogni persona che si iscrive tramite il tuo codice referral</p>
+                <div class="compensi-amount">10€</div>
+                <p style="margin-top: 1rem; opacity: 0.9;">per ogni iscritto</p>
+            </div>
+
+            <div class="compensi-card">
+                <div class="compensi-icon">
+                    <i class="fas fa-users"></i>
                 </div>
-                
-                <div class="compensi-card">
-                    <div class="compensi-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <h3>Aziende Partner</h3>
-                    <p>Porta un'azienda partner e guadagna <strong>fino a 30€</strong>. Più aziende porti, più il tuo guadagno cresce!</p>
+                <h3>Referral Indiretti</h3>
+                <p>Guadagni anche dai referral delle persone che hai portato tu</p>
+                <div class="compensi-amount">5€</div>
+                <p style="margin-top: 1rem; opacity: 0.9;">per ogni referral del tuo network</p>
+            </div>
+
+            <div class="compensi-card">
+                <div class="compensi-icon">
+                    <i class="fas fa-building"></i>
                 </div>
+                <h3>Aziende Partner</h3>
+                <p>Porta un'azienda nella piattaforma e ricevi compensi esclusivi</p>
+                <div class="compensi-amount">fino a 30€</div>
+                <p style="margin-top: 1rem; opacity: 0.9;">per azienda partner</p>
             </div>
         </div>
     </section>
 
     <!-- I BONUS Section -->
-    <section class="platform-section">
-        <div class="platform-container">
-            <h2 class="section-title">I BONUS</h2>
+    <section class="bonus-section" id="bonus">
+        <h2 class="section-title">I BONUS</h2>
+        
+        <div class="bonus-grid">
+            <!-- Climbing character -->
+            <div class="climbing-character" id="climbingChar" style="top: -80px; right: 15%;">🧗</div>
             
-            <div class="bonus-grid">
-                <div class="bonus-card">
-                    <h3>🎯 Bonus Iscrizione</h3>
-                    <p>Ricevi <strong>punti bonus</strong> appena ti iscrivi per iniziare subito a risparmiare!</p>
-                </div>
-                
-                <div class="bonus-card">
-                    <h3>🔥 Bonus Fedeltà</h3>
-                    <p>Più usi la piattaforma, più guadagni! Bonus mensili per gli utenti più attivi.</p>
-                </div>
-                
-                <div class="bonus-card">
-                    <h3>⭐ Bonus Milestone</h3>
-                    <p>Raggiungi traguardi di referral e sblocca bonus esclusivi e premi speciali!</p>
-                </div>
-                
-                <div class="bonus-card">
-                    <h3>🎁 Bonus Stagionali</h3>
-                    <p>Promozioni speciali durante le festività e eventi. Occasioni uniche per guadagnare di più!</p>
-                </div>
+            <div class="bonus-card">
+                <div class="bonus-icon">🎁</div>
+                <h3>Bonus Iscrizione</h3>
+                <p>Ricevi un bonus di benvenuto appena completata la registrazione sulla piattaforma</p>
+            </div>
+
+            <div class="bonus-card">
+                <div class="bonus-icon">⭐</div>
+                <h3>Bonus Fedeltà</h3>
+                <p>Premi esclusivi per gli utenti più attivi e fedeli alla piattaforma</p>
+            </div>
+
+            <div class="bonus-card">
+                <div class="bonus-icon">🏆</div>
+                <h3>Bonus Milestone</h3>
+                <p>Raggiungi obiettivi di referral e sblocca bonus crescenti</p>
+            </div>
+
+            <div class="bonus-card">
+                <div class="bonus-icon">🎊</div>
+                <h3>Bonus Stagionali</h3>
+                <p>Promozioni speciali durante festività e periodi dell'anno</p>
             </div>
         </div>
     </section>
 
     <!-- Final CTA -->
-    <section class="platform-section blue-bg" style="padding: var(--space-12) 0; text-align: center;">
-        <div class="platform-container">
-            <h2 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: var(--space-6);">
-                Inizia Subito a Guadagnare!
-            </h2>
-            <p style="font-size: clamp(1.125rem, 2.5vw, 1.5rem); margin-bottom: var(--space-8); opacity: 0.95;">
-                Iscriviti ora e scopri quanto puoi risparmiare e guadagnare con CDM86
-            </p>
-            <a href="/index.html" style="display: inline-block; padding: 18px 48px; background: #fbbf24; color: var(--primary-dark); font-size: 1.25rem; font-weight: 700; border-radius: 50px; text-decoration: none; transition: all 0.3s; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);">
-                Registrati Gratis
-            </a>
-        </div>
+    <section class="final-cta">
+        <h2>Inizia Subito a Guadagnare!</h2>
+        <p>Unisciti a migliaia di utenti che hanno già scoperto un nuovo modo di risparmiare e guadagnare</p>
+        <a href="#" class="cta-button" onclick="openRegistration(event)">Registrati Gratis</a>
     </section>
+
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.vision-card, .compensi-card, .bonus-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Walking character animation in compensi section
+        let walkingChar = document.getElementById('walkingChar');
+        let compensiCards = document.querySelectorAll('.compensi-card');
+        let currentCardIndex = 0;
+
+        function moveCharacterToCard(index) {
+            if (!compensiCards[index]) return;
+            
+            walkingChar.classList.add('walking');
+            
+            const card = compensiCards[index];
+            const cardRect = card.getBoundingClientRect();
+            const sectionRect = document.getElementById('compensi').getBoundingClientRect();
+            
+            const leftPos = cardRect.left - sectionRect.left + (cardRect.width / 2) - 24;
+            const topPos = cardRect.top - sectionRect.top - 60;
+            
+            walkingChar.style.left = leftPos + 'px';
+            walkingChar.style.top = topPos + 'px';
+            
+            setTimeout(() => {
+                walkingChar.classList.remove('walking');
+            }, 1500);
+        }
+
+        // Start walking animation when compensi section is visible
+        const compensiObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Start walking after 1 second
+                    setTimeout(() => {
+                        setInterval(() => {
+                            currentCardIndex = (currentCardIndex + 1) % compensiCards.length;
+                            moveCharacterToCard(currentCardIndex);
+                        }, 4000);
+                        moveCharacterToCard(0);
+                    }, 1000);
+                    compensiObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        compensiObserver.observe(document.getElementById('compensi'));
+
+        // Climbing character animation in bonus section
+        let climbingChar = document.getElementById('climbingChar');
+        let bonusCards = document.querySelectorAll('.bonus-card');
+        let currentBonusIndex = 0;
+
+        function moveClimbingCharacter(index) {
+            if (!bonusCards[index]) return;
+            
+            climbingChar.classList.add('climbing');
+            
+            const card = bonusCards[index];
+            const cardRect = card.getBoundingClientRect();
+            const sectionRect = document.getElementById('bonus').getBoundingClientRect();
+            
+            const rightPos = sectionRect.right - cardRect.right + (cardRect.width / 2) - 24;
+            const topPos = cardRect.top - sectionRect.top - 80;
+            
+            climbingChar.style.right = rightPos + 'px';
+            climbingChar.style.top = topPos + 'px';
+            
+            setTimeout(() => {
+                climbingChar.classList.remove('climbing');
+            }, 2000);
+        }
+
+        // Start climbing animation when bonus section is visible
+        const bonusObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        setInterval(() => {
+                            currentBonusIndex = (currentBonusIndex + 1) % bonusCards.length;
+                            moveClimbingCharacter(currentBonusIndex);
+                        }, 5000);
+                        moveClimbingCharacter(0);
+                    }, 1000);
+                    bonusObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        bonusObserver.observe(document.getElementById('bonus'));
+
+        // Open registration function
+        function openRegistration(event) {
+            event.preventDefault();
+            // Redirect to home page with registration modal
+            window.location.href = '/index.html#register';
+        }
+    </script>
 </body>
 </html>
