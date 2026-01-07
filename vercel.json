@@ -6,6 +6,10 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/page/([^/]+)",
+      "dest": "/public/page.html"
+    },
+    {
       "src": "/(.*\\.(css|js|html|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },

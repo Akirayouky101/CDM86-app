@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caricamento...</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            font-size: 3rem;
+            color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Page Container */
+        #pageContent {
+            display: none;
+        }
+
+        /* Common Section Styles */
+        section {
+            padding: 4rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* About Section */
+        .about-section {
+            background: white;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: #64748b;
+        }
+
+        .about-image {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Features Section */
+        .features-section {
+            background: #f8fafc;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-text {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-text {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 3rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div>
+            <i class="fas fa-spinner spinner"></i>
+            <p style="margin-top: 1rem; color: #64748b;">Caricamento pagina...</p>
+        </div>
+    </div>
+
+    <!-- Page Content (will be rendered dynamically) -->
+    <div id="pageContent"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <script>
+        // Initialize Supabase
+        const supabaseClient = window.supabase.createClient(
+            window.CDM86_CONFIG.supabase.url,
+            window.CDM86_CONFIG.supabase.anonKey
+        );
+
+        // Color palettes
+        const colorPalettes = {
+            ocean: { primary: '#0ea5e9', secondary: '#06b6d4', accent: '#0891b2', bg: '#f0f9ff', text: '#0c4a6e' },
+            sunset: { primary: '#f97316', secondary: '#fb923c', accent: '#fdba74', bg: '#fff7ed', text: '#7c2d12' },
+            forest: { primary: '#10b981', secondary: '#34d399', accent: '#6ee7b7', bg: '#f0fdf4', text: '#064e3b' },
+            royal: { primary: '#8b5cf6', secondary: '#a78bfa', accent: '#c4b5fd', bg: '#faf5ff', text: '#581c87' },
+            mono: { primary: '#1e293b', secondary: '#475569', accent: '#64748b', bg: '#f8fafc', text: '#0f172a' }
+        };
+
+        // Get slug from URL
+        function getSlugFromURL() {
+            const path = window.location.pathname;
+            const match = path.match(/\/page\/([^\/]+)/);
+            return match ? match[1] : null;
+        }
+
+        // Render page based on layout
+        function renderPage(pageData, colors) {
+            const content = pageData.content || {};
+            const layout = pageData.layout || 'modern';
+            const sections = pageData.sections || {};
+
+            let html = '';
+
+            // Hero Section (always included)
+            if (sections.hero !== false) {
+                html += renderHeroSection(content, colors, layout);
+            }
+
+            // About Section
+            if (sections.about) {
+                html += renderAboutSection(content, colors);
+            }
+
+            // Features Section
+            if (sections.features && content.features && content.features.length > 0) {
+                html += renderFeaturesSection(content, colors);
+            }
+
+            // CTA Section
+            if (sections.cta) {
+                html += renderCTASection(content, colors);
+            }
+
+            return html;
+        }
+
+        // Render Hero Section
+        function renderHeroSection(content, colors, layout) {
+            const companyName = content.companyName || 'Azienda';
+            const slogan = content.slogan || '';
+            const mainImage = content.mainImage || '';
+
+            let style = '';
+            let containerStyle = '';
+
+            if (layout === 'modern') {
+                style = `background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%); color: white;`;
+            } else if (layout === 'minimal') {
+                style = `background: white; color: ${colors.text}; border-bottom: 4px solid ${colors.primary};`;
+            } else if (layout === 'bold') {
+                style = `background: ${colors.bg}; color: ${colors.text}; border-left: 12px solid ${colors.primary};`;
+            }
+
+            if (mainImage) {
+                style = `background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${mainImage}') center/cover; color: white;`;
+            }
+
+            return `
+                <section class="hero-section" style="${style}">
+                    <div class="hero-content">
+                        <h1 class="hero-title">${companyName}</h1>
+                        <p class="hero-subtitle">${slogan}</p>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Render About Section
+        function renderAboutSection(content, colors) {
+            const description = content.description || '';
+            
+            return `
+                <section class="about-section">
+                    <div class="container">
+                        <div class="about-content">
+                            <div class="about-text">
+                                <h2 style="color: ${colors.primary};">Chi Siamo</h2>
+                                <p>${description}</p>
+                            </div>
+                            <div class="about-image">
+                                ${content.mainImage ? `<img src="${content.mainImage}" alt="${content.companyName}">` : '<div style="background: #f1f5f9; height: 300px; display: flex; align-items: center; justify-content: center; color: #94a3b8;"><i class="fas fa-image" style="font-size: 3rem;"></i></div>'}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Render Features Section
+        function renderFeaturesSection(content, colors) {
+            const features = content.features || [];
+            
+            return `
+                <section class="features-section">
+                    <div class="container">
+                        <h2 style="font-size: 2.5rem; text-align: center; color: ${colors.primary}; margin-bottom: 1rem;">Perché Sceglierci</h2>
+                        <div class="features-grid">
+                            ${features.map((feature, index) => `
+                                <div class="feature-card">
+                                    <div class="feature-icon" style="color: ${colors.primary};">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <h3 class="feature-title">${feature}</h3>
+                                    <p class="feature-text">Offriamo un servizio eccellente che garantisce la massima soddisfazione.</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Render CTA Section
+        function renderCTASection(content, colors) {
+            const ctaText = content.cta?.text || 'Contattaci';
+            const ctaLink = content.cta?.link || '#';
+            
+            return `
+                <section class="cta-section" style="background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);">
+                    <div class="container">
+                        <h2 class="cta-title">Pronto a Iniziare?</h2>
+                        <p class="cta-text">Contattaci oggi per scoprire come possiamo aiutarti</p>
+                        <a href="${ctaLink}" class="cta-button" ${ctaLink !== '#' ? 'target="_blank"' : ''}>${ctaText}</a>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Load and render page
+        async function loadPage() {
+            const slug = getSlugFromURL();
+            
+            if (!slug) {
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                        <h2>Pagina non trovata</h2>
+                        <p style="color: #64748b; margin-top: 0.5rem;">URL non valido</p>
+                        <a href="/index.html" style="display: inline-block; margin-top: 2rem; padding: 1rem 2rem; background: #667eea; color: white; text-decoration: none; border-radius: 0.5rem;">Torna alla Home</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // Query page by slug
+                const { data: page, error } = await supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('slug', slug)
+                    .eq('status', 'published')
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!page || !page.page_data) {
+                    throw new Error('Pagina non trovata');
+                }
+
+                const pageData = page.page_data;
+                const colors = colorPalettes[pageData.palette] || colorPalettes.ocean;
+
+                // Set page title
+                document.title = pageData.content?.companyName || 'CDM86';
+
+                // Render page
+                const pageContent = document.getElementById('pageContent');
+                pageContent.innerHTML = renderPage(pageData, colors);
+
+                // Hide loading, show content
+                document.getElementById('loadingScreen').style.display = 'none';
+                pageContent.style.display = 'block';
+
+                console.log('✅ Page loaded:', slug);
+
+            } catch (error) {
+                console.error('❌ Error loading page:', error);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                        <h2>Errore</h2>
+                        <p style="color: #64748b; margin-top: 0.5rem;">${error.message}</p>
+                        <a href="/index.html" style="display: inline-block; margin-top: 2rem; padding: 1rem 2rem; background: #667eea; color: white; text-decoration: none; border-radius: 0.5rem;">Torna alla Home</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadPage);
+    </script>
+</body>
+</html>
