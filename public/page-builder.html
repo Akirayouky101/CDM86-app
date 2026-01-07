@@ -74,6 +74,19 @@
             background: #cbd5e1;
         }
 
+        .btn-wizard {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-wizard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
         .btn-success {
             background: #10b981;
             color: #fff;
@@ -424,13 +437,412 @@
             font-size: 0.85rem;
             color: #64748b;
         }
+
+        /* Wizard Modal */
+        .wizard-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .wizard-modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .wizard-container {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .wizard-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .wizard-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .wizard-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .wizard-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .progress-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+
+        .progress-step:last-child::after {
+            display: none;
+        }
+
+        .progress-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active .progress-number {
+            background: #2563eb;
+            color: white;
+        }
+
+        .progress-step.completed .progress-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .progress-step.active .progress-label {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .wizard-body {
+            padding: 2rem;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .wizard-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .wizard-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .wizard-field input,
+        .wizard-field textarea,
+        .wizard-field select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .wizard-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .wizard-field input:focus,
+        .wizard-field textarea:focus,
+        .wizard-field select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .wizard-field small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .wizard-footer {
+            padding: 1.5rem 2rem;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-wizard-nav {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-prev {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-prev:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-next,
+        .btn-generate {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-next:hover,
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .section-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
+    <!-- Wizard Modal -->
+    <div class="wizard-modal" id="wizardModal">
+        <div class="wizard-container">
+            <div class="wizard-header">
+                <h2><i class="fas fa-wand-magic-sparkles"></i> Creazione Guidata Pagina</h2>
+                <button class="wizard-close" onclick="closeWizard()">×</button>
+            </div>
+
+            <div class="wizard-progress">
+                <div class="progress-step active" id="progressStep1">
+                    <div class="progress-number">1</div>
+                    <div class="progress-label">Info Base</div>
+                </div>
+                <div class="progress-step" id="progressStep2">
+                    <div class="progress-number">2</div>
+                    <div class="progress-label">Contenuti</div>
+                </div>
+                <div class="progress-step" id="progressStep3">
+                    <div class="progress-number">3</div>
+                    <div class="progress-label">Sezioni</div>
+                </div>
+            </div>
+
+            <div class="wizard-body">
+                <!-- Step 1: Info Base -->
+                <div class="wizard-step active" id="wizardStep1">
+                    <div class="wizard-field">
+                        <label>Nome dell'azienda <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="wizardCompanyName" placeholder="Es: Ristorante Da Mario">
+                        <small>Il nome viene utilizzato automaticamente come titolo della pagina</small>
+                    </div>
+
+                    <div class="wizard-field">
+                        <label>Categoria <span style="color: #ef4444;">*</span></label>
+                        <select id="wizardCategory">
+                            <option value="">Seleziona categoria...</option>
+                            <option value="ristorazione">🍕 Ristorazione</option>
+                            <option value="sport">⚽ Sport & Fitness</option>
+                            <option value="moda">👕 Moda & Abbigliamento</option>
+                            <option value="bellezza">💄 Bellezza & Benessere</option>
+                            <option value="tecnologia">💻 Tecnologia</option>
+                            <option value="intrattenimento">🎬 Intrattenimento</option>
+                            <option value="servizi">🔧 Servizi</option>
+                            <option value="altro">🎯 Altro</option>
+                        </select>
+                    </div>
+
+                    <div class="wizard-field">
+                        <label>Descrizione breve <span style="color: #ef4444;">*</span></label>
+                        <textarea id="wizardDescription" placeholder="Es: Cucina italiana autentica nel cuore di Milano. Dal 1985 offriamo piatti tradizionali preparati con ingredienti freschi e genuini." rows="3"></textarea>
+                        <small>Breve descrizione dell'attività (2-3 righe)</small>
+                    </div>
+                </div>
+
+                <!-- Step 2: Contenuti -->
+                <div class="wizard-step" id="wizardStep2">
+                    <div class="wizard-field">
+                        <label>Slogan o frase principale <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="wizardSlogan" placeholder="Es: Il gusto della tradizione italiana">
+                        <small>Una frase d'impatto che rappresenta la tua azienda</small>
+                    </div>
+
+                    <div class="wizard-field">
+                        <label>Cosa offri? (punti di forza)</label>
+                        <input type="text" id="wizardFeature1" placeholder="Es: Ingredienti freschi e biologici">
+                        <input type="text" id="wizardFeature2" placeholder="Es: Chef con esperienza ventennale" style="margin-top: 0.5rem;">
+                        <input type="text" id="wizardFeature3" placeholder="Es: Ambiente familiare e accogliente" style="margin-top: 0.5rem;">
+                        <small>Inserisci 2-3 caratteristiche distintive</small>
+                    </div>
+
+                    <div class="wizard-field">
+                        <label>Call-to-Action (opzionale)</label>
+                        <input type="text" id="wizardCTA" placeholder="Es: Prenota il tuo tavolo">
+                        <input type="url" id="wizardCTALink" placeholder="https://..." style="margin-top: 0.5rem;">
+                        <small>Testo del bottone e link (es: prenotazioni, contatti)</small>
+                    </div>
+                </div>
+
+                <!-- Step 3: Sezioni da includere -->
+                <div class="wizard-step" id="wizardStep3">
+                    <div class="wizard-field">
+                        <label>Seleziona le sezioni da includere <span style="color: #ef4444;">*</span></label>
+                        <small style="margin-bottom: 1rem;">Scegli quali elementi vuoi nella tua pagina</small>
+                        
+                        <div class="section-checkboxes">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sectionHero" checked>
+                                <label for="sectionHero">🎯 Hero (Intro)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sectionAbout" checked>
+                                <label for="sectionAbout">📖 Chi Siamo</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sectionFeatures" checked>
+                                <label for="sectionFeatures">⭐ Punti Forza</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sectionStats">
+                                <label for="sectionStats">📊 Statistiche</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sectionCTA" checked>
+                                <label for="sectionCTA">🚀 Call-to-Action</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-footer">
+                <button class="btn-wizard-nav btn-prev" id="btnPrev" onclick="prevWizardStep()" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Indietro
+                </button>
+                <div></div>
+                <button class="btn-wizard-nav btn-next" id="btnNext" onclick="nextWizardStep()">
+                    Avanti <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn-wizard-nav btn-generate" id="btnGenerate" onclick="generatePage()" style="display: none;">
+                    <i class="fas fa-magic"></i> Genera Pagina
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="builder-header">
         <h1><i class="fas fa-magic"></i> Page Builder</h1>
         <div class="header-actions">
+            <button class="btn btn-wizard" onclick="openWizard()">
+                <i class="fas fa-wand-magic-sparkles"></i> Creazione Guidata
+            </button>
             <button class="btn btn-secondary" onclick="previewPage()">
                 <i class="fas fa-eye"></i> Preview
             </button>
@@ -1164,6 +1576,277 @@
                 option.classList.add('selected');
             });
         });
+
+        // ============================================
+        // WIZARD FUNCTIONS
+        // ============================================
+
+        let currentWizardStep = 1;
+        const wizardData = {};
+
+        function openWizard() {
+            document.getElementById('wizardModal').classList.add('active');
+            currentWizardStep = 1;
+            updateWizardStep();
+        }
+
+        function closeWizard() {
+            document.getElementById('wizardModal').classList.remove('active');
+            // Reset form
+            currentWizardStep = 1;
+            document.querySelectorAll('.wizard-step input, .wizard-step select, .wizard-step textarea').forEach(el => {
+                if (el.type === 'checkbox') {
+                    el.checked = el.id === 'sectionHero' || el.id === 'sectionAbout' || el.id === 'sectionFeatures' || el.id === 'sectionCTA';
+                } else {
+                    el.value = '';
+                }
+            });
+        }
+
+        function nextWizardStep() {
+            // Validate current step
+            if (!validateWizardStep(currentWizardStep)) {
+                return;
+            }
+
+            // Save current step data
+            saveWizardStepData(currentWizardStep);
+
+            currentWizardStep++;
+            updateWizardStep();
+        }
+
+        function prevWizardStep() {
+            currentWizardStep--;
+            updateWizardStep();
+        }
+
+        function updateWizardStep() {
+            // Update steps visibility
+            document.querySelectorAll('.wizard-step').forEach((step, index) => {
+                step.classList.toggle('active', index + 1 === currentWizardStep);
+            });
+
+            // Update progress
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.toggle('active', stepNum === currentWizardStep);
+                step.classList.toggle('completed', stepNum < currentWizardStep);
+            });
+
+            // Update buttons
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            const btnGenerate = document.getElementById('btnGenerate');
+
+            btnPrev.style.display = currentWizardStep === 1 ? 'none' : 'block';
+            btnNext.style.display = currentWizardStep === 3 ? 'none' : 'block';
+            btnGenerate.style.display = currentWizardStep === 3 ? 'block' : 'none';
+        }
+
+        function validateWizardStep(step) {
+            if (step === 1) {
+                const companyName = document.getElementById('wizardCompanyName').value.trim();
+                const category = document.getElementById('wizardCategory').value;
+                const description = document.getElementById('wizardDescription').value.trim();
+                
+                if (!companyName) {
+                    alert('⚠️ Per favore inserisci il nome dell\'azienda');
+                    return false;
+                }
+                if (!category) {
+                    alert('⚠️ Per favore seleziona una categoria');
+                    return false;
+                }
+                if (!description) {
+                    alert('⚠️ Per favore inserisci una descrizione');
+                    return false;
+                }
+            }
+
+            if (step === 2) {
+                const slogan = document.getElementById('wizardSlogan').value.trim();
+                
+                if (!slogan) {
+                    alert('⚠️ Per favore inserisci uno slogan');
+                    return false;
+                }
+            }
+
+            if (step === 3) {
+                const hasSection = document.querySelector('.section-checkboxes input[type="checkbox"]:checked');
+                
+                if (!hasSection) {
+                    alert('⚠️ Seleziona almeno una sezione');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function saveWizardStepData(step) {
+            if (step === 1) {
+                wizardData.companyName = document.getElementById('wizardCompanyName').value.trim();
+                wizardData.category = document.getElementById('wizardCategory').value;
+                wizardData.description = document.getElementById('wizardDescription').value.trim();
+            }
+
+            if (step === 2) {
+                wizardData.slogan = document.getElementById('wizardSlogan').value.trim();
+                wizardData.feature1 = document.getElementById('wizardFeature1').value.trim();
+                wizardData.feature2 = document.getElementById('wizardFeature2').value.trim();
+                wizardData.feature3 = document.getElementById('wizardFeature3').value.trim();
+                wizardData.cta = document.getElementById('wizardCTA').value.trim();
+                wizardData.ctaLink = document.getElementById('wizardCTALink').value.trim();
+            }
+
+            if (step === 3) {
+                wizardData.sections = {
+                    hero: document.getElementById('sectionHero').checked,
+                    about: document.getElementById('sectionAbout').checked,
+                    features: document.getElementById('sectionFeatures').checked,
+                    stats: document.getElementById('sectionStats').checked,
+                    cta: document.getElementById('sectionCTA').checked
+                };
+            }
+        }
+
+        function generatePage() {
+            // Validate last step
+            if (!validateWizardStep(3)) {
+                return;
+            }
+
+            // Save last step data
+            saveWizardStepData(3);
+
+            // Clear existing sections
+            sections = [];
+            canvas.innerHTML = '<div class="canvas-empty"><div><i class="fas fa-sparkles"></i><p>Generazione pagina in corso...</p></div></div>';
+
+            setTimeout(() => {
+                canvas.innerHTML = '';
+                
+                // Generate Hero section if selected
+                if (wizardData.sections.hero) {
+                    const categoryColors = {
+                        'ristorazione': '#dc2626',
+                        'sport': '#2563eb',
+                        'moda': '#9333ea',
+                        'bellezza': '#ec4899',
+                        'tecnologia': '#0891b2',
+                        'intrattenimento': '#f59e0b',
+                        'servizi': '#10b981',
+                        'altro': '#64748b'
+                    };
+
+                    addSection('hero');
+                    const heroSection = sections[sections.length - 1];
+                    heroSection.data.title = wizardData.slogan;
+                    heroSection.data.subtitle = wizardData.companyName;
+                    heroSection.data.text = wizardData.description;
+                    heroSection.data.ctaText = wizardData.cta || 'Scopri di più';
+                    heroSection.data.ctaLink = wizardData.ctaLink || '#';
+                    heroSection.data.background = categoryColors[wizardData.category] || '#2563eb';
+                }
+
+                // Generate About section (text-image) if selected
+                if (wizardData.sections.about) {
+                    addSection('text-image');
+                    const aboutSection = sections[sections.length - 1];
+                    aboutSection.data.title = `Chi siamo`;
+                    aboutSection.data.text = wizardData.description;
+                    aboutSection.data.imagePosition = 'right';
+                }
+
+                // Generate Features section (cards-3) if selected
+                if (wizardData.sections.features) {
+                    addSection('cards-3');
+                    const featuresSection = sections[sections.length - 1];
+                    featuresSection.data.title = 'I Nostri Punti di Forza';
+                    
+                    const categoryIcons = {
+                        'ristorazione': ['fa-utensils', 'fa-wine-glass', 'fa-pizza-slice'],
+                        'sport': ['fa-dumbbell', 'fa-running', 'fa-heart-pulse'],
+                        'moda': ['fa-shirt', 'fa-gem', 'fa-star'],
+                        'bellezza': ['fa-spa', 'fa-heart', 'fa-smile'],
+                        'tecnologia': ['fa-laptop', 'fa-rocket', 'fa-bolt'],
+                        'intrattenimento': ['fa-film', 'fa-music', 'fa-gamepad'],
+                        'servizi': ['fa-wrench', 'fa-check-circle', 'fa-users'],
+                        'altro': ['fa-star', 'fa-heart', 'fa-trophy']
+                    };
+
+                    const icons = categoryIcons[wizardData.category] || ['fa-check', 'fa-star', 'fa-heart'];
+                    
+                    featuresSection.data.cards = [];
+                    if (wizardData.feature1) {
+                        featuresSection.data.cards.push({
+                            icon: icons[0],
+                            title: wizardData.feature1.substring(0, 30),
+                            text: wizardData.feature1
+                        });
+                    }
+                    if (wizardData.feature2) {
+                        featuresSection.data.cards.push({
+                            icon: icons[1],
+                            title: wizardData.feature2.substring(0, 30),
+                            text: wizardData.feature2
+                        });
+                    }
+                    if (wizardData.feature3) {
+                        featuresSection.data.cards.push({
+                            icon: icons[2],
+                            title: wizardData.feature3.substring(0, 30),
+                            text: wizardData.feature3
+                        });
+                    }
+
+                    // If less than 3 features, add generic ones
+                    while (featuresSection.data.cards.length < 3) {
+                        const genericFeatures = {
+                            'ristorazione': 'Qualità garantita',
+                            'sport': 'Risultati garantiti',
+                            'moda': 'Stile unico',
+                            'bellezza': 'Trattamenti professionali',
+                            'tecnologia': 'Innovazione continua',
+                            'intrattenimento': 'Divertimento assicurato',
+                            'servizi': 'Professionalità',
+                            'altro': 'Eccellenza'
+                        };
+                        
+                        featuresSection.data.cards.push({
+                            icon: icons[featuresSection.data.cards.length],
+                            title: genericFeatures[wizardData.category] || 'Qualità',
+                            text: 'Scopri tutti i nostri vantaggi'
+                        });
+                    }
+                }
+
+                // Generate Stats section if selected
+                if (wizardData.sections.stats) {
+                    addSection('stats');
+                }
+
+                // Generate CTA section if selected
+                if (wizardData.sections.cta) {
+                    addSection('cta');
+                    const ctaSection = sections[sections.length - 1];
+                    ctaSection.data.text = wizardData.cta ? `${wizardData.cta}` : `Scopri ${wizardData.companyName}`;
+                    ctaSection.data.ctaText = wizardData.cta || 'Contattaci';
+                    ctaSection.data.ctaLink = wizardData.ctaLink || '#';
+                }
+
+                // Re-render everything
+                rerenderCanvas();
+
+                // Close wizard
+                closeWizard();
+
+                // Show success message
+                alert('✨ Pagina generata con successo! Puoi modificare ogni sezione cliccandoci sopra.');
+            }, 500);
+        }
     </script>
 </body>
 </html>
