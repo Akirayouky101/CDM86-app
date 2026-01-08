@@ -791,19 +791,7 @@
                 return null;
             }
             
-            // Check if user is an organization - redirect to org dashboard
-            const { data: orgData, error: orgError } = await window.supabaseClient
-                .from('organizations')
-                .select('id')
-                .eq('id', session.user.id)
-                .maybeSingle();
-            
-            if (orgData) {
-                // This is an organization, redirect to org dashboard
-                window.location.href = '/public/organization-dashboard.html';
-                return null;
-            }
-            
+            // Set current user - works for both users and organizations
             currentUser = session.user;
             return currentUser;
         }
@@ -1009,7 +997,11 @@
                     // Update login button with organization name
                     const loginBtn = document.getElementById('login-btn');
                     if (loginBtn) {
-                        loginBtn.innerHTML = `
+                        // Remove any existing click handlers
+                        const newLoginBtn = loginBtn.cloneNode(false);
+                        loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
+                        
+                        newLoginBtn.innerHTML = `
                             <i class="fas fa-building"></i>
                             <span>${orgName}</span>
                             <i class="fas fa-chevron-down chevron-icon"></i>
@@ -1018,9 +1010,10 @@
                         // Create dropdown menu for organization
                         const dropdown = document.createElement('div');
                         dropdown.id = 'user-dropdown';
+                        dropdown.className = 'user-dropdown-menu';
                         dropdown.style.cssText = `
                             position: absolute;
-                            top: 50px;
+                            top: calc(100% + 10px);
                             right: 0;
                             background: white;
                             border-radius: 12px;
@@ -1028,43 +1021,62 @@
                             min-width: 200px;
                             display: none;
                             z-index: 1000;
+                            overflow: hidden;
                         `;
                         
                         dropdown.innerHTML = `
-                            <a href="/public/organization-dashboard.html" class="dropdown-menu-item">
+                            <a href="/public/organization-dashboard.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
                                 <span>🏢</span><span>Dashboard Azienda</span>
                             </a>
-                            <div id="logout-menu-item" class="dropdown-menu-item logout-item">
+                            <div class="dropdown-menu-item logout-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; color: #ef4444; border-top: 1px solid #e2e8f0; transition: background 0.2s;">
                                 <span>🚪</span><span>Esci</span>
                             </div>
                         `;
                         
-                        loginBtn.parentElement.style.position = 'relative';
-                        loginBtn.parentElement.appendChild(dropdown);
+                        // Set parent position
+                        if (newLoginBtn.parentElement) {
+                            newLoginBtn.parentElement.style.position = 'relative';
+                            newLoginBtn.parentElement.appendChild(dropdown);
+                        }
                         
-                        // Toggle dropdown
-                        loginBtn.addEventListener('click', (e) => {
+                        // Toggle dropdown on button click
+                        newLoginBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             const isVisible = dropdown.style.display === 'block';
                             dropdown.style.display = isVisible ? 'none' : 'block';
                         });
                         
+                        // Prevent dropdown from closing when clicking inside
                         dropdown.addEventListener('click', (e) => {
                             e.stopPropagation();
                         });
                         
+                        // Close dropdown when clicking outside
                         document.addEventListener('click', () => {
                             dropdown.style.display = 'none';
                         });
                         
                         // Logout handler
-                        const logoutBtn = dropdown.querySelector('#logout-menu-item');
+                        const logoutBtn = dropdown.querySelector('.logout-item');
                         if (logoutBtn) {
-                            logoutBtn.addEventListener('click', async () => {
+                            logoutBtn.addEventListener('click', async (e) => {
+                                e.preventDefault();
                                 await window.supabaseClient.auth.signOut();
                                 window.location.reload();
                             });
                         }
+                        
+                        // Hover effects
+                        const items = dropdown.querySelectorAll('.dropdown-menu-item');
+                        items.forEach(item => {
+                            item.addEventListener('mouseenter', () => {
+                                item.style.background = '#f1f5f9';
+                            });
+                            item.addEventListener('mouseleave', () => {
+                                item.style.background = '';
+                            });
+                        });
                     }
                     return;
                 }
@@ -1092,7 +1104,11 @@
                 // Update login button with user name
                 const loginBtn = document.getElementById('login-btn');
                 if (loginBtn) {
-                    loginBtn.innerHTML = `
+                    // Remove any existing click handlers
+                    const newLoginBtn = loginBtn.cloneNode(false);
+                    loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
+                    
+                    newLoginBtn.innerHTML = `
                         <i class="fas fa-user-circle"></i>
                         <span>${firstName}</span>
                         <i class="fas fa-chevron-down chevron-icon"></i>
@@ -1101,9 +1117,10 @@
                     // Create dropdown menu
                     const dropdown = document.createElement('div');
                     dropdown.id = 'user-dropdown';
+                    dropdown.className = 'user-dropdown-menu';
                     dropdown.style.cssText = `
                         position: absolute;
-                        top: 50px;
+                        top: calc(100% + 10px);
                         right: 0;
                         background: white;
                         border-radius: 12px;
@@ -1111,49 +1128,53 @@
                         min-width: 200px;
                         display: none;
                         z-index: 1000;
+                        overflow: hidden;
                     `;
                     
                     dropdown.innerHTML = `
-                        <a href="/public/dashboard.html" class="dropdown-menu-item">
+                        <a href="/public/dashboard.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
                             <span>📊</span><span>Dashboard</span>
                         </a>
-                        <a href="/public/promotions.html" class="dropdown-menu-item">
+                        <a href="/public/promotions.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
                             <span>🎫</span><span>Promozioni</span>
                         </a>
-                        <a href="/public/favorites.html" class="dropdown-menu-item">
+                        <a href="/public/favorites.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
                             <span>❤️</span><span>Preferiti</span>
                         </a>
-                        <div id="logout-menu-item" class="dropdown-menu-item logout-item">
+                        <div class="dropdown-menu-item logout-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; color: #ef4444; border-top: 1px solid #e2e8f0; transition: background 0.2s;">
                             <span>🚪</span><span>Esci</span>
                         </div>
                     `;
                     
-                    loginBtn.parentElement.style.position = 'relative';
-                    loginBtn.parentElement.appendChild(dropdown);
+                    // Set parent position
+                    if (newLoginBtn.parentElement) {
+                        newLoginBtn.parentElement.style.position = 'relative';
+                        newLoginBtn.parentElement.appendChild(dropdown);
+                    }
                     
-                    // Toggle dropdown
-                    loginBtn.addEventListener('click', (e) => {
+                    // Toggle dropdown on button click
+                    newLoginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         const isVisible = dropdown.style.display === 'block';
                         dropdown.style.display = isVisible ? 'none' : 'block';
                     });
                     
-                    // Prevent clicks inside dropdown from propagating
+                    // Prevent dropdown from closing when clicking inside
                     dropdown.addEventListener('click', (e) => {
                         e.stopPropagation();
                     });
                     
                     // Close dropdown when clicking outside
-                    document.addEventListener('click', (e) => {
-                        if (!loginBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                            dropdown.style.display = 'none';
-                        }
+                    document.addEventListener('click', () => {
+                        dropdown.style.display = 'none';
                     });
                     
-                    // Logout from dropdown
-                    const logoutMenuItem = dropdown.querySelector('#logout-menu-item');
-                    if (logoutMenuItem) {
-                        logoutMenuItem.addEventListener('click', async () => {
+                    // Logout handler
+                    const logoutBtn = dropdown.querySelector('.logout-item');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
                             console.log('Logout clicked');
                             try {
                                 // Clear all storage
@@ -1164,18 +1185,23 @@
                                 await window.supabaseClient.auth.signOut({ scope: 'global' });
                                 
                                 // Force redirect
-                                window.location.replace('/index.html');
+                                window.location.replace('/public/promotions.html');
                             } catch (error) {
                                 console.error('Logout error:', error);
-                                // Force logout anyway
-                                localStorage.clear();
-                                sessionStorage.clear();
-                                window.location.replace('/index.html');
                             }
                         });
-                    } else {
-                        console.error('Logout menu item not found');
                     }
+                    
+                    // Hover effects
+                    const items = dropdown.querySelectorAll('.dropdown-menu-item');
+                    items.forEach(item => {
+                        item.addEventListener('mouseenter', () => {
+                            item.style.background = '#f1f5f9';
+                        });
+                        item.addEventListener('mouseleave', () => {
+                            item.style.background = '';
+                        });
+                    });
                 }
                 
             } catch (error) {
