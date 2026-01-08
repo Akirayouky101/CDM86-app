@@ -209,13 +209,17 @@ class AuthModal {
             this.onLogin();
         } else {
             // Apri il login modal invece di redirect
-            if (window.LoginModal && window.LoginModal.open) {
-                window.LoginModal.open();
-            } else {
-                console.error('Login modal not available');
-                // Fallback: redirect
-                window.location.href = '/public/promotions.html';
-            }
+            console.log('Opening LoginModal...');
+            setTimeout(() => {
+                if (window.LoginModal && window.LoginModal.open) {
+                    console.log('LoginModal.open() called');
+                    window.LoginModal.open();
+                } else {
+                    console.error('Login modal not available:', window.LoginModal);
+                    // Fallback: redirect
+                    window.location.href = '/public/promotions.html';
+                }
+            }, 100); // Small delay to ensure auth modal is closed
         }
     }
 
