@@ -484,27 +484,33 @@ async function handleLogin(event) {
         if (data.user) {
             showAlert('✅ Login effettuato! Reindirizzamento...', 'success');
 
-            // Check user role first
-            const { data: userData } = await supabase
+            // Check if user is an organization
+            const { data: orgData } = await sb
+                .from('organizations')
+                .select('id, name')
+                .eq('id', data.user.id)
+                .maybeSingle();
+
+            // Check user role
+            const { data: userData } = await sb
                 .from('users')
                 .select('role')
                 .eq('id', data.user.id)
                 .maybeSingle();
 
-            // Check if user is an organization
-            const { data: orgData } = await supabase
-                .from('organizations')
-                .select('id')
-                .eq('id', data.user.id)
-                .maybeSingle();
-
             // Redirect based on user type
             setTimeout(() => {
-                if (userData && userData.role === 'admin') {
-                    window.location.href = '/public/admin-panel.html';
-                } else if (orgData) {
+                if (orgData) {
+                    // It's an organization
+                    console.log('✅ Organization login:', orgData.name);
                     window.location.href = '/public/organization-dashboard.html';
+                } else if (userData && userData.role === 'admin') {
+                    // It's an admin user
+                    console.log('✅ Admin login');
+                    window.location.href = '/public/admin-panel.html';
                 } else {
+                    // It's a regular user
+                    console.log('✅ User login');
                     window.location.href = '/public/promotions.html';
                 }
             }, 1500);

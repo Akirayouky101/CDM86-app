@@ -448,23 +448,30 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-                    window.location.href = '/public/login.html';
+                    console.log('❌ No session, redirecting to login');
+                    window.location.href = '/public/promotions.html';
                     return;
                 }
                 
-                // Get organization data
+                console.log('✅ Session found, user ID:', session.user.id);
+                
+                // Get organization data - the auth user ID IS the organization ID
                 const { data: orgData, error: orgError } = await supabaseClient
                     .from('organizations')
                     .select('*')
-                    .eq('user_id', session.user.id)
-                    .single();
+                    .eq('id', session.user.id)
+                    .maybeSingle();
+                
+                console.log('Organization query result:', { orgData, orgError });
                 
                 if (orgError || !orgData) {
-                    alert('Errore: account organizzazione non trovato');
-                    window.location.href = '/public/login.html';
+                    console.error('❌ Not an organization account:', orgError);
+                    alert('Errore: questo account non è un\'organizzazione');
+                    window.location.href = '/public/promotions.html';
                     return;
                 }
                 
+                console.log('✅ Organization loaded:', orgData.name);
                 currentOrg = orgData;
                 
                 // Load employees
