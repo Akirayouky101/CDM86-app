@@ -426,6 +426,212 @@
     </div>
     <div class="filters-overlay" id="filtersOverlay"></div>
 
+    <!-- Login Modal -->
+    <div class="login-modal-overlay" id="loginModalOverlay">
+        <div class="login-modal">
+            <div class="login-modal-header">
+                <button class="login-modal-close" onclick="LoginModal.close()">&times;</button>
+                <div class="login-modal-logo">🎫</div>
+                <h2 class="login-modal-title">CDM86</h2>
+                <p class="login-modal-subtitle">Promozioni Esclusive con Referral</p>
+            </div>
+
+            <div class="login-modal-body">
+                <div class="login-tabs">
+                    <button class="login-tab active" data-tab="login" onclick="LoginModal.switchTab('login')">Login</button>
+                    <button class="login-tab" data-tab="register" onclick="LoginModal.switchTab('register')">Registrati</button>
+                </div>
+
+                <div id="loginAlert" class="form-alert"></div>
+
+                <!-- LOGIN PANEL -->
+                <div id="loginPanel" class="login-form-panel active">
+                    <form id="loginForm" onsubmit="return LoginModal.handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" required placeholder="mario.rossi@test.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required placeholder="••••••••">
+                        </div>
+
+                        <button type="submit" class="form-btn form-btn-primary">Accedi</button>
+                        
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="#" onclick="LoginModal.showForgotPassword(event)" style="color: #dc2626; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">
+                                🔑 Password dimenticata?
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="form-loading" id="loginLoading">
+                        <div class="form-spinner"></div>
+                        <p>Accesso in corso...</p>
+                    </div>
+                </div>
+
+                <!-- REGISTER PANEL -->
+                <div id="registerPanel" class="login-form-panel">
+                    <div class="referral-note">
+                        <strong>⚠️ Codice Referral Obbligatorio</strong>
+                        Devi avere un codice referral per registrarti!<br>
+                        <small>Usa <code>ADMIN001</code> per testare</small>
+                    </div>
+
+                    <form id="registerForm" onsubmit="return LoginModal.handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerFirstname">Nome *</label>
+                            <input type="text" id="registerFirstname" required placeholder="Mario">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerLastname">Cognome *</label>
+                            <input type="text" id="registerLastname" required placeholder="Rossi">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">Email *</label>
+                            <input type="email" id="registerEmail" required placeholder="mario.rossi@test.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Password *</label>
+                            <input type="password" id="registerPassword" required placeholder="••••••••" minlength="8">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerReferral">Codice Referral * 🎫</label>
+                            <input type="text" id="registerReferral" required placeholder="ADMIN001" class="uppercase-input">
+                        </div>
+
+                        <button type="submit" class="form-btn form-btn-primary">Registrati</button>
+                    </form>
+
+                    <div class="form-loading" id="registerLoading">
+                        <div class="form-spinner"></div>
+                        <p>Registrazione in corso...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Modal -->
+    <div class="referral-modal-overlay" id="referralModalOverlay">
+        <div class="referral-modal">
+            <button class="login-modal-close" onclick="LoginModal.closeReferral()">&times;</button>
+
+            <!-- Initial Question -->
+            <div id="referralModalQuestion">
+                <div class="referral-modal-header">
+                    <h2>🎁 Hai un codice d'invito?</h2>
+                    <p>Per registrarti hai bisogno di un codice referral</p>
+                </div>
+                <div class="referral-modal-body">
+                    <div class="referral-modal-buttons">
+                        <button class="referral-modal-btn referral-modal-btn-yes" onclick="LoginModal.handleHasCode()">Sì, ho un codice</button>
+                        <button class="referral-modal-btn referral-modal-btn-no" onclick="LoginModal.showWizard()">No, non ce l'ho</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard -->
+            <div class="wizard-container" id="referralModalWizard">
+                <div class="referral-modal-header">
+                    <h2>📧 Richiedi un codice referral</h2>
+                    <p>Compila il form per richiedere il tuo codice</p>
+                </div>
+
+                <div class="referral-modal-body">
+                    <div class="wizard-progress">
+                        <div class="wizard-progress-step active" id="wizardProgress1"></div>
+                        <div class="wizard-progress-step" id="wizardProgress2"></div>
+                        <div class="wizard-progress-step" id="wizardProgress3"></div>
+                    </div>
+
+                    <!-- Step 1: Nome e Cognome -->
+                    <div class="wizard-step-content active" id="wizardStep1">
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="wizardFirstname" required placeholder="Mario">
+                        </div>
+                        <div class="form-group">
+                            <label>Cognome</label>
+                            <input type="text" id="wizardLastname" required placeholder="Rossi">
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Email -->
+                    <div class="wizard-step-content" id="wizardStep2">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="wizardEmail" required placeholder="mario.rossi@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Conferma -->
+                    <div class="wizard-step-content" id="wizardStep3">
+                        <div class="wizard-confirm">
+                            <p><strong>Verifica i tuoi dati:</strong></p>
+                            <p><strong>Nome:</strong> <span id="wizardConfirmName"></span></p>
+                            <p><strong>Email:</strong> <span id="wizardConfirmEmail"></span></p>
+                        </div>
+                        <p class="wizard-note">
+                            Riceverai il codice referral all'indirizzo fornito.
+                        </p>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div class="wizard-step-content" id="wizardStepSuccess">
+                        <div class="wizard-success">
+                            <div class="wizard-success-icon">✅</div>
+                            <h3>Richiesta inviata!</h3>
+                            <p>Riceverai il codice referral via email a breve.</p>
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="wizard-btn wizard-btn-back" id="wizardBtnBack" onclick="LoginModal.wizardBack()">Indietro</button>
+                        <button class="wizard-btn wizard-btn-next" id="wizardBtnNext" onclick="LoginModal.wizardNext()">Avanti</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="forgot-password-overlay" id="forgotPasswordOverlay">
+        <div class="forgot-password-modal">
+            <button class="forgot-password-close" onclick="LoginModal.closeForgotPassword()">&times;</button>
+            
+            <div class="forgot-password-header">
+                <div class="forgot-password-icon">🔑</div>
+                <h2 class="forgot-password-title">Recupera Password</h2>
+                <p class="forgot-password-subtitle">Inserisci la tua email per reimpostare la password</p>
+            </div>
+
+            <div class="forgot-password-body">
+                <div id="forgotPasswordAlert" class="form-alert"></div>
+                
+                <form id="forgotPasswordForm" onsubmit="return LoginModal.handleForgotPassword(event)">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email</label>
+                        <input type="email" id="forgotPasswordEmail" required placeholder="mario.rossi@test.com">
+                    </div>
+
+                    <button type="submit" class="form-btn form-btn-primary">Invia Email di Reset</button>
+                </form>
+
+                <div class="form-loading" id="forgotPasswordLoading">
+                    <div class="form-spinner"></div>
+                    <p>Invio email in corso...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Login Required Modal -->
     <div class="login-required-overlay" id="loginRequiredOverlay">
         <div class="login-required-modal">
