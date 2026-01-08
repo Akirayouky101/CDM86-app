@@ -779,20 +779,25 @@
         
         // Check authentication
         async function checkAuth() {
+            console.log('🔐 checkAuth() called');
             if (!window.supabaseClient) {
                 console.warn('⚠️ checkAuth: Supabase not ready');
                 return null;
             }
             const { data: { session } } = await window.supabaseClient.auth.getSession();
             
+            console.log('Session data:', session);
+            
             if (!session) {
                 // Don't redirect - let users browse
+                console.log('❌ No session found');
                 currentUser = null;
                 return null;
             }
             
             // Set current user - works for both users and organizations
             currentUser = session.user;
+            console.log('✅ Session found, currentUser set to:', currentUser.id, currentUser.email);
             return currentUser;
         }
         
@@ -918,13 +923,13 @@
         window.addEventListener('supabase-ready', async () => {
             console.log('🚀 Initializing page...');
             const user = await checkAuth();
-            console.log('Current user:', user);
+            console.log('📍 Current user after checkAuth:', user);
             
             if (user) {
-                console.log('User is logged in');
+                console.log('✅ User is logged in, calling loadUserInfo()...');
                 await loadUserInfo();
             } else {
-                console.log('User is NOT logged in');
+                console.log('❌ User is NOT logged in');
                 // Update login button for non-logged users
                 const loginBtn = document.getElementById('login-btn');
                 if (loginBtn) {
@@ -982,21 +987,31 @@
         
         // Load user info
         async function loadUserInfo() {
+            console.log('🔍 loadUserInfo() called');
+            console.log('Current user:', currentUser);
+            
             try {
                 // First check if it's an organization
+                console.log('🔍 Checking if user is an organization...');
                 const { data: orgData, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .select('*')
                     .eq('id', currentUser.id)
                     .maybeSingle();
                 
+                console.log('Organization query result:', { orgData, orgError });
+                
                 if (orgData) {
                     // It's an organization
                     const orgName = orgData.name || 'Organization';
+                    console.log('✅ User IS an organization:', orgName);
                     
                     // Update login button with organization name
                     const loginBtn = document.getElementById('login-btn');
+                    console.log('Login button element:', loginBtn);
+                    
                     if (loginBtn) {
+                        console.log('🔄 Updating login button with org name...');
                         // Remove any existing click handlers
                         const newLoginBtn = loginBtn.cloneNode(false);
                         loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
@@ -1006,6 +1021,9 @@
                             <span>${orgName}</span>
                             <i class="fas fa-chevron-down chevron-icon"></i>
                         `;
+                        
+                        console.log('✅ Login button updated with org name:', orgName);
+                        console.log('Button HTML:', newLoginBtn.innerHTML);
                         
                         // Create dropdown menu for organization
                         const dropdown = document.createElement('div');
@@ -1082,22 +1100,27 @@
                 }
                 
                 // If not organization, check users table
+                console.log('🔍 Not an organization, checking users table...');
                 const { data: userData, error } = await window.supabaseClient
                     .from('users')
                     .select('*')
                     .eq('id', currentUser.id)
                     .maybeSingle();
                 
+                console.log('User query result:', { userData, error });
+                
                 if (error) throw error;
                 
                 // Se l'utente non esiste ancora nella tabella users, aspetta e riprova
                 if (!userData) {
-                    console.warn('User not yet in users table, retrying in 1s...');
+                    console.warn('⚠️ User not yet in users table, retrying in 1s...');
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     return loadUserInfo();
                 }
                 
                 const firstName = userData.first_name || 'User';
+                console.log('✅ User loaded:', firstName);
+                
                 const greetingEl = document.getElementById('user-greeting'); if (greetingEl) greetingEl.textContent = `Ciao, ${firstName}!`;
                 const pointsEl = document.getElementById('user-points'); if (pointsEl) pointsEl.textContent = userData.points || 0;
                 
