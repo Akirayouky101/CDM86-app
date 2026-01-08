@@ -488,7 +488,7 @@ async function handleLogin(event) {
             const { data: orgData } = await sb
                 .from('organizations')
                 .select('id, name')
-                .eq('id', data.user.id)
+                .eq('auth_user_id', data.user.id)
                 .maybeSingle();
 
             // Check user role

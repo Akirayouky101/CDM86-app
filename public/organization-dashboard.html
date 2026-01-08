@@ -455,11 +455,11 @@
                 
                 console.log('✅ Session found, user ID:', session.user.id);
                 
-                // Get organization data - the auth user ID IS the organization ID
+                // Get organization data - use auth_user_id to link to auth user
                 const { data: orgData, error: orgError } = await supabaseClient
                     .from('organizations')
                     .select('*')
-                    .eq('id', session.user.id)
+                    .eq('auth_user_id', session.user.id)
                     .maybeSingle();
                 
                 console.log('Organization query result:', { orgData, orgError });
