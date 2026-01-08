@@ -789,6 +789,81 @@
         // Load user info
         async function loadUserInfo() {
             try {
+                // First check if it's an organization
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+                
+                if (orgData) {
+                    // It's an organization
+                    const orgName = orgData.name || 'Organization';
+                    
+                    // Update login button with organization name
+                    const loginBtn = document.getElementById('login-btn');
+                    if (loginBtn) {
+                        loginBtn.innerHTML = `
+                            <i class="fas fa-building"></i>
+                            <span>${orgName}</span>
+                            <i class="fas fa-chevron-down chevron-icon"></i>
+                        `;
+                        
+                        // Create dropdown menu for organization
+                        const dropdown = document.createElement('div');
+                        dropdown.id = 'user-dropdown';
+                        dropdown.style.cssText = `
+                            position: absolute;
+                            top: 50px;
+                            right: 0;
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                            min-width: 200px;
+                            display: none;
+                            z-index: 1000;
+                        `;
+                        
+                        dropdown.innerHTML = `
+                            <a href="/public/organization-dashboard.html" class="dropdown-menu-item">
+                                <span>🏢</span><span>Dashboard Azienda</span>
+                            </a>
+                            <div id="logout-menu-item" class="dropdown-menu-item logout-item">
+                                <span>🚪</span><span>Esci</span>
+                            </div>
+                        `;
+                        
+                        loginBtn.parentElement.style.position = 'relative';
+                        loginBtn.parentElement.appendChild(dropdown);
+                        
+                        // Toggle dropdown
+                        loginBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const isVisible = dropdown.style.display === 'block';
+                            dropdown.style.display = isVisible ? 'none' : 'block';
+                        });
+                        
+                        dropdown.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                        });
+                        
+                        document.addEventListener('click', () => {
+                            dropdown.style.display = 'none';
+                        });
+                        
+                        // Logout handler
+                        const logoutBtn = dropdown.querySelector('#logout-menu-item');
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', async () => {
+                                await window.supabaseClient.auth.signOut();
+                                window.location.reload();
+                            });
+                        }
+                    }
+                    return;
+                }
+                
+                // If not organization, check users table
                 const { data: userData, error } = await window.supabaseClient
                     .from('users')
                     .select('*')
