@@ -1853,7 +1853,7 @@
                 document.getElementById('usersLoading').style.display = 'block';
                 document.getElementById('usersTableContainer').style.display = 'none';
 
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('users')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -2027,7 +2027,7 @@
                 // Check if referral code exists and get referrer ID
                 let referrerId = null;
                 if (referralCode) {
-                    const { data: referrer, error: refError } = await supabase
+                    const { data: referrer, error: refError } = await window.supabaseClient
                         .from('users')
                         .select('id, email')
                         .eq('referral_code', referralCode)
@@ -2049,7 +2049,7 @@
 
                 if (authError) throw authError;
 
-                const { error: userError } = await supabase
+                const { error: userError } = await window.supabaseClient
                     .from('users')
                     .insert({
                         id: authData.user.id,
@@ -2160,7 +2160,7 @@
         // Load pending requests for dropdown
         async function loadPendingRequests() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('admin_organization_requests')
                     .select('*')
                     .eq('status', 'pending')
@@ -2201,7 +2201,7 @@
         // Get next contract code
         async function getNextContractCode() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('organizations')
                     .select('id')
                     .order('created_at', { ascending: false })
@@ -2259,7 +2259,7 @@
             const fromReferral = document.getElementById('fromReferral').checked;
 
             // Get current admin user
-            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            const { data: { user: currentUser } } = await window.supabaseClient.auth.getUser();
             if (!currentUser) {
                 alert('❌ Utente non autenticato');
                 return;
@@ -2288,7 +2288,7 @@
                 const generatedPassword = generatePassword();
 
                 // Create organization
-                const { data: org, error: orgError } = await supabase
+                const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .insert({
                         organization_type: type,
@@ -2315,8 +2315,9 @@
 
                 // Crea utente auth tramite Edge Function
                 try {
-                    const { data: session } = await supabase.auth.getSession();
-                    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-organization-user`, {
+                    const { data: session } = await window.supabaseClient.auth.getSession();
+                    const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/create-organization-user`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${session.session.access_token}`,
@@ -2343,7 +2344,7 @@
 
                 // If from referral, update request status to completed
                 if (requestId) {
-                    const { error: updateError } = await supabase
+                    const { error: updateError } = await window.supabaseClient
                         .from('organization_requests')
                         .update({
                             status: 'completed',
@@ -2357,11 +2358,11 @@
                     // Award points to user who referred
                     if (referredById) {
                         const REFERRAL_POINTS = 50; // Configurable
-                        const { error: pointsError } = await supabase
+                        const { error: pointsError } = await window.supabaseClient
                             .from('users')
                             .update({
-                                points: supabase.sql`points + ${REFERRAL_POINTS}`,
-                                total_points_earned: supabase.sql`total_points_earned + ${REFERRAL_POINTS}`
+                                points: window.supabaseClient.sql`points + ${REFERRAL_POINTS}`,
+                                total_points_earned: window.supabaseClient.sql`total_points_earned + ${REFERRAL_POINTS}`
                             })
                             .eq('id', referredById);
 
@@ -2431,7 +2432,7 @@
                 loading.style.display = 'block';
                 container.innerHTML = '';
 
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('organization_requests')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -2559,7 +2560,7 @@
             if (!confirm('Approvare questa richiesta?')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('organization_requests')
                     .update({ status: 'approved', approved_at: new Date().toISOString() })
                     .eq('id', requestId);
@@ -2578,7 +2579,7 @@
             if (!confirm('Rifiutare questa richiesta?')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('organization_requests')
                     .update({ status: 'rejected' })
                     .eq('id', requestId);
@@ -2598,7 +2599,7 @@
             if (!code) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('organization_requests')
                     .update({ 
                         contract_code: code.toUpperCase(),
@@ -2621,7 +2622,7 @@
             if (note === null) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('organization_requests')
                     .update({ admin_notes: note })
                     .eq('id', requestId);
@@ -2672,7 +2673,7 @@
 
             try {
                 // Insert into contracts table (adjust table name and fields as needed)
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('contracts')
                     .insert({
                         organization_name: orgName,
@@ -2806,7 +2807,7 @@
                 // Get user details for each referrer
                 const referrerDetails = await Promise.all(
                     topReferrers.map(async ([userId, count]) => {
-                        const { data } = await supabase
+                        const { data } = await window.supabaseClient
                             .from('users')
                             .select('name, email, referral_code')
                             .eq('id', userId)
@@ -2937,7 +2938,7 @@
             };
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('promotions')
                     .insert(formData);
 
@@ -2960,7 +2961,7 @@
                 loading.style.display = 'block';
                 container.innerHTML = '';
 
-                const { data, error } = await supabase
+                const { data, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -3127,7 +3128,7 @@
 
         window.togglePromoStatus = async function(promoId, newStatus) {
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('promotions')
                     .update({ is_active: newStatus })
                     .eq('id', promoId);
@@ -3157,7 +3158,7 @@
             closeModal('deletePromoModal');
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('promotions')
                     .delete()
                     .eq('id', promoId);
@@ -3202,7 +3203,7 @@
                 loading.style.display = 'block';
                 container.innerHTML = '';
                 
-                const { data: contracts, error } = await supabase
+                const { data: contracts, error } = await window.supabaseClient
                     .from('contracts_with_details')
                     .select('*')
                     .order('end_date', { ascending: true });
@@ -3299,7 +3300,7 @@
         
         async function loadPointsStats() {
             try {
-                const { data: users, error } = await supabase
+                const { data: users, error } = await window.supabaseClient
                     .from('users')
                     .select('points');
                 
@@ -3314,7 +3315,7 @@
                 document.getElementById('pointsAvgPerUser').textContent = avgPoints.toLocaleString();
                 
                 // Get rewards redeemed count
-                const { count, error: countError } = await supabase
+                const { count, error: countError } = await window.supabaseClient
                     .from('reward_redemptions')
                     .select('*', { count: 'exact', head: true });
                 
@@ -3334,7 +3335,7 @@
                 loading.style.display = 'block';
                 container.innerHTML = '';
                 
-                const { data: users, error } = await supabase
+                const { data: users, error } = await window.supabaseClient
                     .from('users')
                     .select('email, first_name, last_name, points')
                     .order('points', { ascending: false })
@@ -3377,7 +3378,7 @@
         
         async function loadRewardsManagement() {
             try {
-                const { data: rewards, error } = await supabase
+                const { data: rewards, error } = await window.supabaseClient
                     .from('rewards')
                     .select('*')
                     .order('points_required');
@@ -3424,7 +3425,7 @@
         
         window.toggleRewardStatus = async function(rewardId, newStatus) {
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('rewards')
                     .update({ active: newStatus })
                     .eq('id', rewardId);
@@ -3466,7 +3467,7 @@
         
         async function loadRedemptions() {
             try {
-                let query = supabase
+                let query = window.supabaseClient
                     .from('reward_redemptions')
                     .select('*')
                     .order('redeemed_at', { ascending: false });
@@ -3490,12 +3491,12 @@
                 const userIds = [...new Set(redemptions.map(r => r.user_id))];
                 const rewardIds = [...new Set(redemptions.map(r => r.reward_id))];
 
-                const { data: users } = await supabase
+                const { data: users } = await window.supabaseClient
                     .from('users')
                     .select('id, email, first_name, last_name')
                     .in('id', userIds);
 
-                const { data: rewards } = await supabase
+                const { data: rewards } = await window.supabaseClient
                     .from('rewards')
                     .select('id, title, points_required')
                     .in('id', rewardIds);
@@ -3577,7 +3578,7 @@
             if (!confirm('Approvare questo riscatto?')) return;
             
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('reward_redemptions')
                     .update({ status: 'approved' })
                     .eq('id', redemptionId);
@@ -3596,7 +3597,7 @@
             if (!confirm('Rifiutare questo riscatto? I punti verranno restituiti.')) return;
             
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('reward_redemptions')
                     .update({ status: 'rejected' })
                     .eq('id', redemptionId);
@@ -3617,7 +3618,7 @@
             if (!confirm('Segnare come consegnato?')) return;
             
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('reward_redemptions')
                     .update({ status: 'delivered' })
                     .eq('id', redemptionId);
