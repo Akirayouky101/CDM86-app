@@ -1823,15 +1823,18 @@
                     return false;
                 }
 
-                const { data: userData } = await supabase
+                const { data: userData } = await window.supabaseClient
                     .from('users')
                     .select('role, email')
                     .eq('id', user.id)
                     .single();
 
+                console.log('👤 User data:', userData);
+
                 if (!userData || userData.role !== 'admin') {
+                    console.error('❌ Not admin. Role:', userData?.role);
                     alert('⛔ Accesso negato. Solo gli amministratori possono accedere.');
-                    window.location.href = '/public/dashboard.html';
+                    window.location.href = '/public/promotions.html';
                     return false;
                 }
 
