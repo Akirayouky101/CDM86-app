@@ -2287,13 +2287,31 @@
                 const contractCode = await getNextContractCode();
                 const generatedPassword = generatePassword();
 
-                // Create organization
+                // STEP 1: Crea utente auth PRIMA di creare l'organizzazione
+                let authUserId = null;
+                try {
+                    const { data: authData, error: authError } = await window.supabaseClient.auth.admin.createUser({
+                        email: email,
+                        password: generatedPassword,
+                        email_confirm: true
+                    });
+
+                    if (authError) throw authError;
+                    authUserId = authData.user.id;
+                    console.log('✅ Utente auth creato:', authUserId);
+                } catch (authError) {
+                    console.error('❌ Errore creazione utente auth:', authError);
+                    throw new Error('Impossibile creare l\'utente auth: ' + authError.message);
+                }
+
+                // STEP 2: Crea organizzazione e linkala all'utente auth tramite auth_user_id
                 const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .insert({
                         organization_type: type,
                         name: name,
                         email: email,
+                        auth_user_id: authUserId, // 🔥 QUESTO È IL CAMPO CHIAVE!
                         vat_number: vatNumber || null,
                         tax_code: taxCode || null,
                         address: address || null,
@@ -2311,36 +2329,13 @@
                     .select()
                     .single();
 
-                if (orgError) throw orgError;
-
-                // Crea utente auth tramite Edge Function
-                try {
-                    const { data: session } = await window.supabaseClient.auth.getSession();
-                    const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/create-organization-user`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${session.session.access_token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: generatedPassword,
-                            organizationId: org.id,
-                            organizationName: name,
-                            organizationType: type
-                        })
-                    });
-
-                    const result = await response.json();
-                    if (!result.success) {
-                        console.error('Error creating auth user:', result.error);
-                        // Continua comunque, l'admin può creare l'utente manualmente
-                    }
-                } catch (authError) {
-                    console.error('Error calling create-organization-user function:', authError);
-                    // Continua comunque, mostriamo le credenziali all'admin
+                if (orgError) {
+                    // Se fallisce, elimina l'utente auth creato
+                    await window.supabaseClient.auth.admin.deleteUser(authUserId);
+                    throw orgError;
                 }
+
+                console.log('✅ Organizzazione creata e linkata:', org.id);
 
                 // If from referral, update request status to completed
                 if (requestId) {
