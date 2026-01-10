@@ -29,22 +29,22 @@ function getSupabase() {
 }
 
 // Global supabase instance (will be set after initialization)
-let supabase = null;
+let supabaseInstance = null;
 
 // Initialize supabase
 (async () => {
     console.log('🔄 LoginModal: Initializing Supabase...');
-    supabase = await getSupabase();
+    supabaseInstance = await getSupabase();
     console.log('✅ LoginModal: Supabase ready');
 })();
 
 // Helper to ensure supabase is ready
 async function ensureSupabase() {
-    if (!supabase) {
+    if (!supabaseInstance) {
         console.log('⏳ ensureSupabase: Getting instance...');
-        supabase = await getSupabase();
+        supabaseInstance = await getSupabase();
     }
-    return supabase;
+    return supabaseInstance;
 }
 
 // Variabili globali
