@@ -40,7 +40,7 @@
 }
 
 .promo-badge-slogan .slogan-text {
-    font-size: 48px;
+    font-size: 64px;
     font-weight: 900;
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
     background-size: 200% auto;
@@ -48,9 +48,9 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 4px;
     animation: shimmerText 2s linear infinite;
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 1));
     position: relative;
 }
 
@@ -59,19 +59,19 @@
 .slogan-text::after {
     content: '✨';
     position: absolute;
-    font-size: 32px;
+    font-size: 40px;
     animation: sparkleRotate 2s ease-in-out infinite;
 }
 
 .slogan-text::before {
-    left: -60px;
+    left: -80px;
     top: 50%;
     transform: translateY(-50%);
     animation-delay: 0s;
 }
 
 .slogan-text::after {
-    right: -60px;
+    right: -80px;
     top: 50%;
     transform: translateY(-50%);
     animation-delay: 1s;
@@ -218,7 +218,7 @@
 
 /* Pricing Section - EFFETTO PREZZO BARRATO */
 .promo-pricing {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+    background: rgba(255, 255, 255, 0.95);
     border: 2px solid rgba(255, 215, 0, 0.3);
     border-radius: 16px;
     padding: 30px;
@@ -236,7 +236,7 @@
     height: 100%;
     background: linear-gradient(90deg, 
         transparent, 
-        rgba(255, 215, 0, 0.1), 
+        rgba(255, 215, 0, 0.2), 
         transparent);
     animation: shimmer 3s infinite;
 }
@@ -247,7 +247,7 @@
 
 .old-price {
     font-size: 28px;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.4);
     position: relative;
     display: inline-block;
     margin-bottom: 10px;
@@ -279,7 +279,7 @@
 
 .price-period {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     font-weight: 600;
 }
 
@@ -491,21 +491,21 @@
 /* Responsive slogan */
 @media (max-width: 768px) {
     .promo-badge-slogan .slogan-text {
-        font-size: 32px;
+        font-size: 40px;
         letter-spacing: 2px;
     }
     
     .slogan-text::before,
     .slogan-text::after {
-        font-size: 24px;
+        font-size: 28px;
     }
     
     .slogan-text::before {
-        left: -40px;
+        left: -50px;
     }
     
     .slogan-text::after {
-        right: -40px;
+        right: -50px;
     }
 }
 
