@@ -1092,20 +1092,31 @@
 /* Responsive */
 @media (max-width: 640px) {
     .selection-modal-overlay {
-        padding: 10px;
+        padding: 20px 10px;
     }
 
     .selection-modal {
-        max-height: 95vh;
+        max-height: 85vh;
         overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .selection-options {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .selection-option {
+        padding: 24px 20px;
     }
 
     .login-modal,
     .referral-modal {
         max-width: 100%;
-        max-height: 95vh;
+        max-height: 90vh;
         overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -1129,9 +1140,10 @@
     
     .forgot-password-modal {
         max-width: 100%;
-        max-height: 95vh;
+        max-height: 90vh;
         margin: 0 10px;
         overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
     }
 }
