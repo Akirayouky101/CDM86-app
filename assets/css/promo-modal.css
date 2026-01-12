@@ -17,7 +17,7 @@
     align-items: center;
     z-index: 10000;
     animation: fadeIn 0.4s ease;
-    overflow: hidden;
+    touch-action: pan-y;
 }
 
 .promo-modal-overlay.show {
@@ -710,15 +710,12 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .promo-modal-overlay {
-        overflow: hidden;
-    }
-
     .promo-modal-container {
         width: 85%;
         max-width: 400px;
         max-height: 85vh;
         margin: 0;
+        touch-action: pan-y;
     }
 
     .promo-modal-header,
