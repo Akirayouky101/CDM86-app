@@ -311,7 +311,7 @@
     font-size: 22px;
     color: rgba(0, 0, 0, 0.7);
     font-weight: 700;
-    margin-top: 200px;
+    margin-top: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -707,7 +707,7 @@
 
     .price-period {
         font-size: 16px;
-        margin-top: 160px;
+        margin-top: 200px;
         gap: 6px;
     }
 
