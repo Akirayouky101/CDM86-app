@@ -311,7 +311,61 @@
     font-size: 22px;
     color: rgba(0, 0, 0, 0.7);
     font-weight: 700;
-    margin-top: 200px;
+    margin-top: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.year-highlight {
+    font-size: 56px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.6));
+    animation: shimmerText 3s ease-in-out infinite;
+}
+
+.calendar-animation {
+    display: inline-block;
+    width: 60px;
+    height: 32px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.calendar-months {
+    display: flex;
+    flex-direction: column;
+    animation: scrollMonths 8s linear infinite;
+}
+
+.calendar-months span {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFD700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes scrollMonths {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-50%);
+    }
 }
 
 .discount-badge {
@@ -652,8 +706,23 @@
     }
 
     .price-period {
-        font-size: 18px;
-        margin-top: 150px;
+        font-size: 16px;
+        margin-top: 100px;
+        gap: 6px;
+    }
+
+    .year-highlight {
+        font-size: 38px;
+    }
+
+    .calendar-animation {
+        width: 50px;
+        height: 28px;
+    }
+
+    .calendar-months span {
+        height: 28px;
+        font-size: 11px;
     }
 
     .discount-badge {
