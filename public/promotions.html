@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="/assets/css/animations.css">
     <link rel="stylesheet" href="/assets/css/auth-modal.css">
     <link rel="stylesheet" href="/assets/css/login-modal.css">
+    <link rel="stylesheet" href="/assets/css/promo-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -1796,6 +1797,131 @@
                 });
             }
         }
+    </script>
+
+    <!-- Promo Modal 2026 -->
+    <div class="promo-modal-overlay" id="promoModal">
+        <div class="promo-modal-container">
+            <!-- Particelle Dorate -->
+            <div class="promo-modal-sparkles">
+                <div class="sparkle"></div>
+                <div class="sparkle"></div>
+                <div class="sparkle"></div>
+                <div class="sparkle"></div>
+                <div class="sparkle"></div>
+                <div class="sparkle"></div>
+            </div>
+
+            <!-- Close Button -->
+            <button class="promo-modal-close" onclick="closePromoModal()">×</button>
+
+            <!-- Header -->
+            <div class="promo-modal-header">
+                <div class="promo-badge">🎉 Offerta di Lancio 2026</div>
+                <h2 class="promo-modal-title">Benvenuto in CDM86!</h2>
+                <p class="promo-modal-subtitle">La Piattaforma del Risparmio</p>
+            </div>
+
+            <!-- Body -->
+            <div class="promo-modal-body">
+                <p class="promo-description">
+                    Approfitta della nostra <strong>offerta esclusiva</strong> per tutto il 2026! 
+                    Ottieni accesso completo alla piattaforma con uno sconto del <strong>50%</strong>.
+                </p>
+
+                <!-- Pricing Box -->
+                <div class="promo-pricing">
+                    <div class="price-container">
+                        <div class="old-price">€20</div>
+                        <div class="new-price">€10</div>
+                        <div class="price-period">per tutto il 2026</div>
+                        <div class="discount-badge">-50% SCONTO</div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <ul class="promo-features">
+                    <li>Accesso illimitato a tutte le promozioni</li>
+                    <li>Sistema di punti e referral</li>
+                    <li>Sconti esclusivi riservati ai membri</li>
+                    <li>Supporto prioritario</li>
+                </ul>
+
+                <!-- CTA Button -->
+                <button class="promo-cta" onclick="handlePromoAction()">
+                    Attiva Ora il Tuo Account
+                </button>
+
+                <p class="promo-note">
+                    ⚠️ Dal 1° Gennaio 2027 il prezzo tornerà a €20/anno
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // GESTIONE MODAL PROMOZIONALE
+    // ============================================
+
+    // Mostra la modal all'avvio (dopo 1 secondo)
+    window.addEventListener('DOMContentLoaded', () => {
+        // Controlla se l'utente ha già visto la modal oggi
+        const promoShown = sessionStorage.getItem('promoModalShown');
+        
+        if (!promoShown) {
+            setTimeout(() => {
+                showPromoModal();
+            }, 1000);
+        }
+    });
+
+    function showPromoModal() {
+        const modal = document.getElementById('promoModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            // Segna come vista per questa sessione
+            sessionStorage.setItem('promoModalShown', 'true');
+        }
+    }
+
+    function closePromoModal() {
+        const modal = document.getElementById('promoModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function handlePromoAction() {
+        // Chiudi la modal promozionale
+        closePromoModal();
+        
+        // Apri la modal di autenticazione
+        const authModalElement = document.getElementById('authModal');
+        if (authModalElement && window.authModal) {
+            window.authModal.open();
+        }
+    }
+
+    // Chiudi modal cliccando sull'overlay
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'promoModal') {
+            closePromoModal();
+        }
+    });
+
+    // Chiudi modal con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('promoModal');
+            if (modal && modal.classList.contains('show')) {
+                closePromoModal();
+            }
+        }
+    });
     </script>
 </body>
 </html>

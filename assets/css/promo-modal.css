@@ -1,0 +1,426 @@
+/* ============================================
+   MODAL PROMOZIONALE - STILE PREMIUM GOLD
+   ============================================ */
+
+/* Overlay con effetto blur */
+.promo-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.4s ease;
+}
+
+.promo-modal-overlay.show {
+    display: flex;
+}
+
+/* Modal Container - Effetto Carta Premium */
+.promo-modal-container {
+    position: relative;
+    max-width: 600px;
+    width: 90%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 24px;
+    padding: 0;
+    box-shadow: 
+        0 0 60px rgba(255, 215, 0, 0.4),
+        0 0 120px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    animation: modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+/* Bordo Dorato Animato */
+.promo-modal-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #FFD700, #FFA500, #FFD700, #FFA500);
+    background-size: 400% 400%;
+    border-radius: 24px;
+    z-index: -1;
+    animation: gradientShift 3s ease infinite;
+    opacity: 0.6;
+}
+
+/* Particelle Dorate */
+.promo-modal-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #FFD700;
+    animation: sparkleFloat 3s ease-in-out infinite;
+}
+
+.sparkle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.sparkle:nth-child(2) { top: 40%; left: 80%; animation-delay: 0.5s; }
+.sparkle:nth-child(3) { top: 60%; left: 20%; animation-delay: 1s; }
+.sparkle:nth-child(4) { top: 30%; left: 70%; animation-delay: 1.5s; }
+.sparkle:nth-child(5) { top: 70%; left: 50%; animation-delay: 2s; }
+.sparkle:nth-child(6) { top: 50%; left: 90%; animation-delay: 2.5s; }
+
+/* Close Button */
+.promo-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 50%;
+    color: #FFD700;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promo-modal-close:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: rotate(90deg);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Header */
+.promo-modal-header {
+    padding: 40px 40px 20px;
+    text-align: center;
+}
+
+.promo-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #1a1a2e;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    animation: pulse 2s ease infinite;
+}
+
+.promo-modal-title {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 10px;
+    line-height: 1.2;
+}
+
+.promo-modal-subtitle {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Body */
+.promo-modal-body {
+    padding: 20px 40px 40px;
+}
+
+.promo-description {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+/* Pricing Section - EFFETTO PREZZO BARRATO */
+.promo-pricing {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-pricing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 215, 0, 0.1), 
+        transparent);
+    animation: shimmer 3s infinite;
+}
+
+.price-container {
+    text-align: center;
+}
+
+.old-price {
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.4);
+    position: relative;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.old-price::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 3px;
+    background: #ff4444;
+    transform: rotate(-15deg);
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+}
+
+.new-price {
+    font-size: 56px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin: 10px 0;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.price-period {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+.discount-badge {
+    display: inline-block;
+    background: #ff4444;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 10px;
+    animation: bounce 2s ease infinite;
+}
+
+/* Features List */
+.promo-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px;
+}
+
+.promo-features li {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.promo-features li::before {
+    content: '✨';
+    font-size: 18px;
+    margin-right: 12px;
+}
+
+.promo-features li:last-child {
+    border-bottom: none;
+}
+
+/* CTA Button */
+.promo-cta {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #1a1a2e;
+    border: none;
+    padding: 16px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.promo-cta:hover::before {
+    left: 100%;
+}
+
+.promo-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(255, 215, 0, 0.6);
+}
+
+.promo-cta:active {
+    transform: translateY(0);
+}
+
+/* Footer Note */
+.promo-note {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    margin-top: 20px;
+}
+
+/* ============================================
+   ANIMAZIONI
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes sparkleFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.5);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .promo-modal-container {
+        width: 95%;
+        max-width: none;
+    }
+
+    .promo-modal-header,
+    .promo-modal-body {
+        padding: 30px 24px;
+    }
+
+    .promo-modal-title {
+        font-size: 24px;
+    }
+
+    .promo-modal-subtitle {
+        font-size: 16px;
+    }
+
+    .new-price {
+        font-size: 42px;
+    }
+
+    .old-price {
+        font-size: 22px;
+    }
+
+    .promo-cta {
+        font-size: 16px;
+        padding: 14px 32px;
+    }
+}
