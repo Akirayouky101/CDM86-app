@@ -1092,31 +1092,21 @@
 /* Responsive */
 @media (max-width: 640px) {
     .selection-modal-overlay {
-        align-items: flex-start;
-        padding: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        padding: 10px;
     }
 
     .selection-modal {
-        max-height: none;
-        min-height: 100vh;
-        border-radius: 0;
-        transform: none !important;
-        width: 100%;
-    }
-
-    .selection-modal-overlay.active .selection-modal {
-        transform: none !important;
+        max-height: 95vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .login-modal,
     .referral-modal {
         max-width: 100%;
-        max-height: none;
-        min-height: 100vh;
-        border-radius: 0;
-        width: 100%;
+        max-height: 95vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .login-modal-header,
@@ -1139,10 +1129,9 @@
     
     .forgot-password-modal {
         max-width: 100%;
-        max-height: none;
-        min-height: 100vh;
-        margin: 0;
-        border-radius: 0;
-        width: 100%;
+        max-height: 95vh;
+        margin: 0 10px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
