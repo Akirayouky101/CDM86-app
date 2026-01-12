@@ -1092,13 +1092,22 @@
 /* Responsive */
 @media (max-width: 640px) {
     .selection-modal-overlay {
-        padding: 20px 10px;
+        padding: 10px;
+        align-items: flex-start;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .selection-modal {
-        max-height: 85vh !important;
+        max-height: none !important;
+        height: auto;
+        margin: 20px auto;
+        overflow: visible;
+    }
+
+    .selection-modal-body {
+        max-height: calc(100vh - 220px);
         overflow-y: auto;
-        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
     }
 
