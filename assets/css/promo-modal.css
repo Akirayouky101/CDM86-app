@@ -17,6 +17,7 @@
     align-items: center;
     z-index: 10000;
     animation: fadeIn 0.4s ease;
+    overflow: hidden;
 }
 
 .promo-modal-overlay.show {
@@ -704,78 +705,97 @@
 /* Responsive */
 @media (max-width: 768px) {
     .promo-modal-overlay {
-        overflow-x: hidden;
+        overflow: hidden;
     }
 
     .promo-modal-container {
-        width: 95%;
-        max-width: none;
-        margin: 0 auto;
-        left: 0;
-        right: 0;
+        width: 85%;
+        max-width: 400px;
+        max-height: 85vh;
+        margin: 0;
     }
 
     .promo-modal-header,
     .promo-modal-body {
-        padding: 30px 24px;
+        padding: 25px 20px;
     }
 
     .promo-modal-title {
-        font-size: 24px;
+        font-size: 22px;
     }
 
     .promo-modal-subtitle {
-        font-size: 16px;
+        font-size: 14px;
+    }
+
+    .promo-pricing {
+        padding: 15px;
+        margin-bottom: 20px;
     }
 
     .price-container {
-        min-height: 250px;
+        min-height: 220px;
         padding-top: 10px;
     }
 
     .old-price {
-        font-size: 80px;
-        top: 20px;
+        font-size: 70px;
+        top: 15px;
     }
 
     .old-price::before {
-        font-size: 40px;
-        top: -40px;
-        right: -40px;
+        font-size: 35px;
+        top: -35px;
+        right: -35px;
     }
 
     .new-price {
-        font-size: 90px;
-        top: 20px;
+        font-size: 80px;
+        top: 15px;
     }
 
     .price-period {
-        font-size: 16px;
-        margin-top: 110px;
-        gap: 6px;
+        font-size: 14px;
+        margin-top: 100px;
+        gap: 5px;
     }
 
     .year-highlight {
-        font-size: 38px;
+        font-size: 32px;
     }
 
     .calendar-animation {
-        width: 50px;
-        height: 28px;
+        width: 45px;
+        height: 26px;
     }
 
     .calendar-months span {
-        height: 28px;
-        font-size: 11px;
+        height: 26px;
+        font-size: 10px;
     }
 
     .discount-badge {
-        font-size: 14px;
-        padding: 6px 16px;
+        font-size: 12px;
+        padding: 5px 14px;
+    }
+
+    .promo-features {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .promo-features li {
+        font-size: 13px;
+        padding: 10px 0;
     }
 
     .promo-cta {
-        font-size: 16px;
-        padding: 14px 32px;
+        font-size: 14px;
+        padding: 12px 28px;
+    }
+
+    .promo-note {
+        font-size: 11px;
+        margin-top: 15px;
     }
 }
