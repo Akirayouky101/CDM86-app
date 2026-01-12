@@ -59,7 +59,11 @@ function showSelectionModal() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        // Su mobile (< 640px) NON bloccare lo scroll del body
+        // perché l'overlay stesso è scrollabile
+        if (window.innerWidth > 640) {
+            document.body.style.overflow = 'hidden';
+        }
     }
 }
 
@@ -67,7 +71,10 @@ function closeSelectionModal() {
     const overlay = document.getElementById('selectionModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
-        document.body.style.overflow = '';
+        // Ripristina lo scroll solo se era stato bloccato (desktop)
+        if (window.innerWidth > 640) {
+            document.body.style.overflow = '';
+        }
     }
 }
 
