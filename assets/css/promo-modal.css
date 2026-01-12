@@ -244,17 +244,24 @@
 .price-container {
     text-align: center;
     position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* PREZZO VECCHIO - Grande e poi esplode */
+/* PREZZO VECCHIO - Grande al centro poi esplode */
 .old-price {
-    font-size: 72px;
+    font-size: 120px;
     font-weight: 900;
     color: rgba(255, 68, 68, 0.9);
-    position: relative;
-    display: inline-block;
-    margin-bottom: 20px;
-    animation: priceExplode 3s ease-in-out infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    animation: priceExplode 5s ease-in-out infinite;
 }
 
 .old-price::after {
@@ -263,36 +270,40 @@
     top: 50%;
     left: -10%;
     width: 120%;
-    height: 4px;
+    height: 6px;
     background: #ff0000;
-    transform: rotate(-15deg);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-    animation: strikeThrough 3s ease-in-out infinite;
+    transform: rotate(-15deg) translateY(-50%);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 1);
+    animation: strikeThrough 5s ease-in-out infinite;
 }
 
 /* Effetto frantumazione */
 .old-price::before {
     content: '💥';
     position: absolute;
-    font-size: 40px;
-    top: -30px;
-    right: -40px;
+    font-size: 60px;
+    top: -50px;
+    right: -60px;
     opacity: 0;
-    animation: boom 3s ease-in-out infinite;
+    animation: boom 5s ease-in-out infinite;
 }
 
-/* PREZZO NUOVO - Enorme e impattante */
+/* PREZZO NUOVO - Enorme al centro */
 .new-price {
-    font-size: 96px;
+    font-size: 140px;
     font-weight: 900;
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1;
-    margin: 20px 0;
-    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-    animation: priceAppear 3s ease-in-out infinite;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    animation: priceAppear 5s ease-in-out infinite;
     transform-origin: center;
 }
 
@@ -300,6 +311,7 @@
     font-size: 22px;
     color: rgba(0, 0, 0, 0.7);
     font-weight: 700;
+    margin-top: 200px;
 }
 
 .discount-badge {
@@ -310,7 +322,7 @@
     border-radius: 20px;
     font-size: 16px;
     font-weight: 700;
-    margin-top: 15px;
+    margin-top: 10px;
     animation: bounce 2s ease infinite;
     box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
 }
@@ -492,50 +504,50 @@
 }
 
 @keyframes priceExplode {
-    0%, 30% {
-        transform: scale(1) rotate(0deg);
+    0%, 40% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
         opacity: 1;
     }
-    35% {
-        transform: scale(1.1) rotate(-3deg);
+    45% {
+        transform: translate(-50%, -50%) scale(1.15) rotate(-3deg);
     }
-    40% {
-        transform: scale(0.8) rotate(3deg);
+    50% {
+        transform: translate(-50%, -50%) scale(0.9) rotate(3deg);
         opacity: 0.5;
     }
-    45%, 100% {
-        transform: scale(0) rotate(180deg);
+    55%, 100% {
+        transform: translate(-50%, -50%) scale(0) rotate(180deg);
         opacity: 0;
     }
 }
 
 @keyframes strikeThrough {
-    0%, 30% {
+    0%, 40% {
         width: 0%;
         opacity: 0;
     }
-    35% {
+    45% {
         width: 120%;
         opacity: 1;
     }
-    45%, 100% {
+    55%, 100% {
         width: 120%;
         opacity: 0;
     }
 }
 
 @keyframes boom {
-    0%, 35% {
+    0%, 45% {
         opacity: 0;
         transform: scale(0) rotate(0deg);
     }
-    40% {
-        opacity: 1;
-        transform: scale(2) rotate(45deg);
-    }
     50% {
+        opacity: 1;
+        transform: scale(2.5) rotate(45deg);
+    }
+    60% {
         opacity: 0;
-        transform: scale(3) rotate(90deg);
+        transform: scale(4) rotate(90deg);
     }
     100% {
         opacity: 0;
@@ -543,19 +555,19 @@
 }
 
 @keyframes priceAppear {
-    0%, 45% {
-        transform: scale(0) rotate(-180deg);
+    0%, 55% {
+        transform: translate(-50%, -50%) scale(0) rotate(-180deg);
         opacity: 0;
     }
-    50% {
-        transform: scale(1.3) rotate(10deg);
+    60% {
+        transform: translate(-50%, -50%) scale(1.3) rotate(10deg);
         opacity: 1;
     }
-    55% {
-        transform: scale(0.9) rotate(-5deg);
+    65% {
+        transform: translate(-50%, -50%) scale(0.95) rotate(-5deg);
     }
-    60%, 100% {
-        transform: scale(1) rotate(0deg);
+    70%, 100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
         opacity: 1;
     }
 }
@@ -621,16 +633,27 @@
         font-size: 16px;
     }
 
+    .price-container {
+        min-height: 150px;
+    }
+
     .old-price {
-        font-size: 48px;
+        font-size: 80px;
+    }
+
+    .old-price::before {
+        font-size: 40px;
+        top: -40px;
+        right: -40px;
     }
 
     .new-price {
-        font-size: 64px;
+        font-size: 90px;
     }
 
     .price-period {
         font-size: 18px;
+        margin-top: 150px;
     }
 
     .discount-badge {
