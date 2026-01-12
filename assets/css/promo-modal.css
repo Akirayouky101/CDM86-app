@@ -93,7 +93,25 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 215, 0, 0.3);
     animation: modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
+}
+
+/* Custom Scrollbar */
+.promo-modal-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.promo-modal-container::-webkit-scrollbar-track {
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 0 24px 24px 0;
+}
+
+.promo-modal-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 4px;
+}
+
+.promo-modal-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
 }
 
 /* Bordo Dorato Animato */
