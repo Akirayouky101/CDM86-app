@@ -195,7 +195,7 @@
 }
 
 /* Header */
-.promo-modal-header {
+.promo-modal-container .promo-modal-header {
     padding: 35px 40px 15px;
     text-align: center;
     overflow-x: hidden;
@@ -234,7 +234,7 @@
 }
 
 /* Body */
-.promo-modal-body {
+.promo-modal-container .promo-modal-body {
     padding: 15px 40px 35px;
     overflow-x: hidden;
 }
