@@ -1094,22 +1094,29 @@
     .selection-modal-overlay {
         align-items: flex-start;
         padding: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .selection-modal {
-        max-height: 100vh;
+        max-height: none;
+        min-height: 100vh;
         border-radius: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        transform: none !important;
+        width: 100%;
+    }
+
+    .selection-modal-overlay.active .selection-modal {
+        transform: none !important;
     }
 
     .login-modal,
     .referral-modal {
         max-width: 100%;
-        max-height: 100vh;
+        max-height: none;
+        min-height: 100vh;
         border-radius: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
 
     .login-modal-header,
@@ -1132,10 +1139,10 @@
     
     .forgot-password-modal {
         max-width: 100%;
-        max-height: 100vh;
+        max-height: none;
+        min-height: 100vh;
         margin: 0;
         border-radius: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
 }
