@@ -82,6 +82,8 @@
     position: relative;
     max-width: 600px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border-radius: 24px;
     padding: 0;
@@ -167,7 +169,7 @@
 
 /* Header */
 .promo-modal-header {
-    padding: 40px 40px 20px;
+    padding: 35px 40px 15px;
     text-align: center;
 }
 
@@ -205,7 +207,7 @@
 
 /* Body */
 .promo-modal-body {
-    padding: 20px 40px 40px;
+    padding: 15px 40px 35px;
 }
 
 .promo-description {
@@ -221,7 +223,7 @@
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid rgba(255, 215, 0, 0.3);
     border-radius: 16px;
-    padding: 40px;
+    padding: 20px;
     margin-bottom: 30px;
     position: relative;
     overflow: hidden;
@@ -244,12 +246,12 @@
 .price-container {
     text-align: center;
     position: relative;
-    min-height: 350px;
+    min-height: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: 20px;
+    padding-top: 15px;
 }
 
 /* PREZZO VECCHIO - Grande in alto poi esplode */
@@ -312,7 +314,7 @@
     font-size: 22px;
     color: rgba(0, 0, 0, 0.7);
     font-weight: 700;
-    margin-top: 180px;
+    margin-top: 160px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -689,8 +691,8 @@
     }
 
     .price-container {
-        min-height: 280px;
-        padding-top: 15px;
+        min-height: 250px;
+        padding-top: 10px;
     }
 
     .old-price {
@@ -711,7 +713,7 @@
 
     .price-period {
         font-size: 16px;
-        margin-top: 130px;
+        margin-top: 110px;
         gap: 6px;
     }
 
