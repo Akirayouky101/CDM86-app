@@ -1096,7 +1096,7 @@
     }
 
     .selection-modal {
-        max-height: 85vh;
+        max-height: 85vh !important;
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
