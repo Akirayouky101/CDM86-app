@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Utenti CDM86 - Solo Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00ff00;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .warning-box {
+            background: #ff0000;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .instructions {
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .instructions h2 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        button {
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #console {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .info {
+            color: #00aaff;
+        }
+
+        .credentials {
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .credentials h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .user-card {
+            background: #1a1a2e;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #FFD700;
+            border-radius: 4px;
+        }
+
+        .user-card strong {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Reset Database Utenti - Solo Admin</h1>
+
+        <div class="warning-box">
+            ⚠️ ATTENZIONE: Questa operazione cancellerà TUTTI gli utenti esistenti! ⚠️
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Cosa farà questo script:</h2>
+            <ul>
+                <li>❌ Cancellerà TUTTI gli utenti da public.users</li>
+                <li>❌ NON può cancellare da auth.users (devi farlo manualmente da Supabase)</li>
+                <li>✅ Creerà 1 utente amministratore</li>
+                <li>✅ L'admin avrà accesso completo al sistema</li>
+            </ul>
+            <br>
+            <h2>🔴 Importante:</h2>
+            <ul>
+                <li>Devi cancellare manualmente gli auth.users da Supabase Dashboard</li>
+                <li>Vai su: Authentication > Users > Seleziona tutti > Delete</li>
+                <li>Poi torna qui e clicca "Crea Admin"</li>
+            </ul>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-danger" id="deleteBtn" onclick="deleteAllUsers()">
+                🗑️ Cancella Tutti gli Utenti
+            </button>
+            <button class="btn-success" id="createBtn" onclick="createAdmin()">
+                ✅ Crea Admin
+            </button>
+        </div>
+
+        <div id="console"></div>
+
+        <div class="credentials">
+            <h3>📝 Credenziali Admin che verrà creato:</h3>
+            
+            <div class="user-card">
+                <strong>AMMINISTRATORE:</strong> Admin CDM86<br>
+                Email: admin@cdm86.com<br>
+                Password: Admin123!<br>
+                Referral Code: ADMIN001<br>
+                Ruolo: admin
+            </div>
+
+            <div class="user-card">
+                <strong>⚡ Poteri Admin:</strong><br>
+                - Accesso completo a tutte le funzioni<br>
+                - Può gestire organizzazioni<br>
+                - Può approvare richieste<br>
+                - Dashboard amministratore
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const consoleDiv = document.getElementById('console');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const createBtn = document.getElementById('createBtn');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = `[${timestamp}] ${message}\n`;
+            consoleDiv.appendChild(span);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function deleteAllUsers() {
+            if (!confirm('⚠️ SEI SICURO? Questa operazione cancellerà TUTTI gli utenti da public.users!')) {
+                return;
+            }
+
+            deleteBtn.disabled = true;
+            consoleDiv.innerHTML = '';
+            
+            log('🗑️ Inizio cancellazione utenti...', 'warning');
+            
+            try {
+                // Prima conta quanti utenti ci sono
+                const { count, error: countError } = await supabaseClient
+                    .from('users')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (countError) throw countError;
+                
+                log(`📊 Utenti trovati: ${count}`, 'info');
+                
+                // Cancella tutti
+                const { error: deleteError } = await supabaseClient
+                    .from('users')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000'); // Cancella tutti (condizione sempre vera)
+                
+                if (deleteError) throw deleteError;
+                
+                log(`✅ ${count} utenti cancellati da public.users`, 'success');
+                log('', 'info');
+                log('⚠️ IMPORTANTE: Devi ancora cancellare gli utenti da auth.users!', 'warning');
+                log('Vai su Supabase Dashboard > Authentication > Users', 'warning');
+                log('Seleziona tutti gli utenti e clicca Delete', 'warning');
+                log('Poi torna qui e clicca "Crea Admin"', 'warning');
+                
+            } catch (error) {
+                log(`❌ Errore: ${error.message}`, 'error');
+            }
+            
+            deleteBtn.disabled = false;
+        }
+
+        async function createAdmin() {
+            createBtn.disabled = true;
+            
+            if (consoleDiv.innerHTML === '') {
+                consoleDiv.innerHTML = '';
+            }
+            
+            log('\n\n🚀 Inizio creazione Admin...', 'info');
+            
+            const admin = {
+                email: 'admin@cdm86.com',
+                password: 'Admin123!',
+                full_name: 'Admin CDM86',
+                role: 'admin',
+                referral_code: 'ADMIN001'
+            };
+            
+            try {
+                log(`📝 Creazione utente auth: ${admin.email}...`, 'info');
+                
+                // 1. Crea auth user
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                    email: admin.email,
+                    password: admin.password,
+                    options: {
+                        data: {
+                            full_name: admin.full_name
+                        }
+                    }
+                });
+                
+                if (authError) {
+                    if (authError.message.includes('already registered')) {
+                        log('⚠️ Admin già esistente in auth.users', 'warning');
+                        log('Cancellalo da Supabase Dashboard e riprova', 'warning');
+                    } else {
+                        throw authError;
+                    }
+                    createBtn.disabled = false;
+                    return;
+                }
+                
+                log(`✅ Auth user creato: ${authData.user.id}`, 'success');
+                
+                // 2. Aspetta trigger
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 3. Aggiorna record in public.users
+                log('📝 Aggiornamento dati admin...', 'info');
+                
+                const { error: updateError } = await supabaseClient
+                    .from('users')
+                    .update({
+                        full_name: admin.full_name,
+                        role: admin.role,
+                        referral_code: admin.referral_code
+                    })
+                    .eq('id', authData.user.id);
+                
+                if (updateError) {
+                    log(`❌ Errore aggiornamento: ${updateError.message}`, 'error');
+                } else {
+                    log(`✅ Admin creato con successo!`, 'success');
+                    log('', 'info');
+                    log('========================================', 'success');
+                    log('📋 CREDENZIALI ADMIN:', 'success');
+                    log('========================================', 'success');
+                    log(`Email: ${admin.email}`, 'success');
+                    log(`Password: ${admin.password}`, 'success');
+                    log(`Referral Code: ${admin.referral_code}`, 'success');
+                    log(`UUID: ${authData.user.id}`, 'success');
+                    log('========================================', 'success');
+                    log('', 'info');
+                    log('✅ Puoi ora fare login con queste credenziali!', 'success');
+                }
+                
+            } catch (error) {
+                log(`❌ Errore: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+            
+            createBtn.disabled = false;
+        }
+
+        // Log iniziale
+        log('👋 Pronto per resettare gli utenti', 'info');
+        log('Leggi le istruzioni e poi procedi con cautela!', 'warning');
+    </script>
+</body>
+</html>
