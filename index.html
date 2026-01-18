@@ -392,6 +392,47 @@
         </button>
     </nav>
 
+    <!-- Selection Modal (User vs Azienda) -->
+    <div class="selection-modal-overlay" id="selectionModalOverlay">
+        <div class="selection-modal">
+            <div class="selection-modal-header">
+                <button class="selection-modal-close" onclick="LoginModal.closeSelection()">&times;</button>
+                <div class="selection-modal-icon">🔐</div>
+                <h2 class="selection-modal-title">Benvenuto su CDM86</h2>
+                <p class="selection-modal-subtitle">Scegli come vuoi accedere alla piattaforma</p>
+            </div>
+
+            <div class="selection-modal-body">
+                <div class="selection-options">
+                    <div class="selection-option" onclick="LoginModal.selectUser()">
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">👤</span>
+                            <h3 class="selection-option-title">Sono un Utente</h3>
+                            <p class="selection-option-description">Accedi alle promozioni e guadagna punti</p>
+                        </div>
+                    </div>
+
+                    <div class="selection-option" onclick="LoginModal.selectCompany()">
+                        <span class="selection-option-badge">Partner</span>
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">🏢</span>
+                            <h3 class="selection-option-title">Azienda/Associazione</h3>
+                            <p class="selection-option-description">Richiedi informazioni per pubblicare promozioni</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selection-login-section">
+                    <p>Hai già un account?</p>
+                    <button class="selection-login-btn" onclick="LoginModal.showExistingUserLogin()">
+                        <span>🔑</span>
+                        <span>Accedi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Company Request Modal -->
     <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
         <div class="company-request-modal">
