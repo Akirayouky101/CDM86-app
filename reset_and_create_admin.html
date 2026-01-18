@@ -374,6 +374,7 @@
                     email: admin.email,
                     password: admin.password,
                     options: {
+                        emailRedirectTo: window.location.origin,
                         data: {
                             first_name: admin.first_name,
                             last_name: admin.last_name
@@ -394,10 +395,24 @@
                 
                 log(`✅ Auth user creato: ${authData.user.id}`, 'success');
                 
-                // 2. Aspetta trigger
+                // 2. Conferma email automaticamente
+                log('📧 Conferma email...', 'info');
+                const { error: confirmError } = await supabaseClient.auth.admin.updateUserById(
+                    authData.user.id,
+                    { email_confirmed_at: new Date().toISOString() }
+                );
+                
+                if (confirmError) {
+                    log(`⚠️ Avviso: ${confirmError.message}`, 'warning');
+                    log('⚠️ Devi confermare l\'email manualmente da Supabase Dashboard', 'warning');
+                } else {
+                    log('✅ Email confermata automaticamente', 'success');
+                }
+                
+                // 3. Aspetta trigger
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // 3. Aggiorna record in public.users
+                // 4. Aggiorna record in public.users
                 log('📝 Aggiornamento dati admin...', 'info');
                 
                 const { error: updateError } = await supabaseClient
