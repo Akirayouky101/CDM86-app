@@ -941,11 +941,11 @@
                     console.log('✅ LoginModal ready!');
                     clearInterval(checkLoginModal);
                     
-                    // Setup login button to open modal
+                    // Setup login button to open SELECTION modal
                     const loginBtn = document.getElementById('login-btn');
                     if (loginBtn) {
                         loginBtn.addEventListener('click', () => {
-                            window.LoginModal.open();
+                            window.LoginModal.showSelection();
                         });
                     }
                 }
@@ -970,7 +970,10 @@
             if (loginBtn) {
                 loginBtn.addEventListener('click', () => {
                     hideLoginRequiredModal();
-                    window.location.href = '/public/login.html';
+                    // Apri modale di SELEZIONE invece del login diretto
+                    if (window.LoginModal) {
+                        window.LoginModal.showSelection();
+                    }
                 });
             }
             
