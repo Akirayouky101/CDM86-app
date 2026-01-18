@@ -10,8 +10,7 @@ SET
   first_name = 'Admin',
   last_name = 'CDM86',
   role = 'admin',
-  referral_code = 'ADMIN001',
-  full_name = 'Admin CDM86'
+  referral_code = 'ADMIN001'
 WHERE id = '46bd5e0c-30ac-4b2c-8d71-73b0cbd416a7';
 
 -- 2️⃣ CONFERMA EMAIL PER TUTTI GLI UTENTI NON CONFERMATI
