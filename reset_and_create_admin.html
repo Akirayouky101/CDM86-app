@@ -167,9 +167,12 @@
             <h2>📋 Cosa farà questo script:</h2>
             <ul>
                 <li>❌ Cancellerà TUTTI gli utenti da public.users</li>
+                <li>❌ Cancellerà TUTTE le transazioni degli utenti</li>
+                <li>❌ Cancellerà TUTTI i referral</li>
+                <li>❌ Cancellerà TUTTE le richieste organizzazioni</li>
+                <li>❌ Cancellerà TUTTI i favorites</li>
                 <li>❌ NON può cancellare da auth.users (devi farlo manualmente da Supabase)</li>
-                <li>✅ Creerà 1 utente amministratore</li>
-                <li>✅ L'admin avrà accesso completo al sistema</li>
+                <li>✅ Creerà 1 utente amministratore pulito</li>
             </ul>
             <br>
             <h2>🔴 Importante:</h2>
@@ -234,34 +237,90 @@
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function deleteAllUsers() {
-            if (!confirm('⚠️ SEI SICURO? Questa operazione cancellerà TUTTI gli utenti da public.users!')) {
+            if (!confirm('⚠️ SEI SICURO? Questa operazione cancellerà TUTTI gli utenti e TUTTE le loro interazioni!')) {
                 return;
             }
 
             deleteBtn.disabled = true;
             consoleDiv.innerHTML = '';
             
-            log('🗑️ Inizio cancellazione utenti...', 'warning');
+            log('🗑️ Inizio cancellazione completa...', 'warning');
             
             try {
-                // Prima conta quanti utenti ci sono
+                // 1. Conta utenti
                 const { count, error: countError } = await supabaseClient
                     .from('users')
                     .select('*', { count: 'exact', head: true });
                 
                 if (countError) throw countError;
-                
                 log(`📊 Utenti trovati: ${count}`, 'info');
                 
-                // Cancella tutti
+                // 2. Cancella TRANSACTIONS
+                log('�️ Cancellazione transazioni...', 'info');
+                const { error: transError } = await supabaseClient
+                    .from('transactions')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (transError) {
+                    log(`⚠️ Errore transazioni: ${transError.message}`, 'warning');
+                } else {
+                    log('✅ Transazioni cancellate', 'success');
+                }
+                
+                // 3. Cancella REFERRALS
+                log('🗑️ Cancellazione referral...', 'info');
+                const { error: refError } = await supabaseClient
+                    .from('referrals')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (refError) {
+                    log(`⚠️ Errore referral: ${refError.message}`, 'warning');
+                } else {
+                    log('✅ Referral cancellati', 'success');
+                }
+                
+                // 4. Cancella FAVORITES
+                log('🗑️ Cancellazione favorites...', 'info');
+                const { error: favError } = await supabaseClient
+                    .from('favorites')
+                    .delete()
+                    .neq('user_id', '00000000-0000-0000-0000-000000000000');
+                
+                if (favError) {
+                    log(`⚠️ Errore favorites: ${favError.message}`, 'warning');
+                } else {
+                    log('✅ Favorites cancellati', 'success');
+                }
+                
+                // 5. Cancella ORGANIZATION_REQUESTS
+                log('🗑️ Cancellazione richieste organizzazioni...', 'info');
+                const { error: orgReqError } = await supabaseClient
+                    .from('organization_requests')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (orgReqError) {
+                    log(`⚠️ Errore org requests: ${orgReqError.message}`, 'warning');
+                } else {
+                    log('✅ Richieste organizzazioni cancellate', 'success');
+                }
+                
+                // 6. Cancella USERS (ultimo!)
+                log('🗑️ Cancellazione utenti...', 'info');
                 const { error: deleteError } = await supabaseClient
                     .from('users')
                     .delete()
-                    .neq('id', '00000000-0000-0000-0000-000000000000'); // Cancella tutti (condizione sempre vera)
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
                 
                 if (deleteError) throw deleteError;
                 
                 log(`✅ ${count} utenti cancellati da public.users`, 'success');
+                log('', 'info');
+                log('========================================', 'success');
+                log('✅ CANCELLAZIONE COMPLETATA!', 'success');
+                log('========================================', 'success');
                 log('', 'info');
                 log('⚠️ IMPORTANTE: Devi ancora cancellare gli utenti da auth.users!', 'warning');
                 log('Vai su Supabase Dashboard > Authentication > Users', 'warning');

@@ -27,12 +27,39 @@ FROM public.users
 ORDER BY role, created_at;
 
 -- ============================================
--- CANCELLAZIONE
+-- CANCELLAZIONE COMPLETA
 -- ============================================
 
--- 3️⃣ CANCELLA TUTTI GLI UTENTI DA PUBLIC.USERS
+-- 3️⃣ CANCELLA TUTTE LE RELAZIONI E GLI UTENTI
 -- ⚠️ DECOMMENTARE PER ESEGUIRE
+
+-- Cancella nell'ordine corretto per evitare errori di foreign key:
+
+-- A. Transazioni
+-- DELETE FROM public.transactions;
+
+-- B. Referral
+-- DELETE FROM public.referrals;
+
+-- C. Favorites
+-- DELETE FROM public.favorites;
+
+-- D. Richieste organizzazioni
+-- DELETE FROM public.organization_requests;
+
+-- E. Utenti (ultimo!)
 -- DELETE FROM public.users;
+
+-- OPPURE ESEGUI TUTTO IN UNA VOLTA:
+/*
+BEGIN;
+DELETE FROM public.transactions;
+DELETE FROM public.referrals;
+DELETE FROM public.favorites;
+DELETE FROM public.organization_requests;
+DELETE FROM public.users;
+COMMIT;
+*/
 
 -- 4️⃣ VERIFICA CANCELLAZIONE
 -- SELECT COUNT(*) as utenti_rimasti FROM public.users;
