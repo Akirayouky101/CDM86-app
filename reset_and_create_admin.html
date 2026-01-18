@@ -173,7 +173,7 @@
                 <li>❌ Cancellerà TUTTE le organizzazioni</li>
                 <li>❌ Cancellerà TUTTI i favorites</li>
                 <li>❌ NON può cancellare da auth.users (devi farlo manualmente da Supabase)</li>
-                <li>✅ Creerà 1 Admin + 1 Utente normale</li>
+                <li>✅ Creerà SOLO 1 Admin</li>
             </ul>
             <br>
             <h2>🔴 Importante:</h2>
@@ -189,14 +189,14 @@
                 🗑️ Cancella Tutti gli Utenti
             </button>
             <button class="btn-success" id="createBtn" onclick="createAdmin()">
-                ✅ Crea Utenti (Admin + User)
+                ✅ Crea Solo Admin
             </button>
         </div>
 
         <div id="console"></div>
 
         <div class="credentials">
-            <h3>📝 Utenti che verranno creati:</h3>
+            <h3>📝 Admin che verrà creato:</h3>
             
             <div class="user-card">
                 <strong>👑 AMMINISTRATORE:</strong> Admin CDM86<br>
@@ -204,14 +204,6 @@
                 Password: Criogenia2026!?<br>
                 Referral Code: ADMIN001<br>
                 Ruolo: admin
-            </div>
-
-            <div class="user-card">
-                <strong>👤 UTENTE NORMALE:</strong> Mario Rossi<br>
-                Email: mario.rossi@cdm86.com<br>
-                Password: MarioRossi2026!<br>
-                Referral Code: MARIO001<br>
-                Ruolo: user
             </div>
         </div>
     </div>
@@ -365,14 +357,6 @@
                     last_name: 'CDM86',
                     role: 'admin',
                     referral_code: 'ADMIN001'
-                },
-                {
-                    email: 'mario.rossi@cdm86.com',
-                    password: 'MarioRossi2026!',
-                    first_name: 'Mario',
-                    last_name: 'Rossi',
-                    role: 'user',
-                    referral_code: 'MARIO001'
                 }
             ];
             
