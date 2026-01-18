@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="assets/css/promotions.css">
     <link rel="stylesheet" href="assets/css/animations.css">
     <link rel="stylesheet" href="assets/css/login-modal.css">
-    <link rel="stylesheet" href="assets/css/selection-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -392,34 +391,6 @@
             <span>Profilo</span>
         </button>
     </nav>
-
-    <!-- CDM Selection Modal - STANDALONE (Nuova modale indipendente) -->
-    <div class="cdm-selection-overlay" id="cdmSelectionOverlay">
-        <div class="cdm-selection-container">
-            <div class="cdm-selection-header">
-                <div class="cdm-selection-icon">🔐</div>
-                <h2 class="cdm-selection-title">Benvenuto su CDM86</h2>
-                <p class="cdm-selection-subtitle">Scegli come vuoi accedere alla piattaforma</p>
-            </div>
-
-            <div class="cdm-selection-body">
-                <div class="cdm-selection-options">
-                    <div class="cdm-selection-option" onclick="CDMSelection.selectUser()">
-                        <div class="cdm-selection-option-icon">👤</div>
-                        <h3 class="cdm-selection-option-title">Sono un Utente</h3>
-                        <p class="cdm-selection-option-desc">Accedi alle promozioni e guadagna punti</p>
-                    </div>
-
-                    <div class="cdm-selection-option" onclick="CDMSelection.selectBusiness()">
-                        <div class="cdm-selection-option-icon">🏢</div>
-                        <h3 class="cdm-selection-option-title">Azienda/Associazione</h3>
-                        <p class="cdm-selection-option-desc">Richiedi informazioni per pubblicare promozioni</p>
-                    </div>
-                </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Company Request Modal -->
     <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
@@ -1094,8 +1065,5 @@
             deferredPrompt = null;
         });
     </script>
-    
-    <!-- Selection Modal Standalone JavaScript -->
-    <script src="assets/js/selection-modal.js"></script>
 </body>
 </html>
