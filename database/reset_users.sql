@@ -47,7 +47,10 @@ ORDER BY role, created_at;
 -- D. Richieste organizzazioni
 -- DELETE FROM public.organization_requests;
 
--- E. Utenti (ultimo!)
+-- E. Organizzazioni (prima degli utenti!)
+-- DELETE FROM public.organizations;
+
+-- F. Utenti (ultimo!)
 -- DELETE FROM public.users;
 
 -- OPPURE ESEGUI TUTTO IN UNA VOLTA:
@@ -57,6 +60,7 @@ DELETE FROM public.transactions;
 DELETE FROM public.referrals;
 DELETE FROM public.favorites;
 DELETE FROM public.organization_requests;
+DELETE FROM public.organizations;
 DELETE FROM public.users;
 COMMIT;
 */

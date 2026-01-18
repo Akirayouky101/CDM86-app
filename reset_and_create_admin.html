@@ -170,6 +170,7 @@
                 <li>❌ Cancellerà TUTTE le transazioni degli utenti</li>
                 <li>❌ Cancellerà TUTTI i referral</li>
                 <li>❌ Cancellerà TUTTE le richieste organizzazioni</li>
+                <li>❌ Cancellerà TUTTE le organizzazioni</li>
                 <li>❌ Cancellerà TUTTI i favorites</li>
                 <li>❌ NON può cancellare da auth.users (devi farlo manualmente da Supabase)</li>
                 <li>✅ Creerà 1 utente amministratore pulito</li>
@@ -307,7 +308,20 @@
                     log('✅ Richieste organizzazioni cancellate', 'success');
                 }
                 
-                // 6. Cancella USERS (ultimo!)
+                // 6. Cancella ORGANIZATIONS
+                log('🗑️ Cancellazione organizzazioni...', 'info');
+                const { error: orgsError } = await supabaseClient
+                    .from('organizations')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (orgsError) {
+                    log(`⚠️ Errore organizations: ${orgsError.message}`, 'warning');
+                } else {
+                    log('✅ Organizzazioni cancellate', 'success');
+                }
+                
+                // 7. Cancella USERS (ultimo!)
                 log('🗑️ Cancellazione utenti...', 'info');
                 const { error: deleteError } = await supabaseClient
                     .from('users')
