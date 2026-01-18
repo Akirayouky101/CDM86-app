@@ -157,7 +157,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>⚠️ Reset Database Utenti - Solo Admin</h1>
+        <h1>⚠️ Reset Database Utenti</h1>
 
         <div class="warning-box">
             ⚠️ ATTENZIONE: Questa operazione cancellerà TUTTI gli utenti esistenti! ⚠️
@@ -173,14 +173,14 @@
                 <li>❌ Cancellerà TUTTE le organizzazioni</li>
                 <li>❌ Cancellerà TUTTI i favorites</li>
                 <li>❌ NON può cancellare da auth.users (devi farlo manualmente da Supabase)</li>
-                <li>✅ Creerà 1 utente amministratore pulito</li>
+                <li>✅ Creerà 1 Admin + 1 Utente normale</li>
             </ul>
             <br>
             <h2>🔴 Importante:</h2>
             <ul>
                 <li>Devi cancellare manualmente gli auth.users da Supabase Dashboard</li>
                 <li>Vai su: Authentication > Users > Seleziona tutti > Delete</li>
-                <li>Poi torna qui e clicca "Crea Admin"</li>
+                <li>Poi torna qui e clicca "Crea Utenti"</li>
             </ul>
         </div>
 
@@ -189,29 +189,29 @@
                 🗑️ Cancella Tutti gli Utenti
             </button>
             <button class="btn-success" id="createBtn" onclick="createAdmin()">
-                ✅ Crea Admin
+                ✅ Crea Utenti (Admin + User)
             </button>
         </div>
 
         <div id="console"></div>
 
         <div class="credentials">
-            <h3>📝 Credenziali Admin che verrà creato:</h3>
+            <h3>📝 Utenti che verranno creati:</h3>
             
             <div class="user-card">
-                <strong>AMMINISTRATORE:</strong> Admin CDM86<br>
+                <strong>👑 AMMINISTRATORE:</strong> Admin CDM86<br>
                 Email: admin@cdm86.com<br>
-                Password: Admin123!<br>
+                Password: Criogenia2026!?<br>
                 Referral Code: ADMIN001<br>
                 Ruolo: admin
             </div>
 
             <div class="user-card">
-                <strong>⚡ Poteri Admin:</strong><br>
-                - Accesso completo a tutte le funzioni<br>
-                - Può gestire organizzazioni<br>
-                - Può approvare richieste<br>
-                - Dashboard amministratore
+                <strong>👤 UTENTE NORMALE:</strong> Mario Rossi<br>
+                Email: mario.rossi@example.com<br>
+                Password: MarioRossi2026!<br>
+                Referral Code: MARIO001<br>
+                Ruolo: user
             </div>
         </div>
     </div>
@@ -355,83 +355,91 @@
                 consoleDiv.innerHTML = '';
             }
             
-            log('\n\n🚀 Inizio creazione Admin...', 'info');
+            log('\n\n🚀 Inizio creazione utenti...', 'info');
             
-            const admin = {
-                email: 'admin@cdm86.com',
-                password: 'Admin123!',
-                first_name: 'Admin',
-                last_name: 'CDM86',
-                role: 'admin',
-                referral_code: 'ADMIN001'
-            };
+            const users = [
+                {
+                    email: 'admin@cdm86.com',
+                    password: 'Criogenia2026!?',
+                    first_name: 'Admin',
+                    last_name: 'CDM86',
+                    role: 'admin',
+                    referral_code: 'ADMIN001'
+                },
+                {
+                    email: 'mario.rossi@example.com',
+                    password: 'MarioRossi2026!',
+                    first_name: 'Mario',
+                    last_name: 'Rossi',
+                    role: 'user',
+                    referral_code: 'MARIO001'
+                }
+            ];
             
             try {
-                log(`📝 Creazione utente auth: ${admin.email}...`, 'info');
+                for (const user of users) {
+                    log(`\n📝 Creazione utente: ${user.email}...`, 'info');
                 
-                // 1. Crea auth user
-                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                    email: admin.email,
-                    password: admin.password,
-                    options: {
-                        emailRedirectTo: window.location.origin,
-                        data: {
-                            first_name: admin.first_name,
-                            last_name: admin.last_name
+                    // 1. Crea auth user
+                    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                        email: user.email,
+                        password: user.password,
+                        options: {
+                            emailRedirectTo: window.location.origin,
+                            data: {
+                                first_name: user.first_name,
+                                last_name: user.last_name
+                            }
+                        }
+                    });
+                    
+                    if (authError) {
+                        if (authError.message.includes('already registered')) {
+                            log(`⚠️ ${user.email} già esistente`, 'warning');
+                            continue;
+                        } else {
+                            throw authError;
                         }
                     }
-                });
-                
-                if (authError) {
-                    if (authError.message.includes('already registered')) {
-                        log('⚠️ Admin già esistente in auth.users', 'warning');
-                        log('Cancellalo da Supabase Dashboard e riprova', 'warning');
+                    
+                    log(`✅ Auth user creato: ${authData.user.id}`, 'success');
+                    
+                    // 2. Aspetta trigger
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // 3. Aggiorna record in public.users
+                    log('📝 Aggiornamento dati utente...', 'info');
+                    
+                    const { error: updateError } = await supabaseClient
+                        .from('users')
+                        .update({
+                            first_name: user.first_name,
+                            last_name: user.last_name,
+                            role: user.role,
+                            referral_code: user.referral_code
+                        })
+                        .eq('id', authData.user.id);
+                    
+                    if (updateError) {
+                        log(`❌ Errore aggiornamento: ${updateError.message}`, 'error');
                     } else {
-                        throw authError;
+                        log(`✅ ${user.role === 'admin' ? 'Admin' : 'Utente'} creato!`, 'success');
+                        log(`   Email: ${user.email}`, 'success');
+                        log(`   Password: ${user.password}`, 'success');
+                        log(`   Referral Code: ${user.referral_code}`, 'success');
                     }
-                    createBtn.disabled = false;
-                    return;
                 }
                 
-                log(`✅ Auth user creato: ${authData.user.id}`, 'success');
-                
-                // 2. Aspetta trigger
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // 3. Aggiorna record in public.users
-                log('📝 Aggiornamento dati admin...', 'info');
-                
-                const { error: updateError } = await supabaseClient
-                    .from('users')
-                    .update({
-                        first_name: admin.first_name,
-                        last_name: admin.last_name,
-                        role: admin.role,
-                        referral_code: admin.referral_code
-                    })
-                    .eq('id', authData.user.id);
-                
-                if (updateError) {
-                    log(`❌ Errore aggiornamento: ${updateError.message}`, 'error');
-                } else {
-                    log(`✅ Admin creato con successo!`, 'success');
-                    log('', 'info');
-                    log('========================================', 'success');
-                    log('📋 CREDENZIALI ADMIN:', 'success');
-                    log('========================================', 'success');
-                    log(`Email: ${admin.email}`, 'success');
-                    log(`Password: ${admin.password}`, 'success');
-                    log(`Referral Code: ${admin.referral_code}`, 'success');
-                    log(`UUID: ${authData.user.id}`, 'success');
-                    log('========================================', 'success');
-                    log('', 'info');
-                    log('⚠️ IMPORTANTE: Vai su Supabase Dashboard:', 'warning');
-                    log('Authentication > Users > Trova questo utente', 'warning');
-                    log('Clicca sui 3 puntini > "Send Magic Link" per confermare', 'warning');
-                    log('Oppure disabilita "Enable email confirmations" in Settings', 'warning');
-                    log('', 'info');
-                    log('Dopo la conferma potrai fare login!', 'success');
-                }
+                log('', 'info');
+                log('========================================', 'success');
+                log('✅ UTENTI CREATI CON SUCCESSO!', 'success');
+                log('========================================', 'success');
+                log('', 'info');
+                log('⚠️ IMPORTANTE: Vai su Supabase Dashboard:', 'warning');
+                log('Authentication > Users > Conferma email per ogni utente', 'warning');
+                log('Clicca sui 3 puntini > "Confirm email"', 'warning');
+                log('', 'info');
+                log('Dopo la conferma potrai fare login!', 'success');
                 
             } catch (error) {
                 log(`❌ Errore: ${error.message}`, 'error');
