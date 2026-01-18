@@ -395,24 +395,10 @@
                 
                 log(`✅ Auth user creato: ${authData.user.id}`, 'success');
                 
-                // 2. Conferma email automaticamente
-                log('📧 Conferma email...', 'info');
-                const { error: confirmError } = await supabaseClient.auth.admin.updateUserById(
-                    authData.user.id,
-                    { email_confirmed_at: new Date().toISOString() }
-                );
-                
-                if (confirmError) {
-                    log(`⚠️ Avviso: ${confirmError.message}`, 'warning');
-                    log('⚠️ Devi confermare l\'email manualmente da Supabase Dashboard', 'warning');
-                } else {
-                    log('✅ Email confermata automaticamente', 'success');
-                }
-                
-                // 3. Aspetta trigger
+                // 2. Aspetta trigger
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // 4. Aggiorna record in public.users
+                // 3. Aggiorna record in public.users
                 log('📝 Aggiornamento dati admin...', 'info');
                 
                 const { error: updateError } = await supabaseClient
@@ -439,7 +425,12 @@
                     log(`UUID: ${authData.user.id}`, 'success');
                     log('========================================', 'success');
                     log('', 'info');
-                    log('✅ Puoi ora fare login con queste credenziali!', 'success');
+                    log('⚠️ IMPORTANTE: Vai su Supabase Dashboard:', 'warning');
+                    log('Authentication > Users > Trova questo utente', 'warning');
+                    log('Clicca sui 3 puntini > "Send Magic Link" per confermare', 'warning');
+                    log('Oppure disabilita "Enable email confirmations" in Settings', 'warning');
+                    log('', 'info');
+                    log('Dopo la conferma potrai fare login!', 'success');
                 }
                 
             } catch (error) {
