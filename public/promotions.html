@@ -432,6 +432,120 @@
     </div>
     <div class="filters-overlay" id="filtersOverlay"></div>
 
+    <!-- Selection Modal (User vs Azienda) -->
+    <div class="selection-modal-overlay" id="selectionModalOverlay">
+        <div class="selection-modal">
+            <div class="selection-modal-header">
+                <button class="selection-modal-close" onclick="LoginModal.closeSelection()">&times;</button>
+                <div class="selection-modal-icon">🔐</div>
+                <h2 class="selection-modal-title">Benvenuto su CDM86</h2>
+                <p class="selection-modal-subtitle">Scegli come vuoi accedere alla piattaforma</p>
+            </div>
+
+            <div class="selection-modal-body">
+                <div class="selection-options">
+                    <div class="selection-option" onclick="LoginModal.selectUser()">
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">👤</span>
+                            <h3 class="selection-option-title">Sono un Utente</h3>
+                            <p class="selection-option-description">Accedi alle promozioni e guadagna punti</p>
+                        </div>
+                    </div>
+
+                    <div class="selection-option" onclick="LoginModal.selectCompany()">
+                        <span class="selection-option-badge">Partner</span>
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">🏢</span>
+                            <h3 class="selection-option-title">Azienda/Associazione</h3>
+                            <p class="selection-option-description">Richiedi informazioni per pubblicare promozioni</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selection-login-section">
+                    <p>Hai già un account?</p>
+                    <button class="selection-login-btn" onclick="LoginModal.showExistingUserLogin()">
+                        <span>🔑</span>
+                        <span>Accedi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Request Modal -->
+    <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
+        <div class="company-request-modal">
+            <button class="selection-modal-close" onclick="LoginModal.closeCompanyRequest()">&times;</button>
+            
+            <div class="company-request-header">
+                <span class="company-request-icon">🏢</span>
+                <h2>Richiesta Informazioni Partnership</h2>
+                <p>Compila il form per ricevere informazioni su come pubblicare le tue promozioni</p>
+            </div>
+
+            <form id="companyRequestForm" class="company-request-form" onsubmit="LoginModal.handleCompanyRequest(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyName">Nome Azienda/Associazione *</label>
+                        <input type="text" id="companyName" required placeholder="Es: Ristorante Da Mario">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyContact">Nome e Cognome Referente *</label>
+                        <input type="text" id="companyContact" required placeholder="Es: Mario Rossi">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyEmail">Email *</label>
+                        <input type="email" id="companyEmail" required placeholder="info@azienda.it">
+                    </div>
+                    <div class="form-group">
+                        <label for="companyPhone">Telefono *</label>
+                        <input type="tel" id="companyPhone" required placeholder="+39 123 456 7890">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyType">Tipo di Attività *</label>
+                    <select id="companyType" required>
+                        <option value="">Seleziona...</option>
+                        <option value="restaurant">Ristorazione</option>
+                        <option value="retail">Retail/Negozio</option>
+                        <option value="services">Servizi</option>
+                        <option value="entertainment">Intrattenimento</option>
+                        <option value="wellness">Benessere</option>
+                        <option value="travel">Viaggi/Turismo</option>
+                        <option value="association">Associazione</option>
+                        <option value="other">Altro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyMessage">Messaggio (opzionale)</label>
+                    <textarea id="companyMessage" rows="4" placeholder="Raccontaci della tua attività e delle promozioni che vorresti offrire..."></textarea>
+                </div>
+
+                <div class="company-request-actions">
+                    <button type="button" class="btn-secondary" onclick="LoginModal.closeCompanyRequest()">Annulla</button>
+                    <button type="submit" class="btn-primary">
+                        <span>📧</span>
+                        <span>Invia Richiesta</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="company-request-loading" id="companyRequestLoading">
+                <div class="spinner"></div>
+                <p>Invio richiesta in corso...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Login Modal -->
     <div class="login-modal-overlay" id="loginModalOverlay">
         <div class="login-modal">
