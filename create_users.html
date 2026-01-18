@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crea Utenti CDM86</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00ff00;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .instructions {
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .instructions h2 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #console {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .info {
+            color: #00aaff;
+        }
+
+        .credentials {
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .credentials h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .user-card {
+            background: #1a1a2e;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .user-card strong {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Creazione Utenti CDM86</h1>
+
+        <div class="instructions">
+            <h2>📋 Istruzioni:</h2>
+            <ul>
+                <li>Clicca il pulsante "Crea Utenti" per iniziare</li>
+                <li>Lo script creerà 7 utenti di test con credenziali funzionanti</li>
+                <li>Gli utenti verranno creati sia in auth.users che in public.users</li>
+                <li>Controlla la console qui sotto per vedere il progresso</li>
+            </ul>
+        </div>
+
+        <div class="button-container">
+            <button id="createBtn" onclick="createUsers()">
+                🚀 Crea Utenti
+            </button>
+        </div>
+
+        <div id="console"></div>
+
+        <div class="credentials">
+            <h3>📝 Credenziali Utenti da Creare:</h3>
+            
+            <div class="user-card">
+                <strong>ADMIN:</strong> Mario Rossi<br>
+                Email: admin@cdm86.com<br>
+                Password: Admin123!<br>
+                Referral Code: ADMIN001
+            </div>
+
+            <div class="user-card">
+                <strong>ORGANIZZAZIONE:</strong> Giuseppe Verdi (Pizzeria)<br>
+                Email: pizzeria@cdm86.com<br>
+                Password: Pizza123!<br>
+                Referral Code: PIZZA001
+            </div>
+
+            <div class="user-card">
+                <strong>ORGANIZZAZIONE:</strong> Laura Bianchi (Palestra)<br>
+                Email: palestra@cdm86.com<br>
+                Password: Gym123!<br>
+                Referral Code: GYM001
+            </div>
+
+            <div class="user-card">
+                <strong>ORGANIZZAZIONE:</strong> Antonio Esposito (Ristorante)<br>
+                Email: ristorante@cdm86.com<br>
+                Password: Rest123!<br>
+                Referral Code: REST001
+            </div>
+
+            <div class="user-card">
+                <strong>USER:</strong> Marco Ferrari<br>
+                Email: utente1@test.com<br>
+                Password: User123!
+            </div>
+
+            <div class="user-card">
+                <strong>USER:</strong> Sofia Romano<br>
+                Email: utente2@test.com<br>
+                Password: User123!
+            </div>
+
+            <div class="user-card">
+                <strong>USER:</strong> Luca Martini<br>
+                Email: utente3@test.com<br>
+                Password: User123!
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const consoleDiv = document.getElementById('console');
+        const createBtn = document.getElementById('createBtn');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = `[${timestamp}] ${message}\n`;
+            consoleDiv.appendChild(span);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        async function createUsers() {
+            createBtn.disabled = true;
+            consoleDiv.innerHTML = '';
+            
+            log('🚀 Inizio creazione utenti...', 'info');
+            
+            const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+            
+            const { createClient } = supabase;
+            const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            const users = [
+                {
+                    email: 'admin@cdm86.com',
+                    password: 'Admin123!',
+                    full_name: 'Mario Rossi',
+                    role: 'admin',
+                    referral_code: 'ADMIN001'
+                },
+                {
+                    email: 'pizzeria@cdm86.com',
+                    password: 'Pizza123!',
+                    full_name: 'Giuseppe Verdi',
+                    role: 'organization',
+                    organization_id: 1,
+                    referral_code: 'PIZZA001'
+                },
+                {
+                    email: 'palestra@cdm86.com',
+                    password: 'Gym123!',
+                    full_name: 'Laura Bianchi',
+                    role: 'organization',
+                    organization_id: 2,
+                    referral_code: 'GYM001'
+                },
+                {
+                    email: 'ristorante@cdm86.com',
+                    password: 'Rest123!',
+                    full_name: 'Antonio Esposito',
+                    role: 'organization',
+                    organization_id: 3,
+                    referral_code: 'REST001'
+                },
+                {
+                    email: 'utente1@test.com',
+                    password: 'User123!',
+                    full_name: 'Marco Ferrari',
+                    role: 'user'
+                },
+                {
+                    email: 'utente2@test.com',
+                    password: 'User123!',
+                    full_name: 'Sofia Romano',
+                    role: 'user'
+                },
+                {
+                    email: 'utente3@test.com',
+                    password: 'User123!',
+                    full_name: 'Luca Martini',
+                    role: 'user'
+                }
+            ];
+            
+            const results = { success: [], failed: [] };
+            
+            for (const user of users) {
+                try {
+                    log(`\n📝 Creazione ${user.email}...`, 'info');
+                    
+                    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                        email: user.email,
+                        password: user.password,
+                        options: {
+                            data: {
+                                full_name: user.full_name
+                            }
+                        }
+                    });
+                    
+                    if (authError) {
+                        if (authError.message.includes('already registered')) {
+                            log(`⚠️ ${user.email} già esistente`, 'warning');
+                            results.failed.push({ email: user.email, error: 'Already exists' });
+                        } else {
+                            throw authError;
+                        }
+                        continue;
+                    }
+                    
+                    log(`✅ Auth user creato: ${authData.user.id}`, 'success');
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const updateData = {
+                        full_name: user.full_name,
+                        role: user.role
+                    };
+                    
+                    if (user.organization_id) updateData.organization_id = user.organization_id;
+                    if (user.referral_code) updateData.referral_code = user.referral_code;
+                    
+                    const { error: updateError } = await supabaseClient
+                        .from('users')
+                        .update(updateData)
+                        .eq('id', authData.user.id);
+                    
+                    if (updateError) {
+                        log(`❌ Errore aggiornamento: ${updateError.message}`, 'error');
+                        results.failed.push({ email: user.email, error: updateError.message });
+                    } else {
+                        log(`✅ User record aggiornato (role: ${user.role})`, 'success');
+                        results.success.push({ email: user.email, role: user.role });
+                    }
+                    
+                } catch (error) {
+                    log(`❌ Errore: ${error.message}`, 'error');
+                    results.failed.push({ email: user.email, error: error.message });
+                }
+            }
+            
+            log('\n========================================', 'info');
+            log('📊 RIEPILOGO', 'info');
+            log('========================================', 'info');
+            log(`✅ Creati: ${results.success.length}`, 'success');
+            log(`❌ Falliti: ${results.failed.length}`, 'error');
+            
+            if (results.success.length > 0) {
+                log('\n✅ UTENTI CREATI CON SUCCESSO:', 'success');
+                results.success.forEach(u => log(`  - ${u.email} (${u.role})`, 'success'));
+            }
+            
+            if (results.failed.length > 0) {
+                log('\n❌ ERRORI:', 'error');
+                results.failed.forEach(u => log(`  - ${u.email}: ${u.error}`, 'error'));
+            }
+            
+            log('\n✅ Script completato!', 'success');
+            createBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
