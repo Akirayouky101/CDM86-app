@@ -920,6 +920,7 @@ const CompanyWizard = {
     
     async displayUserReferralCode() {
         try {
+            const supabase = await ensureSupabase();
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             
@@ -986,6 +987,8 @@ const CompanyWizard = {
         if (loading) loading.classList.add('show');
         
         try {
+            const supabase = await ensureSupabase();
+            
             // Get current user
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Devi essere loggato per segnalare un\'azienda');
