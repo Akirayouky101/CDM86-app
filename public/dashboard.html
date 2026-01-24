@@ -3166,16 +3166,26 @@
                 
                 console.log('🔍 Loading referral network for user:', user.id, user.email);
                 
-                // NUOVO SISTEMA: Leggi diretti e indiretti da users.referred_by_id
+                // NUOVO SISTEMA: Leggi diretti e indiretti da users.referred_by_id + organizations
                 
-                // 1. Carica referral DIRETTI (livello 1)
+                // 1. Carica referral DIRETTI - UTENTI (livello 1)
                 const { data: directReferrals, error: directError } = await window.supabaseClient
                     .from('users')
                     .select('id, email, first_name, last_name, referral_code, created_at')
                     .eq('referred_by_id', user.id)
                     .order('created_at', { ascending: true });
                 
-                console.log('📊 Direct referrals found:', directReferrals?.length || 0, directReferrals);
+                console.log('📊 Direct referrals (users) found:', directReferrals?.length || 0, directReferrals);
+                
+                // 1b. Carica ORGANIZZAZIONI portate
+                const { data: directOrganizations, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('id, name, email, referral_code, active, created_at')
+                    .eq('referred_by_user_id', user.id)
+                    .eq('active', true)
+                    .order('created_at', { ascending: true });
+                
+                console.log('🏢 Organizations found:', directOrganizations?.length || 0, directOrganizations);
                 
                 if (directError) throw directError;
                 
@@ -3202,7 +3212,7 @@
                 
                 const modalContent = document.getElementById('network-chart');
                 
-                if (!directReferrals || directReferrals.length === 0) {
+                if ((!directReferrals || directReferrals.length === 0) && (!directOrganizations || directOrganizations.length === 0)) {
                     modalContent.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-users-slash" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
@@ -3233,25 +3243,50 @@
                     </div>
                 `;
                 
-                // Livello 1 (Referral Diretti) - TUTTI i diretti
-                html += `
-                    <div class="network-level level-1">
-                        <div class="level-title">
-                            <span class="level-badge">Livello 1</span>
-                            <span>${directReferrals.length} referral dirett${directReferrals.length === 1 ? 'o' : 'i'}</span>
+                // Livello 1 (Referral Diretti) - UTENTI
+                if (directReferrals && directReferrals.length > 0) {
+                    html += `
+                        <div class="network-level level-1">
+                            <div class="level-title">
+                                <span class="level-badge">👤 Utenti Referenziati</span>
+                                <span>${directReferrals.length} utent${directReferrals.length === 1 ? 'e' : 'i'}</span>
+                            </div>
+                            <div class="network-nodes">
+                                ${directReferrals.map(ref => `
+                                    <div class="network-node">
+                                        <div class="node-icon">👥</div>
+                                        <div class="node-name">${ref.first_name || 'User'} ${ref.last_name || ''}</div>
+                                        <div class="node-email">${ref.email || 'N/A'}</div>
+                                        <div class="node-code">${ref.referral_code}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                        <div class="network-nodes">
-                            ${directReferrals.map(ref => `
-                                <div class="network-node">
-                                    <div class="node-icon">👥</div>
-                                    <div class="node-name">${ref.first_name || 'User'} ${ref.last_name || ''}</div>
-                                    <div class="node-email">${ref.email || 'N/A'}</div>
-                                    <div class="node-code">${ref.referral_code}</div>
-                                </div>
-                            `).join('')}
+                    `;
+                }
+                
+                // Sezione ORGANIZZAZIONI portate
+                if (directOrganizations && directOrganizations.length > 0) {
+                    html += `
+                        <div class="network-level level-organizations">
+                            <div class="level-title">
+                                <span class="level-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🏢 Aziende Portate</span>
+                                <span>${directOrganizations.length} aziend${directOrganizations.length === 1 ? 'a' : 'e'}</span>
+                            </div>
+                            <div class="network-nodes">
+                                ${directOrganizations.map(org => `
+                                    <div class="network-node" style="border-left: 4px solid #667eea;">
+                                        <div class="node-icon">🏢</div>
+                                        <div class="node-name">${org.name || 'Organization'}</div>
+                                        <div class="node-email">${org.email || 'N/A'}</div>
+                                        <div class="node-code">${org.referral_code || 'N/A'}</div>
+                                        <div class="node-parent" style="color: #667eea;">✓ Attiva</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
                 
                 // Livello 2 (Referral Indiretti)
                 if (indirectReferrals.length > 0) {
@@ -3283,19 +3318,27 @@
                 html += '</div>';
                 
                 // Statistiche
+                const totalUsers = (directReferrals?.length || 0) + (indirectReferrals?.length || 0);
+                const totalOrgs = directOrganizations?.length || 0;
+                const grandTotal = totalUsers + totalOrgs;
+                
                 html += `
                     <div class="network-stats">
                         <div class="network-stat">
-                            <div class="stat-value">${directReferrals.length}</div>
-                            <div class="stat-label">Diretti</div>
+                            <div class="stat-value">${directReferrals?.length || 0}</div>
+                            <div class="stat-label">👤 Utenti Diretti</div>
                         </div>
                         <div class="network-stat">
-                            <div class="stat-value">${indirectReferrals.length}</div>
-                            <div class="stat-label">Indiretti</div>
+                            <div class="stat-value">${indirectReferrals?.length || 0}</div>
+                            <div class="stat-label">👥 Utenti Indiretti</div>
+                        </div>
+                        <div class="network-stat" style="border-left: 3px solid #667eea;">
+                            <div class="stat-value">${totalOrgs}</div>
+                            <div class="stat-label">🏢 Aziende</div>
                         </div>
                         <div class="network-stat primary">
-                            <div class="stat-value">${directReferrals.length + indirectReferrals.length}</div>
-                            <div class="stat-label">Totale Rete</div>
+                            <div class="stat-value">${grandTotal}</div>
+                            <div class="stat-label">✨ Totale Rete</div>
                         </div>
                     </div>
                 `;
