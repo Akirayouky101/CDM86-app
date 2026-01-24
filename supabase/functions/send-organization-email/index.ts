@@ -179,6 +179,16 @@ serve(async (req) => {
         console.warn('Could not create auth user:', authError)
       } else {
         console.log('Auth user created successfully:', authData.user?.id)
+        
+        // Salva auth_user_id nella tabella organizations
+        if (authData.user?.id) {
+          await supabaseClient
+            .from('organizations')
+            .update({ auth_user_id: authData.user.id })
+            .eq('id', organization_id)
+          
+          console.log('Organization updated with auth_user_id')
+        }
       }
     } catch (authError) {
       console.warn('Auth creation failed (non-blocking):', authError)
