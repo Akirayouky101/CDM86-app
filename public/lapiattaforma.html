@@ -38,9 +38,9 @@
             padding: 4rem 2rem;
             position: relative;
             background: var(--bg-gradient);
-            opacity: 0;
+            opacity: 0.3;
             transform: translateY(50px);
-            transition: all 1s ease;
+            transition: all 0.8s ease;
         }
 
         .story-section.active {
@@ -563,7 +563,7 @@
             
             setTimeout(() => {
                 isScrolling = false;
-            }, 1000);
+            }, 600);
         }
 
         // Wheel event
@@ -783,7 +783,27 @@
         });
 
         // Initialize
-        scrollToSection(0);
+        function init() {
+            // Check if there's an anchor in the URL (e.g., #compensi)
+            const hash = window.location.hash.substring(1);
+            let targetSection = 0;
+            
+            if (hash) {
+                // Find section with matching ID
+                const targetElement = document.getElementById(hash);
+                if (targetElement) {
+                    const sectionElement = targetElement.closest('.story-section');
+                    if (sectionElement) {
+                        targetSection = parseInt(sectionElement.dataset.section) || 0;
+                    }
+                }
+            }
+            
+            // Scroll to target section (0 if no anchor found)
+            scrollToSection(targetSection);
+        }
+        
+        init();
     </script>
 </body>
 </html>
