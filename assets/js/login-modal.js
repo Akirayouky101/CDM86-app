@@ -836,18 +836,32 @@ const CompanyWizard = {
     
     open() {
         const overlay = document.getElementById('companyRequestModalOverlay');
+        const loading = document.getElementById('companyRequestLoading');
+        
         if (overlay) {
             overlay.classList.add('active');
             this.currentStep = 1;
             this.updateUI();
+            
+            // Assicurati che il loading sia nascosto
+            if (loading) {
+                loading.classList.remove('show');
+            }
         }
     },
     
     close() {
         const overlay = document.getElementById('companyRequestModalOverlay');
+        const loading = document.getElementById('companyRequestLoading');
+        
         if (overlay) {
             overlay.classList.remove('active');
             this.resetForm();
+            
+            // Nascondi loading quando chiudi
+            if (loading) {
+                loading.classList.remove('show');
+            }
         }
     },
     
