@@ -55,7 +55,7 @@ CREATE POLICY "Admins can view all reports"
     USING (
         EXISTS (
             SELECT 1 FROM users
-            WHERE users.auth_id = auth.uid()
+            WHERE users.id = auth.uid()
             AND users.role = 'admin'
         )
     );
@@ -65,7 +65,7 @@ CREATE POLICY "Admins can update all reports"
     USING (
         EXISTS (
             SELECT 1 FROM users
-            WHERE users.auth_id = auth.uid()
+            WHERE users.id = auth.uid()
             AND users.role = 'admin'
         )
     );
