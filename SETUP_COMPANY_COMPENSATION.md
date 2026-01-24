@@ -26,7 +26,23 @@ Questo aggiunge:
 
 ---
 
-### **Step 2: Crea trigger compensi**
+### **Step 2: Fix constraint transaction_type**
+
+```sql
+-- File: database/fix_transaction_type_constraint.sql
+-- Vai su Supabase → SQL Editor → Copia e incolla questo file → Run
+```
+
+Questo aggiunge i nuovi tipi di transazione al CHECK constraint:
+- `company_report_approved`
+- `company_report_rejected`
+- `company_compensation`
+- `mlm_compensation_level1`
+- `mlm_compensation_level2`
+
+---
+
+### **Step 3: Crea trigger compensi**
 
 ```sql
 -- File: database/company_reports_approval_trigger.sql
