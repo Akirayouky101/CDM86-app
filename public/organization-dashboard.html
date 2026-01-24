@@ -380,21 +380,37 @@
                 </div>
             </div>
             
-            <!-- Referral Code -->
+            <!-- Referral Codes -->
             <div class="card">
-                <h2><i class="fas fa-qrcode"></i> Codice Referral</h2>
-                <div class="referral-code-box">
-                    <p>Condividi questo codice con i tuoi dipendenti/membri</p>
-                    <div class="referral-code-large" id="referral-code">ORG0000</div>
-                    <button class="copy-btn" onclick="copyReferralCode()">
+                <h2><i class="fas fa-qrcode"></i> Codici Referral</h2>
+                <p style="color: #666; margin-bottom: 25px;">Usa codici diversi per tracciare registrazioni di dipendenti e clienti esterni</p>
+                
+                <!-- Employee Referral -->
+                <div class="referral-section" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px; color: white;">
+                    <h3 style="color: white; margin-bottom: 15px;"><i class="fas fa-users"></i> Codice Dipendenti</h3>
+                    <p style="opacity: 0.9; margin-bottom: 15px;">Condividi con i tuoi dipendenti e collaboratori interni</p>
+                    <div class="referral-code-large" id="referral-code-employees" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; border: 2px dashed white; font-size: 28px; letter-spacing: 3px; text-align: center; margin-bottom: 15px;">LOADING...</div>
+                    <button class="copy-btn" onclick="copyReferralCode('employees')" style="background: rgba(255,255,255,0.3); color: white; border: 2px solid white;">
                         <i class="fas fa-copy"></i> Copia Codice
                     </button>
+                    <div class="qr-container" style="margin-top: 20px;">
+                        <div id="qr-canvas-employees" style="background: white; padding: 15px; border-radius: 8px; display: inline-block;"></div>
+                        <p style="margin-top: 10px; opacity: 0.9;">Scansiona per registrazione dipendenti</p>
+                    </div>
                 </div>
                 
-                <h3 style="text-align: center; margin-top: 30px; margin-bottom: 20px;">QR Code per Registrazione</h3>
-                <div class="qr-container">
-                    <div id="qr-canvas"></div>
-                    <p style="margin-top: 15px; color: #666;">Scansiona per registrarti automaticamente</p>
+                <!-- External Referral -->
+                <div class="referral-section" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 25px; border-radius: 12px; color: white;">
+                    <h3 style="color: white; margin-bottom: 15px;"><i class="fas fa-globe"></i> Codice Clienti Esterni</h3>
+                    <p style="opacity: 0.9; margin-bottom: 15px;">Condividi con clienti e partner esterni alla tua organizzazione</p>
+                    <div class="referral-code-large" id="referral-code-external" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; border: 2px dashed white; font-size: 28px; letter-spacing: 3px; text-align: center; margin-bottom: 15px;">LOADING...</div>
+                    <button class="copy-btn" onclick="copyReferralCode('external')" style="background: rgba(255,255,255,0.3); color: white; border: 2px solid white;">
+                        <i class="fas fa-copy"></i> Copia Codice
+                    </button>
+                    <div class="qr-container" style="margin-top: 20px;">
+                        <div id="qr-canvas-external" style="background: white; padding: 15px; border-radius: 8px; display: inline-block;"></div>
+                        <p style="margin-top: 10px; opacity: 0.9;">Scansiona per registrazione clienti esterni</p>
+                    </div>
                 </div>
             </div>
             
@@ -488,8 +504,8 @@
                 // Display data
                 displayOrganizationInfo(orgData);
                 displayStats(orgData, employees || []);
-                displayReferralCode(orgData.referral_code);
-                generateQRCode(orgData.referral_code);
+                displayReferralCodes(orgData.referral_code_employees, orgData.referral_code_external);
+                generateQRCodes(orgData.referral_code_employees, orgData.referral_code_external);
                 displayEmployees(employees || []);
                 loadContentStatus(); // Load unified content status (page + card)
                 
@@ -566,22 +582,39 @@
             document.getElementById('points-count').textContent = org.points || 0;
         }
         
-        function displayReferralCode(code) {
-            document.getElementById('referral-code').textContent = code;
+        function displayReferralCodes(codeEmployees, codeExternal) {
+            document.getElementById('referral-code-employees').textContent = codeEmployees || 'N/A';
+            document.getElementById('referral-code-external').textContent = codeExternal || 'N/A';
         }
         
-        function generateQRCode(referralCode) {
-            const qrContainer = document.getElementById('qr-canvas');
-            qrContainer.innerHTML = '';
+        function generateQRCodes(codeEmployees, codeExternal) {
+            // QR Code Dipendenti
+            const qrContainerEmployees = document.getElementById('qr-canvas-employees');
+            qrContainerEmployees.innerHTML = '';
+            const urlEmployees = `https://www.cdm86.com/register.html?ref=${codeEmployees}`;
             
-            const referralUrl = `https://cdm86.com/public/login.html?ref=${referralCode}`;
-            
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrContainer, {
-                    text: referralUrl,
+            if (typeof QRCode !== 'undefined' && codeEmployees) {
+                new QRCode(qrContainerEmployees, {
+                    text: urlEmployees,
                     width: 200,
                     height: 200,
-                    colorDark: '#667eea',
+                    colorDark: '#10b981',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+            
+            // QR Code Esterni
+            const qrContainerExternal = document.getElementById('qr-canvas-external');
+            qrContainerExternal.innerHTML = '';
+            const urlExternal = `https://www.cdm86.com/register.html?ref=${codeExternal}`;
+            
+            if (typeof QRCode !== 'undefined' && codeExternal) {
+                new QRCode(qrContainerExternal, {
+                    text: urlExternal,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#f59e0b',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
                 });
@@ -629,8 +662,9 @@
             list.innerHTML = html;
         }
         
-        function copyReferralCode() {
-            const code = document.getElementById('referral-code').textContent;
+        function copyReferralCode(type) {
+            const elementId = type === 'employees' ? 'referral-code-employees' : 'referral-code-external';
+            const code = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(code).then(() => {
                 const btn = event.target.closest('.copy-btn');
                 const originalText = btn.innerHTML;

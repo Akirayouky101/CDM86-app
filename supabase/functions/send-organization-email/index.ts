@@ -36,6 +36,8 @@ serve(async (req) => {
         name,
         email,
         referral_code,
+        referral_code_employees,
+        referral_code_external,
         referred_by_user_id,
         organization_temp_passwords (
           temp_password,
@@ -81,7 +83,11 @@ serve(async (req) => {
           .content { background: white; padding: 30px; border: 1px solid #e5e7eb; }
           .credentials { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
           .referral-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin: 25px 0; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3); }
+          .referral-box.employees { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); }
+          .referral-box.external { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3); }
           .referral-code { font-size: 32px; font-weight: bold; letter-spacing: 3px; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; border: 2px dashed white; }
+          .qr-code { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; display: inline-block; }
+          .qr-code img { display: block; width: 200px; height: 200px; }
           .referrer-info { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
           .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
           .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
@@ -105,10 +111,25 @@ serve(async (req) => {
             </div>
             ` : ''}
             
-            <div class="referral-box">
-              <h2 style="margin: 0 0 10px 0; font-size: 24px;">🎫 Il Tuo Codice Referral</h2>
-              <div class="referral-code">${orgData.referral_code}</div>
-              <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Condividi questo codice per far crescere la tua rete!</p>
+            <h2 style="text-align: center; color: #667eea; margin: 30px 0 20px 0;">🎫 I Tuoi Codici Referral</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Usa codici diversi per tracciare dipendenti e clienti esterni</p>
+            
+            <div class="referral-box employees">
+              <h3 style="margin: 0 0 10px 0; font-size: 20px;">👥 CODICE DIPENDENTI</h3>
+              <div class="referral-code">${orgData.referral_code_employees || 'N/A'}</div>
+              <p style="margin: 10px 0; font-size: 14px; opacity: 0.9;">Condividi con i tuoi dipendenti e collaboratori</p>
+              <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.com/register.html?ref=' + (orgData.referral_code_employees || ''))}" alt="QR Dipendenti" />
+              </div>
+            </div>
+            
+            <div class="referral-box external">
+              <h3 style="margin: 0 0 10px 0; font-size: 20px;">🌍 CODICE CLIENTI ESTERNI</h3>
+              <div class="referral-code">${orgData.referral_code_external || 'N/A'}</div>
+              <p style="margin: 10px 0; font-size: 14px; opacity: 0.9;">Condividi con clienti e partner esterni</p>
+              <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.com/register.html?ref=' + (orgData.referral_code_external || ''))}" alt="QR Esterni" />
+              </div>
             </div>
             
             <div class="credentials">
