@@ -3556,9 +3556,16 @@
                 updateReportStats();
                 applyReportFilters();
 
+                // Map status to Italian
+                const statusMap = {
+                    'pending': 'In Attesa',
+                    'approved': 'Approvata',
+                    'rejected': 'Rifiutata'
+                };
+
                 showNotification(
                     'Stato Aggiornato',
-                    `Segnalazione aggiornata a: ${newStatus}`,
+                    `Segnalazione aggiornata a: ${statusMap[newStatus] || newStatus}`,
                     'success'
                 );
 
