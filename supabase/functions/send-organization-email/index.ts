@@ -161,6 +161,29 @@ serve(async (req) => {
       throw new Error(`Resend API error: ${await resendResponse.text()}`)
     }
 
+    // Crea account Supabase Auth per l'organization
+    try {
+      const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
+        email: orgData.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          organization_id: organization_id,
+          organization_name: orgData.name,
+          referral_code: orgData.referral_code,
+          is_organization: true
+        }
+      })
+
+      if (authError) {
+        console.warn('Could not create auth user:', authError)
+      } else {
+        console.log('Auth user created successfully:', authData.user?.id)
+      }
+    } catch (authError) {
+      console.warn('Auth creation failed (non-blocking):', authError)
+    }
+
     // Marca email come inviata
     await supabaseClient
       .from('organization_temp_passwords')
