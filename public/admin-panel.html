@@ -3546,6 +3546,50 @@
 
                 if (error) throw error;
 
+                // 📧 Se approvata, attendi che il trigger crei l'organization e poi invia email
+                if (newStatus === 'approved') {
+                    try {
+                        // Attendi 1 secondo per dare tempo al trigger di completare
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Ricarica il report per ottenere l'organization_id dal trigger
+                        const { data: updatedReport, error: fetchError } = await window.supabaseClient
+                            .from('company_reports')
+                            .select('*, organization_id')
+                            .eq('id', reportId)
+                            .single();
+                        
+                        if (!fetchError && updatedReport && updatedReport.organization_id) {
+                            console.log('📧 Invio email a organizzazione:', updatedReport.organization_id);
+                            
+                            const response = await fetch(
+                                'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-organization-email',
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${window.supabaseClient.supabaseKey}`
+                                    },
+                                    body: JSON.stringify({
+                                        organization_id: updatedReport.organization_id
+                                    })
+                                }
+                            );
+                            
+                            if (response.ok) {
+                                console.log('✅ Email inviata con successo!');
+                            } else {
+                                const errorData = await response.json();
+                                console.warn('⚠️ Errore invio email:', errorData);
+                            }
+                        } else {
+                            console.log('ℹ️ Organization già esistente, email non necessaria');
+                        }
+                    } catch (emailError) {
+                        console.warn('⚠️ Errore invio email (non bloccante):', emailError);
+                    }
+                }
+
                 // Update local data
                 const report = allCompanyReports.find(r => r.id === reportId);
                 if (report) {

@@ -1,4 +1,4 @@
-# 🚀 SETUP RAPIDO - 3 STEP
+# 🚀 SETUP RAPIDO - 2 STEP
 
 ## ✅ PROBLEMA 1: Modale "approved" → RISOLTO ✅
 
@@ -6,15 +6,15 @@ La modale ora mostra **"Approvata"** in italiano!
 
 ---
 
-## 📧 PROBLEMA 2: Email non arrivano
+## 📧 PROBLEMA 2: Email non arrivano → RISOLTO ✅
 
 **CAUSA:** Il trigger salva solo la password ma NON invia l'email.
 
-**SOLUZIONE:** Creare un **Database Webhook** che chiama automaticamente l'Edge Function.
+**SOLUZIONE:** Admin Panel ora chiama automaticamente l'Edge Function dopo l'approvazione!
 
 ---
 
-## 🔧 COSA FARE ORA (3 minuti)
+## 🔧 COSA FARE ORA (1 minuto)
 
 ### STEP 1: Esegui SQL su Supabase ⚡
 
@@ -30,65 +30,42 @@ ALTER TABLE points_transactions
 ADD COLUMN IF NOT EXISTS compensation_euros DECIMAL(10,2) DEFAULT 0;
 ```
 
-### STEP 2: Crea Database Webhook 🔗
+### STEP 2: Ricarica Admin Panel 🔄
 
-1. **Vai su:** https://supabase.com/dashboard/project/uchrjlngfzfibcpdxtky/database/hooks
-
-2. **Clicca:** "Create a new hook"
-
-3. **Compila così:**
-
-   ```
-   Name: send-email-on-org-creation
-   
-   Table: organization_temp_passwords
-   
-   Events: ✅ Insert (solo questo)
-   
-   Type: Supabase Edge Functions
-   
-   Edge Function: send-organization-email
-   
-   HTTP Headers: (lascia vuoto)
-   ```
-
-4. **Clicca:** "Create webhook"
-
-### STEP 3: Testa! 🧪
-
-1. Ricarica Admin Panel (`CTRL + SHIFT + R`)
-2. Approva la segnalazione "ZG Impiantisrl srl"
-3. Controlla email a `serviziomail1@gmail.com`
+1. **Ricarica la pagina:** `CTRL + SHIFT + R` (o `CMD + SHIFT + R` su Mac)
+2. **Approva** la segnalazione "ZG Impiantisrl srl"
+3. **Controlla email** a `serviziomail1@gmail.com`
 
 ---
 
 ## 🎯 COME FUNZIONA
 
 ```
-Admin approva 
+Admin clicca "Approva" 
     ↓
-Trigger crea organization + password
+✅ Trigger: crea organization + salva password
     ↓
-INSERT in organization_temp_passwords
+✅ Admin Panel: aspetta 1 secondo
     ↓
-🔔 WEBHOOK AUTOMATICO chiama Edge Function
+✅ Admin Panel: chiama Edge Function send-organization-email
     ↓
 📧 Email inviata via Resend!
+    ↓
+✅ Modale: "Approvata" (in italiano!)
 ```
 
 ---
 
 ## 🔍 Se l'email NON arriva
 
-**1. Controlla Webhook creato:**
-- Vai su Database → Webhooks
-- Deve esserci `send-email-on-org-creation`
+**1. Apri Console del Browser** (`F12` → Console)
 
-**2. Controlla logs Edge Function:**
-- Functions → send-organization-email → Logs
-- Vedi errori (rossi)?
+Cerca:
+- `📧 Invio email a organizzazione: [ID]` ← OK
+- `✅ Email inviata con successo!` ← OK
+- `⚠️ Errore invio email` ← Problema!
 
-**3. Verifica password salvata:**
+**2. Verifica password salvata:**
 ```sql
 SELECT o.name, o.email, otp.temp_password, otp.email_sent, otp.created_at
 FROM organization_temp_passwords otp
@@ -97,15 +74,15 @@ ORDER BY otp.created_at DESC
 LIMIT 1;
 ```
 
-Se `email_sent = false`, il webhook non ha funzionato.
+**3. Controlla logs Edge Function:**
+- https://supabase.com/dashboard/project/uchrjlngfzfibcpdxtky/functions/send-organization-email/logs
 
 ---
 
 ## 📂 FILE AGGIORNATI
 
-✅ `admin-panel.html` - Modale ora mostra "Approvata"  
+✅ `admin-panel.html` - Modale "Approvata" + Invio email automatico  
 ✅ `FINAL_FIX_ALL.sql` - SQL per colonne mancanti  
-✅ `EMAIL_WEBHOOK_SETUP.md` - Guida completa  
 
 ---
 
@@ -115,9 +92,12 @@ Se tutto funziona:
 - ✅ Modale: "Approvata" ✓
 - ✅ Organization creata ✓
 - ✅ Password salvata ✓
+- ✅ Email inviata automaticamente ✓
 - ✅ Email ricevuta ✓
 - ✅ Sistema completo! 🎉
 
 ---
 
-**Commit:** `58db7ba` - Fix modale + Setup webhook
+**Commit:** `5315b31` → Nuovo commit in arrivo con fix email automatiche
+
+**NON serve più creare Webhooks!** Il sistema è più semplice e funziona subito.
