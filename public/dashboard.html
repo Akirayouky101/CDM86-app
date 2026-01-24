@@ -1521,74 +1521,170 @@
         </div>
     </div>
     
-    <!-- Report Company Modal -->
-    <div id="reportCompanyModal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header-row">
-                <h2 class="modal-title">
-                    <i class="fas fa-building modal-icon"></i>
-                    Segnala un'Azienda
-                </h2>
-                <button onclick="closeReportCompanyModal()" class="btn-modal-close" aria-label="Chiudi modal">
-                    <i class="fas fa-times"></i>
-                </button>
+    <!-- Company Report Wizard (2-Step) -->
+    <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
+        <div class="company-request-modal">
+            <button class="selection-modal-close" onclick="CompanyWizard.close()">&times;</button>
+            
+            <div class="company-request-header">
+                <span class="company-request-icon">🏢</span>
+                <h2 id="wizardTitle">Segnala Azienda/Associazione</h2>
+                <p id="wizardSubtitle">Passo 1 di 2 - Dati Azienda</p>
             </div>
-            
-            <p class="modal-description">
-                Compila i dati dell'azienda che vuoi segnalare. Riceverai punti quando si iscriverà!
-            </p>
-            
-            <form id="reportCompanyForm" onsubmit="submitReportCompany(event)">
-                <div class="form-group">
-                    <label for="companyName" class="form-label">
-                        <i class="fas fa-building modal-icon"></i>
-                        Nome Azienda *
-                    </label>
-                    <input type="text" id="companyName" required class="form-input" placeholder="Es: Ristorante Da Mario">
-                </div>
-                
-                <div class="form-group">
-                    <label for="companyEmail" class="form-label">
-                        <i class="fas fa-envelope modal-icon"></i>
-                        Email Azienda *
-                    </label>
-                    <input type="email" id="companyEmail" required class="form-input" placeholder="info@azienda.it">
-                </div>
-                
-                <div class="form-group">
-                    <label for="companyPhone" class="form-label">
-                        <i class="fas fa-phone modal-icon"></i>
-                        Telefono Azienda *
-                    </label>
-                    <input type="tel" id="companyPhone" required class="form-input" placeholder="+39 123 456 7890">
-                </div>
-                
-                <div class="form-group">
-                    <label for="contactName" class="form-label">
-                        <i class="fas fa-user modal-icon"></i>
-                        Nome Contatto *
-                    </label>
-                    <input type="text" id="contactName" required class="form-input" placeholder="Es: Mario Rossi">
-                </div>
-                
-                <div class="form-group">
-                    <label for="companyNotes" class="form-label">
-                        <i class="fas fa-comment modal-icon"></i>
-                        Note (opzionale)
-                    </label>
-                    <textarea id="companyNotes" rows="3" class="form-textarea" placeholder="Qualsiasi informazione aggiuntiva..."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" onclick="closeReportCompanyModal()" class="btn-cancel">
-                        Annulla
-                    </button>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-paper-plane icon-margin"></i>
-                        Invia Segnalazione
-                    </button>
-                </div>
-            </form>
+
+            <!-- Progress Bar -->
+            <div class="wizard-progress">
+                <div class="wizard-progress-bar" id="wizardProgressBar"></div>
+            </div>
+
+            <!-- STEP 1: Dati Azienda -->
+            <div id="wizardStep1" class="wizard-step active">
+                <form id="companyDataForm" class="company-request-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyName">Nome Azienda/Associazione *</label>
+                            <input type="text" id="companyName" required placeholder="Es: Ristorante Da Mario">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyContact">Nome e Cognome Referente *</label>
+                            <input type="text" id="companyContact" required placeholder="Es: Mario Rossi">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyEmail">Email *</label>
+                            <input type="email" id="companyEmail" required placeholder="info@azienda.it">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyPhone">Telefono *</label>
+                            <input type="tel" id="companyPhone" required placeholder="+39 123 456 7890">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyAddress">Indirizzo *</label>
+                        <input type="text" id="companyAddress" required placeholder="Via, Città, CAP">
+                    </div>
+
+                    <div class="company-request-actions">
+                        <button type="button" class="btn-secondary" onclick="CompanyWizard.close()">Annulla</button>
+                        <button type="button" class="btn-primary" onclick="CompanyWizard.nextStep()">
+                            <span>Avanti</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- STEP 2: Sondaggio -->
+            <div id="wizardStep2" class="wizard-step">
+                <form id="companySurveyForm" class="company-request-form">
+                    <!-- Settore -->
+                    <div class="form-group">
+                        <label for="companySector">Settore *</label>
+                        <select id="companySector" required onchange="CompanyWizard.toggleSectorOther()">
+                            <option value="">Seleziona...</option>
+                            <option value="Ristorazione">Ristorazione</option>
+                            <option value="Bar/Caffetteria">Bar/Caffetteria</option>
+                            <option value="Retail/Abbigliamento">Retail/Abbigliamento</option>
+                            <option value="Elettronica">Elettronica</option>
+                            <option value="Alimentari/Supermercato">Alimentari/Supermercato</option>
+                            <option value="Servizi alla Persona">Servizi alla Persona</option>
+                            <option value="Benessere/SPA">Benessere/SPA</option>
+                            <option value="Fitness/Palestra">Fitness/Palestra</option>
+                            <option value="Intrattenimento">Intrattenimento</option>
+                            <option value="Viaggi/Turismo">Viaggi/Turismo</option>
+                            <option value="Hotel/B&B">Hotel/B&B</option>
+                            <option value="Artigianato">Artigianato</option>
+                            <option value="Automotive">Automotive</option>
+                            <option value="Immobiliare">Immobiliare</option>
+                            <option value="Associazione No-Profit">Associazione No-Profit</option>
+                            <option value="Associazione Sportiva">Associazione Sportiva</option>
+                            <option value="Associazione Culturale">Associazione Culturale</option>
+                            <option value="other">Altro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="sectorOtherGroup">
+                        <label for="sectorOther">Specifica Settore</label>
+                        <input type="text" id="sectorOther" placeholder="Inserisci il settore">
+                    </div>
+
+                    <!-- Azienda Consapevole -->
+                    <div class="form-group">
+                        <label>L'azienda è a conoscenza di questa segnalazione? *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="companyAware" value="si" required>
+                                <span>✅ Sì</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="companyAware" value="no" required>
+                                <span>❌ No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chi è a conoscenza -->
+                    <div class="form-group">
+                        <label for="whoKnows">Chi ne è a conoscenza? *</label>
+                        <select id="whoKnows" required onchange="CompanyWizard.toggleWhoKnowsOther()">
+                            <option value="">Seleziona...</option>
+                            <option value="Titolare">Titolare</option>
+                            <option value="Direttore">Direttore</option>
+                            <option value="Responsabile Commerciale">Responsabile Commerciale</option>
+                            <option value="Responsabile Marketing">Responsabile Marketing</option>
+                            <option value="Segreteria">Segreteria</option>
+                            <option value="Addetto Vendite">Addetto Vendite</option>
+                            <option value="other">Altro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="whoKnowsOtherGroup">
+                        <label for="whoKnowsOther">Specifica Ruolo</label>
+                        <input type="text" id="whoKnowsOther" placeholder="Inserisci il ruolo">
+                    </div>
+
+                    <!-- Orari di Contatto -->
+                    <div class="form-group">
+                        <label for="callTime">Orari in cui si può chiamare? *</label>
+                        <select id="callTime" required>
+                            <option value="">Seleziona...</option>
+                            <option value="08:00 - 10:00">08:00 - 10:00</option>
+                            <option value="10:00 - 12:00">10:00 - 12:00</option>
+                            <option value="12:00 - 14:00">12:00 - 14:00</option>
+                            <option value="14:00 - 16:00">14:00 - 16:00</option>
+                            <option value="16:00 - 18:00">16:00 - 18:00</option>
+                            <option value="18:00 - 20:00">18:00 - 20:00</option>
+                            <option value="20:00 - 22:00">20:00 - 22:00</option>
+                            <option value="Sempre disponibile">Sempre disponibile</option>
+                            <option value="Solo mattina (08:00-13:00)">Solo mattina (08:00-13:00)</option>
+                            <option value="Solo pomeriggio (13:00-18:00)">Solo pomeriggio (13:00-18:00)</option>
+                            <option value="Solo sera (18:00-22:00)">Solo sera (18:00-22:00)</option>
+                        </select>
+                    </div>
+
+                    <div class="company-request-actions">
+                        <button type="button" class="btn-secondary" onclick="CompanyWizard.prevStep()">
+                            <span>←</span>
+                            <span>Indietro</span>
+                        </button>
+                        <button type="button" class="btn-primary" onclick="CompanyWizard.submitForm()">
+                            <span>📧</span>
+                            <span>Invia Segnalazione</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="company-request-loading" id="companyRequestLoading">
+                <div class="spinner"></div>
+                <p>Invio segnalazione in corso...</p>
+            </div>
         </div>
     </div>
     
@@ -2435,24 +2531,20 @@
         window.proceedToReportForm = function() {
             // Chiudi modale informativa
             closePartnerInfoModal();
-            // Apri form segnalazione
+            // Apri wizard segnalazione
             setTimeout(() => {
-                openReportCompanyModal();
+                CompanyWizard.open();
             }, 300);
         };
         
-        // Open report company modal
+        // Legacy function redirect to wizard
         window.openReportCompanyModal = function() {
-            const modal = document.getElementById('reportCompanyModal');
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
+            CompanyWizard.open();
         };
         
-        // Close report company modal
+        // Legacy function redirect to wizard
         window.closeReportCompanyModal = function() {
-            const modal = document.getElementById('reportCompanyModal');
-            modal.style.display = 'none';
-            modal.classList.add('hidden');
+            CompanyWizard.close();
             document.getElementById('reportCompanyForm').reset();
         };
         

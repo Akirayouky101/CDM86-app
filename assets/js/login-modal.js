@@ -828,6 +828,215 @@ window.LoginModal = {
 };
 
 // ==========================================
+// COMPANY WIZARD (2-STEP REPORT)
+// ==========================================
+
+const CompanyWizard = {
+    currentStep: 1,
+    
+    open() {
+        const overlay = document.getElementById('companyRequestModalOverlay');
+        if (overlay) {
+            overlay.classList.add('active');
+            this.currentStep = 1;
+            this.updateUI();
+        }
+    },
+    
+    close() {
+        const overlay = document.getElementById('companyRequestModalOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            this.resetForm();
+        }
+    },
+    
+    resetForm() {
+        document.getElementById('companyDataForm')?.reset();
+        document.getElementById('companySurveyForm')?.reset();
+        this.currentStep = 1;
+        this.updateUI();
+    },
+    
+    updateUI() {
+        // Update header
+        const title = document.getElementById('wizardTitle');
+        const subtitle = document.getElementById('wizardSubtitle');
+        
+        if (this.currentStep === 1) {
+            if (title) title.textContent = 'Segnala Azienda/Associazione';
+            if (subtitle) subtitle.textContent = 'Passo 1 di 2 - Dati Azienda';
+        } else {
+            if (title) title.textContent = 'Informazioni Aggiuntive';
+            if (subtitle) subtitle.textContent = 'Passo 2 di 2 - Sondaggio';
+        }
+        
+        // Update progress bar
+        const progressBar = document.getElementById('wizardProgressBar');
+        if (progressBar) {
+            progressBar.style.width = this.currentStep === 1 ? '50%' : '100%';
+        }
+        
+        // Show/hide steps
+        const step1 = document.getElementById('wizardStep1');
+        const step2 = document.getElementById('wizardStep2');
+        
+        if (step1) step1.classList.toggle('active', this.currentStep === 1);
+        if (step2) step2.classList.toggle('active', this.currentStep === 2);
+    },
+    
+    nextStep() {
+        const form = document.getElementById('companyDataForm');
+        if (!form || !form.checkValidity()) {
+            form?.reportValidity();
+            return;
+        }
+        
+        this.currentStep = 2;
+        this.updateUI();
+    },
+    
+    prevStep() {
+        this.currentStep = 1;
+        this.updateUI();
+    },
+    
+    toggleSectorOther() {
+        const select = document.getElementById('companySector');
+        const otherGroup = document.getElementById('sectorOtherGroup');
+        const otherInput = document.getElementById('sectorOther');
+        
+        if (select?.value === 'other') {
+            otherGroup?.classList.add('active');
+            if (otherInput) otherInput.required = true;
+        } else {
+            otherGroup?.classList.remove('active');
+            if (otherInput) {
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+    },
+    
+    toggleWhoKnowsOther() {
+        const select = document.getElementById('whoKnows');
+        const otherGroup = document.getElementById('whoKnowsOtherGroup');
+        const otherInput = document.getElementById('whoKnowsOther');
+        
+        if (select?.value === 'other') {
+            otherGroup?.classList.add('active');
+            if (otherInput) otherInput.required = true;
+        } else {
+            otherGroup?.classList.remove('active');
+            if (otherInput) {
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+    },
+    
+    async submitForm() {
+        const surveyForm = document.getElementById('companySurveyForm');
+        if (!surveyForm || !surveyForm.checkValidity()) {
+            surveyForm?.reportValidity();
+            return;
+        }
+        
+        const loading = document.getElementById('companyRequestLoading');
+        const step2 = document.getElementById('wizardStep2');
+        
+        if (step2) step2.style.display = 'none';
+        if (loading) loading.classList.add('show');
+        
+        try {
+            // Get current user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Devi essere loggato per segnalare un\'azienda');
+            
+            // Get user data to find referral code
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('referral_code')
+                .eq('auth_id', user.id)
+                .single();
+            
+            if (userError) throw userError;
+            
+            // Collect all form data
+            const companyName = document.getElementById('companyName').value.trim();
+            const contactName = document.getElementById('companyContact').value.trim();
+            const email = document.getElementById('companyEmail').value.trim();
+            const phone = document.getElementById('companyPhone').value.trim();
+            const address = document.getElementById('companyAddress').value.trim();
+            
+            const sector = document.getElementById('companySector').value;
+            const sectorOther = document.getElementById('sectorOther').value.trim();
+            const finalSector = sector === 'other' ? sectorOther : sector;
+            
+            const companyAware = document.querySelector('input[name="companyAware"]:checked')?.value;
+            
+            const whoKnows = document.getElementById('whoKnows').value;
+            const whoKnowsOther = document.getElementById('whoKnowsOther').value.trim();
+            const finalWhoKnows = whoKnows === 'other' ? whoKnowsOther : whoKnows;
+            
+            const callTime = document.getElementById('callTime').value;
+            
+            // Save to database
+            const { error: insertError } = await supabase
+                .from('company_reports')
+                .insert({
+                    reported_by_user_id: user.id,
+                    reported_by_referral_code: userData.referral_code,
+                    company_name: companyName,
+                    contact_name: contactName,
+                    email: email,
+                    phone: phone,
+                    address: address,
+                    sector: finalSector,
+                    company_aware: companyAware === 'si',
+                    who_knows: finalWhoKnows,
+                    preferred_call_time: callTime,
+                    status: 'pending'
+                });
+            
+            if (insertError) throw insertError;
+            
+            // Show success message
+            if (loading) {
+                loading.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                        <h3 style="color: #10b981; margin-bottom: 10px;">Segnalazione Inviata!</h3>
+                        <p style="color: #64748b;">L'amministratore riceverà la tua segnalazione a breve.</p>
+                    </div>
+                `;
+            }
+            
+            setTimeout(() => {
+                this.close();
+                if (loading) {
+                    loading.classList.remove('show');
+                    loading.innerHTML = `
+                        <div class="spinner"></div>
+                        <p>Invio segnalazione in corso...</p>
+                    `;
+                }
+                if (step2) step2.style.display = 'block';
+            }, 2500);
+            
+        } catch (error) {
+            console.error('Company report error:', error);
+            alert(error.message || 'Errore durante l\'invio della segnalazione');
+            if (loading) loading.classList.remove('show');
+            if (step2) step2.style.display = 'block';
+        }
+    }
+};
+
+// Make CompanyWizard globally available
+window.CompanyWizard = CompanyWizard;
+
+// ==========================================
 // AUTO-INITIALIZE
 // ==========================================
 
@@ -839,3 +1048,4 @@ if (document.readyState === 'loading') {
 } else {
     checkAuthStatus();
 }
+

@@ -250,7 +250,7 @@
     background: white;
     border-radius: 24px;
     box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
-    max-width: 600px;
+    max-width: 650px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
@@ -283,6 +283,80 @@
     font-size: 15px;
     margin: 0;
     opacity: 0.95;
+}
+
+/* Wizard Progress Bar */
+.wizard-progress {
+    height: 6px;
+    background: #e9ecef;
+    position: relative;
+    overflow: hidden;
+}
+
+.wizard-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.4s ease;
+}
+
+/* Wizard Steps */
+.wizard-step {
+    display: none;
+    animation: fadeInSlide 0.4s ease;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Radio Group Styling */
+.radio-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.radio-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.radio-label:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 8px;
+}
+
+.radio-label input[type="radio"]:checked + span {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: #f0f3ff;
 }
 
 .company-request-body {
@@ -342,6 +416,16 @@
 .company-form-section.active {
     display: block;
     animation: fadeInUp 0.4s ease;
+}
+
+#sectorOtherGroup,
+#whoKnowsOtherGroup {
+    display: none;
+}
+
+#sectorOtherGroup.active,
+#whoKnowsOtherGroup.active {
+    display: block;
 }
 
 /* ============================================
