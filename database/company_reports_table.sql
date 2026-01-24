@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS company_reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     -- Chi ha fatto la segnalazione (collegato al referral)
-    reported_by_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    reported_by_user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     reported_by_referral_code VARCHAR(20) NOT NULL,
     
     -- Dati Azienda (Step 1)
