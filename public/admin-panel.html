@@ -970,6 +970,277 @@
                 right: 16px;
             }
         }
+
+        /* Reports Grid Layout */
+        .reports-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-200);
+        }
+
+        .report-card:hover {
+            box-shadow: 0 8px 24px rgba(123, 97, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .report-company-info {
+            flex: 1;
+        }
+
+        .report-company-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-company-name i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .report-company-sector {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .report-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .report-status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .status-contacted {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-approved {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .report-card-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .report-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .report-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .report-info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(123, 97, 255, 0.1) 0%, rgba(123, 97, 255, 0.05) 100%);
+            color: var(--primary);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .report-info-content {
+            flex: 1;
+        }
+
+        .report-info-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .report-info-value {
+            font-size: 0.95rem;
+            color: var(--gray-800);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .report-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 2px solid var(--gray-100);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .report-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .report-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .report-meta-item i {
+            color: var(--primary);
+        }
+
+        .report-action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-view-report {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-view-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(123, 97, 255, 0.4);
+        }
+
+        .report-status-dropdown {
+            padding: 10px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            background: white;
+            color: var(--gray-700);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .report-status-dropdown:hover {
+            border-color: var(--primary);
+            background: rgba(123, 97, 255, 0.05);
+        }
+
+        .report-awareness-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .awareness-yes {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #0a5f38;
+        }
+
+        .awareness-no {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #7c2d12;
+        }
+
+        @media (max-width: 768px) {
+            .report-card {
+                padding: 16px;
+            }
+
+            .report-card-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .report-card-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .report-card-body {
+                grid-template-columns: 1fr;
+            }
+
+            .report-card-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .report-action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-view-report,
+            .report-status-dropdown {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1185,31 +1456,12 @@
                 </div>
 
                 <!-- Reports Table -->
-                <div id="reportsTableContainer" class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Azienda</th>
-                                <th>Contatto</th>
-                                <th>Settore</th>
-                                <th>Segnalata da</th>
-                                <th>Referral Code</th>
-                                <th>Consapevole</th>
-                                <th>Chi Conosce</th>
-                                <th>Orari</th>
-                                <th>Data</th>
-                                <th>Stato</th>
-                                <th>Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportsTableBody">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
+                <div id="reportsTableContainer" class="reports-grid">
+                    <!-- Populated by JS -->
                 </div>
 
                 <!-- Empty State -->
-                <div id="reportsEmpty" class="empty-state">
+                <div id="reportsEmpty" class="empty-state" style="display: none;">
                     <i class="fas fa-inbox"></i>
                     <p>Nessuna segnalazione trovata</p>
                 </div>
@@ -2891,59 +3143,167 @@
         }
 
         function renderCompanyReports(reports) {
-            const tbody = document.getElementById('reportsTableBody');
+            const container = document.getElementById('reportsTableContainer');
+            const emptyState = document.getElementById('reportsEmpty');
             
             if (!reports || reports.length === 0) {
-                tbody.innerHTML = '';
+                container.innerHTML = '';
+                emptyState.style.display = 'flex';
                 return;
             }
 
-            tbody.innerHTML = reports.map(report => {
-                const statusBadges = {
-                    pending: '<span class="badge badge-warning">⏳ In Attesa</span>',
-                    contacted: '<span class="badge badge-info">📞 Contattata</span>',
-                    approved: '<span class="badge badge-success">✅ Approvata</span>',
-                    rejected: '<span class="badge badge-danger">❌ Rifiutata</span>'
-                };
+            emptyState.style.display = 'none';
 
+            const statusBadges = {
+                pending: '<span class="report-status-badge status-pending">In Attesa</span>',
+                contacted: '<span class="report-status-badge status-contacted">Contattata</span>',
+                approved: '<span class="report-status-badge status-approved">Iscritta</span>',
+                rejected: '<span class="report-status-badge status-rejected">Rifiutata</span>'
+            };
+
+            container.innerHTML = reports.map(report => {
                 const reporterName = report.users 
                     ? `${report.users.first_name} ${report.users.last_name}`
                     : 'N/A';
 
+                const reporterEmail = report.users?.email || 'N/A';
+                
                 const awareBadge = report.company_aware 
-                    ? '<span class="badge badge-success">✅ Sì</span>'
-                    : '<span class="badge badge-warning">❌ No</span>';
+                    ? '<span class="report-awareness-badge awareness-yes">✅ Consapevole</span>'
+                    : '<span class="report-awareness-badge awareness-no">❌ Non Consapevole</span>';
+
+                const createdDate = new Date(report.created_at).toLocaleDateString('it-IT', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
 
                 return `
-                    <tr>
-                        <td>
-                            <div style="font-weight: 600;">${report.company_name}</div>
-                            <div style="font-size: 0.875rem; color: var(--gray-500);">${report.address}</div>
-                        </td>
-                        <td>
-                            <div>${report.contact_name}</div>
-                            <div style="font-size: 0.875rem; color: var(--gray-500);">${report.email}</div>
-                            <div style="font-size: 0.875rem; color: var(--gray-500);">${report.phone}</div>
-                        </td>
-                        <td>${report.sector}</td>
-                        <td>
-                            <div style="font-weight: 600;">${reporterName}</div>
-                            <div style="font-size: 0.875rem; color: var(--gray-500);">${report.users?.email || 'N/A'}</div>
-                        </td>
-                        <td>
-                            <span class="badge badge-primary">${report.reported_by_referral_code}</span>
-                        </td>
-                        <td>${awareBadge}</td>
-                        <td>${report.who_knows}</td>
-                        <td style="font-size: 0.875rem;">${report.preferred_call_time}</td>
-                        <td>${new Date(report.created_at).toLocaleDateString('it-IT')}</td>
-                        <td>${statusBadges[report.status] || report.status}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-secondary" onclick="viewReportDetails('${report.id}')">
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-company-info">
+                                <div class="report-company-name">
+                                    <i class="fas fa-building"></i>
+                                    ${report.company_name}
+                                </div>
+                                <div class="report-company-sector">${report.sector}</div>
+                            </div>
+                            <div class="report-card-actions">
+                                ${statusBadges[report.status] || report.status}
+                            </div>
+                        </div>
+
+                        <div class="report-card-body">
+                            <div class="report-info-section">
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Contatto</div>
+                                        <div class="report-info-value">${report.contact_name}</div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Email</div>
+                                        <div class="report-info-value">${report.email}</div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Telefono</div>
+                                        <div class="report-info-value">${report.phone}</div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Indirizzo</div>
+                                        <div class="report-info-value">${report.address}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-info-section">
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Segnalata da</div>
+                                        <div class="report-info-value">${reporterName}</div>
+                                        <div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 4px;">${reporterEmail}</div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-ticket-alt"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Codice Referral</div>
+                                        <div class="report-info-value">
+                                            <span style="font-family: monospace; background: rgba(123, 97, 255, 0.1); padding: 4px 8px; border-radius: 6px; color: var(--primary); font-weight: 700;">
+                                                ${report.reported_by_referral_code}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Consapevolezza</div>
+                                        <div class="report-info-value">${awareBadge}</div>
+                                    </div>
+                                </div>
+
+                                <div class="report-info-item">
+                                    <div class="report-info-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="report-info-content">
+                                        <div class="report-info-label">Orari Preferiti</div>
+                                        <div class="report-info-value">${report.preferred_call_time}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card-footer">
+                            <div class="report-meta">
+                                <div class="report-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>${createdDate}</span>
+                                </div>
+                                ${report.who_knows ? `
+                                    <div class="report-meta-item">
+                                        <i class="fas fa-users"></i>
+                                        <span title="Chi conosce in azienda">${report.who_knows}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="report-action-buttons">
+                                <button class="btn-view-report" onclick="viewReportDetails('${report.id}')">
                                     <i class="fas fa-eye"></i>
+                                    Dettagli Completi
                                 </button>
-                                <select class="btn btn-sm btn-primary" onchange="updateReportStatus('${report.id}', this.value)">
+                                <select class="report-status-dropdown" onchange="updateReportStatus('${report.id}', this.value)">
                                     <option value="">Cambia Stato</option>
                                     <option value="pending" ${report.status === 'pending' ? 'selected' : ''}>In Attesa</option>
                                     <option value="contacted" ${report.status === 'contacted' ? 'selected' : ''}>Contattata</option>
@@ -2951,8 +3311,8 @@
                                     <option value="rejected" ${report.status === 'rejected' ? 'selected' : ''}>Rifiutata</option>
                                 </select>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 `;
             }).join('');
         }
