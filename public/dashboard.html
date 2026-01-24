@@ -3329,11 +3329,11 @@
                     document.getElementById('transactions-count').textContent = txCount;
                 }
                 
-                // Count network
+                // Count network (utenti referenziati direttamente + loro referenziati)
                 const { count: netCount, error: netError } = await window.supabaseClient
-                    .from('referral_network')
+                    .from('users')
                     .select('*', { count: 'exact', head: true })
-                    .eq('user_id', user.id);
+                    .eq('referred_by_id', user.id);
                 
                 if (!netError && netCount !== null) {
                     document.getElementById('network-count').textContent = netCount;
