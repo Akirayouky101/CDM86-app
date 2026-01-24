@@ -843,6 +843,9 @@ const CompanyWizard = {
             this.currentStep = 1;
             this.updateUI();
             
+            // Mostra il referral code dell'utente
+            this.displayUserReferralCode();
+            
             // Assicurati che il loading sia nascosto
             if (loading) {
                 loading.classList.remove('show');
@@ -913,6 +916,26 @@ const CompanyWizard = {
     prevStep() {
         this.currentStep = 1;
         this.updateUI();
+    },
+    
+    async displayUserReferralCode() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            
+            const { data: userData } = await supabase
+                .from('users')
+                .select('referral_code')
+                .eq('auth_id', user.id)
+                .single();
+            
+            const displayElement = document.getElementById('userReferralCodeDisplay');
+            if (displayElement && userData?.referral_code) {
+                displayElement.textContent = userData.referral_code;
+            }
+        } catch (error) {
+            console.error('Error loading referral code:', error);
+        }
     },
     
     toggleSectorOther() {
@@ -995,6 +1018,9 @@ const CompanyWizard = {
             
             const callTime = document.getElementById('callTime').value;
             
+            const referralGiven = document.querySelector('input[name="referralGiven"]:checked')?.value;
+            const emailConsent = document.querySelector('input[name="emailConsent"]:checked')?.value;
+            
             // Save to database
             const { error: insertError } = await supabase
                 .from('company_reports')
@@ -1010,10 +1036,27 @@ const CompanyWizard = {
                     company_aware: companyAware === 'si',
                     who_knows: finalWhoKnows,
                     preferred_call_time: callTime,
+                    referral_given: referralGiven === 'si',
+                    email_consent: emailConsent === 'si',
                     status: 'pending'
                 });
             
             if (insertError) throw insertError;
+            
+            // Get user full name for email message
+            const { data: fullUserData } = await supabase
+                .from('users')
+                .select('first_name, last_name')
+                .eq('auth_id', user.id)
+                .single();
+            
+            const userName = fullUserData ? `${fullUserData.first_name} ${fullUserData.last_name}` : 'Utente';
+            
+            // Messaggio email fake (da implementare in futuro)
+            const emailMessage = emailConsent === 'si' 
+                ? `<p style="color: #10b981; margin-top: 16px; font-weight: 600;">📧 Email inviata all'azienda (${email})</p>
+                   <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Segnalazione da: <strong>${userData.referral_code}</strong> - ${userName}</p>`
+                : '<p style="color: #f59e0b; margin-top: 16px;">⚠️ Email non inviata (consenso non dato)</p>';
             
             // Show success message
             if (loading) {
@@ -1022,6 +1065,7 @@ const CompanyWizard = {
                         <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
                         <h3 style="color: #10b981; margin-bottom: 10px;">Segnalazione Inviata!</h3>
                         <p style="color: #64748b;">L'amministratore riceverà la tua segnalazione a breve.</p>
+                        ${emailMessage}
                     </div>
                 `;
             }

@@ -1674,6 +1674,38 @@
                         </select>
                     </div>
 
+                    <!-- Hai dato il tuo referral? -->
+                    <div class="form-group">
+                        <label>Hai già comunicato il tuo Referral Code all'azienda?</label>
+                        <p class="referral-code-display" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 18px; text-align: center; margin: 12px 0 16px; letter-spacing: 1px;">
+                            Il tuo codice: <span id="userReferralCodeDisplay">-</span>
+                        </p>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" id="referralGivenYes" name="referralGiven" value="si" required>
+                            <label class="form-check-label" for="referralGivenYes">✅ Sì, ho già dato il mio Referral Code</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" id="referralGivenNo" name="referralGiven" value="no" required>
+                            <label class="form-check-label" for="referralGivenNo">❌ No, non l'ho ancora comunicato</label>
+                        </div>
+                    </div>
+
+                    <!-- Consenso invio email -->
+                    <div class="form-group">
+                        <label>Consenso Invio Email Informativa *</label>
+                        <p style="color: #64748b; font-size: 14px; margin: 8px 0 16px; line-height: 1.6;">
+                            Sei consapevole che l'azienda riceverà una mail informativa con il tuo <strong>Referral Code</strong> e <strong>Nome</strong> per la segnalazione avvenuta?
+                        </p>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" id="emailConsentYes" name="emailConsent" value="si" required>
+                            <label class="form-check-label" for="emailConsentYes">✅ Sì, autorizzo l'invio dell'email</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" id="emailConsentNo" name="emailConsent" value="no" required>
+                            <label class="form-check-label" for="emailConsentNo">❌ No, non autorizzo</label>
+                        </div>
+                    </div>
+
                     <div class="company-request-actions">
                         <button type="button" class="btn-secondary" onclick="CompanyWizard.prevStep()">
                             <span>←</span>

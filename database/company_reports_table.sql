@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS company_reports (
     company_aware BOOLEAN NOT NULL DEFAULT false,
     who_knows VARCHAR(100) NOT NULL,
     preferred_call_time VARCHAR(50) NOT NULL,
+    referral_given BOOLEAN NOT NULL DEFAULT false,
+    email_consent BOOLEAN NOT NULL DEFAULT false,
     
     -- Status e Metadati
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'contacted', 'approved', 'rejected')),
