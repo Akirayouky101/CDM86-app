@@ -731,10 +731,10 @@
                                 <i class="fas fa-diagram-project"></i>
                             </div>
                             <h3>🌳 Rete MLM</h3>
-                            <p class="mlm-card-description">Visualizza il tuo albero referral a 2 livelli</p>
+                            <p class="mlm-card-description">Utenti e aziende portate nella rete</p>
                             <div class="mlm-card-stats">
                                 <span class="mlm-card-count" id="network-count">0</span>
-                                <span class="mlm-card-label">membri</span>
+                                <span class="mlm-card-label">membri totali</span>
                             </div>
                         </div>
                         <div class="mlm-card-footer">
@@ -3329,15 +3329,23 @@
                     document.getElementById('transactions-count').textContent = txCount;
                 }
                 
-                // Count network (utenti referenziati direttamente + loro referenziati)
-                const { count: netCount, error: netError } = await window.supabaseClient
+                // Count network: utenti + aziende referenziate
+                // Utenti diretti
+                const { count: usersCount, error: usersError } = await window.supabaseClient
                     .from('users')
                     .select('*', { count: 'exact', head: true })
                     .eq('referred_by_id', user.id);
                 
-                if (!netError && netCount !== null) {
-                    document.getElementById('network-count').textContent = netCount;
-                }
+                // Organizations portate (solo quelle approvate e iscritte)
+                const { count: orgsCount, error: orgsError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('referred_by_user_id', user.id)
+                    .eq('active', true);
+                
+                // Somma totale
+                const totalNetworkCount = (usersCount || 0) + (orgsCount || 0);
+                document.getElementById('network-count').textContent = totalNetworkCount;
                 
             } catch (error) {
                 console.error('Error updating MLM counts:', error);
