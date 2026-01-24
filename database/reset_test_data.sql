@@ -5,17 +5,23 @@
 -- ⚠️ ATTENZIONE: Cancella TUTTI i dati! Non usare in produzione!
 -- =====================================================
 
--- 1. Cancella tutte le organizations create automaticamente
+-- 1. Cancella password temporanee organizations
+DELETE FROM organization_temp_passwords 
+WHERE organization_id IN (
+  SELECT id FROM organizations WHERE referred_by_user_id IS NOT NULL
+);
+
+-- 2. Cancella tutte le organizations create automaticamente
 DELETE FROM organizations 
 WHERE referred_by_user_id IS NOT NULL;
 
--- 2. Cancella tutte le segnalazioni aziende
+-- 3. Cancella tutte le segnalazioni aziende
 DELETE FROM company_reports;
 
--- 3. Cancella tutte le transazioni punti
+-- 4. Cancella tutte le transazioni punti
 DELETE FROM points_transactions;
 
--- 4. Reset punti utenti a 0
+-- 5. Reset punti utenti a 0
 UPDATE user_points 
 SET 
   points_total = 0,
@@ -24,7 +30,7 @@ SET
   rejected_reports_count = 0,
   updated_at = NOW();
 
--- 5. Verifica reset
+-- 6. Verifica reset
 SELECT 'Reset completato!' as status;
 
 SELECT 
