@@ -8,9 +8,19 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
-    const { organizationId } = await req.json()
+    const { organization_id } = await req.json()
 
     // Connetti a Supabase
     const supabaseClient = createClient(
@@ -31,7 +41,7 @@ serve(async (req) => {
           email_sent
         )
       `)
-      .eq('id', organizationId)
+      .eq('id', organization_id)
       .single()
 
     if (orgError || !orgData) {
@@ -124,17 +134,17 @@ serve(async (req) => {
     await supabaseClient
       .from('organization_temp_passwords')
       .update({ email_sent: true })
-      .eq('organization_id', organizationId)
+      .eq('organization_id', organization_id)
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
