@@ -250,9 +250,9 @@
     background: white;
     border-radius: 28px;
     box-shadow: 0 30px 90px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
-    max-width: 680px;
+    max-width: 800px;
     width: 100%;
-    max-height: 92vh;
+    max-height: 95vh;
     overflow-y: auto;
     overflow-x: hidden;
     transform: scale(0.92) translateY(20px);
@@ -294,7 +294,7 @@
 }
 
 .company-request-header {
-    padding: 48px 48px 36px;
+    padding: 52px 60px 40px;
     text-align: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 28px 28px 0 0;
@@ -406,6 +406,7 @@
 .wizard-step {
     display: none;
     animation: fadeInSlide 0.4s ease;
+    padding: 40px 60px 50px;
 }
 
 .wizard-step.active {
@@ -511,15 +512,15 @@
 
 /* Form Groups */
 .wizard-step .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .wizard-step label {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     letter-spacing: 0.3px;
 }
 
@@ -535,10 +536,10 @@
 .wizard-step select,
 .wizard-step textarea {
     width: 100%;
-    padding: 14px 18px;
+    padding: 16px 20px;
     border: 2px solid #e2e8f0;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16px;
     color: #2d3748;
     background: white;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -577,7 +578,7 @@
 /* Radio Button Groups (Modern Cards) */
 .wizard-step .form-check {
     position: relative;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .wizard-step .form-check-input {
@@ -588,10 +589,10 @@
 
 .wizard-step .form-check-label {
     display: block;
-    padding: 14px 20px 14px 50px;
+    padding: 16px 24px 16px 56px;
     border: 2px solid #e2e8f0;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     color: #4a5568;
     cursor: pointer;
@@ -603,11 +604,11 @@
 .wizard-step .form-check-label::before {
     content: '';
     position: absolute;
-    left: 18px;
+    left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border: 2px solid #cbd5e0;
     border-radius: 50%;
     background: white;
@@ -617,11 +618,11 @@
 .wizard-step .form-check-label::after {
     content: '';
     position: absolute;
-    left: 24px;
+    left: 26px;
     top: 50%;
     transform: translateY(-50%) scale(0);
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: white;
     transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -652,16 +653,17 @@
 /* Wizard Navigation Buttons */
 .wizard-step button[type="button"],
 .wizard-step button[type="submit"] {
-    padding: 14px 32px;
+    padding: 16px 40px;
     border: none;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
     position: relative;
     overflow: hidden;
+    min-height: 52px;
 }
 
 .wizard-step button::before {
@@ -728,6 +730,17 @@
     transform: translateX(-4px);
 }
 
+/* Actions Container */
+.wizard-step .company-request-actions,
+.wizard-step .d-flex.justify-content-between {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 2px solid #f1f5f9;
+}
+
 /* Conditional Fields (Altro) */
 .wizard-step .form-group.mt-2 {
     animation: slideDown 0.3s ease-out;
@@ -745,10 +758,11 @@
 }
 
 /* Row Layout for Multi-Column */
-.wizard-step .row {
+.wizard-step .row,
+.wizard-step .form-row {
     display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 20px;
+    margin-bottom: 0;
 }
 
 .wizard-step .col-md-6 {
