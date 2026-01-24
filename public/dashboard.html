@@ -1596,6 +1596,46 @@
             <!-- STEP 2: Sondaggio -->
             <div id="wizardStep2" class="wizard-step">
                 <form id="companySurveyForm" class="company-request-form">
+                    
+                    <!-- TIPO AZIENDA (IMPORTANTE!) -->
+                    <div class="form-group" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; border: 2px solid #667eea; margin-bottom: 30px;">
+                        <label style="font-size: 1.1rem; font-weight: 700; color: #667eea; margin-bottom: 12px; display: block;">
+                            <i class="fas fa-building"></i> Tipo di Azienda/Associazione *
+                        </label>
+                        <p style="font-size: 0.9rem; color: #6c757d; margin-bottom: 16px;">
+                            Seleziona il tipo di partnership. Questo determina i compensi che riceverai.
+                        </p>
+                        <div class="radio-group" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                            <label class="radio-label" style="padding: 16px; border: 2px solid #667eea; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="companyType" value="inserzionista" required>
+                                <span style="font-weight: 600;">
+                                    💼 Azienda Inserzionista
+                                    <small style="display: block; color: #28a745; font-size: 0.85rem; margin-top: 4px;">
+                                        ✅ Compenso: 30€ + 1 punto + MLM
+                                    </small>
+                                </span>
+                            </label>
+                            <label class="radio-label" style="padding: 16px; border: 2px solid #f093fb; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="companyType" value="partner" required>
+                                <span style="font-weight: 600;">
+                                    🤝 Azienda Partner
+                                    <small style="display: block; color: #667eea; font-size: 0.85rem; margin-top: 4px;">
+                                        ✅ Compenso: 0€ + 1 punto
+                                    </small>
+                                </span>
+                            </label>
+                            <label class="radio-label" style="padding: 16px; border: 2px solid #4facfe; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="companyType" value="associazione" required>
+                                <span style="font-weight: 600;">
+                                    🎗️ Associazione
+                                    <small style="display: block; color: #17a2b8; font-size: 0.85rem; margin-top: 4px;">
+                                        ✅ Compenso: 0€ + 1 punto
+                                    </small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Settore -->
                     <div class="form-group">
                         <label for="companySector">Settore *</label>

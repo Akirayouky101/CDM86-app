@@ -1024,6 +1024,12 @@ const CompanyWizard = {
             const referralGiven = document.querySelector('input[name="referralGiven"]:checked')?.value;
             const emailConsent = document.querySelector('input[name="emailConsent"]:checked')?.value;
             
+            // ⭐ NUOVO: Company Type
+            const companyType = document.querySelector('input[name="companyType"]:checked')?.value;
+            if (!companyType) {
+                throw new Error('Seleziona il tipo di azienda/associazione');
+            }
+            
             // Save to database
             const { error: insertError } = await supabase
                 .from('company_reports')
@@ -1041,6 +1047,7 @@ const CompanyWizard = {
                     preferred_call_time: callTime,
                     referral_given: referralGiven === 'si',
                     email_consent: emailConsent === 'si',
+                    company_type: companyType,  // ⭐ NUOVO CAMPO
                     status: 'pending'
                 });
             

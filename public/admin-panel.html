@@ -3178,6 +3178,14 @@
                     year: 'numeric'
                 });
 
+                // ⭐ Badge Tipo Azienda
+                const companyTypeBadges = {
+                    'inserzionista': '<span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">💼 Inserzionista (30€)</span>',
+                    'partner': '<span style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">🤝 Partner</span>',
+                    'associazione': '<span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">🎗️ Associazione</span>'
+                };
+                const companyTypeBadge = companyTypeBadges[report.company_type] || '<span style="background: #6c757d; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">N/A</span>';
+
                 return `
                     <div class="report-card">
                         <div class="report-card-header">
@@ -3186,7 +3194,10 @@
                                     <i class="fas fa-building"></i>
                                     ${report.company_name}
                                 </div>
-                                <div class="report-company-sector">${report.sector}</div>
+                                <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
+                                    <div class="report-company-sector">${report.sector}</div>
+                                    ${companyTypeBadge}
+                                </div>
                             </div>
                             <div class="report-card-actions">
                                 ${statusBadges[report.status] || report.status}
@@ -3294,6 +3305,18 @@
                                     <div class="report-meta-item">
                                         <i class="fas fa-users"></i>
                                         <span title="Chi conosce in azienda">${report.who_knows}</span>
+                                    </div>
+                                ` : ''}
+                                ${report.status === 'approved' && report.points_awarded ? `
+                                    <div class="report-meta-item" style="background: rgba(16, 185, 129, 0.1); padding: 6px 12px; border-radius: 8px;">
+                                        <i class="fas fa-star" style="color: #10b981;"></i>
+                                        <span style="font-weight: 600; color: #10b981;">${report.points_awarded} punto</span>
+                                    </div>
+                                ` : ''}
+                                ${report.status === 'approved' && report.compensation_amount > 0 ? `
+                                    <div class="report-meta-item" style="background: rgba(102, 126, 234, 0.1); padding: 6px 12px; border-radius: 8px;">
+                                        <i class="fas fa-euro-sign" style="color: #667eea;"></i>
+                                        <span style="font-weight: 600; color: #667eea;">€${report.compensation_amount.toFixed(2)}</span>
                                     </div>
                                 ` : ''}
                             </div>
