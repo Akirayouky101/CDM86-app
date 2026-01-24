@@ -17,6 +17,9 @@ DECLARE
   v_referrer_of_referrer_id UUID;
   v_mlm_compensation_level1 DECIMAL(10,2) := 0.00;
   v_mlm_compensation_level2 DECIMAL(10,2) := 0.00;
+  v_organization_id UUID;
+  v_organization_type VARCHAR(20);
+  v_random_password TEXT;
 BEGIN
   -- Solo se cambia da altro stato ad "approved"
   IF NEW.status = 'approved' AND (OLD.status IS NULL OR OLD.status != 'approved') THEN
@@ -32,6 +35,61 @@ BEGIN
       v_compensation := 0.00;
       v_mlm_compensation_level1 := 0.00;
       v_mlm_compensation_level2 := 0.00;
+    END IF;
+    
+    -- ========================================================================
+    -- 🆕 1.5. CREA ORGANIZATION AUTOMATICAMENTE
+    -- ========================================================================
+    -- Verifica che l'azienda non esista già (per email)
+    SELECT id INTO v_organization_id
+    FROM organizations
+    WHERE email = NEW.email
+    LIMIT 1;
+    
+    IF v_organization_id IS NULL THEN
+      -- Determina tipo organization
+      IF NEW.company_type = 'associazione' THEN
+        v_organization_type := 'association';
+      ELSE
+        v_organization_type := 'company';
+      END IF;
+      
+      -- Genera password casuale (8 caratteri alfanumerici)
+      v_random_password := substr(md5(random()::text), 1, 8);
+      
+      -- Crea organization
+      INSERT INTO organizations (
+        organization_type,
+        name,
+        email,
+        phone,
+        address,
+        referred_by_user_id,
+        active
+      ) VALUES (
+        v_organization_type,
+        NEW.company_name,
+        NEW.email,
+        NEW.phone,
+        NEW.address,
+        NEW.reported_by_user_id,  -- Chi ha segnalato
+        true  -- Attiva subito
+      )
+      RETURNING id INTO v_organization_id;
+      
+      -- 🔐 TODO: Salvare v_random_password e inviare email
+      -- Per ora loggo solo la password (da implementare invio email)
+      RAISE NOTICE '🏢 Organization creata: % (ID: %) - Password: %', 
+        NEW.company_name, v_organization_id, v_random_password;
+      
+      -- Aggiorna company_report con organization_id creato
+      UPDATE company_reports
+      SET organization_id = v_organization_id
+      WHERE id = NEW.id;
+      
+      RAISE NOTICE '✅ Azienda % iscritta automaticamente nel sistema', NEW.company_name;
+    ELSE
+      RAISE NOTICE 'ℹ️ Azienda % già esistente (ID: %)', NEW.company_name, v_organization_id;
     END IF;
     
     -- ========================================================================
