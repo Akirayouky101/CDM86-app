@@ -37,7 +37,7 @@ BEGIN
     -- Ottieni dati della segnalazione
     v_reporter_id := NEW.reported_by_user_id;
     v_company_name := NEW.company_name;
-    v_company_email := NEW.company_email;
+    v_company_email := NEW.email;  -- Campo si chiama 'email', non 'company_email'
     v_company_type := COALESCE(NEW.company_type, 'partner');
     
     -- Determina compenso basato su company_type
