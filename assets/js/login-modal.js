@@ -927,7 +927,7 @@ const CompanyWizard = {
             const { data: userData } = await supabase
                 .from('users')
                 .select('referral_code')
-                .eq('auth_id', user.id)
+                .eq('id', user.id)
                 .single();
             
             const displayElement = document.getElementById('userReferralCodeDisplay');
@@ -996,8 +996,8 @@ const CompanyWizard = {
             // Get user data to find referral code
             const { data: userData, error: userError } = await supabase
                 .from('users')
-                .select('referral_code')
-                .eq('auth_id', user.id)
+                .select('referral_code, first_name, last_name')
+                .eq('id', user.id)
                 .single();
             
             if (userError) throw userError;
@@ -1046,14 +1046,8 @@ const CompanyWizard = {
             
             if (insertError) throw insertError;
             
-            // Get user full name for email message
-            const { data: fullUserData } = await supabase
-                .from('users')
-                .select('first_name, last_name')
-                .eq('auth_id', user.id)
-                .single();
-            
-            const userName = fullUserData ? `${fullUserData.first_name} ${fullUserData.last_name}` : 'Utente';
+            // Use already loaded user data for email message
+            const userName = userData ? `${userData.first_name} ${userData.last_name}` : 'Utente';
             
             // Messaggio email fake (da implementare in futuro)
             const emailMessage = emailConsent === 'si' 
