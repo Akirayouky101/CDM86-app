@@ -674,6 +674,302 @@
                 margin: 0.5rem;
             }
         }
+
+        /* ========== REPORT DETAILS MODAL ========== */
+        .report-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .report-details-modal.active {
+            opacity: 1;
+        }
+
+        .report-details-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+        }
+
+        .report-details-container {
+            position: relative;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: calc(100% - 40px);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .report-details-modal.active .report-details-container {
+            transform: scale(1);
+        }
+
+        .report-details-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.1);
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+            z-index: 1;
+        }
+
+        .report-details-close:hover {
+            background: #ef4444;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .report-details-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 40px 40px;
+            text-align: center;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-details-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: backgroundShift 8s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .report-details-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .report-details-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-details-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-details-body {
+            padding: 40px;
+        }
+
+        .report-section {
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .report-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .report-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .report-section-header i {
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .report-section-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: 0.5px;
+        }
+
+        .report-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .report-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .report-info-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .report-info-item label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .report-info-item span {
+            font-size: 16px;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .report-info-item a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .report-info-item a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .referral-code-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 16px;
+        }
+
+        .admin-notes-box {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 16px;
+            color: #92400e;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .report-details-footer {
+            padding: 24px 40px;
+            border-top: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .report-details-footer .btn-secondary {
+            padding: 12px 32px;
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .report-details-footer .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        /* Scrollbar personalizzata per il modal */
+        .report-details-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .report-details-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 0 24px 24px 0;
+        }
+
+        .report-details-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        /* Responsive modal */
+        @media (max-width: 768px) {
+            .report-details-container {
+                width: calc(100% - 20px);
+                max-height: 95vh;
+                border-radius: 16px;
+            }
+
+            .report-details-header {
+                padding: 40px 24px 32px;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .report-details-body {
+                padding: 24px;
+            }
+
+            .report-info-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .report-details-footer {
+                padding: 16px 24px;
+            }
+
+            .report-details-close {
+                width: 36px;
+                height: 36px;
+                top: 16px;
+                right: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2696,33 +2992,164 @@
                 ? `${report.users.first_name} ${report.users.last_name} (${report.users.email})`
                 : 'N/A';
 
-            alert(`
-📋 DETTAGLI SEGNALAZIONE
+            const createdDate = new Date(report.created_at).toLocaleDateString('it-IT', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-🏢 AZIENDA:
-  Nome: ${report.company_name}
-  Settore: ${report.sector}
-  Indirizzo: ${report.address}
+            const statusBadge = {
+                pending: '<span class="status-badge status-pending">In Attesa</span>',
+                contacted: '<span class="status-badge status-contacted">Contattata</span>',
+                approved: '<span class="status-badge status-approved">Iscritta</span>',
+                rejected: '<span class="status-badge status-rejected">Rifiutata</span>'
+            }[report.status] || report.status;
 
-👤 CONTATTO:
-  Nome: ${report.contact_name}
-  Email: ${report.email}
-  Telefono: ${report.phone}
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'report-details-modal';
+            modal.innerHTML = `
+                <div class="report-details-overlay" onclick="this.parentElement.remove()"></div>
+                <div class="report-details-container">
+                    <button class="report-details-close" onclick="this.closest('.report-details-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    
+                    <div class="report-details-header">
+                        <div class="report-details-icon">🏢</div>
+                        <h2 class="report-details-title">Dettagli Segnalazione</h2>
+                        <p class="report-details-subtitle">${report.company_name}</p>
+                    </div>
 
-📊 SONDAGGIO:
-  Azienda Consapevole: ${report.company_aware ? 'Sì' : 'No'}
-  Chi Conosce: ${report.who_knows}
-  Orari Preferiti: ${report.preferred_call_time}
+                    <div class="report-details-body">
+                        <div class="report-section">
+                            <div class="report-section-header">
+                                <i class="fas fa-building"></i>
+                                <h3>AZIENDA</h3>
+                            </div>
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <label>Nome</label>
+                                    <span>${report.company_name}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Settore</label>
+                                    <span>${report.sector}</span>
+                                </div>
+                                <div class="report-info-item full-width">
+                                    <label>Indirizzo</label>
+                                    <span>${report.address}</span>
+                                </div>
+                            </div>
+                        </div>
 
-👥 SEGNALATA DA:
-  Utente: ${reporterName}
-  Codice Referral: ${report.reported_by_referral_code}
+                        <div class="report-section">
+                            <div class="report-section-header">
+                                <i class="fas fa-user"></i>
+                                <h3>CONTATTO</h3>
+                            </div>
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <label>Nome</label>
+                                    <span>${report.contact_name}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Email</label>
+                                    <span><a href="mailto:${report.email}">${report.email}</a></span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Telefono</label>
+                                    <span><a href="tel:${report.phone}">${report.phone}</a></span>
+                                </div>
+                            </div>
+                        </div>
 
-📅 DATA: ${new Date(report.created_at).toLocaleString('it-IT')}
-🔖 STATO: ${report.status}
+                        <div class="report-section">
+                            <div class="report-section-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>SONDAGGIO</h3>
+                            </div>
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <label>Azienda Consapevole</label>
+                                    <span>${report.company_aware ? '✅ Sì' : '❌ No'}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Chi ne è a conoscenza</label>
+                                    <span>${report.who_knows}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Orari Preferiti</label>
+                                    <span>${report.preferred_call_time}</span>
+                                </div>
+                                ${report.referral_given ? `
+                                <div class="report-info-item">
+                                    <label>Referral Comunicato</label>
+                                    <span>✅ Sì</span>
+                                </div>
+                                ` : ''}
+                                ${report.email_consent ? `
+                                <div class="report-info-item">
+                                    <label>Consenso Email</label>
+                                    <span>✅ Autorizzato</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
 
-${report.admin_notes ? '📝 Note Admin:\n' + report.admin_notes : ''}
-            `.trim());
+                        <div class="report-section">
+                            <div class="report-section-header">
+                                <i class="fas fa-user-tag"></i>
+                                <h3>SEGNALATA DA</h3>
+                            </div>
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <label>Utente</label>
+                                    <span>${reporterName}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Codice Referral</label>
+                                    <span class="referral-code-badge">${report.reported_by_referral_code}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-section">
+                            <div class="report-section-header">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>STATO</h3>
+                            </div>
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <label>Data Segnalazione</label>
+                                    <span>${createdDate}</span>
+                                </div>
+                                <div class="report-info-item">
+                                    <label>Stato Corrente</label>
+                                    <span>${statusBadge}</span>
+                                </div>
+                                ${report.admin_notes ? `
+                                <div class="report-info-item full-width">
+                                    <label>Note Admin</label>
+                                    <div class="admin-notes-box">${report.admin_notes}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-details-footer">
+                        <button class="btn-secondary" onclick="this.closest('.report-details-modal').remove()">
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
         };
 
         window.updateReportStatus = async function(reportId, newStatus) {
