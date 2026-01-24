@@ -3336,6 +3336,8 @@
                     .select('*', { count: 'exact', head: true })
                     .eq('referred_by_id', user.id);
                 
+                console.log('🔍 Network - Users count:', usersCount, 'Error:', usersError);
+                
                 // Organizations portate (solo quelle approvate e iscritte)
                 const { count: orgsCount, error: orgsError } = await window.supabaseClient
                     .from('organizations')
@@ -3343,8 +3345,11 @@
                     .eq('referred_by_user_id', user.id)
                     .eq('active', true);
                 
+                console.log('🏢 Network - Orgs count:', orgsCount, 'Error:', orgsError);
+                
                 // Somma totale
                 const totalNetworkCount = (usersCount || 0) + (orgsCount || 0);
+                console.log('📊 Network - Total:', totalNetworkCount, '(users:', usersCount, '+ orgs:', orgsCount, ')');
                 document.getElementById('network-count').textContent = totalNetworkCount;
                 
             } catch (error) {
