@@ -228,16 +228,16 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     z-index: 10001;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 20px;
 }
 
@@ -248,47 +248,128 @@
 
 .company-request-modal {
     background: white;
-    border-radius: 24px;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
-    max-width: 650px;
+    border-radius: 28px;
+    box-shadow: 0 30px 90px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
+    max-width: 680px;
     width: 100%;
-    max-height: 90vh;
+    max-height: 92vh;
     overflow-y: auto;
-    transform: scale(0.9);
+    overflow-x: hidden;
+    transform: scale(0.92) translateY(20px);
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.company-request-modal-overlay.active .company-request-modal {
-    transform: scale(1);
-    opacity: 1;
-}
-
-.company-request-header {
-    padding: 40px 40px 30px;
-    text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 24px 24px 0 0;
-    color: white;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
 }
 
+.company-request-modal-overlay.active .company-request-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Scrollbar personalizzata */
+.company-request-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.company-request-modal::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 0 28px 28px 0;
+}
+
+.company-request-modal::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+.company-request-icon {
+    font-size: 56px;
+    display: inline-block;
+    margin-bottom: 16px;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.company-request-header {
+    padding: 48px 48px 36px;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 28px 28px 0 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated background pattern */
+.company-request-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation: backgroundShift 8s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
 .company-request-header h2 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
-    margin: 0 0 8px;
+    margin: 0 0 12px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
 }
 
 .company-request-header p {
-    font-size: 15px;
+    font-size: 16px;
     margin: 0;
     opacity: 0.95;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+}
+
+/* Close Button */
+.selection-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.selection-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Wizard Progress Bar */
 .wizard-progress {
-    height: 6px;
-    background: #e9ecef;
+    height: 8px;
+    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
     position: relative;
     overflow: hidden;
 }
@@ -296,7 +377,30 @@
 .wizard-progress-bar {
     height: 100%;
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    transition: width 0.4s ease;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.wizard-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
 }
 
 /* Wizard Steps */
@@ -402,6 +506,274 @@
 .referral-question-btn.no {
     background: #e9ecef;
     color: #495057;
+}
+
+/* ========== COMPANY WIZARD MODERN STYLES ========== */
+
+/* Form Groups */
+.wizard-step .form-group {
+    margin-bottom: 24px;
+}
+
+.wizard-step label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.wizard-step label .text-danger {
+    color: #e53e3e;
+    margin-left: 2px;
+}
+
+/* Input Fields & Selects */
+.wizard-step input[type="text"],
+.wizard-step input[type="email"],
+.wizard-step input[type="tel"],
+.wizard-step select,
+.wizard-step textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #2d3748;
+    background: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.wizard-step input::placeholder,
+.wizard-step select option:first-child,
+.wizard-step textarea::placeholder {
+    color: #a0aec0;
+}
+
+.wizard-step input:focus,
+.wizard-step select:focus,
+.wizard-step textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.wizard-step input:hover:not(:focus),
+.wizard-step select:hover:not(:focus),
+.wizard-step textarea:hover:not(:focus) {
+    border-color: #cbd5e0;
+}
+
+/* Select Dropdown Arrow */
+.wizard-step select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    padding-right: 45px;
+}
+
+/* Radio Button Groups (Modern Cards) */
+.wizard-step .form-check {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.wizard-step .form-check-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.wizard-step .form-check-label {
+    display: block;
+    padding: 14px 20px 14px 50px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    position: relative;
+}
+
+.wizard-step .form-check-label::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s;
+}
+
+.wizard-step .form-check-label::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wizard-step .form-check-input:checked + .form-check-label {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.wizard-step .form-check-input:checked + .form-check-label::before {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.wizard-step .form-check-input:checked + .form-check-label::after {
+    transform: translateY(-50%) scale(1);
+}
+
+.wizard-step .form-check-label:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+    transform: translateX(4px);
+}
+
+/* Wizard Navigation Buttons */
+.wizard-step button[type="button"],
+.wizard-step button[type="submit"] {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.wizard-step button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.wizard-step button:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Primary Button (Avanti, Invia) */
+.wizard-step .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.wizard-step .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+}
+
+.wizard-step .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Secondary Button (Indietro) */
+.wizard-step .btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.wizard-step .btn-secondary:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+/* Button Icons */
+.wizard-step button i {
+    margin-left: 8px;
+    transition: transform 0.3s;
+}
+
+.wizard-step .btn-primary:hover i {
+    transform: translateX(4px);
+}
+
+.wizard-step .btn-secondary i {
+    margin-right: 8px;
+    margin-left: 0;
+}
+
+.wizard-step .btn-secondary:hover i {
+    transform: translateX(-4px);
+}
+
+/* Conditional Fields (Altro) */
+.wizard-step .form-group.mt-2 {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Row Layout for Multi-Column */
+.wizard-step .row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.wizard-step .col-md-6 {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wizard-step .row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .wizard-step input,
+    .wizard-step select,
+    .wizard-step button {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .wizard-step .form-check-label {
+        padding: 16px 20px 16px 50px;
+        font-size: 16px;
+    }
 }
 
 .referral-question-btn:hover {
@@ -1005,6 +1377,7 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     z-index: 10001;
     display: flex;
