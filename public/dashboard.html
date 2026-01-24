@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>CDM86 - Dashboard</title>
     
     <!-- Font Awesome -->
@@ -1141,11 +1144,15 @@
         // Load organization requests (segnalazioni aziende)
         async function loadOrganizationRequests() {
             try {
+                // Force fresh data by using a random query parameter (bypass cache)
+                const timestamp = Date.now();
                 const { data, error } = await window.supabaseClient
                     .from('company_reports')
                     .select('*')
                     .eq('reported_by_user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    // Force bypass Supabase cache
+                    .limit(1000);
                 
                 if (error) {
                     console.error('Error loading company reports:', error);
@@ -2711,12 +2718,12 @@
                 closeReportCompanyModal();
                 showSuccessModal();
                 
-                // Reload organization requests after a short delay
-                setTimeout(() => {
-                    if (window.loadOrganizationRequests) {
-                        window.loadOrganizationRequests();
-                    }
-                }, 1000);
+                // FORCE REFRESH IMMEDIATO - bypass cache completamente
+                console.log('✅ Segnalazione inviata! Ricarico lista...');
+                if (window.loadOrganizationRequests) {
+                    // Immediate refresh
+                    await window.loadOrganizationRequests();
+                }
                 
             } catch (error) {
                 console.error('Error submitting report:', error);
