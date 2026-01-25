@@ -906,14 +906,38 @@
             try {
                 console.log('🚀 Starting loadDashboardData...');
                 
-                // Get user data
-                const { data: userData, error: userError } = await window.supabaseClient
+                // Get user data (check both users and organizations)
+                let { data: userData, error: userError } = await window.supabaseClient
                     .from('users')
                     .select('*')
-                    .eq('id', currentUser.id)
+                    .eq('auth_user_id', currentUser.id)
                     .single();
                 
-                if (userError) throw userError;
+                // If not found in users, check organizations
+                if (userError && userError.code === 'PGRST116') {
+                    console.log('👔 User not found, checking organizations...');
+                    const { data: orgData, error: orgError } = await window.supabaseClient
+                        .from('organizations')
+                        .select('*')
+                        .eq('auth_user_id', currentUser.id)
+                        .single();
+                    
+                    if (orgError) throw orgError;
+                    
+                    // Map organization data to user-like structure
+                    userData = {
+                        ...orgData,
+                        first_name: orgData.name,
+                        last_name: '(Organizzazione)',
+                        points: 0,
+                        referred_by_user_id: null,
+                        referral_code: orgData.referral_code_employees || orgData.referral_code_external
+                    };
+                    
+                    console.log('✅ Organization data mapped:', userData);
+                } else if (userError) {
+                    throw userError;
+                }
                 
                 console.log('✅ User data loaded (raw):', userData);
                 console.log('� Type of userData:', typeof userData, 'Is array:', Array.isArray(userData));
