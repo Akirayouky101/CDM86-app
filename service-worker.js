@@ -59,16 +59,19 @@ self.addEventListener('fetch', (event) => {
   if (url.protocol === 'chrome-extension:') {
     return;
   }
+  
+  // Skippa richieste a Supabase e API esterne - usa fetch normale
+  if (url.hostname.includes('supabase.co') || 
+      url.hostname.includes('unpkg.com') ||
+      url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('cloudflare.com')) {
+    return; // Lascia che il browser gestisca normalmente
+  }
 
   event.respondWith(
-    // Fetch con headers no-cache aggressivi
+    // Fetch SENZA headers custom per evitare CORS
     fetch(event.request.clone(), {
-      cache: 'no-store',
-      headers: new Headers({
-        'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      })
+      cache: 'no-store'
     })
     .then((response) => {
       // NON salvare nella cache, restituisci direttamente
