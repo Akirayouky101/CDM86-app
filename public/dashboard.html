@@ -982,11 +982,6 @@
                         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
                     });
                     
-                    // Prevent clicks inside dropdown from closing it
-                    dropdown.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                    });
-                    
                     // Close dropdown when clicking outside
                     document.addEventListener('click', (e) => {
                         if (!userBtn.contains(e.target) && !dropdown.contains(e.target)) {
