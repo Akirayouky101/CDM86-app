@@ -2831,9 +2831,28 @@
             if (!pendingDeleteUser) return;
 
             try {
-                const { error } = await window.supabaseClient.auth.admin.deleteUser(pendingDeleteUser.id);
+                // Usa Edge Function con Service Role Key per eliminare l'utente
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                
+                const response = await fetch(
+                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/delete-user',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        },
+                        body: JSON.stringify({
+                            userId: pendingDeleteUser.id
+                        })
+                    }
+                );
 
-                if (error) throw error;
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Errore durante l\'eliminazione');
+                }
 
                 alert(`✅ Utente ${pendingDeleteUser.email} eliminato!`);
                 closeModal('deleteUserModal');
