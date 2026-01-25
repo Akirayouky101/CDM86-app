@@ -417,6 +417,43 @@
                 </div>
             </div>
             
+            <!-- Guadagni e Commissioni -->
+            <div class="card">
+                <h2><i class="fas fa-euro-sign"></i> Guadagni e Commissioni</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Riepilogo dei tuoi guadagni dal sistema referral
+                </p>
+                
+                <!-- Saldo Totale -->
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 12px; color: white; text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 16px; opacity: 0.9; margin-bottom: 10px;">💰 Saldo Totale</div>
+                    <div id="commission-balance" style="font-size: 48px; font-weight: 800;">€0.00</div>
+                    <div style="font-size: 14px; opacity: 0.8; margin-top: 10px;">Guadagni accumulati</div>
+                </div>
+                
+                <!-- Statistiche -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                    <div style="background: #fef3c7; padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #92400e;" id="pending-count">0</div>
+                        <div style="font-size: 14px; color: #78350f; margin-top: 5px;">⏳ In Attesa</div>
+                    </div>
+                    <div style="background: #dbeafe; padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #1e40af;" id="approved-count">0</div>
+                        <div style="font-size: 14px; color: #1e3a8a; margin-top: 5px;">✅ Approvate</div>
+                    </div>
+                    <div style="background: #d1fae5; padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #065f46;" id="paid-count">0</div>
+                        <div style="font-size: 14px; color: #064e3b; margin-top: 5px;">💸 Pagate</div>
+                    </div>
+                </div>
+                
+                <!-- Lista Commissioni -->
+                <h3 style="color: #333; font-size: 18px; margin-bottom: 15px;">📋 Storico Commissioni</h3>
+                <div id="commissions-list">
+                    <p style="text-align: center; color: #999;">Caricamento...</p>
+                </div>
+            </div>
+            
             <!-- Utenti Invitati -->
             <div class="card">
                 <h2><i class="fas fa-users"></i> Utenti Invitati</h2>
@@ -521,7 +558,8 @@
                 displayReferralCodes(orgData.referral_code_employees, orgData.referral_code_external);
                 generateQRCodes(orgData.referral_code_employees, orgData.referral_code_external);
                 displayEmployees(employees || []);
-                loadReferredUsers(orgData.id); // 👈 AGGIUNGI QUESTA RIGA
+                loadReferredUsers(orgData.id);
+                loadCommissions(orgData.id); // 👈 NUOVO: Carica commissioni
                 loadContentStatus(); // Load unified content status (page + card)
                 
                 // Show dashboard
@@ -924,6 +962,125 @@
                 
             } catch (error) {
                 console.error('❌ Error in loadReferredUsers:', error);
+            }
+        }
+        
+        // Carica commissioni e guadagni
+        async function loadCommissions(organizationId) {
+            try {
+                console.log('💰 Loading commissions for org:', organizationId);
+                
+                // Carica statistiche
+                const { data: stats, error: statsError } = await supabaseClient
+                    .from('organization_commission_stats')
+                    .select('*')
+                    .eq('organization_id', organizationId)
+                    .maybeSingle();
+                
+                if (statsError) {
+                    console.error('Error loading commission stats:', statsError);
+                }
+                
+                // Carica lista commissioni
+                const { data: commissions, error: commissionsError } = await supabaseClient
+                    .from('commissions')
+                    .select(`
+                        *,
+                        referred_user:users!commissions_referred_user_id_fkey(first_name, last_name, email)
+                    `)
+                    .eq('organization_id', organizationId)
+                    .order('created_at', { ascending: false });
+                
+                if (commissionsError) {
+                    console.error('Error loading commissions:', commissionsError);
+                    document.getElementById('commissions-list').innerHTML = `
+                        <p style="text-align: center; color: #ef4444;">
+                            <i class="fas fa-exclamation-circle"></i> Errore caricamento commissioni
+                        </p>
+                    `;
+                    return;
+                }
+                
+                console.log('✅ Commissions loaded:', commissions?.length || 0);
+                
+                // Aggiorna statistiche
+                if (stats) {
+                    document.getElementById('commission-balance').textContent = 
+                        `€${parseFloat(stats.commission_balance || 0).toFixed(2)}`;
+                    document.getElementById('pending-count').textContent = stats.pending_count || 0;
+                    document.getElementById('approved-count').textContent = stats.approved_count || 0;
+                    document.getElementById('paid-count').textContent = stats.paid_count || 0;
+                }
+                
+                // Mostra lista commissioni
+                if (!commissions || commissions.length === 0) {
+                    document.getElementById('commissions-list').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Nessuna commissione ancora</p>
+                            <p style="font-size: 14px; margin-top: 10px;">
+                                Le commissioni appariranno qui quando qualcuno si registra con i tuoi codici referral
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const html = `
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Data</th>
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Utente</th>
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Importo</th>
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Stato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${commissions.map(comm => {
+                                const statusColors = {
+                                    pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳', label: 'In Attesa' },
+                                    approved: { bg: '#dbeafe', text: '#1e40af', icon: '✅', label: 'Approvata' },
+                                    paid: { bg: '#d1fae5', text: '#065f46', icon: '💸', label: 'Pagata' },
+                                    cancelled: { bg: '#fee2e2', text: '#991b1b', icon: '❌', label: 'Annullata' }
+                                };
+                                const status = statusColors[comm.status] || statusColors.pending;
+                                const userName = comm.referred_user 
+                                    ? `${comm.referred_user.first_name} ${comm.referred_user.last_name}`
+                                    : 'Utente rimosso';
+                                
+                                return `
+                                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                                        <td style="padding: 12px; color: #6b7280;">
+                                            ${new Date(comm.created_at).toLocaleDateString('it-IT', {
+                                                day: '2-digit',
+                                                month: 'short',
+                                                year: 'numeric'
+                                            })}
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <div style="font-weight: 500; color: #111827;">${userName}</div>
+                                            ${comm.referred_user ? `<div style="font-size: 12px; color: #9ca3af;">${comm.referred_user.email}</div>` : ''}
+                                        </td>
+                                        <td style="padding: 12px; font-weight: 700; color: #10b981;">
+                                            €${parseFloat(comm.amount).toFixed(2)}
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <span style="background: ${status.bg}; color: ${status.text}; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+                                                ${status.icon} ${status.label}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                document.getElementById('commissions-list').innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ Error in loadCommissions:', error);
             }
         }
         
