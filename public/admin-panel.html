@@ -2512,14 +2512,44 @@
                 document.getElementById('usersLoading').style.display = 'block';
                 document.getElementById('usersTableContainer').style.display = 'none';
 
-                const { data, error } = await window.supabaseClient
+                // Carica utenti normali
+                const { data: normalUsers, error: usersError } = await window.supabaseClient
                     .from('users')
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                if (usersError) throw usersError;
 
-                allUsers = data || [];
+                // Carica organizzazioni con i loro dati dalla tabella organizations
+                const { data: orgs, error: orgsError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('id, name, email, organization_type, auth_user_id, active, created_at')
+                    .order('created_at', { ascending: false });
+
+                if (orgsError) throw orgsError;
+
+                // Combina utenti e organizzazioni
+                allUsers = [
+                    ...(normalUsers || []).map(u => ({
+                        ...u,
+                        isOrganization: false,
+                        displayName: `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'User Unknown'
+                    })),
+                    ...(orgs || []).map(org => ({
+                        id: org.auth_user_id || org.id,
+                        email: org.email,
+                        first_name: org.name,
+                        last_name: '',
+                        displayName: org.name,
+                        role: org.organization_type === 'company' ? 'organization' : 'association',
+                        is_verified: org.active,
+                        points: 0,
+                        created_at: org.created_at,
+                        isOrganization: true,
+                        organization_type: org.organization_type
+                    }))
+                ];
+
                 renderUsers(allUsers);
                 updateStats(allUsers);
 
@@ -2547,18 +2577,29 @@
                 return;
             }
 
-            tbody.innerHTML = users.map(user => `
+            tbody.innerHTML = users.map(user => {
+                // Determina il badge del ruolo
+                let roleBadge = '';
+                if (user.role === 'admin') {
+                    roleBadge = '<span class="badge badge-danger">👑 ADMIN</span>';
+                } else if (user.isOrganization) {
+                    if (user.organization_type === 'company') {
+                        roleBadge = '<span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">💼 USER</span>';
+                    } else {
+                        roleBadge = '<span class="badge" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">🎗️ USER</span>';
+                    }
+                } else {
+                    roleBadge = '<span class="badge badge-info">👤 USER</span>';
+                }
+
+                return `
                 <tr>
                     <td>${user.email}</td>
-                    <td>${user.first_name || ''} ${user.last_name || ''}</td>
-                    <td>
-                        <span class="badge ${user.role === 'admin' ? 'badge-danger' : 'badge-info'}">
-                            ${user.role === 'admin' ? '👑 Admin' : '👤 User'}
-                        </span>
-                    </td>
+                    <td>${user.displayName}</td>
+                    <td>${roleBadge}</td>
                     <td>
                         <span class="badge ${user.is_verified ? 'badge-success' : 'badge-warning'}">
-                            ${user.is_verified ? '✓ Verificato' : '⏳ Non Verificato'}
+                            ${user.is_verified ? '✓ VERIFICATO' : '⏳ NON VERIFICATO'}
                         </span>
                     </td>
                     <td><strong>${user.points || 0}</strong> pt</td>
@@ -2573,7 +2614,8 @@
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // Update Stats
@@ -2589,6 +2631,7 @@
             const searchTerm = document.getElementById('userSearch').value.toLowerCase();
             const filtered = allUsers.filter(user =>
                 (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.displayName && user.displayName.toLowerCase().includes(searchTerm)) ||
                 (user.first_name && user.first_name.toLowerCase().includes(searchTerm)) ||
                 (user.last_name && user.last_name.toLowerCase().includes(searchTerm))
             );
