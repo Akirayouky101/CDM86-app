@@ -83,7 +83,7 @@ serve(async (req) => {
         .from('referrals')
         .select('id, referrer_id, points_earned_referrer, status')
         .eq('referred_user_id', userId)
-        .single()
+        .maybeSingle()
 
       if (referralData && referralData.points_earned_referrer > 0) {
         console.log(`💰 Trovato referral con ${referralData.points_earned_referrer} punti guadagnati`)
@@ -94,7 +94,7 @@ serve(async (req) => {
           .from('users')
           .select('email, first_name, last_name')
           .eq('id', userId)
-          .single()
+          .maybeSingle()
 
         const deletedUserName = deletedUserInfo 
           ? `${deletedUserInfo.first_name || ''} ${deletedUserInfo.last_name || ''}`.trim() || deletedUserInfo.email
@@ -127,7 +127,7 @@ serve(async (req) => {
           .from('users')
           .select('total_points')
           .eq('id', referralData.referrer_id)
-          .single()
+          .maybeSingle()
 
         if (currentBalance) {
           const newBalance = Math.max(0, currentBalance.total_points + pointsToRemove)
