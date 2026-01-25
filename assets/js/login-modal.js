@@ -569,15 +569,23 @@ async function handleRegister(event) {
                 referrerOrgId = orgData.id;
             } else {
                 // Check users table for normal referral codes
+                console.log('🔍 Cercando codice referral utente:', referralCode);
                 const { data: referrerData, error: referrerError} = await sb
                     .from('users')
                     .select('id, referral_code, first_name, last_name')
                     .eq('referral_code', referralCode)
                     .maybeSingle();
 
-                if (referrerError || !referrerData) {
+                console.log('📊 Risultato query users:', { referrerData, referrerError });
+
+                if (referrerError) {
+                    throw new Error('ERRORE DATABASE: ' + referrerError.message);
+                }
+                
+                if (!referrerData) {
                     throw new Error('CODICE REFERRAL NON VALIDO!');
                 }
+                
                 referrer = referrerData;
             }
         }
