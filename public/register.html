@@ -215,12 +215,87 @@
             <div class="form-group">
                 <label for="referralCode"><i class="fas fa-ticket-alt"></i> Codice Referral (opzionale)</label>
                 <input type="text" id="referralCode" placeholder="Inserisci codice referral" autocomplete="off">
+                <small style="display: block; margin-top: 8px; color: #6b7280; font-size: 13px;">
+                    Non hai un codice? 
+                    <a href="#" id="requestReferralLink" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                        Richiedilo qui →
+                    </a>
+                </small>
             </div>
 
             <button type="submit" class="btn" id="submitBtn">
                 <i class="fas fa-user-plus"></i> Registrati
             </button>
         </form>
+
+        <!-- Modale richiesta referral -->
+        <div id="requestReferralModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 16px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;">
+                <button id="closeModalBtn" style="position: absolute; top: 15px; right: 15px; background: #f3f4f6; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; color: #6b7280;">×</button>
+                
+                <h2 style="margin: 0 0 10px 0; color: var(--text); font-size: 24px;">
+                    📬 Richiedi Codice Referral
+                </h2>
+                <p style="margin: 0 0 25px 0; color: #6b7280; font-size: 14px;">
+                    Compila il form per richiedere il tuo codice. Sarai ricontattato a breve.
+                </p>
+
+                <form id="requestReferralForm">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-user"></i> Nome *
+                        </label>
+                        <input type="text" id="reqFirstName" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-user"></i> Cognome *
+                        </label>
+                        <input type="text" id="reqLastName" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-envelope"></i> Email *
+                        </label>
+                        <input type="email" id="reqEmail" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-phone"></i> Telefono (opzionale)
+                        </label>
+                        <input type="tel" id="reqPhone" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 14px;">
+                            <i class="fas fa-comment"></i> Messaggio (opzionale)
+                        </label>
+                        <textarea id="reqMessage" rows="3" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical;" placeholder="Raccontaci brevemente perché vuoi unirti a CDM86..."></textarea>
+                    </div>
+
+                    <button type="submit" style="width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-paper-plane"></i> Invia Richiesta
+                    </button>
+                </form>
+
+                <div id="requestLoading" style="display: none; text-align: center; padding: 40px 0;">
+                    <div class="spinner" style="margin: 0 auto 15px auto;"></div>
+                    <p style="color: #6b7280; margin: 0;">Invio richiesta in corso...</p>
+                </div>
+
+                <div id="requestSuccess" style="display: none; text-align: center; padding: 30px 0;">
+                    <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                    <h3 style="margin: 0 0 10px 0; color: var(--secondary);">Richiesta Inviata!</h3>
+                    <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                        Riceverai una email di conferma a breve.<br>
+                        Sarai ricontattato dal nostro team.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
@@ -237,6 +312,111 @@
     <script>
         // Inizializza Supabase
         const sb = window.supabase.createClient(window.supabaseUrl, window.supabaseAnonKey);
+
+        // Gestione modale richiesta referral
+        const modal = document.getElementById('requestReferralModal');
+        const requestLink = document.getElementById('requestReferralLink');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const requestForm = document.getElementById('requestReferralForm');
+
+        requestLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.style.display = 'flex';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            // Reset form
+            requestForm.reset();
+            document.getElementById('requestReferralForm').style.display = 'block';
+            document.getElementById('requestLoading').style.display = 'none';
+            document.getElementById('requestSuccess').style.display = 'none';
+        });
+
+        // Chiudi modale cliccando fuori
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Gestione invio richiesta referral
+        requestForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const firstName = document.getElementById('reqFirstName').value.trim();
+            const lastName = document.getElementById('reqLastName').value.trim();
+            const email = document.getElementById('reqEmail').value.trim();
+            const phone = document.getElementById('reqPhone').value.trim();
+            const message = document.getElementById('reqMessage').value.trim();
+
+            // Mostra loading
+            document.getElementById('requestReferralForm').style.display = 'none';
+            document.getElementById('requestLoading').style.display = 'block';
+
+            try {
+                // Inserisci richiesta nel database
+                const { data: request, error: insertError } = await sb
+                    .from('user_referral_requests')
+                    .insert({
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: email,
+                        phone: phone || null,
+                        message: message || null,
+                        status: 'pending'
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+
+                console.log('✅ Richiesta creata:', request.id);
+
+                // Invia email di conferma
+                try {
+                    const emailResponse = await fetch(
+                        'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-referral-request-confirmation',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${window.supabaseAnonKey}`
+                            },
+                            body: JSON.stringify({
+                                requestId: request.id
+                            })
+                        }
+                    );
+
+                    if (emailResponse.ok) {
+                        console.log('✅ Email di conferma inviata!');
+                    } else {
+                        console.warn('⚠️ Errore invio email (non bloccante)');
+                    }
+                } catch (emailError) {
+                    console.warn('⚠️ Errore email:', emailError);
+                }
+
+                // Mostra successo
+                document.getElementById('requestLoading').style.display = 'none';
+                document.getElementById('requestSuccess').style.display = 'block';
+
+                // Chiudi modale dopo 4 secondi
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    requestForm.reset();
+                    document.getElementById('requestSuccess').style.display = 'none';
+                    document.getElementById('requestReferralForm').style.display = 'block';
+                }, 4000);
+
+            } catch (error) {
+                console.error('Errore richiesta referral:', error);
+                alert('❌ Errore nell\'invio della richiesta: ' + error.message);
+                document.getElementById('requestLoading').style.display = 'none';
+                document.getElementById('requestReferralForm').style.display = 'block';
+            }
+        });
 
         // Leggi parametro ref dall'URL
         const urlParams = new URLSearchParams(window.location.search);
