@@ -1031,7 +1031,7 @@ const CompanyWizard = {
             }
             
             // Save to database
-            const { error: insertError } = await supabase
+            const { data: insertedReport, error: insertError } = await supabase
                 .from('company_reports')
                 .insert({
                     reported_by_user_id: user.id,
@@ -1047,20 +1047,46 @@ const CompanyWizard = {
                     preferred_call_time: callTime,
                     referral_given: referralGiven === 'si',
                     email_consent: emailConsent === 'si',
-                    company_type: companyType,  // ⭐ NUOVO CAMPO
+                    company_type: companyType,
                     status: 'pending'
-                });
+                })
+                .select()
+                .single();
             
             if (insertError) throw insertError;
             
-            // Use already loaded user data for email message
+            // 📧 Invia email di notifica (utente + azienda)
+            console.log('📧 Invio email di notifica per segnalazione ID:', insertedReport.id);
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const emailResponse = await fetch(
+                    `${supabase.supabaseUrl}/functions/v1/send-report-notification`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        },
+                        body: JSON.stringify({ reportId: insertedReport.id })
+                    }
+                );
+                
+                if (!emailResponse.ok) {
+                    console.error('⚠️ Errore invio email notifica:', await emailResponse.text());
+                }
+            } catch (emailError) {
+                console.error('⚠️ Errore chiamata email function:', emailError);
+                // Non blocchiamo il flusso se l'email fallisce
+            }
+            
             const userName = userData ? `${userData.first_name} ${userData.last_name}` : 'Utente';
             
-            // Messaggio email fake (da implementare in futuro)
+            // Messaggio email
             const emailMessage = emailConsent === 'si' 
-                ? `<p style="color: #10b981; margin-top: 16px; font-weight: 600;">📧 Email inviata all'azienda (${email})</p>
+                ? `<p style="color: #10b981; margin-top: 16px; font-weight: 600;">📧 Email inviate a te e all'azienda (${email})</p>
                    <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Segnalazione da: <strong>${userData.referral_code}</strong> - ${userName}</p>`
-                : '<p style="color: #f59e0b; margin-top: 16px;">⚠️ Email non inviata (consenso non dato)</p>';
+                : '<p style="color: #f59e0b; margin-top: 16px;">📧 Email di conferma inviata a te<br>⚠️ Email all\'azienda non inviata (consenso non dato)</p>';
             
             // Show success message
             if (loading) {
