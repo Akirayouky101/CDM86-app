@@ -74,7 +74,81 @@ serve(async (req) => {
       .eq('auth_user_id', userId)
       .single()
 
-    // Prima cancella i dati del database
+    // STEP 1: Gestisci referral e punti PRIMA di cancellare l'utente
+    if (userRecord) {
+      console.log('🔗 Controllo referral collegati...')
+      
+      // Cerca se questo utente è stato invitato da qualcuno
+      const { data: referralData } = await supabaseAdmin
+        .from('referrals')
+        .select('id, referrer_id, points_earned_referrer, status')
+        .eq('referred_user_id', userId)
+        .single()
+
+      if (referralData && referralData.points_earned_referrer > 0) {
+        console.log(`💰 Trovato referral con ${referralData.points_earned_referrer} punti guadagnati`)
+        console.log(`👤 Referrer: ${referralData.referrer_id}`)
+
+        // Ottieni info dell'utente eliminato per il messaggio
+        const { data: deletedUserInfo } = await supabaseAdmin
+          .from('users')
+          .select('email, first_name, last_name')
+          .eq('id', userId)
+          .single()
+
+        const deletedUserName = deletedUserInfo 
+          ? `${deletedUserInfo.first_name || ''} ${deletedUserInfo.last_name || ''}`.trim() || deletedUserInfo.email
+          : 'Utente eliminato'
+
+        // Rimuovi i punti dal referrer
+        const pointsToRemove = -Math.abs(referralData.points_earned_referrer)
+        
+        console.log(`⚖️ Rimozione ${Math.abs(pointsToRemove)} punti da referrer...`)
+        
+        // Crea transazione di rimozione punti
+        const { error: transactionError } = await supabaseAdmin
+          .from('points_transactions')
+          .insert({
+            user_id: referralData.referrer_id,
+            points: pointsToRemove,
+            transaction_type: 'admin_adjustment',
+            reference_id: referralData.id,
+            description: `Rimossi punti per eliminazione utente invitato: ${deletedUserName}`
+          })
+
+        if (transactionError) {
+          console.error('⚠️ Errore creazione transazione rimozione punti:', transactionError)
+        } else {
+          console.log('✅ Transazione di rimozione punti creata')
+        }
+
+        // Aggiorna il saldo punti del referrer
+        const { data: currentBalance } = await supabaseAdmin
+          .from('users')
+          .select('total_points')
+          .eq('id', referralData.referrer_id)
+          .single()
+
+        if (currentBalance) {
+          const newBalance = Math.max(0, currentBalance.total_points + pointsToRemove)
+          
+          const { error: updateError } = await supabaseAdmin
+            .from('users')
+            .update({ total_points: newBalance })
+            .eq('id', referralData.referrer_id)
+
+          if (updateError) {
+            console.error('⚠️ Errore aggiornamento saldo:', updateError)
+          } else {
+            console.log(`✅ Saldo aggiornato: ${currentBalance.total_points} → ${newBalance}`)
+          }
+        }
+      } else {
+        console.log('ℹ️ Nessun referral con punti trovato per questo utente')
+      }
+    }
+
+    // STEP 2: Cancella i dati del database
     console.log(`🗑️ Cancellazione dati database per: ${userId}`)
     
     try {
