@@ -5,7 +5,7 @@
 // Risolve problemi di dati stantii dopo modifiche DB
 // =====================================================
 
-const VERSION = 'v3-nocache-org-users-list-' + Date.now();
+const VERSION = 'v3-nocache-trigger-fix-' + Date.now();
 
 console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 

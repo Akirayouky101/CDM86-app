@@ -1206,8 +1206,11 @@
         }
         
         // Load user info
+        let loadUserInfoRetries = 0;
+        const MAX_RETRIES = 5;
+        
         async function loadUserInfo() {
-            console.log('🔍 loadUserInfo() called');
+            console.log('🔍 loadUserInfo() called (attempt', loadUserInfoRetries + 1, '/', MAX_RETRIES, ')');
             console.log('Current user:', currentUser);
             
             try {
@@ -1333,8 +1336,25 @@
                 
                 // Se l'utente non esiste ancora nella tabella users, aspetta e riprova
                 if (!userData) {
-                    console.warn('⚠️ User not yet in users table, retrying in 1s...');
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    loadUserInfoRetries++;
+                    
+                    if (loadUserInfoRetries >= MAX_RETRIES) {
+                        console.error('❌ User record not created after', MAX_RETRIES, 'attempts');
+                        console.error('⚠️ Il trigger handle_new_user potrebbe non funzionare correttamente');
+                        console.error('📧 User email:', currentUser.email);
+                        console.error('🆔 User ID:', currentUser.id);
+                        
+                        // Mostra messaggio all'utente
+                        alert('Si è verificato un problema con la registrazione. Contatta il supporto con questo ID: ' + currentUser.id);
+                        
+                        // Forza logout
+                        await window.supabaseClient.auth.signOut();
+                        window.location.href = '/public/login.html';
+                        return;
+                    }
+                    
+                    console.warn('⚠️ User not yet in users table, retrying in 2s... (attempt', loadUserInfoRetries, '/', MAX_RETRIES, ')');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
                     return loadUserInfo();
                 }
                 
