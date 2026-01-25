@@ -3546,6 +3546,37 @@
 
                 if (error) throw error;
 
+                // 📧 Invia email di notifica per cambio stato (contacted o rejected)
+                if (newStatus === 'contacted' || newStatus === 'rejected') {
+                    try {
+                        const { data: { session } } = await window.supabaseClient.auth.getSession();
+                        
+                        const statusResponse = await fetch(
+                            'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-report-status-update',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${session.access_token}`
+                                },
+                                body: JSON.stringify({
+                                    reportId: reportId,
+                                    newStatus: newStatus
+                                })
+                            }
+                        );
+                        
+                        if (statusResponse.ok) {
+                            console.log(`✅ Email ${newStatus} inviate con successo!`);
+                        } else {
+                            const errorData = await statusResponse.json();
+                            console.warn(`⚠️ Errore invio email ${newStatus}:`, errorData);
+                        }
+                    } catch (emailError) {
+                        console.warn('⚠️ Errore invio email status update:', emailError);
+                    }
+                }
+
                 // 📧 Se approvata, attendi che il trigger crei l'organization e poi invia email
                 if (newStatus === 'approved') {
                     try {
@@ -3626,10 +3657,39 @@
                             );
                             
                             if (response.ok) {
-                                console.log('✅ Email inviata con successo!');
+                                console.log('✅ Email all\'azienda inviata con successo!');
                             } else {
                                 const errorData = await response.json();
                                 console.warn('⚠️ Errore invio email:', errorData);
+                            }
+                            
+                            // 📧 Invia anche email all'utente per ringraziarlo
+                            try {
+                                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                                
+                                const userEmailResponse = await fetch(
+                                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-report-status-update',
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${session.access_token}`
+                                        },
+                                        body: JSON.stringify({
+                                            reportId: reportId,
+                                            newStatus: 'approved'
+                                        })
+                                    }
+                                );
+                                
+                                if (userEmailResponse.ok) {
+                                    console.log('✅ Email ringraziamento utente inviata!');
+                                } else {
+                                    const errorData = await userEmailResponse.json();
+                                    console.warn('⚠️ Errore invio email utente:', errorData);
+                                }
+                            } catch (userEmailError) {
+                                console.warn('⚠️ Errore invio email utente:', userEmailError);
                             }
                         } else {
                             console.log('ℹ️ Organization già esistente, email non necessaria');
