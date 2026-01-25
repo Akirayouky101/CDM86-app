@@ -967,61 +967,67 @@
             }
         }
         
-        // Carica commissioni e guadagni
+        // Carica transazioni e guadagni (NUOVO SISTEMA)
         async function loadCommissions(organizationId) {
             try {
-                console.log('💰 Loading commissions for org:', organizationId);
+                console.log('💰 Loading transactions for org:', organizationId);
                 
                 // Carica statistiche
-                const { data: stats, error: statsError } = await supabaseClient
-                    .from('organization_commission_stats')
+                const { data: stats, error: statsError} = await supabaseClient
+                    .from('organization_transaction_stats')
                     .select('*')
                     .eq('organization_id', organizationId)
                     .maybeSingle();
                 
                 if (statsError) {
-                    console.error('Error loading commission stats:', statsError);
+                    console.error('Error loading transaction stats:', statsError);
                 }
                 
-                // Carica lista commissioni
-                const { data: commissions, error: commissionsError } = await supabaseClient
-                    .from('commissions')
+                // Carica lista transazioni
+                const { data: transactions, error: transactionsError } = await supabaseClient
+                    .from('organization_transactions')
                     .select(`
                         *,
-                        referred_user:users!commissions_referred_user_id_fkey(first_name, last_name, email)
+                        referred_user:users!organization_transactions_referred_user_id_fkey(first_name, last_name, email)
                     `)
                     .eq('organization_id', organizationId)
                     .order('created_at', { ascending: false });
                 
-                if (commissionsError) {
-                    console.error('Error loading commissions:', commissionsError);
+                if (transactionsError) {
+                    console.error('Error loading transactions:', transactionsError);
                     document.getElementById('commissions-list').innerHTML = `
                         <p style="text-align: center; color: #ef4444;">
-                            <i class="fas fa-exclamation-circle"></i> Errore caricamento commissioni
+                            <i class="fas fa-exclamation-circle"></i> Errore caricamento transazioni
                         </p>
                     `;
                     return;
                 }
                 
-                console.log('✅ Commissions loaded:', commissions?.length || 0);
+                console.log('✅ Transactions loaded:', transactions?.length || 0);
                 
                 // Aggiorna statistiche
                 if (stats) {
                     document.getElementById('commission-balance').textContent = 
-                        `€${parseFloat(stats.commission_balance || 0).toFixed(2)}`;
-                    document.getElementById('pending-count').textContent = stats.pending_count || 0;
-                    document.getElementById('approved-count').textContent = stats.approved_count || 0;
-                    document.getElementById('paid-count').textContent = stats.paid_count || 0;
+                        `€${parseFloat(stats.total_balance || 0).toFixed(2)}`;
+                    
+                    // Conta transazioni per tipo
+                    const referralTxs = transactions?.filter(t => t.transaction_type.startsWith('referral_')) || [];
+                    const payoutTxs = transactions?.filter(t => t.transaction_type === 'payout') || [];
+                    const bonusTxs = transactions?.filter(t => t.transaction_type === 'bonus' || t.transaction_type === 'admin_adjustment') || [];
+                    
+                    document.getElementById('pending-count').textContent = referralTxs.length;
+                    document.getElementById('approved-count').textContent = bonusTxs.length;
+                    document.getElementById('paid-count').textContent = Math.abs(payoutTxs.length);
                 }
                 
-                // Mostra lista commissioni
-                if (!commissions || commissions.length === 0) {
+                // Mostra lista transazioni
+                if (!transactions || transactions.length === 0) {
                     document.getElementById('commissions-list').innerHTML = `
                         <div style="text-align: center; padding: 40px; color: #999;">
                             <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
-                            <p>Nessuna commissione ancora</p>
+                            <p>Nessuna transazione ancora</p>
                             <p style="font-size: 14px; margin-top: 10px;">
-                                Le commissioni appariranno qui quando qualcuno si registra con i tuoi codici referral
+                                Le transazioni appariranno qui quando qualcuno si registra con i tuoi codici referral
                             </p>
                         </div>
                     `;
@@ -1033,50 +1039,63 @@
                         <thead>
                             <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
                                 <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Data</th>
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Utente</th>
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Importo</th>
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Stato</th>
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Descrizione</th>
+                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Tipo</th>
+                                <th style="padding: 12px; text-align: right; color: #374151; font-weight: 600;">Importo</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${commissions.map(comm => {
-                                const statusColors = {
-                                    pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳', label: 'In Attesa' },
-                                    approved: { bg: '#dbeafe', text: '#1e40af', icon: '✅', label: 'Approvata' },
-                                    paid: { bg: '#d1fae5', text: '#065f46', icon: '💸', label: 'Pagata' },
-                                    cancelled: { bg: '#fee2e2', text: '#991b1b', icon: '❌', label: 'Annullata' }
+                            ${transactions.map(tx => {
+                                const typeLabels = {
+                                    referral_user_direct: { icon: '👤', label: 'Utente Diretto', color: '#10b981' },
+                                    referral_user_indirect: { icon: '👥', label: 'Utente Indiretto', color: '#3b82f6' },
+                                    referral_org_direct: { icon: '🏢', label: 'Org Diretta', color: '#8b5cf6' },
+                                    referral_org_indirect: { icon: '🏭', label: 'Org Indiretta', color: '#ec4899' },
+                                    admin_adjustment: { icon: '⚙️', label: 'Aggiustamento', color: '#f59e0b' },
+                                    payout: { icon: '💸', label: 'Pagamento', color: '#ef4444' },
+                                    bonus: { icon: '🎁', label: 'Bonus', color: '#10b981' },
+                                    penalty: { icon: '⚠️', label: 'Penalità', color: '#ef4444' }
                                 };
-                                const status = statusColors[comm.status] || statusColors.pending;
-                                const userName = comm.referred_user 
-                                    ? `${comm.referred_user.first_name} ${comm.referred_user.last_name}`
-                                    : 'Utente rimosso';
+                                const type = typeLabels[tx.transaction_type] || { icon: '📊', label: tx.transaction_type, color: '#6b7280' };
+                                const isNegative = tx.amount < 0;
+                                const userName = tx.referred_user 
+                                    ? `${tx.referred_user.first_name} ${tx.referred_user.last_name}`
+                                    : null;
                                 
                                 return `
                                     <tr style="border-bottom: 1px solid #e5e7eb;">
-                                        <td style="padding: 12px; color: #6b7280;">
-                                            ${new Date(comm.created_at).toLocaleDateString('it-IT', {
+                                        <td style="padding: 12px; color: #6b7280; font-size: 13px;">
+                                            ${new Date(tx.created_at).toLocaleDateString('it-IT', {
                                                 day: '2-digit',
                                                 month: 'short',
-                                                year: 'numeric'
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
                                             })}
                                         </td>
                                         <td style="padding: 12px;">
-                                            <div style="font-weight: 500; color: #111827;">${userName}</div>
-                                            ${comm.referred_user ? `<div style="font-size: 12px; color: #9ca3af;">${comm.referred_user.email}</div>` : ''}
-                                        </td>
-                                        <td style="padding: 12px; font-weight: 700; color: #10b981;">
-                                            €${parseFloat(comm.amount).toFixed(2)}
+                                            <div style="font-weight: 500; color: #111827;">${tx.description || type.label}</div>
+                                            ${userName ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">${userName}</div>` : ''}
                                         </td>
                                         <td style="padding: 12px;">
-                                            <span style="background: ${status.bg}; color: ${status.text}; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;">
-                                                ${status.icon} ${status.label}
+                                            <span style="background: ${type.color}15; color: ${type.color}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                                ${type.icon} ${type.label}
                                             </span>
+                                        </td>
+                                        <td style="padding: 12px; text-align: right; font-weight: 700; color: ${isNegative ? '#ef4444' : '#10b981'}; font-size: 16px;">
+                                            ${isNegative ? '-' : '+'}€${Math.abs(parseFloat(tx.amount)).toFixed(2)}
                                         </td>
                                     </tr>
                                 `;
                             }).join('')}
                         </tbody>
                     </table>
+                    <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; text-align: right;">
+                        <span style="color: #6b7280; margin-right: 10px;">Saldo Totale:</span>
+                        <span style="font-size: 24px; font-weight: 800; color: #10b981;">
+                            €${parseFloat(stats?.total_balance || 0).toFixed(2)}
+                        </span>
+                    </div>
                 `;
                 
                 document.getElementById('commissions-list').innerHTML = html;
