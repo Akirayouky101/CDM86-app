@@ -933,17 +933,34 @@
                         organization_data: orgData
                     };
                 } else {
-                    // Regular user - use auth data
-                    console.log('👤 Regular user, using auth data');
-                    userData = {
-                        id: currentUser.id,
-                        first_name: currentUser.user_metadata?.first_name || currentUser.email.split('@')[0],
-                        last_name: currentUser.user_metadata?.last_name || '',
-                        email: currentUser.email,
-                        points: 0,
-                        referral_code: 'N/A',
-                        is_organization: false
-                    };
+                    // Regular user - check public.users table
+                    console.log('👤 Regular user, checking public.users...');
+                    const { data: userList, error: userError } = await window.supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('auth_user_id', currentUser.id);
+                    
+                    console.log('� Users query result:', { userList, userError });
+                    
+                    if (userList && userList.length > 0) {
+                        // User found in public.users
+                        userData = userList[0];
+                        userData.is_organization = false;
+                        console.log('✅ User data from public.users:', userData);
+                    } else {
+                        // Fallback to auth metadata (nuovo utente non ancora sincronizzato)
+                        console.log('⚠️ User not in public.users yet, using auth metadata');
+                        userData = {
+                            id: currentUser.id,
+                            auth_user_id: currentUser.id,
+                            first_name: currentUser.user_metadata?.first_name || currentUser.email.split('@')[0],
+                            last_name: currentUser.user_metadata?.last_name || '',
+                            email: currentUser.email,
+                            points: 0,
+                            referral_code: 'Generando...',
+                            is_organization: false
+                        };
+                    }
                 }
                 
                 console.log('✅ User data loaded (raw):', userData);
