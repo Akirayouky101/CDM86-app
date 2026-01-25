@@ -622,13 +622,19 @@ async function handleRegister(event) {
             // Aspetta che il trigger crei l'entry in users
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            try {
-                // Usa il token della sessione utente appena creata
-                const accessToken = authData.session?.access_token;
-                if (!accessToken) {
-                    throw new Error('No access token available');
-                }
+            // Controlla se c'è una sessione (conferma email disabilitata)
+            const accessToken = authData.session?.access_token;
+            
+            if (!accessToken) {
+                console.warn('⚠️ Nessun access token - conferma email probabilmente richiesta');
+                console.log('📧 Referral verrà impostato dopo la conferma email');
+                // TODO: Salvare il referral in un campo temporaneo o in localStorage
+                // e applicarlo dopo la conferma email
+                showAlert('✅ Registrazione completata! Controlla la tua email per confermare e completare il referral.', 'success');
+                return;
+            }
 
+            try {
                 const response = await fetch(
                     'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/set-user-referral',
                     {
@@ -682,7 +688,30 @@ async function handleRegister(event) {
             }
         }
 
-        showAlert('✅ Registrazione completata! Controlla la tua email per confermare.', 'success');
+        // Invia email di benvenuto personalizzata
+        try {
+            const referredByName = referrer 
+                ? `${referrer.first_name} ${referrer.last_name}` 
+                : (referrerOrgId ? organizationData[0]?.name : null);
+
+            await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-welcome-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    referredBy: referredByName
+                })
+            });
+            console.log('✅ Email di benvenuto inviata');
+        } catch (error) {
+            console.error('⚠️ Errore invio email benvenuto (non critico):', error);
+        }
+
+        showAlert('✅ Registrazione completata! Benvenuto su CDM86!', 'success');
 
         // Switch to login tab
         setTimeout(() => {

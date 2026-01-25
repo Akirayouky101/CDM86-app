@@ -5,7 +5,7 @@
 // Risolve problemi di dati stantii dopo modifiche DB
 // =====================================================
 
-const VERSION = 'v3-nocache-referral-jwt-fix-' + Date.now();
+const VERSION = 'v3-nocache-welcome-email-' + Date.now();
 
 console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 
