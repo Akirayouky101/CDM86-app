@@ -2215,6 +2215,28 @@
         </div>
     </div>
 
+    <!-- APPROVAL LOADING MODAL -->
+    <div id="approvalLoadingModal" class="modal" style="z-index: 10000;">
+        <div class="modal-dialog" style="max-width: 400px;">
+            <div class="modal-content" style="border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 30px 20px; text-align: center; color: white;">
+                    <div class="spinner-border" style="width: 60px; height: 60px; border-width: 5px; border-color: rgba(255,255,255,0.3); border-top-color: white; animation: spin 1s linear infinite; display: inline-block; border-radius: 50%; border-style: solid;"></div>
+                    <h3 id="approvalLoadingTitle" style="margin: 20px 0 0 0; font-size: 22px; font-weight: 700; color: white;">Approvazione in corso...</h3>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 30px 25px; text-align: center;">
+                    <p id="approvalLoadingMessage" style="font-size: 15px; color: #6b7280; line-height: 1.6; margin: 0;">
+                        ⏳ Creazione account organizzazione e invio email di benvenuto...
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- ADD ORGANIZATION MODAL -->
     <div id="addOrganizationModal" class="modal">
         <div class="modal-dialog">
@@ -2767,6 +2789,17 @@
             document.getElementById('successTitle').textContent = title;
             document.getElementById('successMessage').textContent = message;
             openModal('successModal');
+        };
+
+        // Approval Loading Modal Helper
+        window.showApprovalLoading = function(title, message) {
+            document.getElementById('approvalLoadingTitle').textContent = title || 'Approvazione in corso...';
+            document.getElementById('approvalLoadingMessage').textContent = message || '⏳ Creazione account organizzazione e invio email di benvenuto...';
+            openModal('approvalLoadingModal');
+        };
+
+        window.hideApprovalLoading = function() {
+            closeModal('approvalLoadingModal');
         };
 
         // Notification Helper
@@ -3695,6 +3728,11 @@
             if (!newStatus) return;
 
             try {
+                // Mostra loading modal se si sta approvando
+                if (newStatus === 'approved') {
+                    showApprovalLoading('Approvazione in corso...', '⏳ Creazione account organizzazione e invio email di benvenuto...');
+                }
+
                 const { error } = await window.supabaseClient
                     .from('company_reports')
                     .update({ status: newStatus })
@@ -3861,6 +3899,11 @@
                     report.status = newStatus;
                 }
 
+                // Nascondi loading modal se era approvazione
+                if (newStatus === 'approved') {
+                    hideApprovalLoading();
+                }
+
                 // Refresh view
                 updateReportStats();
                 applyReportFilters();
@@ -3869,16 +3912,28 @@
                 const statusMap = {
                     'pending': 'In Attesa',
                     'approved': 'Approvata',
-                    'rejected': 'Rifiutata'
+                    'rejected': 'Rifiutata',
+                    'contacted': 'Contattata'
                 };
 
-                showNotification(
-                    'Stato Aggiornato',
-                    `Segnalazione aggiornata a: ${statusMap[newStatus] || newStatus}`,
-                    'success'
-                );
+                // Mostra messaggio di successo
+                if (newStatus === 'approved') {
+                    showSuccessModal(
+                        '✅ Segnalazione Approvata!',
+                        'L\'organizzazione è stata creata e l\'email di benvenuto è stata inviata con successo.'
+                    );
+                } else {
+                    showNotification(
+                        'Stato Aggiornato',
+                        `Segnalazione aggiornata a: ${statusMap[newStatus] || newStatus}`,
+                        'success'
+                    );
+                }
 
             } catch (error) {
+                // Nascondi loading modal in caso di errore
+                hideApprovalLoading();
+                
                 console.error('Error updating report status:', error);
                 alert('Errore nell\'aggiornamento dello stato: ' + error.message);
             }
