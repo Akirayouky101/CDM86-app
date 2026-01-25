@@ -938,7 +938,7 @@
     background: rgba(0, 0, 0, 0.7);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-    z-index: 2000;
+    z-index: 10002; /* Higher than wizard (10001) */
     display: flex;
     align-items: center;
     justify-content: center;
