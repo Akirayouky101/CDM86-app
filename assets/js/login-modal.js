@@ -553,7 +553,8 @@ async function handleRegister(event) {
         // Valida referral code PRIMA della registrazione
         let referrer = null;
         let referrerOrgId = null;
-        let referrerOrgName = null; // 👈 AGGIUNTO per salvare il nome
+        let referrerOrgName = null;
+        let referralType = null; // 👈 AGGIUNTO per tracciare il tipo
 
         if (referralCode) {
             console.log('🔍 Validazione codice referral:', referralCode);
@@ -573,6 +574,7 @@ async function handleRegister(event) {
             if (userData) {
                 console.log('✅ Trovato in users:', userData);
                 referrer = userData;
+                referralType = 'user';
             } else {
                 // STEP 2: Non trovato in users, cerca in organizations
                 console.log('🔍 Non trovato in users, cerco in organizations...');
@@ -591,7 +593,20 @@ async function handleRegister(event) {
                 if (orgData) {
                     console.log('✅ Trovato in organizations:', orgData);
                     referrerOrgId = orgData.id;
-                    referrerOrgName = orgData.name; // 👈 SALVA IL NOME
+                    referrerOrgName = orgData.name;
+                    
+                    // Determina il tipo in base a quale codice è stato usato
+                    if (orgData.referral_code_employees === referralCode) {
+                        referralType = 'org_employee';
+                        console.log('� Tipo: Dipendente aziendale');
+                    } else if (orgData.referral_code_external === referralCode) {
+                        referralType = 'org_external';
+                        console.log('📋 Tipo: Membro esterno');
+                    } else {
+                        // referral_code generico (non usato per utenti, solo per org-to-org)
+                        referralType = 'org_employee'; // default
+                        console.log('📋 Tipo: Default employee');
+                    }
                 } else {
                     console.error('❌ Codice non trovato in nessuna tabella');
                     throw new Error('CODICE REFERRAL NON VALIDO!');
@@ -648,7 +663,8 @@ async function handleRegister(event) {
                         body: JSON.stringify({
                             userId: authData.user.id,
                             referrerId: referrer?.id || null,
-                            organizationId: referrerOrgId || null
+                            organizationId: referrerOrgId || null,
+                            referralType: referralType // 👈 AGGIUNTO
                         })
                     }
                 );

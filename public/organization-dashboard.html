@@ -767,7 +767,7 @@
                 
                 const { data: users, error } = await supabaseClient
                     .from('users')
-                    .select('id, email, first_name, last_name, created_at')
+                    .select('id, email, first_name, last_name, created_at, referral_type')
                     .eq('referred_by_organization_id', organizationId)
                     .order('created_at', { ascending: false });
                 
@@ -796,41 +796,121 @@
                     return;
                 }
                 
+                // Separa dipendenti da membri esterni
+                const employees = users.filter(u => u.referral_type === 'org_employee');
+                const externals = users.filter(u => u.referral_type === 'org_external');
+                
                 const html = `
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Nome</th>
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Email</th>
-                                <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Data Registrazione</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${users.map(user => `
-                                <tr style="border-bottom: 1px solid #e5e7eb;">
-                                    <td style="padding: 12px;">
-                                        <i class="fas fa-user-check" style="color: #10b981; margin-right: 8px;"></i>
-                                        ${user.first_name} ${user.last_name}
-                                    </td>
-                                    <td style="padding: 12px; color: #6b7280;">${user.email}</td>
-                                    <td style="padding: 12px; color: #6b7280;">
-                                        ${new Date(user.created_at).toLocaleDateString('it-IT', {
-                                            day: '2-digit',
-                                            month: 'long',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
-                        <p style="color: #166534; margin: 0;">
+                    <!-- Dipendenti/Membri Aziendali -->
+                    <div style="margin-bottom: 40px;">
+                        <h4 style="color: #667eea; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user-tie"></i> Dipendenti/Membri registrati
+                        </h4>
+                        ${employees.length > 0 ? `
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Nome</th>
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Email</th>
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Data Registrazione</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${employees.map(user => `
+                                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                                            <td style="padding: 12px;">
+                                                <i class="fas fa-user-check" style="color: #667eea; margin-right: 8px;"></i>
+                                                ${user.first_name} ${user.last_name}
+                                            </td>
+                                            <td style="padding: 12px; color: #6b7280;">${user.email}</td>
+                                            <td style="padding: 12px; color: #6b7280;">
+                                                ${new Date(user.created_at).toLocaleDateString('it-IT', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 15px; padding: 12px; background: #ede9fe; border-radius: 8px; border: 1px solid #c4b5fd;">
+                                <p style="color: #5b21b6; margin: 0; font-size: 14px;">
+                                    <i class="fas fa-users" style="margin-right: 8px;"></i>
+                                    <strong>Totale dipendenti: ${employees.length}</strong>
+                                </p>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 30px; background: #f9fafb; border-radius: 8px; color: #999;">
+                                <p>Nessun dipendente registrato ancora</p>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Membri Non Aziendali -->
+                    <div>
+                        <h4 style="color: #f59e0b; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-users"></i> Membri non Aziendali
+                        </h4>
+                        ${externals.length > 0 ? `
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Nome</th>
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Email</th>
+                                        <th style="padding: 12px; text-align: left; color: #374151; font-weight: 600;">Data Registrazione</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${externals.map(user => `
+                                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                                            <td style="padding: 12px;">
+                                                <i class="fas fa-user-check" style="color: #f59e0b; margin-right: 8px;"></i>
+                                                ${user.first_name} ${user.last_name}
+                                            </td>
+                                            <td style="padding: 12px; color: #6b7280;">${user.email}</td>
+                                            <td style="padding: 12px; color: #6b7280;">
+                                                ${new Date(user.created_at).toLocaleDateString('it-IT', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 15px; padding: 12px; background: #fef3c7; border-radius: 8px; border: 1px solid #fcd34d;">
+                                <p style="color: #92400e; margin: 0; font-size: 14px;">
+                                    <i class="fas fa-user-group" style="margin-right: 8px;"></i>
+                                    <strong>Totale membri esterni: ${externals.length}</strong>
+                                </p>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 30px; background: #f9fafb; border-radius: 8px; color: #999;">
+                                <p>Nessun membro esterno registrato ancora</p>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Totale Complessivo -->
+                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
+                        <p style="margin: 0; font-size: 18px; font-weight: 700;">
                             <i class="fas fa-chart-line" style="margin-right: 8px;"></i>
-                            <strong>Totale utenti invitati: ${users.length}</strong>
+                            Totale utenti invitati: ${users.length}
                         </p>
+                        <div style="display: flex; gap: 30px; margin-top: 15px; font-size: 14px;">
+                            <div>
+                                <i class="fas fa-user-tie"></i> Dipendenti: ${employees.length}
+                            </div>
+                            <div>
+                                <i class="fas fa-users"></i> Esterni: ${externals.length}
+                            </div>
+                        </div>
                     </div>
                 `;
                 

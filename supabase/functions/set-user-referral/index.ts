@@ -46,7 +46,7 @@ serve(async (req) => {
       )
     }
 
-    const { userId, referrerId, organizationId } = await req.json()
+    const { userId, referrerId, organizationId, referralType } = await req.json()
 
     if (!userId) {
       throw new Error('userId è richiesto')
@@ -60,6 +60,7 @@ serve(async (req) => {
     console.log('🔄 Aggiornamento referral per user:', userId)
     console.log('👤 Referrer ID:', referrerId)
     console.log('🏢 Organization ID:', organizationId)
+    console.log('📋 Referral Type:', referralType)
 
     // Crea client Supabase con Service Role Key per bypassare RLS
     const supabaseAdmin = createClient(
@@ -78,10 +79,13 @@ serve(async (req) => {
     
     if (referrerId) {
       updateData.referred_by_id = referrerId
+      updateData.referral_type = 'user'
     }
     
     if (organizationId) {
       updateData.referred_by_organization_id = organizationId
+      // referralType può essere 'org_employee' o 'org_external'
+      updateData.referral_type = referralType || 'org_employee'
     }
 
     const { error: updateError } = await supabaseAdmin
