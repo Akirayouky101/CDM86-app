@@ -1,269 +1,145 @@
-/**
- * CDM86 Service Worker - DISABLED FOR DEVELOPMENT
- * Cache disabilitata per evitare problemi durante lo sviluppo
- */
+// =====================================================
+// CDM86 SERVICE WORKER - AGGRESSIVE NO-CACHE MODE
+// =====================================================
+// Bypassa COMPLETAMENTE la cache del browser
+// Risolve problemi di dati stantii dopo modifiche DB
+// =====================================================
 
-const CACHE_NAME = 'cdm86-v4-nocache';
-const DYNAMIC_CACHE = 'cdm86-dynamic-v4';
+const VERSION = 'v2-nocache-' + Date.now();
 
-// NO FILES TO CACHE - Development mode
-const STATIC_ASSETS = [];
+console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 
-// Install event - Skip caching in development mode
+// =====================================================
+// INSTALL - Attiva immediatamente
+// =====================================================
 self.addEventListener('install', (event) => {
-    console.log('[Service Worker] Installing (no cache)...');
-    self.skipWaiting();
+  console.log('🔧 [SW] Installing:', VERSION);
+  
+  // Skippa waiting e attiva subito
+  self.skipWaiting();
 });
 
-// Activate event - DELETE ALL OLD CACHES
+// =====================================================
+// ACTIVATE - Pulisci TUTTE le cache e prendi controllo
+// =====================================================
 self.addEventListener('activate', (event) => {
-    console.log('[Service Worker] Activating and clearing all caches...');
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    console.log('[Service Worker] Deleting cache:', cacheName);
-                    return caches.delete(cacheName);
-                })
-            );
-        }).then(() => {
-            console.log('[Service Worker] All caches cleared!');
-            return self.clients.claim();
-        })
-    );
+  console.log('✅ [SW] Activating:', VERSION);
+  
+  event.waitUntil(
+    // Cancella TUTTE le cache esistenti
+    caches.keys().then((cacheNames) => {
+      console.log('🗑️ [SW] Deleting all caches:', cacheNames);
+      return Promise.all(
+        cacheNames.map((cacheName) => caches.delete(cacheName))
+      );
+    })
+    .then(() => {
+      console.log('✅ [SW] All caches deleted');
+      // Prendi controllo di tutti i client immediatamente
+      return self.clients.claim();
+    })
+    .then(() => {
+      console.log('✅ [SW] Claimed all clients');
+    })
+  );
 });
 
-// Fetch event - NO CACHING, always network
+// =====================================================
+// FETCH - SEMPRE dalla rete, MAI dalla cache
+// =====================================================
 self.addEventListener('fetch', (event) => {
-    // Skip service worker for API calls
-    if (event.request.url.includes('/api/') || 
-        event.request.url.includes('vercel.app') ||
-        event.request.url.includes('supabase.co')) {
-        return; // Let the browser handle it directly
-    }
-    
-    event.respondWith(
-        fetch(event.request)
-            .then(response => {
-                return response;
-            })
-            .catch(error => {
-                console.log('[Service Worker] Fetch failed:', error);
-                throw error;
-            })
-    );
+  const url = new URL(event.request.url);
+  
+  // Skippa protocolli non-HTTP
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+  
+  // Skippa Chrome extensions
+  if (url.protocol === 'chrome-extension:') {
+    return;
+  }
+
+  event.respondWith(
+    // Fetch con headers no-cache aggressivi
+    fetch(event.request.clone(), {
+      cache: 'no-store',
+      headers: new Headers({
+        'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      })
+    })
+    .then((response) => {
+      // NON salvare nella cache, restituisci direttamente
+      
+      // Log per debug (solo file importanti)
+      if (url.pathname.includes('.html') || 
+          url.pathname.includes('.js') ||
+          url.pathname === '/' ||
+          url.pathname.includes('dashboard') ||
+          url.pathname.includes('admin')) {
+        console.log('🌐 [SW] Fetched from network (NO CACHE):', url.pathname);
+      }
+      
+      return response;
+    })
+    .catch((error) => {
+      console.error('❌ [SW] Fetch failed for:', url.pathname, error.message);
+      
+      // Restituisci errore 503
+      return new Response(
+        JSON.stringify({
+          error: 'Network Error',
+          message: 'Unable to fetch resource. Please check your internet connection.',
+          url: url.href
+        }),
+        {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          })
+        }
+      );
+    })
+  );
 });
 
-// Activate Event - Clean old caches
-self.addEventListener('activate', (event) => {
-    console.log('[Service Worker] Activating...');
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames
-                    .filter((name) => name !== CACHE_NAME && name !== DYNAMIC_CACHE)
-                    .map((name) => {
-                        console.log('[Service Worker] Deleting old cache:', name);
-                        return caches.delete(name);
-                    })
-            );
-        })
-    );
-    return self.clients.claim();
-});
-
-// Fetch Event - Network first, fallback to cache
-self.addEventListener('fetch', (event) => {
-    const { request } = event;
-    const url = new URL(request.url);
-
-    // Skip non-GET requests
-    if (request.method !== 'GET') {
-        return;
-    }
-
-    // API requests - Network only with offline fallback
-    if (url.pathname.startsWith('/api/')) {
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    // Clone and cache successful responses
-                    if (response.ok) {
-                        const responseClone = response.clone();
-                        caches.open(DYNAMIC_CACHE).then((cache) => {
-                            cache.put(request, responseClone);
-                        });
-                    }
-                    return response;
-                })
-                .catch(() => {
-                    // Return cached version if offline
-                    return caches.match(request).then((cached) => {
-                        if (cached) {
-                            return cached;
-                        }
-                        // Return offline page for API requests
-                        return new Response(
-                            JSON.stringify({
-                                error: 'Offline',
-                                message: 'Sei offline. Controlla la connessione.'
-                            }),
-                            {
-                                headers: { 'Content-Type': 'application/json' },
-                                status: 503
-                            }
-                        );
-                    });
-                })
-        );
-        return;
-    }
-
-    // Static assets - Cache first, fallback to network
-    event.respondWith(
-        caches.match(request).then((cached) => {
-            if (cached) {
-                // Return cached version and update in background
-                fetch(request).then((response) => {
-                    if (response.ok) {
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(request, response);
-                        });
-                    }
-                });
-                return cached;
-            }
-
-            // Not in cache, fetch from network
-            return fetch(request)
-                .then((response) => {
-                    if (!response || response.status !== 200) {
-                        return response;
-                    }
-
-                    // Cache the new resource
-                    const responseClone = response.clone();
-                    caches.open(DYNAMIC_CACHE).then((cache) => {
-                        cache.put(request, responseClone);
-                    });
-
-                    return response;
-                })
-                .catch(() => {
-                    // Network failed, show offline page
-                    if (request.destination === 'document') {
-                        return caches.match('/offline.html');
-                    }
-                });
-        })
-    );
-});
-
-// Background Sync - Sync data when connection returns
-self.addEventListener('sync', (event) => {
-    console.log('[Service Worker] Background sync:', event.tag);
-    
-    if (event.tag === 'sync-promotions') {
-        event.waitUntil(syncPromotions());
-    }
-    
-    if (event.tag === 'sync-referrals') {
-        event.waitUntil(syncReferrals());
-    }
-});
-
-// Push Notifications
-self.addEventListener('push', (event) => {
-    console.log('[Service Worker] Push notification received');
-    
-    const data = event.data ? event.data.json() : {};
-    const title = data.title || 'CDM86';
-    const options = {
-        body: data.body || 'Nuova notifica disponibile',
-        icon: '/assets/images/icon-192x192.png',
-        badge: '/assets/images/icon-72x72.png',
-        vibrate: [200, 100, 200],
-        data: data.url || '/',
-        actions: [
-            { action: 'open', title: 'Apri', icon: '/assets/images/icon-72x72.png' },
-            { action: 'close', title: 'Chiudi', icon: '/assets/images/icon-72x72.png' }
-        ]
-    };
-
-    event.waitUntil(
-        self.registration.showNotification(title, options)
-    );
-});
-
-// Notification Click
-self.addEventListener('notificationclick', (event) => {
-    console.log('[Service Worker] Notification clicked');
-    
-    event.notification.close();
-    
-    if (event.action === 'open' || !event.action) {
-        const urlToOpen = event.notification.data || '/';
-        
-        event.waitUntil(
-            clients.matchAll({ type: 'window', includeUncontrolled: true })
-                .then((clientList) => {
-                    // Check if window is already open
-                    for (let client of clientList) {
-                        if (client.url === urlToOpen && 'focus' in client) {
-                            return client.focus();
-                        }
-                    }
-                    // Open new window
-                    if (clients.openWindow) {
-                        return clients.openWindow(urlToOpen);
-                    }
-                })
-        );
-    }
-});
-
-// Helper Functions
-async function syncPromotions() {
-    try {
-        const response = await fetch('/api/promotions/sync', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        return response.json();
-    } catch (error) {
-        console.error('[Service Worker] Sync promotions failed:', error);
-    }
-}
-
-async function syncReferrals() {
-    try {
-        const response = await fetch('/api/referrals/sync', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        return response.json();
-    } catch (error) {
-        console.error('[Service Worker] Sync referrals failed:', error);
-    }
-}
-
-// Message handling
+// =====================================================
+// MESSAGE - Gestisci comandi dal client
+// =====================================================
 self.addEventListener('message', (event) => {
-    console.log('[Service Worker] Message received:', event.data);
-    
-    if (event.data.action === 'skipWaiting') {
-        self.skipWaiting();
-    }
-    
-    if (event.data.action === 'clearCache') {
-        event.waitUntil(
-            caches.keys().then((names) => {
-                return Promise.all(names.map((name) => caches.delete(name)));
-            })
+  console.log('📨 [SW] Message received:', event.data);
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('⏩ [SW] Skip waiting on demand');
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    console.log('🗑️ [SW] Clearing all caches on demand');
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            console.log('🗑️ [SW] Deleting cache:', cacheName);
+            return caches.delete(cacheName);
+          })
         );
-    }
+      })
+      .then(() => {
+        console.log('✅ [SW] All caches cleared on demand');
+        // Notifica il client
+        event.ports[0].postMessage({ success: true });
+      })
+    );
+  }
+  
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: VERSION });
+  }
 });
+
+console.log('✅ CDM86 Service Worker ready - NO CACHE MODE ACTIVE');
