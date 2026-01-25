@@ -718,11 +718,22 @@ async function handleRegister(event) {
 
         showAlert('✅ Registrazione completata! Benvenuto su CDM86!', 'success');
 
-        // Switch to login tab
+        // Nascondi loading e mostra form
+        if (form && loading) {
+            loading.classList.remove('show');
+            form.style.display = 'block';
+        }
+
+        // Chiudi la modal e reindirizza
         setTimeout(() => {
-            switchLoginTab('login');
-            document.getElementById('loginEmail').value = email;
-        }, 2000);
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            
+            // Login automatico già fatto da signUp, vai a dashboard
+            window.location.href = '/public/promotions.html';
+        }, 1500);
     } catch (error) {
         console.error('Register error:', error);
         showAlert(error.message || 'Errore durante la registrazione');
