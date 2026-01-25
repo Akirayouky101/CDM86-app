@@ -569,7 +569,7 @@ async function handleRegister(event) {
                 referrerOrgId = orgData.id;
             } else {
                 // Check users table for normal referral codes
-                const { data: referrerData, error: referrerError } = await supabase
+                const { data: referrerData, error: referrerError} = await sb
                     .from('users')
                     .select('id, referral_code, first_name, last_name')
                     .eq('referral_code', referralCode)
@@ -583,7 +583,7 @@ async function handleRegister(event) {
         }
 
         // Registra l'utente su Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await sb.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -761,8 +761,11 @@ async function handleForgotPassword(event) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Invio in corso...';
         
+        // Assicurati che supabase sia pronto
+        const sb = await ensureSupabase();
+        
         // Invia email di recupero password
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/public/reset-password.html`
         });
         
@@ -1061,7 +1064,7 @@ const CompanyWizard = {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 const emailResponse = await fetch(
-                    `${supabase.supabaseUrl}/functions/v1/send-report-notification`,
+                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-report-notification',
                     {
                         method: 'POST',
                         headers: {
