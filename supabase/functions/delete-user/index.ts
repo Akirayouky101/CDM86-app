@@ -59,28 +59,61 @@ serve(async (req) => {
       throw new Error('Permessi insufficienti: solo admin può eliminare utenti')
     }
 
-    // Prima cancella i dati del database collegati all'utente
-    console.log(`🗑️ Cancellazione dati database per utente: ${userId}`)
+    // Verifica se è un utente normale o un'organizzazione
+    console.log(`🔍 Verifica tipo account: ${userId}`)
+    
+    const { data: userRecord } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single()
+    
+    const { data: orgRecord } = await supabaseAdmin
+      .from('organizations')
+      .select('id, auth_user_id')
+      .eq('auth_user_id', userId)
+      .single()
+
+    // Prima cancella i dati del database
+    console.log(`🗑️ Cancellazione dati database per: ${userId}`)
     
     try {
-      // Cancella dalla tabella users (questo cancellerà a cascata molte altre tabelle)
-      const { error: dbError } = await supabaseAdmin
-        .from('users')
-        .delete()
-        .eq('id', userId)
-      
-      if (dbError) {
-        console.error('⚠️ Errore cancellazione database:', dbError)
-        throw new Error('Database error deleting user')
+      if (userRecord) {
+        // È un utente normale - cancella dalla tabella users
+        console.log('👤 Cancellazione utente normale...')
+        const { error: dbError } = await supabaseAdmin
+          .from('users')
+          .delete()
+          .eq('id', userId)
+        
+        if (dbError) {
+          console.error('⚠️ Errore cancellazione users:', dbError)
+          throw new Error(`Database error: ${dbError.message}`)
+        }
+      } else if (orgRecord) {
+        // È un'organizzazione - cancella dalla tabella organizations
+        console.log('🏢 Cancellazione organizzazione...')
+        const { error: orgError } = await supabaseAdmin
+          .from('organizations')
+          .delete()
+          .eq('auth_user_id', userId)
+        
+        if (orgError) {
+          console.error('⚠️ Errore cancellazione organization:', orgError)
+          throw new Error(`Database error: ${orgError.message}`)
+        }
+      } else {
+        console.log('⚠️ Nessun record trovato nel database, procedo solo con auth')
       }
       
       console.log('✅ Dati database cancellati')
     } catch (dbErr) {
       console.error('❌ Errore database:', dbErr)
-      throw new Error('Database error deleting user')
+      throw dbErr
     }
 
     // Poi cancella l'utente dalla auth usando Service Role
+    console.log(`🔐 Cancellazione account auth: ${userId}`)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (deleteError) {
@@ -88,7 +121,7 @@ serve(async (req) => {
       throw deleteError
     }
 
-    console.log(`✅ Utente ${userId} eliminato con successo`)
+    console.log(`✅ Account ${userId} eliminato con successo`)
 
     return new Response(
       JSON.stringify({
