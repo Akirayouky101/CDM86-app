@@ -666,9 +666,12 @@
                             <input type="email" id="loginEmail" required placeholder="mario.rossi@test.com">
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="position: relative;">
                             <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" required placeholder="••••••••">
+                            <input type="password" id="loginPassword" required placeholder="••••••••" style="padding-right: 45px;">
+                            <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 12px; top: 38px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; color: #6b7280;">
+                                👁️
+                            </button>
                         </div>
 
                         <button type="submit" class="form-btn form-btn-primary">Accedi</button>
@@ -710,9 +713,12 @@
                             <input type="email" id="registerEmail" required placeholder="mario.rossi@test.com">
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="position: relative;">
                             <label for="registerPassword">Password *</label>
-                            <input type="password" id="registerPassword" required placeholder="••••••••" minlength="8">
+                            <input type="password" id="registerPassword" required placeholder="••••••••" minlength="8" style="padding-right: 45px;">
+                            <button type="button" onclick="togglePasswordVisibility('registerPassword', this)" style="position: absolute; right: 12px; top: 38px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; color: #6b7280;">
+                                👁️
+                            </button>
                         </div>
 
                         <div class="form-group">
@@ -2003,6 +2009,18 @@
                     
                     applyFiltersAndRender();
                 });
+            }
+        }
+        
+        // Toggle Password Visibility
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
             }
         }
     </script>
