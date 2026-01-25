@@ -5,7 +5,7 @@
 // Risolve problemi di dati stantii dopo modifiche DB
 // =====================================================
 
-const VERSION = 'v3-nocache-approval-loading-' + Date.now();
+const VERSION = 'v3-nocache-user-referral-requests-' + Date.now();
 
 console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 
