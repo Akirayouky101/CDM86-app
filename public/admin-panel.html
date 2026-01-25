@@ -3565,7 +3565,7 @@
                             // Ottieni dati organization e temp password
                             const { data: orgData } = await window.supabaseClient
                                 .from('organizations')
-                                .select('id, name, email, organization_type')
+                                .select('id, name, email, organization_type, auth_user_id')
                                 .eq('id', updatedReport.organization_id)
                                 .single();
                             
@@ -3575,7 +3575,8 @@
                                 .eq('organization_id', updatedReport.organization_id)
                                 .single();
                             
-                            if (orgData && tempPassData) {
+                            // Solo crea account se non esiste già (auth_user_id è null)
+                            if (orgData && tempPassData && !orgData.auth_user_id) {
                                 console.log('🔑 Creazione account Auth per organizzazione...');
                                 
                                 // Chiama Edge Function per creare account Auth
@@ -3605,6 +3606,8 @@
                                     const errorData = await createUserResponse.json();
                                     console.warn('⚠️ Errore creazione account Auth:', errorData);
                                 }
+                            } else if (orgData && orgData.auth_user_id) {
+                                console.log('ℹ️ Account Auth già esistente per questa organization');
                             }
                             
                             // Invia email di benvenuto
