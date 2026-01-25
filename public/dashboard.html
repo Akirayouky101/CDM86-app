@@ -1805,6 +1805,37 @@
             </button>
         </div>
     </div>
+
+    <!-- Company Notification Modal -->
+    <div id="companyNotificationModal" class="modal-success-overlay hidden">
+        <div class="modal-success-container" style="max-width: 500px;">
+            <div class="success-icon-wrapper" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <i class="fas fa-envelope success-icon"></i>
+            </div>
+            <h2 class="success-title">
+                Vuoi segnalare il sito all'azienda?
+            </h2>
+            <p class="success-message">
+                Possiamo inviare un'email all'azienda per informarla della tua segnalazione e invitarla a iscriversi a CDM86.
+            </p>
+            <div class="success-info-box" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid #3b82f6;">
+                <p class="success-info-text" style="color: #1e40af;">
+                    <i class="fas fa-info-circle" style="color: #3b82f6;"></i>
+                    L'azienda riceverà un'email con il tuo nome e il tuo codice referral.
+                </p>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button onclick="handleCompanyNotification(false)" class="btn-success-close" style="flex: 1; background: #6b7280;">
+                    <i class="fas fa-times icon-margin"></i>
+                    No, grazie
+                </button>
+                <button onclick="handleCompanyNotification(true)" class="btn-success-close" style="flex: 1;">
+                    <i class="fas fa-paper-plane icon-margin"></i>
+                    Sì, invia email
+                </button>
+            </div>
+        </div>
+    </div>
     
     <style>
         @keyframes successSlideIn {
@@ -2631,6 +2662,134 @@
             modal.classList.add('hidden');
         };
         
+        // Show company notification modal
+        window.showCompanyNotificationModal = function() {
+            const modal = document.getElementById('companyNotificationModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        };
+        
+        // Close company notification modal
+        window.closeCompanyNotificationModal = function() {
+            const modal = document.getElementById('companyNotificationModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        };
+        
+        // Handle company notification choice (YES/NO)
+        window.handleCompanyNotification = async function(sendEmail) {
+            closeCompanyNotificationModal();
+            
+            if (sendEmail) {
+                // Send notification email to company
+                try {
+                    const currentUser = window.getCurrentUser();
+                    const reportData = window.pendingCompanyReport;
+                    
+                    if (!currentUser || !reportData) {
+                        alert('❌ Errore: dati mancanti');
+                        return;
+                    }
+                    
+                    // Get user data for email
+                    const { data: userData } = await window.supabaseClient
+                        .from('users')
+                        .select('first_name, last_name, referral_code')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    if (!userData) {
+                        alert('❌ Errore: utente non trovato');
+                        return;
+                    }
+                    
+                    // Call Edge Function to send email
+                    const { data, error } = await window.supabaseClient.functions.invoke(
+                        'send-company-notification',
+                        {
+                            body: {
+                                companyEmail: reportData.companyEmail,
+                                companyName: reportData.companyName,
+                                referrerName: `${userData.first_name} ${userData.last_name}`,
+                                referralCode: userData.referral_code
+                            }
+                        }
+                    );
+                    
+                    if (error) {
+                        console.error('Error sending notification:', error);
+                        // Continue anyway - don't block the report submission
+                    } else {
+                        console.log('✅ Email notifica inviata!');
+                    }
+                } catch (error) {
+                    console.error('Error sending notification:', error);
+                    // Continue anyway
+                }
+            }
+            
+            // Now submit the report (whether email was sent or not)
+            await actuallySubmitReport();
+        };
+        
+        // Actually submit the report (extracted from submitReportCompany)
+        window.actuallySubmitReport = async function() {
+            const reportData = window.pendingCompanyReport;
+            const currentUser = window.getCurrentUser();
+            
+            if (!reportData || !currentUser) {
+                alert('❌ Errore: dati mancanti');
+                return;
+            }
+            
+            try {
+                // Get current user's referral code
+                const { data: userData } = await window.supabaseClient
+                    .from('users')
+                    .select('referral_code')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (!userData || !userData.referral_code) {
+                    alert('❌ Errore: codice referral non trovato');
+                    return;
+                }
+                
+                // Insert into organization_requests table
+                const { data, error } = await window.supabaseClient
+                    .from('organization_requests')
+                    .insert({
+                        organization_name: reportData.companyName,
+                        contact_email: reportData.companyEmail,
+                        contact_phone: reportData.companyPhone,
+                        contact_first_name: reportData.contactName.split(' ')[0] || reportData.contactName,
+                        contact_last_name: reportData.contactName.split(' ').slice(1).join(' ') || '',
+                        referred_by_id: currentUser.id,
+                        referred_by_code: userData.referral_code,
+                        admin_notes: reportData.notes || null,
+                        status: 'pending'
+                    });
+                
+                if (error) throw error;
+                
+                // Show success modal
+                showSuccessModal();
+                
+                // Clear pending data
+                window.pendingCompanyReport = null;
+                
+                // FORCE REFRESH IMMEDIATO
+                console.log('✅ Segnalazione inviata! Ricarico lista...');
+                if (window.loadOrganizationRequests) {
+                    await window.loadOrganizationRequests();
+                }
+                
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                alert('❌ Errore nell\'invio della segnalazione: ' + error.message);
+            }
+        };
+        
         // Open partner info modal (Modale Informativa)
         window.openPartnerInfoModal = function() {
             const modal = document.getElementById('partnerInfoModal');
@@ -2683,6 +2842,24 @@
             const companyPhone = document.getElementById('companyPhone').value;
             const contactName = document.getElementById('contactName').value;
             const notes = document.getElementById('companyNotes').value;
+            
+            // Check if company is NOT aware
+            const companyAware = document.querySelector('input[name="companyAware"]:checked')?.value;
+            if (companyAware === 'no') {
+                // Store form data for later submission
+                window.pendingCompanyReport = {
+                    companyName,
+                    companyEmail,
+                    companyPhone,
+                    contactName,
+                    notes
+                };
+                
+                // Show notification modal instead of submitting
+                closeReportCompanyModal();
+                showCompanyNotificationModal();
+                return;
+            }
             
             try {
                 // Get current user's referral code
