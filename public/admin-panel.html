@@ -2101,32 +2101,79 @@
 
     <!-- DELETE USER MODAL -->
     <div id="deleteUserModal" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-trash"></i> Elimina Utente
-                </h3>
-                <button class="modal-close" onclick="closeModal('deleteUserModal')">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle alert-icon"></i>
-                    <div>
-                        <strong>⛔ PERICOLO! Azione IRREVERSIBILE!</strong><br>
-                        Stai per eliminare: <strong id="deleteUserEmail"></strong><br><br>
-                        Verranno eliminati:
-                        <ul style="margin: 0.5rem 0 0 1.5rem; padding-left: 0;">
-                            <li>Account e credenziali</li>
-                            <li>Dati personali</li>
-                            <li>Punti e referral</li>
-                            <li>Storico attività</li>
-                        </ul>
-                    </div>
+        <div class="modal-dialog" style="max-width: 500px;">
+            <div class="modal-content" style="border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                
+                <!-- Header con gradiente rosso -->
+                <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px 20px; text-align: center; color: white;">
+                    <div style="font-size: 64px; margin-bottom: 15px;">🗑️</div>
+                    <h3 style="margin: 0; font-size: 24px; font-weight: 700; color: white;">Elimina Utente</h3>
+                    <button class="modal-close" onclick="closeModal('deleteUserModal')" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; cursor: pointer; transition: all 0.3s;">×</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('deleteUserModal')">Annulla</button>
-                <button class="btn btn-danger" onclick="confirmDeleteUser()">Elimina Definitivamente</button>
+
+                <!-- Body -->
+                <div style="padding: 30px 25px;">
+                    
+                    <!-- Warning box -->
+                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                        <div style="display: flex; align-items: flex-start; gap: 15px;">
+                            <div style="font-size: 28px; flex-shrink: 0;">⚠️</div>
+                            <div>
+                                <div style="font-weight: 700; color: #92400e; font-size: 16px; margin-bottom: 8px;">
+                                    PERICOLO! Azione IRREVERSIBILE!
+                                </div>
+                                <div style="color: #78350f; font-size: 14px; line-height: 1.6;">
+                                    Stai per eliminare:<br>
+                                    <strong id="deleteUserEmail" style="color: #92400e; font-size: 15px;"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista cosa verrà eliminato -->
+                    <div style="background: #fef2f2; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <div style="font-weight: 600; color: #991b1b; margin-bottom: 12px; font-size: 15px;">
+                            📋 Verranno eliminati:
+                        </div>
+                        <div style="display: grid; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 14px; color: #7f1d1d;">
+                                <span style="color: #dc2626;">🔐</span>
+                                <span>Account e credenziali</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 14px; color: #7f1d1d;">
+                                <span style="color: #dc2626;">👤</span>
+                                <span>Dati personali</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 14px; color: #7f1d1d;">
+                                <span style="color: #dc2626;">🎯</span>
+                                <span>Punti e referral</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 14px; color: #7f1d1d;">
+                                <span style="color: #dc2626;">📊</span>
+                                <span>Storico attività</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning finale -->
+                    <div style="text-align: center; padding: 15px; background: #fee2e2; border-radius: 10px; border: 2px dashed #dc2626;">
+                        <div style="font-size: 13px; color: #991b1b; font-weight: 600;">
+                            ⚠️ Questa azione non può essere annullata
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer con bottoni -->
+                <div style="padding: 0 25px 30px 25px; display: flex; gap: 12px;">
+                    <button onclick="closeModal('deleteUserModal')" style="flex: 1; padding: 14px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        Annulla
+                    </button>
+                    <button onclick="confirmDeleteUser()" style="flex: 1; padding: 14px; border: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);">
+                        🗑️ Elimina Definitivamente
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
