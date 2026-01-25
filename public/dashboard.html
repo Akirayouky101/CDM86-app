@@ -1053,7 +1053,9 @@
                 // Get who referred this user (chi ti ha invitato)
                 let referrerData = null;
                 let referrerError = null;
+                let referrerType = null; // 'user' o 'organization'
                 
+                // STEP 1: Controlla se invitato da un utente
                 if (user.referred_by_id) {
                     const result = await window.supabaseClient
                         .from('users')
@@ -1062,9 +1064,29 @@
                         .maybeSingle();
                     referrerData = result.data;
                     referrerError = result.error;
+                    referrerType = 'user';
                     
-                    console.log('🔍 Referrer lookup:', {
+                    console.log('🔍 Referrer (user) lookup:', {
                         referred_by_id: user.referred_by_id,
+                        found: !!referrerData,
+                        data: referrerData,
+                        error: referrerError
+                    });
+                }
+                
+                // STEP 2: Controlla se invitato da un'organizzazione
+                if (!referrerData && user.referred_by_organization_id) {
+                    const result = await window.supabaseClient
+                        .from('organizations')
+                        .select('id, name, organization_type, referral_code, referral_code_employees, referral_code_external')
+                        .eq('id', user.referred_by_organization_id)
+                        .maybeSingle();
+                    referrerData = result.data;
+                    referrerError = result.error;
+                    referrerType = 'organization';
+                    
+                    console.log('🔍 Referrer (organization) lookup:', {
+                        referred_by_organization_id: user.referred_by_organization_id,
                         found: !!referrerData,
                         data: referrerData,
                         error: referrerError
@@ -1074,13 +1096,32 @@
                 const referrerContent = document.getElementById('referrer-content');
                 if (referrerContent) {
                     if (!referrerError && referrerData) {
-                        referrerContent.innerHTML = `
-                            <div class="referrer-card">
-                                <div class="referrer-label">SEI STATO INVITATO DA:</div>
-                                <div class="referrer-name">${referrerData.first_name} ${referrerData.last_name}</div>
-                                <div class="referrer-code">Codice: ${referrerData.referral_code}</div>
-                            </div>
-                        `;
+                        if (referrerType === 'user') {
+                            // Invitato da un utente
+                            referrerContent.innerHTML = `
+                                <div class="referrer-card">
+                                    <div class="referrer-label">SEI STATO INVITATO DA:</div>
+                                    <div class="referrer-name">👤 ${referrerData.first_name} ${referrerData.last_name}</div>
+                                    <div class="referrer-code">Codice: ${referrerData.referral_code}</div>
+                                </div>
+                            `;
+                        } else if (referrerType === 'organization') {
+                            // Invitato da un'organizzazione
+                            const orgTypeLabel = referrerData.organization_type === 'company' ? 'Azienda' : 'Associazione';
+                            const orgIcon = referrerData.organization_type === 'company' ? '🏢' : '🤝';
+                            
+                            referrerContent.innerHTML = `
+                                <div class="referrer-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <div class="referrer-label" style="color: white;">SEI STATO INVITATO DA:</div>
+                                    <div class="referrer-name" style="color: white; font-size: 24px;">
+                                        ${orgIcon} ${referrerData.name}
+                                    </div>
+                                    <div class="referrer-code" style="color: rgba(255,255,255,0.9);">
+                                        ${orgTypeLabel}
+                                    </div>
+                                </div>
+                            `;
+                        }
                     } else {
                         referrerContent.innerHTML = `
                             <div class="original-user-card">
