@@ -1837,6 +1837,31 @@
         </div>
     </div>
     
+    <!-- Modale Successo Email Inviata -->
+    <div id="emailSentSuccessModal" class="modal-success-overlay hidden">
+        <div class="modal-success-container" style="max-width: 500px;">
+            <div class="success-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <i class="fas fa-check success-icon"></i>
+            </div>
+            <h2 class="success-title" style="color: #059669;">
+                Email di notifica inviata all'azienda!
+            </h2>
+            <p class="success-message">
+                L'azienda ha ricevuto un'email professionale con il tuo nome e il tuo codice referral per iscriversi a CDM86.
+            </p>
+            <div class="success-info-box" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-left: 4px solid #10b981;">
+                <p class="success-info-text" style="color: #065f46;">
+                    <i class="fas fa-envelope-open-text" style="color: #10b981;"></i>
+                    L'azienda può ora registrarsi utilizzando il tuo codice e iniziare a collaborare!
+                </p>
+            </div>
+            <button onclick="closeEmailSentSuccessModal()" class="btn-success-close" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <i class="fas fa-check icon-margin"></i>
+                Perfetto!
+            </button>
+        </div>
+    </div>
+    
     <style>
         @keyframes successSlideIn {
             from {
@@ -2686,6 +2711,22 @@
             modal.classList.add('hidden');
         };
         
+        // Show email sent success modal
+        window.showEmailSentSuccessModal = function() {
+            const modal = document.getElementById('emailSentSuccessModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        };
+        
+        // Close email sent success modal
+        window.closeEmailSentSuccessModal = function() {
+            const modal = document.getElementById('emailSentSuccessModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            // Close the entire wizard after closing success modal
+            window.CompanyWizard.close();
+        };
+        
         // Handle company notification choice (YES/NO)
         window.handleCompanyNotification = async function(sendEmail) {
             if (sendEmail) {
@@ -2738,10 +2779,9 @@
                             alert('❌ Errore nell\'invio dell\'email. Riprova.');
                         } else {
                             console.log('✅ Email inviata!', data);
-                            alert('✅ Email di notifica inviata all\'azienda!');
                             closeCompanyNotificationModal();
-                            // Close the entire wizard after sending email
-                            window.CompanyWizard.close();
+                            // Show success modal
+                            showEmailSentSuccessModal();
                         }
                     } else {
                         console.error('❌ User data not found');
