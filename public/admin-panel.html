@@ -1565,6 +1565,38 @@
                 <!-- Requests List -->
                 <div id="orgRequestsList"></div>
             </div>
+
+            <!-- User Referral Requests Card -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-plus"></i> Richieste Codice Referral Utenti (<span id="countUserRequests">0</span>)
+                    </h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadUserReferralRequests()">
+                        <i class="fas fa-sync-alt"></i> Aggiorna
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="search-box">
+                    <input type="text" id="userReqFilterSearch" placeholder="🔍 Cerca nome, email, telefono..." onkeyup="applyUserReqFilters()">
+                    <select id="userReqFilterStatus" onchange="applyUserReqFilters()" class="btn btn-secondary btn-sm">
+                        <option value="">Tutti gli stati</option>
+                        <option value="pending">⏳ Da Contattare</option>
+                        <option value="contacted">📞 Contattati</option>
+                        <option value="approved">✅ Approvati</option>
+                        <option value="rejected">❌ Rifiutati</option>
+                    </select>
+                </div>
+
+                <div id="userReqLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Caricamento richieste utenti...</p>
+                </div>
+
+                <!-- User Requests List -->
+                <div id="userRequestsList"></div>
+            </div>
         </div>
 
         <!-- CONTRACTS TAB -->
@@ -2761,6 +2793,7 @@
                 loadCompanyReports();
             } else if (tabName === 'requests') {
                 loadOrgRequests();
+                loadUserReferralRequests();
             } else if (tabName === 'contracts') {
                 loadContracts();
             } else if (tabName === 'points') {
@@ -4161,6 +4194,269 @@
         window.emailOrg = function(email, orgName) {
             const subject = encodeURIComponent(`CDM86 - ${orgName}`);
             const body = encodeURIComponent(`Gentile ${orgName},\n\n`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
+        // ========================================
+        // USER REFERRAL REQUESTS FUNCTIONS
+        // ========================================
+
+        let allUserRequests = [];
+
+        window.loadUserReferralRequests = async function() {
+            const loading = document.getElementById('userReqLoading');
+            const container = document.getElementById('userRequestsList');
+
+            try {
+                loading.style.display = 'block';
+                container.innerHTML = '';
+
+                const { data, error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allUserRequests = data || [];
+                displayUserRequests(allUserRequests);
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading user requests:', error);
+                loading.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Errore caricamento richieste utenti</p></div>';
+            }
+        };
+
+        function displayUserRequests(requests) {
+            const container = document.getElementById('userRequestsList');
+            document.getElementById('countUserRequests').textContent = requests.length;
+
+            if (!requests || requests.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fas fa-user-plus"></i></div><p>Nessuna richiesta utente trovata</p></div>';
+                return;
+            }
+
+            const statusColors = {
+                pending: 'var(--warning)',
+                contacted: 'var(--info)',
+                approved: 'var(--secondary)',
+                rejected: 'var(--danger)'
+            };
+            const statusLabels = {
+                pending: '⏳ Da Contattare',
+                contacted: '📞 Contattato',
+                approved: '✅ Approvato',
+                rejected: '❌ Rifiutato'
+            };
+
+            container.innerHTML = requests.map(request => {
+                return `
+                    <div class="card" style="border-left: 4px solid ${statusColors[request.status]}; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="margin: 0 0 0.5rem 0;">👤 ${request.first_name} ${request.last_name}</h3>
+                                <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">
+                                    📧 ${request.email}${request.phone ? ` • 📞 ${request.phone}` : ''}
+                                </p>
+                                <p style="margin: 0.5rem 0 0 0; color: var(--gray-500); font-size: 0.75rem;">
+                                    📅 ${new Date(request.created_at).toLocaleDateString('it-IT', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </p>
+                            </div>
+                            <span class="badge" style="background: ${statusColors[request.status]}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem;">
+                                ${statusLabels[request.status]}
+                            </span>
+                        </div>
+                        
+                        ${request.message ? `<div style="background: var(--gray-50); padding: 0.75rem; border-radius: 8px; margin: 0.75rem 0;"><strong>💬 Messaggio:</strong><br>${request.message}</div>` : ''}
+                        ${request.admin_notes ? `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 8px; margin: 0.75rem 0;"><strong>📝 Note Admin:</strong><br>${request.admin_notes}</div>` : ''}
+                        ${request.assigned_referral_code ? `<div style="background: var(--secondary); color: white; padding: 0.5rem 1rem; border-radius: 8px; margin: 0.75rem 0; display: inline-flex; align-items: center; gap: 0.5rem;"><i class="fas fa-ticket-alt"></i> Codice: <strong>${request.assigned_referral_code}</strong></div>` : ''}
+                        
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+                            ${request.status === 'pending' ? `
+                                <button class="btn btn-info btn-sm" onclick="markUserContacted('${request.id}')">
+                                    <i class="fas fa-phone"></i> Segna Contattato
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="approveUserRequest('${request.id}')">
+                                    <i class="fas fa-check"></i> Approva
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectUserRequest('${request.id}')">
+                                    <i class="fas fa-times"></i> Rifiuta
+                                </button>
+                            ` : ''}
+                            ${request.status === 'contacted' ? `
+                                <button class="btn btn-primary btn-sm" onclick="approveUserRequest('${request.id}')">
+                                    <i class="fas fa-check"></i> Approva
+                                </button>
+                            ` : ''}
+                            ${request.status === 'approved' && !request.assigned_referral_code ? `
+                                <button class="btn btn-primary btn-sm" onclick="assignReferralCode('${request.id}')">
+                                    <i class="fas fa-ticket-alt"></i> Assegna Codice
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="addUserReqNote('${request.id}')">
+                                <i class="fas fa-sticky-note"></i> Note
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="emailUser('${request.email}', '${request.first_name}')">
+                                <i class="fas fa-envelope"></i> Email
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.applyUserReqFilters = function() {
+            const status = document.getElementById('userReqFilterStatus').value;
+            const searchTerm = document.getElementById('userReqFilterSearch').value.toLowerCase();
+
+            let filtered = allUserRequests;
+
+            if (status) {
+                filtered = filtered.filter(r => r.status === status);
+            }
+
+            if (searchTerm) {
+                filtered = filtered.filter(r =>
+                    (r.first_name && r.first_name.toLowerCase().includes(searchTerm)) ||
+                    (r.last_name && r.last_name.toLowerCase().includes(searchTerm)) ||
+                    (r.email && r.email.toLowerCase().includes(searchTerm)) ||
+                    (r.phone && r.phone.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            displayUserRequests(filtered);
+        };
+
+        window.markUserContacted = async function(requestId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .update({ 
+                        status: 'contacted',
+                        contacted_at: new Date().toISOString()
+                    })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showNotification('Stato Aggiornato', 'Utente segnato come contattato', 'success');
+                loadUserReferralRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.approveUserRequest = async function(requestId) {
+            if (!confirm('Approvare questa richiesta? L\'utente riceverà un codice referral.')) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .update({ 
+                        status: 'approved',
+                        resolved_at: new Date().toISOString()
+                    })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showNotification('Richiesta Approvata', 'Ora puoi assegnare un codice referral', 'success');
+                loadUserReferralRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.rejectUserRequest = async function(requestId) {
+            const reason = prompt('Motivo del rifiuto (opzionale):');
+            if (reason === null) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .update({ 
+                        status: 'rejected',
+                        admin_notes: reason || 'Rifiutata',
+                        resolved_at: new Date().toISOString()
+                    })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showNotification('Richiesta Rifiutata', 'L\'utente è stato informato', 'info');
+                loadUserReferralRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.assignReferralCode = async function(requestId) {
+            const code = prompt('Inserisci il codice referral da assegnare:');
+            if (!code) return;
+
+            try {
+                // Verifica che il codice esista
+                const { data: userWithCode } = await window.supabaseClient
+                    .from('users')
+                    .select('id, referral_code')
+                    .eq('referral_code', code.toUpperCase())
+                    .maybeSingle();
+
+                if (!userWithCode) {
+                    alert('❌ Codice referral non valido!');
+                    return;
+                }
+
+                const { error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .update({ 
+                        assigned_referral_code: code.toUpperCase(),
+                        assigned_by: window.currentUser.id
+                    })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showNotification('Codice Assegnato', 'Il codice referral è stato assegnato all\'utente', 'success');
+                loadUserReferralRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.addUserReqNote = async function(requestId) {
+            const note = prompt('Inserisci una nota:');
+            if (note === null) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('user_referral_requests')
+                    .update({ admin_notes: note })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                showNotification('Nota Salvata', 'La nota è stata aggiunta alla richiesta', 'success');
+                loadUserReferralRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+
+        window.emailUser = function(email, firstName) {
+            const subject = encodeURIComponent(`CDM86 - Richiesta Codice Referral`);
+            const body = encodeURIComponent(`Ciao ${firstName},\n\n`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
