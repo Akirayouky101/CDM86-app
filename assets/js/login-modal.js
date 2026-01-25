@@ -623,13 +623,19 @@ async function handleRegister(event) {
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             try {
+                // Usa il token della sessione utente appena creata
+                const accessToken = authData.session?.access_token;
+                if (!accessToken) {
+                    throw new Error('No access token available');
+                }
+
                 const response = await fetch(
                     'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/set-user-referral',
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${window.supabaseAnonKey}`
+                            'Authorization': `Bearer ${accessToken}`
                         },
                         body: JSON.stringify({
                             userId: authData.user.id,

@@ -12,17 +12,56 @@ serve(async (req) => {
   }
 
   try {
+    // Verifica JWT del utente
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Missing authorization header')
+    }
+
+    // Crea client per verificare il JWT
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader }
+        }
+      }
+    )
+
+    // Verifica che il token sia valido
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    
+    if (authError || !user) {
+      console.error('❌ Auth error:', authError)
+      return new Response(
+        JSON.stringify({ 
+          code: 401,
+          message: 'Invalid JWT' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401 
+        }
+      )
+    }
+
     const { userId, referrerId, organizationId } = await req.json()
 
     if (!userId) {
       throw new Error('userId è richiesto')
     }
 
+    // Verifica che l'utente stia aggiornando il proprio profilo
+    if (userId !== user.id) {
+      throw new Error('Non puoi aggiornare il profilo di un altro utente')
+    }
+
     console.log('🔄 Aggiornamento referral per user:', userId)
     console.log('👤 Referrer ID:', referrerId)
     console.log('🏢 Organization ID:', organizationId)
 
-    // Crea client Supabase con Service Role Key
+    // Crea client Supabase con Service Role Key per bypassare RLS
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
