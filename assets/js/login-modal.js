@@ -553,6 +553,7 @@ async function handleRegister(event) {
         // Valida referral code PRIMA della registrazione
         let referrer = null;
         let referrerOrgId = null;
+        let referrerOrgName = null; // 👈 AGGIUNTO per salvare il nome
 
         if (referralCode) {
             console.log('🔍 Validazione codice referral:', referralCode);
@@ -590,6 +591,7 @@ async function handleRegister(event) {
                 if (orgData) {
                     console.log('✅ Trovato in organizations:', orgData);
                     referrerOrgId = orgData.id;
+                    referrerOrgName = orgData.name; // 👈 SALVA IL NOME
                 } else {
                     console.error('❌ Codice non trovato in nessuna tabella');
                     throw new Error('CODICE REFERRAL NON VALIDO!');
@@ -692,7 +694,7 @@ async function handleRegister(event) {
         try {
             const referredByName = referrer 
                 ? `${referrer.first_name} ${referrer.last_name}` 
-                : (referrerOrgId ? organizationData[0]?.name : null);
+                : (referrerOrgId ? referrerOrgName : null); // 👈 USATO referrerOrgName
 
             await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-welcome-email', {
                 method: 'POST',
