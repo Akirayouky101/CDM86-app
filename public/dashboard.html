@@ -1680,7 +1680,7 @@
                         <label>L'azienda è a conoscenza di questa segnalazione? *</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="companyAware" value="si" required onchange="handleCompanyAwareChange('si')">
+                                <input type="radio" name="companyAware" value="si" required>
                                 <span>✅ Sì</span>
                             </label>
                             <label class="radio-label">
@@ -2665,15 +2665,11 @@
         // Handle company aware radio change (IMMEDIATE modal on NO selection)
         window.handleCompanyAwareChange = function(value) {
             if (value === 'no') {
-                // Store that user wants to be asked about notification
-                window.companyNotificationRequested = true;
-                // Show modal immediately
+                // Show modal immediately when NO is selected
                 showCompanyNotificationModal();
-            } else {
-                // If user selected YES, clear the flag
-                window.companyNotificationRequested = false;
-                window.sendCompanyNotification = false;
             }
+            // If YES is selected, do nothing - flag stays undefined
+            // This prevents unwanted resets on initial form load
         };
         
         // Show company notification modal
