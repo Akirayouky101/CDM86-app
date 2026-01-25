@@ -5,7 +5,7 @@
 // Risolve problemi di dati stantii dopo modifiche DB
 // =====================================================
 
-const VERSION = 'v2-nocache-' + Date.now();
+const VERSION = 'v3-nocache-delete-user-' + Date.now();
 
 console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 
@@ -40,6 +40,14 @@ self.addEventListener('activate', (event) => {
     })
     .then(() => {
       console.log('✅ [SW] Claimed all clients');
+      // Ricarica tutti i client per usare la nuova versione
+      return self.clients.matchAll({ type: 'window' });
+    })
+    .then((clients) => {
+      clients.forEach((client) => {
+        console.log('🔄 [SW] Reloading client:', client.url);
+        client.navigate(client.url);
+      });
     })
   );
 });
