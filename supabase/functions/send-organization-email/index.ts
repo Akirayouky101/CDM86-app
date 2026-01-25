@@ -163,7 +163,9 @@ serve(async (req) => {
       </html>
     `
 
-    // Invia email tramite Resend
+    // Invia email tramite Resend con dominio verificato cdm86.com
+    console.log(`📧 Invio email a: ${orgData.email}`);
+    
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -171,9 +173,9 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`
       },
       body: JSON.stringify({
-        from: 'CDM86 <onboarding@resend.dev>',
+        from: 'CDM86 <noreply@cdm86.com>',
         to: [orgData.email],
-        subject: '🎉 Benvenuto su CDM86 - Credenziali di accesso',
+        subject: `🎉 Benvenuto su CDM86 - ${orgData.name}`,
         html: emailHtml
       })
     })
