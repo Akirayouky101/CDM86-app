@@ -84,10 +84,10 @@ serve(async (req) => {
       throw authError
     }
 
-    // Aggiorna la tabella organizations con l'user_id
+    // Aggiorna la tabella organizations con l'auth_user_id
     const { error: updateError } = await supabaseAdmin
       .from('organizations')
-      .update({ user_id: authData.user.id })
+      .update({ auth_user_id: authData.user.id })
       .eq('id', organizationId)
 
     if (updateError) {

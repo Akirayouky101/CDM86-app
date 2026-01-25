@@ -1084,6 +1084,11 @@ const CompanyWizard = {
                     `;
                 }
                 if (step2) step2.style.display = 'block';
+                
+                // Reload dashboard data to show new report
+                if (typeof loadDashboardData === 'function') {
+                    loadDashboardData();
+                }
             }, 2500);
             
         } catch (error) {
