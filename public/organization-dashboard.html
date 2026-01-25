@@ -1093,20 +1093,17 @@
         
         // Gestione primo accesso
         function checkFirstAccess(orgId) {
+            // Mostra sempre il pulsante "Torna al Sito"
+            document.getElementById('back-to-site-btn').style.display = 'inline-block';
+            
             const storageKey = `org_first_access_${orgId}`;
             const hasVisited = localStorage.getItem(storageKey);
             
             if (!hasVisited) {
-                // Primo accesso - nascondi pulsante "Torna al Sito"
                 console.log('🎉 Primo accesso per questa organizzazione');
-                document.getElementById('back-to-site-btn').style.display = 'none';
-                
-                // Segna come visitato
                 localStorage.setItem(storageKey, 'true');
             } else {
-                // Accesso successivo - mostra pulsante "Torna al Sito"
-                console.log('👋 Bentornato! Mostrando pulsante Torna al Sito');
-                document.getElementById('back-to-site-btn').style.display = 'inline-block';
+                console.log('👋 Bentornato!');
             }
         }
         
