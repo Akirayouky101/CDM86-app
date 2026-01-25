@@ -555,38 +555,45 @@ async function handleRegister(event) {
         let referrerOrgId = null;
 
         if (referralCode) {
-            // Check if it's an organization code (ORG####)
-            if (referralCode.startsWith('ORG')) {
+            console.log('🔍 Validazione codice referral:', referralCode);
+            
+            // STEP 1: Cerca in users
+            const { data: userData, error: userError } = await sb
+                .from('users')
+                .select('id, referral_code, first_name, last_name')
+                .eq('referral_code', referralCode)
+                .maybeSingle();
+
+            if (userError) {
+                console.error('❌ Errore query users:', userError);
+                throw new Error('ERRORE DATABASE: ' + userError.message);
+            }
+
+            if (userData) {
+                console.log('✅ Trovato in users:', userData);
+                referrer = userData;
+            } else {
+                // STEP 2: Non trovato in users, cerca in organizations
+                console.log('🔍 Non trovato in users, cerco in organizations...');
+                
                 const { data: orgData, error: orgError } = await sb
                     .from('organizations')
-                    .select('id, referral_code, name')
-                    .eq('referral_code', referralCode)
+                    .select('id, name, referral_code, referral_code_employees, referral_code_external')
+                    .or(`referral_code.eq.${referralCode},referral_code_employees.eq.${referralCode},referral_code_external.eq.${referralCode}`)
                     .maybeSingle();
 
-                if (orgError || !orgData) {
-                    throw new Error('CODICE ORGANIZZAZIONE NON VALIDO!');
+                if (orgError) {
+                    console.error('❌ Errore query organizations:', orgError);
+                    throw new Error('ERRORE DATABASE: ' + orgError.message);
                 }
-                referrerOrgId = orgData.id;
-            } else {
-                // Check users table for normal referral codes
-                console.log('🔍 Cercando codice referral utente:', referralCode);
-                const { data: referrerData, error: referrerError} = await sb
-                    .from('users')
-                    .select('id, referral_code, first_name, last_name')
-                    .eq('referral_code', referralCode)
-                    .maybeSingle();
 
-                console.log('📊 Risultato query users:', { referrerData, referrerError });
-
-                if (referrerError) {
-                    throw new Error('ERRORE DATABASE: ' + referrerError.message);
-                }
-                
-                if (!referrerData) {
+                if (orgData) {
+                    console.log('✅ Trovato in organizations:', orgData);
+                    referrerOrgId = orgData.id;
+                } else {
+                    console.error('❌ Codice non trovato in nessuna tabella');
                     throw new Error('CODICE REFERRAL NON VALIDO!');
                 }
-                
-                referrer = referrerData;
             }
         }
 
