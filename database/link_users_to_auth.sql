@@ -43,21 +43,15 @@ BEGIN
     INSERT INTO public.users (
         auth_user_id,
         email,
-        password_hash,
         first_name,
         last_name,
-        referral_code,
-        is_verified,
-        is_active
+        referral_code
     ) VALUES (
         NEW.id,
         NEW.email,
-        'managed_by_supabase_auth', -- Password gestita da Supabase Auth
         COALESCE(NEW.raw_user_meta_data->>'first_name', SPLIT_PART(NEW.email, '@', 1)),
         COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
-        v_referral_code,
-        NEW.email_confirmed_at IS NOT NULL,
-        true
+        v_referral_code
     )
     ON CONFLICT (auth_user_id) DO NOTHING; -- Evita duplicati
     
@@ -83,22 +77,16 @@ CREATE TRIGGER on_auth_user_created
 INSERT INTO public.users (
     auth_user_id,
     email,
-    password_hash,
     first_name,
     last_name,
-    referral_code,
-    is_verified,
-    is_active
+    referral_code
 )
 SELECT 
     au.id,
     au.email,
-    'managed_by_supabase_auth',
     COALESCE(au.raw_user_meta_data->>'first_name', SPLIT_PART(au.email, '@', 1)),
     COALESCE(au.raw_user_meta_data->>'last_name', ''),
-    generate_unique_referral_code(),
-    au.email_confirmed_at IS NOT NULL,
-    true
+    generate_unique_referral_code()
 FROM auth.users au
 WHERE NOT EXISTS (
     SELECT 1 FROM public.users pu WHERE pu.auth_user_id = au.id
