@@ -59,7 +59,28 @@ serve(async (req) => {
       throw new Error('Permessi insufficienti: solo admin può eliminare utenti')
     }
 
-    // Cancella l'utente dalla auth usando Service Role
+    // Prima cancella i dati del database collegati all'utente
+    console.log(`🗑️ Cancellazione dati database per utente: ${userId}`)
+    
+    try {
+      // Cancella dalla tabella users (questo cancellerà a cascata molte altre tabelle)
+      const { error: dbError } = await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', userId)
+      
+      if (dbError) {
+        console.error('⚠️ Errore cancellazione database:', dbError)
+        throw new Error('Database error deleting user')
+      }
+      
+      console.log('✅ Dati database cancellati')
+    } catch (dbErr) {
+      console.error('❌ Errore database:', dbErr)
+      throw new Error('Database error deleting user')
+    }
+
+    // Poi cancella l'utente dalla auth usando Service Role
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (deleteError) {
