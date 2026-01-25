@@ -21,9 +21,18 @@ serve(async (req) => {
   try {
     const { companyEmail, companyName, referrerName, referralCode } = await req.json()
 
+    console.log('📧 Received notification request:', { companyEmail, companyName, referrerName, referralCode });
+
     if (!companyEmail || !companyName || !referrerName || !referralCode) {
       throw new Error('Missing required parameters')
     }
+
+    if (!RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY is not set!');
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
+    console.log('✅ RESEND_API_KEY is configured');
 
     // Genera URL registrazione con codice referral
     const registrationUrl = `https://cdm86-new.vercel.app/register.html?ref=${referralCode}`
@@ -233,6 +242,8 @@ serve(async (req) => {
     `
 
     // Invia email con Resend
+    console.log('📤 Sending email to:', companyEmail);
+    
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -248,10 +259,15 @@ serve(async (req) => {
     })
 
     const resendData = await resendResponse.json()
+    
+    console.log('📨 Resend response:', resendData);
 
     if (!resendResponse.ok) {
+      console.error('❌ Resend API error:', resendData);
       throw new Error(`Resend API error: ${JSON.stringify(resendData)}`)
     }
+
+    console.log('✅ Email sent successfully! ID:', resendData.id);
 
     return new Response(
       JSON.stringify({ 

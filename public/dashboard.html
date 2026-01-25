@@ -1680,11 +1680,11 @@
                         <label>L'azienda è a conoscenza di questa segnalazione? *</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="companyAware" value="si" required>
+                                <input type="radio" name="companyAware" value="si" required onchange="handleCompanyAwareChange('si')">
                                 <span>✅ Sì</span>
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="companyAware" value="no" required>
+                                <input type="radio" name="companyAware" value="no" required onchange="handleCompanyAwareChange('no')">
                                 <span>❌ No</span>
                             </label>
                         </div>
@@ -2662,6 +2662,20 @@
             modal.classList.add('hidden');
         };
         
+        // Handle company aware radio change (IMMEDIATE modal on NO selection)
+        window.handleCompanyAwareChange = function(value) {
+            if (value === 'no') {
+                // Store that user wants to be asked about notification
+                window.companyNotificationRequested = true;
+                // Show modal immediately
+                showCompanyNotificationModal();
+            } else {
+                // If user selected YES, clear the flag
+                window.companyNotificationRequested = false;
+                window.sendCompanyNotification = false;
+            }
+        };
+        
         // Show company notification modal
         window.showCompanyNotificationModal = function() {
             const modal = document.getElementById('companyNotificationModal');
@@ -2677,118 +2691,15 @@
         };
         
         // Handle company notification choice (YES/NO)
-        window.handleCompanyNotification = async function(sendEmail) {
+        window.handleCompanyNotification = function(sendEmail) {
             closeCompanyNotificationModal();
             
-            if (sendEmail) {
-                // Send notification email to company
-                try {
-                    const currentUser = window.getCurrentUser();
-                    const reportData = window.pendingCompanyReport;
-                    
-                    if (!currentUser || !reportData) {
-                        alert('❌ Errore: dati mancanti');
-                        return;
-                    }
-                    
-                    // Get user data for email
-                    const { data: userData } = await window.supabaseClient
-                        .from('users')
-                        .select('first_name, last_name, referral_code')
-                        .eq('id', currentUser.id)
-                        .single();
-                    
-                    if (!userData) {
-                        alert('❌ Errore: utente non trovato');
-                        return;
-                    }
-                    
-                    // Call Edge Function to send email
-                    const { data, error } = await window.supabaseClient.functions.invoke(
-                        'send-company-notification',
-                        {
-                            body: {
-                                companyEmail: reportData.companyEmail,
-                                companyName: reportData.companyName,
-                                referrerName: `${userData.first_name} ${userData.last_name}`,
-                                referralCode: userData.referral_code
-                            }
-                        }
-                    );
-                    
-                    if (error) {
-                        console.error('Error sending notification:', error);
-                        // Continue anyway - don't block the report submission
-                    } else {
-                        console.log('✅ Email notifica inviata!');
-                    }
-                } catch (error) {
-                    console.error('Error sending notification:', error);
-                    // Continue anyway
-                }
-            }
+            // Save user's choice
+            window.sendCompanyNotification = sendEmail;
             
-            // Now submit the report (whether email was sent or not)
-            await actuallySubmitReport();
+            console.log(sendEmail ? '✅ Utente ha scelto di inviare email' : '❌ Utente non vuole inviare email');
         };
         
-        // Actually submit the report (extracted from submitReportCompany)
-        window.actuallySubmitReport = async function() {
-            const reportData = window.pendingCompanyReport;
-            const currentUser = window.getCurrentUser();
-            
-            if (!reportData || !currentUser) {
-                alert('❌ Errore: dati mancanti');
-                return;
-            }
-            
-            try {
-                // Get current user's referral code
-                const { data: userData } = await window.supabaseClient
-                    .from('users')
-                    .select('referral_code')
-                    .eq('id', currentUser.id)
-                    .single();
-                
-                if (!userData || !userData.referral_code) {
-                    alert('❌ Errore: codice referral non trovato');
-                    return;
-                }
-                
-                // Insert into organization_requests table
-                const { data, error } = await window.supabaseClient
-                    .from('organization_requests')
-                    .insert({
-                        organization_name: reportData.companyName,
-                        contact_email: reportData.companyEmail,
-                        contact_phone: reportData.companyPhone,
-                        contact_first_name: reportData.contactName.split(' ')[0] || reportData.contactName,
-                        contact_last_name: reportData.contactName.split(' ').slice(1).join(' ') || '',
-                        referred_by_id: currentUser.id,
-                        referred_by_code: userData.referral_code,
-                        admin_notes: reportData.notes || null,
-                        status: 'pending'
-                    });
-                
-                if (error) throw error;
-                
-                // Show success modal
-                showSuccessModal();
-                
-                // Clear pending data
-                window.pendingCompanyReport = null;
-                
-                // FORCE REFRESH IMMEDIATO
-                console.log('✅ Segnalazione inviata! Ricarico lista...');
-                if (window.loadOrganizationRequests) {
-                    await window.loadOrganizationRequests();
-                }
-                
-            } catch (error) {
-                console.error('Error submitting report:', error);
-                alert('❌ Errore nell\'invio della segnalazione: ' + error.message);
-            }
-        };
         
         // Open partner info modal (Modale Informativa)
         window.openPartnerInfoModal = function() {
@@ -2843,25 +2754,40 @@
             const contactName = document.getElementById('contactName').value;
             const notes = document.getElementById('companyNotes').value;
             
-            // Check if company is NOT aware
-            const companyAware = document.querySelector('input[name="companyAware"]:checked')?.value;
-            if (companyAware === 'no') {
-                // Store form data for later submission
-                window.pendingCompanyReport = {
-                    companyName,
-                    companyEmail,
-                    companyPhone,
-                    contactName,
-                    notes
-                };
-                
-                // Show notification modal instead of submitting
-                closeReportCompanyModal();
-                showCompanyNotificationModal();
-                return;
-            }
-            
             try {
+                // If user chose to send notification email (from modal), send it now
+                if (window.sendCompanyNotification === true) {
+                    console.log('📧 Invio email notifica azienda...');
+                    
+                    // Get user data for email
+                    const { data: userData } = await window.supabaseClient
+                        .from('users')
+                        .select('first_name, last_name, referral_code')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    if (userData) {
+                        // Call Edge Function to send email
+                        const { data, error } = await window.supabaseClient.functions.invoke(
+                            'send-company-notification',
+                            {
+                                body: {
+                                    companyEmail: companyEmail,
+                                    companyName: companyName,
+                                    referrerName: `${userData.first_name} ${userData.last_name}`,
+                                    referralCode: userData.referral_code
+                                }
+                            }
+                        );
+                        
+                        if (error) {
+                            console.error('❌ Error sending notification:', error);
+                        } else {
+                            console.log('✅ Email notifica inviata!', data);
+                        }
+                    }
+                }
+                
                 // Get current user's referral code
                 const { data: userData } = await window.supabaseClient
                     .from('users')
@@ -2890,6 +2816,9 @@
                     });
                 
                 if (error) throw error;
+                
+                // Reset notification flag
+                window.sendCompanyNotification = false;
                 
                 // Close report modal and show success modal
                 closeReportCompanyModal();
