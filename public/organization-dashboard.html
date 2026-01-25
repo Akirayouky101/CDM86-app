@@ -541,23 +541,25 @@
                 console.log('✅ Organization loaded:', orgData.name);
                 currentOrg = orgData;
                 
-                // Load employees
-                const { data: employees, error: empError } = await supabaseClient
+                // Load utenti invitati (referred by organization)
+                const { data: referredUsers, error: refError } = await supabaseClient
                     .from('users')
                     .select('*')
-                    .eq('organization_id', orgData.id)
+                    .eq('referred_by_organization_id', orgData.id)
                     .order('created_at', { ascending: false });
                 
-                if (empError) {
-                    console.error('Error loading employees:', empError);
+                if (refError) {
+                    console.error('Error loading referred users:', refError);
                 }
+                
+                console.log('📊 Referred users count:', referredUsers?.length || 0);
                 
                 // Display data
                 displayOrganizationInfo(orgData);
-                displayStats(orgData, employees || []);
+                displayStats(orgData, referredUsers || []);
                 displayReferralCodes(orgData.referral_code_employees, orgData.referral_code_external);
                 generateQRCodes(orgData.referral_code_employees, orgData.referral_code_external);
-                displayEmployees(employees || []);
+                displayEmployees(referredUsers || []);
                 loadReferredUsers(orgData.id);
                 loadCommissions(orgData.id); // 👈 NUOVO: Carica commissioni
                 loadContentStatus(); // Load unified content status (page + card)
