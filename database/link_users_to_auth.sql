@@ -73,7 +73,18 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_new_user();
 
--- 6. Migra utenti auth esistenti a public.users (se non ci sono già)
+-- 6. Collega utenti esistenti in public.users al loro auth_user_id (UPDATE)
+UPDATE public.users pu
+SET auth_user_id = au.id
+FROM auth.users au
+WHERE pu.email = au.email 
+AND pu.auth_user_id IS NULL
+AND au.id NOT IN (
+    -- Escludi organizzazioni
+    SELECT auth_user_id FROM organizations WHERE auth_user_id IS NOT NULL
+);
+
+-- 7. Migra NUOVI utenti auth a public.users (INSERT solo per utenti non esistenti)
 INSERT INTO public.users (
     auth_user_id,
     email,
@@ -89,7 +100,12 @@ SELECT
     generate_unique_referral_code()
 FROM auth.users au
 WHERE NOT EXISTS (
+    -- Non inserire se esiste già con stesso auth_user_id
     SELECT 1 FROM public.users pu WHERE pu.auth_user_id = au.id
+)
+AND NOT EXISTS (
+    -- Non inserire se esiste già con stessa email
+    SELECT 1 FROM public.users pu WHERE pu.email = au.email
 )
 AND au.id NOT IN (
     -- Escludi organizzazioni (hanno già auth_user_id in organizations table)
@@ -107,9 +123,13 @@ SELECT
     pu.id as user_id,
     pu.email as user_email,
     pu.referral_code,
-    pu.points
+    pu.points,
+    CASE 
+        WHEN pu.auth_user_id IS NOT NULL THEN '✅ Collegato'
+        ELSE '❌ Non collegato'
+    END as status
 FROM auth.users au
-LEFT JOIN public.users pu ON au.auth_user_id = pu.id
+LEFT JOIN public.users pu ON pu.auth_user_id = au.id
 ORDER BY au.created_at DESC
 LIMIT 10;
 
