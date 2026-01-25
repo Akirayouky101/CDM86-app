@@ -906,62 +906,31 @@
             try {
                 console.log('🚀 Starting loadDashboardData...');
                 
-                // REPLACED - SEE BELOW
-                // Check if organization or user
-                let isOrganization = false;
-                let user = null;
+                // Get user data
+                const { data: userData, error: userError } = await window.supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
                 
-                const { data: orgData } = await window.supabaseClient
-                    .from("organizations")
-                    .select("*")
-                    .eq("auth_user_id", currentUser.id)
-                    .maybeSingle();
+                if (userError) throw userError;
                 
-                if (orgData) {
-                    isOrganization = true;
-                    user = {
-                        id: orgData.id,
-                        first_name: orgData.name,
-                        last_name: "",
-                        email: orgData.email,
-                        referral_code: orgData.referral_code,
-                        points: orgData.points || 0,
-                        referred_by_id: null,
-                        referred_by_organization_id: null
-                    };
-                } else {
-                    const { data: userData, error: userError } = await window.supabaseClient
-                        .from("users")
-                        .select("*")
-                        .eq("id", currentUser.id)
-                        .single();
-                    if (userError) throw userError;
-                    user = Array.isArray(userData) ? userData[0] : userData;
-                }
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
-                // REPLACED - SEE BELOW
+                console.log('✅ User data loaded (raw):', userData);
+                console.log('� Type of userData:', typeof userData, 'Is array:', Array.isArray(userData));
+                
+                // Fix: se userData è un array, prendi il primo elemento
+                const user = Array.isArray(userData) ? userData[0] : userData;
+                
+                console.log('✅ User object:', user);
+                console.log('�📋 Referral code:', user.referral_code);
+                
+                // Update UI with correct IDs
+                const userEmail = document.getElementById('user-email');
+                if (userEmail) userEmail.textContent = currentUser.email;
+                
+                const userNameNav = document.getElementById('user-name-nav');
+                if (userNameNav) userNameNav.textContent = user.first_name || 'User';
+                
                 // Create dropdown menu for user button
                 const userBtn = document.getElementById('user-btn');
                 if (userBtn) {
