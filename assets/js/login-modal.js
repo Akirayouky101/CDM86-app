@@ -623,18 +623,21 @@ async function handleRegister(event) {
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             try {
-                const apiUrl = window.CDM86_CONFIG?.api?.baseUrl || '/api';
-                const response = await fetch(`${apiUrl}/set-referral`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: authData.user.id,
-                        referredById: referrer?.id || null,
-                        organizationId: referrerOrgId || null
-                    })
-                });
+                const response = await fetch(
+                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/set-user-referral',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${window.supabaseAnonKey}`
+                        },
+                        body: JSON.stringify({
+                            userId: authData.user.id,
+                            referrerId: referrer?.id || null,
+                            organizationId: referrerOrgId || null
+                        })
+                    }
+                );
 
                 const result = await response.json();
 
@@ -646,9 +649,9 @@ async function handleRegister(event) {
                 console.log('✅ Referral impostato via API:', result.data);
                 
                 // Verifica finale
-                const { data: verifyUser, error: verifyError } = await supabase
+                const { data: verifyUser, error: verifyError } = await sb
                     .from('users')
-                    .select('id, referred_by_id, organization_id')
+                    .select('id, referred_by_id, referred_by_organization_id')
                     .eq('id', authData.user.id)
                     .single();
                 
@@ -660,6 +663,11 @@ async function handleRegister(event) {
                         console.error('⚠️ PROBLEMA: referred_by_id è ancora NULL dopo UPDATE API!');
                     } else if (referrer && verifyUser.referred_by_id) {
                         console.log('🎉 SUCCESS! referred_by_id impostato correttamente!');
+                    }
+                    if (referrerOrgId && !verifyUser.referred_by_organization_id) {
+                        console.error('⚠️ PROBLEMA: referred_by_organization_id è ancora NULL dopo UPDATE API!');
+                    } else if (referrerOrgId && verifyUser.referred_by_organization_id) {
+                        console.log('🎉 SUCCESS! referred_by_organization_id impostato correttamente!');
                     }
                 }
 
