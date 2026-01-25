@@ -662,16 +662,19 @@ async function handleRegister(event) {
 
                 console.log('✅ Referral impostato via API:', result.data);
                 
-                // Verifica finale
+                // Aspetta un po' prima di verificare (il trigger potrebbe essere lento)
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Verifica finale (usa maybeSingle per evitare errori se non esiste ancora)
                 const { data: verifyUser, error: verifyError } = await sb
                     .from('users')
                     .select('id, referred_by_id, referred_by_organization_id')
                     .eq('id', authData.user.id)
-                    .single();
+                    .maybeSingle();
                 
                 if (verifyError) {
                     console.error('❌ ERRORE verifica utente:', verifyError);
-                } else {
+                } else if (verifyUser) {
                     console.log('🔍 VERIFICA utente dopo update:', verifyUser);
                     if (referrer && !verifyUser.referred_by_id) {
                         console.error('⚠️ PROBLEMA: referred_by_id è ancora NULL dopo UPDATE API!');
