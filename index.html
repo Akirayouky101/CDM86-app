@@ -568,7 +568,12 @@
 
                         <div class="form-group">
                             <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" required placeholder="••••••••">
+                            <div style="position: relative;">
+                                <input type="password" id="loginPassword" required placeholder="••••••••">
+                                <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; color: #6b7280;">
+                                    👁️
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" class="form-btn form-btn-primary">Accedi</button>
@@ -612,7 +617,12 @@
 
                         <div class="form-group">
                             <label for="registerPassword">Password *</label>
-                            <input type="password" id="registerPassword" required placeholder="••••••••" minlength="8">
+                            <div style="position: relative;">
+                                <input type="password" id="registerPassword" required placeholder="••••••••" minlength="8">
+                                <button type="button" onclick="togglePasswordVisibility('registerPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; color: #6b7280;">
+                                    👁️
+                                </button>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -1088,6 +1098,18 @@
         })();
     </script>
     <script>
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈'; // Occhio chiuso
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️'; // Occhio aperto
+            }
+        }
+        
         // Keyframes for slideDown animation
         const style = document.createElement('style');
         style.textContent = `
