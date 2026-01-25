@@ -2754,6 +2754,10 @@
             const contactName = document.getElementById('contactName').value;
             const notes = document.getElementById('companyNotes').value;
             
+            console.log('🔍 Submit - sendCompanyNotification value:', window.sendCompanyNotification);
+            console.log('🔍 Submit - Type:', typeof window.sendCompanyNotification);
+            console.log('🔍 Submit - Strict equality:', window.sendCompanyNotification === true);
+            
             try {
                 // If user chose to send notification email (from modal), send it now
                 if (window.sendCompanyNotification === true) {
@@ -2766,18 +2770,22 @@
                         .eq('id', currentUser.id)
                         .single();
                     
+                    console.log('👤 User data for email:', userData);
+                    
                     if (userData) {
+                        const emailParams = {
+                            companyEmail: companyEmail,
+                            companyName: companyName,
+                            referrerName: `${userData.first_name} ${userData.last_name}`,
+                            referralCode: userData.referral_code
+                        };
+                        
+                        console.log('📤 Calling Edge Function with:', emailParams);
+                        
                         // Call Edge Function to send email
                         const { data, error } = await window.supabaseClient.functions.invoke(
                             'send-company-notification',
-                            {
-                                body: {
-                                    companyEmail: companyEmail,
-                                    companyName: companyName,
-                                    referrerName: `${userData.first_name} ${userData.last_name}`,
-                                    referralCode: userData.referral_code
-                                }
-                            }
+                            { body: emailParams }
                         );
                         
                         if (error) {
@@ -2785,7 +2793,11 @@
                         } else {
                             console.log('✅ Email notifica inviata!', data);
                         }
+                    } else {
+                        console.error('❌ User data not found!');
                     }
+                } else {
+                    console.log('⏭️ Skipping email notification (user chose NO or not set)');
                 }
                 
                 // Get current user's referral code
