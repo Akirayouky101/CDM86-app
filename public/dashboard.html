@@ -905,38 +905,45 @@
         window.loadDashboardData = async function() {
             try {
                 console.log('🚀 Starting loadDashboardData...');
+                console.log('📋 Current user ID:', currentUser.id);
                 
-                // Get user data (check both users and organizations)
-                let { data: userData, error: userError } = await window.supabaseClient
-                    .from('users')
+                // Check if user is an organization first
+                const { data: orgList, error: orgError } = await window.supabaseClient
+                    .from('organizations')
                     .select('*')
-                    .eq('auth_user_id', currentUser.id)
-                    .single();
+                    .eq('auth_user_id', currentUser.id);
                 
-                // If not found in users, check organizations
-                if (userError && userError.code === 'PGRST116') {
-                    console.log('👔 User not found, checking organizations...');
-                    const { data: orgData, error: orgError } = await window.supabaseClient
-                        .from('organizations')
-                        .select('*')
-                        .eq('auth_user_id', currentUser.id)
-                        .single();
-                    
-                    if (orgError) throw orgError;
-                    
-                    // Map organization data to user-like structure
+                console.log('🔍 Organization query result:', { orgList, orgError });
+                
+                let userData;
+                
+                if (orgList && orgList.length > 0) {
+                    // User is an organization - map to user-like structure
+                    const orgData = orgList[0];
+                    console.log('👔 Organization found:', orgData);
                     userData = {
-                        ...orgData,
+                        id: orgData.id,
                         first_name: orgData.name,
                         last_name: '(Organizzazione)',
+                        email: orgData.email,
                         points: 0,
                         referred_by_user_id: null,
-                        referral_code: orgData.referral_code_employees || orgData.referral_code_external
+                        referral_code: orgData.referral_code_employees || orgData.referral_code_external,
+                        is_organization: true,
+                        organization_data: orgData
                     };
-                    
-                    console.log('✅ Organization data mapped:', userData);
-                } else if (userError) {
-                    throw userError;
+                } else {
+                    // Regular user - use auth data
+                    console.log('👤 Regular user, using auth data');
+                    userData = {
+                        id: currentUser.id,
+                        first_name: currentUser.user_metadata?.first_name || currentUser.email.split('@')[0],
+                        last_name: currentUser.user_metadata?.last_name || '',
+                        email: currentUser.email,
+                        points: 0,
+                        referral_code: 'N/A',
+                        is_organization: false
+                    };
                 }
                 
                 console.log('✅ User data loaded (raw):', userData);
