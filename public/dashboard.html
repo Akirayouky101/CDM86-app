@@ -2687,13 +2687,74 @@
         };
         
         // Handle company notification choice (YES/NO)
-        window.handleCompanyNotification = function(sendEmail) {
-            closeCompanyNotificationModal();
-            
-            // Save user's choice
-            window.sendCompanyNotification = sendEmail;
-            
-            console.log(sendEmail ? '✅ Utente ha scelto di inviare email' : '❌ Utente non vuole inviare email');
+        window.handleCompanyNotification = async function(sendEmail) {
+            if (sendEmail) {
+                console.log('📧 Invio immediato email notifica...');
+                
+                // Get company data from form
+                const companyName = document.getElementById('companyName').value;
+                const companyEmail = document.getElementById('companyEmail').value;
+                
+                if (!companyName || !companyEmail) {
+                    alert('⚠️ Inserisci almeno il nome e l\'email dell\'azienda prima di inviare la notifica.');
+                    return;
+                }
+                
+                try {
+                    const currentUser = window.getCurrentUser();
+                    if (!currentUser) {
+                        alert('❌ Sessione non valida.');
+                        closeCompanyNotificationModal();
+                        return;
+                    }
+                    
+                    // Get user data for email
+                    const { data: userData } = await window.supabaseClient
+                        .from('users')
+                        .select('first_name, last_name, referral_code')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    console.log('👤 User data:', userData);
+                    
+                    if (userData) {
+                        const emailParams = {
+                            companyEmail: companyEmail,
+                            companyName: companyName,
+                            referrerName: `${userData.first_name} ${userData.last_name}`,
+                            referralCode: userData.referral_code
+                        };
+                        
+                        console.log('📤 Sending email with:', emailParams);
+                        
+                        // Call Edge Function to send email
+                        const { data, error } = await window.supabaseClient.functions.invoke(
+                            'send-company-notification',
+                            { body: emailParams }
+                        );
+                        
+                        if (error) {
+                            console.error('❌ Error sending email:', error);
+                            alert('❌ Errore nell\'invio dell\'email. Riprova.');
+                        } else {
+                            console.log('✅ Email inviata!', data);
+                            alert('✅ Email di notifica inviata all\'azienda!');
+                            closeCompanyNotificationModal();
+                            // Close the entire wizard after sending email
+                            window.CompanyWizard.close();
+                        }
+                    } else {
+                        console.error('❌ User data not found');
+                        alert('❌ Errore: dati utente non trovati.');
+                    }
+                } catch (error) {
+                    console.error('❌ Exception:', error);
+                    alert('❌ Errore nell\'invio dell\'email.');
+                }
+            } else {
+                console.log('❌ Utente ha scelto di non inviare email');
+                closeCompanyNotificationModal();
+            }
         };
         
         
@@ -2750,51 +2811,8 @@
             const contactName = document.getElementById('contactName').value;
             const notes = document.getElementById('companyNotes').value;
             
-            console.log('🔍 Submit - sendCompanyNotification value:', window.sendCompanyNotification);
-            console.log('🔍 Submit - Type:', typeof window.sendCompanyNotification);
-            console.log('🔍 Submit - Strict equality:', window.sendCompanyNotification === true);
-            
             try {
-                // If user chose to send notification email (from modal), send it now
-                if (window.sendCompanyNotification === true) {
-                    console.log('📧 Invio email notifica azienda...');
-                    
-                    // Get user data for email
-                    const { data: userData } = await window.supabaseClient
-                        .from('users')
-                        .select('first_name, last_name, referral_code')
-                        .eq('id', currentUser.id)
-                        .single();
-                    
-                    console.log('👤 User data for email:', userData);
-                    
-                    if (userData) {
-                        const emailParams = {
-                            companyEmail: companyEmail,
-                            companyName: companyName,
-                            referrerName: `${userData.first_name} ${userData.last_name}`,
-                            referralCode: userData.referral_code
-                        };
-                        
-                        console.log('📤 Calling Edge Function with:', emailParams);
-                        
-                        // Call Edge Function to send email
-                        const { data, error } = await window.supabaseClient.functions.invoke(
-                            'send-company-notification',
-                            { body: emailParams }
-                        );
-                        
-                        if (error) {
-                            console.error('❌ Error sending notification:', error);
-                        } else {
-                            console.log('✅ Email notifica inviata!', data);
-                        }
-                    } else {
-                        console.error('❌ User data not found!');
-                    }
-                } else {
-                    console.log('⏭️ Skipping email notification (user chose NO or not set)');
-                }
+                // Email notification is now sent immediately in the modal, not here
                 
                 // Get current user's referral code
                 const { data: userData } = await window.supabaseClient
@@ -2824,9 +2842,6 @@
                     });
                 
                 if (error) throw error;
-                
-                // Reset notification flag
-                window.sendCompanyNotification = false;
                 
                 // Close report modal and show success modal
                 closeReportCompanyModal();
