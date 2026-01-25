@@ -911,7 +911,7 @@
         
         
         // Load dashboard data
-        async function loadDashboardData() {
+        window.loadDashboardData = async function() {
             try {
                 console.log('🚀 Starting loadDashboardData...');
                 
@@ -1130,7 +1130,7 @@
                 console.error('Error loading dashboard:', error);
                 alert('Errore nel caricamento dei dati: ' + error.message);
             }
-        }
+        };
         
         // Global variables for organization requests
         let allOrgRequests = [];
