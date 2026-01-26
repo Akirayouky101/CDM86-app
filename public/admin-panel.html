@@ -1297,6 +1297,9 @@
             <button class="tab" onclick="switchTab('promotions')">
                 <i class="fas fa-tags"></i> Promozioni
             </button>
+            <button class="tab" onclick="switchTab('zones')">
+                <i class="fas fa-map-marked-alt"></i> Zone CAP
+            </button>
         </div>
 
         <!-- USERS TAB -->
@@ -2065,6 +2068,52 @@
         </div>
     </div>
 
+    <!-- ZONE CAP TAB -->
+    <div id="zonesTab" class="tab-content">
+        <div class="section-header">
+            <div>
+                <h2><i class="fas fa-map-marked-alt"></i> Gestione Zone e CAP</h2>
+                <p>Crea e gestisci le zone geografiche basate sui codici postali</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCreateZoneModal()">
+                <i class="fas fa-plus"></i> Nuova Zona
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-list"></i> Elenco Zone</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="text" id="zoneSearchInput" placeholder="🔍 Cerca zona o CAP..." 
+                           style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; min-width: 250px;"
+                           onkeyup="filterZones()">
+                    <span id="zoneCount" style="color: #6b7280; font-size: 14px;">0 zone</span>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="zonesLoading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Caricamento zone...</p>
+            </div>
+
+            <!-- Zones List -->
+            <div id="zonesList"></div>
+
+            <!-- Empty State -->
+            <div id="zonesEmpty" class="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3>Nessuna zona configurata</h3>
+                <p>Inizia creando la prima zona geografica per organizzare gli utenti per CAP</p>
+                <button class="btn btn-primary" onclick="openCreateZoneModal()">
+                    <i class="fas fa-plus"></i> Crea Prima Zona
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- CREATE USER MODAL -->
     <div id="createUserModal" class="modal">
         <div class="modal-dialog">
@@ -2212,6 +2261,97 @@
                     </button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- ZONE MODAL (Create/Edit) -->
+    <div id="zoneModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="zoneModalTitle"><i class="fas fa-map-marked-alt"></i> Nuova Zona</h3>
+                    <button class="modal-close" onclick="closeModal('zoneModal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="zoneId">
+                    
+                    <div class="form-group">
+                        <label for="zoneName">Nome Zona *</label>
+                        <input type="text" id="zoneName" placeholder="es. Zona Nord, Centro, Quartiere Est..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zoneDescription">Descrizione</label>
+                        <textarea id="zoneDescription" rows="3" placeholder="Descrivi l'area geografica coperta da questa zona..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zoneCAPs">Codici Postali (CAP)</label>
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+                            Inserisci i CAP uno alla volta e premi Invio. Es: 00100, 00101, 00102
+                        </p>
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                            <input type="text" id="capInput" placeholder="Inserisci CAP (5 cifre)" 
+                                   maxlength="5" pattern="[0-9]{5}" 
+                                   style="flex: 1;"
+                                   onkeypress="if(event.key === 'Enter') { event.preventDefault(); addCAP(); }">
+                            <button type="button" class="btn btn-secondary" onclick="addCAP()" style="padding: 8px 16px;">
+                                <i class="fas fa-plus"></i> Aggiungi
+                            </button>
+                        </div>
+                        <div id="capTags" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb;">
+                            <!-- CAP tags appear here -->
+                        </div>
+                        <p style="font-size: 12px; color: #6b7280; margin-top: 6px;">
+                            <span id="capCount">0</span> CAP aggiunti
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="zoneActive" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>Zona attiva</span>
+                        </label>
+                        <p style="font-size: 12px; color: #6b7280; margin-top: 4px; margin-left: 28px;">
+                            Le zone disattivate non saranno visibili agli utenti
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('zoneModal')">Annulla</button>
+                    <button class="btn btn-primary" onclick="saveZone()">
+                        <i class="fas fa-save"></i> Salva Zona
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE ZONE MODAL -->
+    <div id="deleteZoneModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-trash-alt"></i> Elimina Zona</h3>
+                    <button class="modal-close" onclick="closeModal('deleteZoneModal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteZoneId">
+                    <p style="margin-bottom: 15px;">Sei sicuro di voler eliminare la zona:</p>
+                    <p style="font-weight: 600; color: var(--danger); font-size: 16px;" id="deleteZoneName"></p>
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #f59e0b;">
+                        <p style="margin: 0; font-size: 14px; color: #78350f;">
+                            ⚠️ Questa azione non può essere annullata. Gli utenti con CAP appartenenti a questa zona non saranno più associati ad alcuna zona.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('deleteZoneModal')">Annulla</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteZone()">
+                        <i class="fas fa-trash-alt"></i> Elimina
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2805,6 +2945,8 @@
                 loadAnalytics();
             } else if (tabName === 'promotions') {
                 loadPromotions();
+            } else if (tabName === 'zones') {
+                loadZones();
             }
         };
 
@@ -4996,6 +5138,313 @@
                 'La modifica delle promozioni sarà disponibile a breve. Per ora puoi eliminare e ricreare la promozione.',
                 'info'
             );
+        };
+
+        // ========================================
+        // ZONES MANAGEMENT FUNCTIONS
+        // ========================================
+
+        let allZones = [];
+        let currentZoneCAPs = [];
+
+        window.loadZones = async function() {
+            const loading = document.getElementById('zonesLoading');
+            const list = document.getElementById('zonesList');
+            const empty = document.getElementById('zonesEmpty');
+            
+            try {
+                loading.style.display = 'block';
+                list.innerHTML = '';
+                empty.style.display = 'none';
+                
+                const { data: zones, error } = await window.supabaseClient
+                    .from('zones')
+                    .select('*')
+                    .order('name');
+                
+                if (error) throw error;
+                
+                allZones = zones || [];
+                
+                if (allZones.length === 0) {
+                    loading.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+                
+                displayZones(allZones);
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading zones:', error);
+                showNotification('Errore', 'Errore nel caricamento delle zone', 'error');
+                loading.style.display = 'none';
+            }
+        };
+
+        function displayZones(zones) {
+            const list = document.getElementById('zonesList');
+            const count = document.getElementById('zoneCount');
+            
+            count.textContent = `${zones.length} zone`;
+            
+            if (zones.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>Nessuna zona trovata</p></div>';
+                return;
+            }
+            
+            let html = '<div style="display: grid; gap: 15px; padding: 15px;">';
+            
+            zones.forEach(zone => {
+                const capList = zone.cap_list || [];
+                const capCount = capList.length;
+                const statusColor = zone.active ? '#10b981' : '#94a3b8';
+                const statusText = zone.active ? 'Attiva' : 'Disattivata';
+                const statusIcon = zone.active ? '✅' : '⏸️';
+                
+                html += `
+                    <div class="zone-card" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <h4 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">
+                                        📍 ${zone.name}
+                                    </h4>
+                                    <span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                        ${statusIcon} ${statusText}
+                                    </span>
+                                </div>
+                                ${zone.description ? `
+                                    <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; line-height: 1.5;">
+                                        ${zone.description}
+                                    </p>
+                                ` : ''}
+                                <div style="display: flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px;">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span><strong>${capCount}</strong> CAP assegnati</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                                <button class="btn btn-secondary btn-sm" onclick="editZone('${zone.id}')" title="Modifica">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="openDeleteZoneModal('${zone.id}', '${zone.name}')" title="Elimina">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${capCount > 0 ? `
+                            <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 5px;">
+                                <div style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    Codici Postali
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    ${capList.slice(0, 15).map(cap => `
+                                        <span style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: monospace;">
+                                            ${cap}
+                                        </span>
+                                    `).join('')}
+                                    ${capCount > 15 ? `
+                                        <span style="background: #f3f4f6; color: #6b7280; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;">
+                                            +${capCount - 15} altri
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            list.innerHTML = html;
+        }
+
+        window.filterZones = function() {
+            const searchInput = document.getElementById('zoneSearchInput').value.toLowerCase();
+            
+            if (!searchInput) {
+                displayZones(allZones);
+                return;
+            }
+            
+            const filtered = allZones.filter(zone => {
+                const nameMatch = zone.name.toLowerCase().includes(searchInput);
+                const descMatch = (zone.description || '').toLowerCase().includes(searchInput);
+                const capMatch = (zone.cap_list || []).some(cap => cap.includes(searchInput));
+                return nameMatch || descMatch || capMatch;
+            });
+            
+            displayZones(filtered);
+        };
+
+        window.openCreateZoneModal = function() {
+            document.getElementById('zoneId').value = '';
+            document.getElementById('zoneModalTitle').innerHTML = '<i class="fas fa-map-marked-alt"></i> Nuova Zona';
+            document.getElementById('zoneName').value = '';
+            document.getElementById('zoneDescription').value = '';
+            document.getElementById('zoneActive').checked = true;
+            currentZoneCAPs = [];
+            updateCAPTags();
+            openModal('zoneModal');
+        };
+
+        window.editZone = async function(zoneId) {
+            try {
+                const zone = allZones.find(z => z.id === zoneId);
+                if (!zone) throw new Error('Zona non trovata');
+                
+                document.getElementById('zoneId').value = zone.id;
+                document.getElementById('zoneModalTitle').innerHTML = '<i class="fas fa-edit"></i> Modifica Zona';
+                document.getElementById('zoneName').value = zone.name;
+                document.getElementById('zoneDescription').value = zone.description || '';
+                document.getElementById('zoneActive').checked = zone.active;
+                currentZoneCAPs = zone.cap_list || [];
+                updateCAPTags();
+                openModal('zoneModal');
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore', error.message, 'error');
+            }
+        };
+
+        window.addCAP = function() {
+            const input = document.getElementById('capInput');
+            const cap = input.value.trim();
+            
+            if (!cap) {
+                showNotification('Attenzione', 'Inserisci un CAP valido', 'warning');
+                return;
+            }
+            
+            if (!/^\d{5}$/.test(cap)) {
+                showNotification('Errore', 'Il CAP deve essere di 5 cifre', 'error');
+                return;
+            }
+            
+            if (currentZoneCAPs.includes(cap)) {
+                showNotification('Attenzione', 'Questo CAP è già stato aggiunto', 'warning');
+                return;
+            }
+            
+            currentZoneCAPs.push(cap);
+            currentZoneCAPs.sort();
+            updateCAPTags();
+            input.value = '';
+            input.focus();
+        };
+
+        window.removeCAP = function(cap) {
+            currentZoneCAPs = currentZoneCAPs.filter(c => c !== cap);
+            updateCAPTags();
+        };
+
+        function updateCAPTags() {
+            const container = document.getElementById('capTags');
+            const countElement = document.getElementById('capCount');
+            
+            countElement.textContent = currentZoneCAPs.length;
+            
+            if (currentZoneCAPs.length === 0) {
+                container.innerHTML = '<span style="color: #9ca3af; font-size: 14px;">Nessun CAP aggiunto</span>';
+                return;
+            }
+            
+            let html = '';
+            currentZoneCAPs.forEach(cap => {
+                html += `
+                    <span style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; font-family: monospace;">
+                        ${cap}
+                        <button onclick="removeCAP('${cap}')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; transition: all 0.2s;" title="Rimuovi">
+                            ×
+                        </button>
+                    </span>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        window.saveZone = async function() {
+            try {
+                const zoneId = document.getElementById('zoneId').value;
+                const name = document.getElementById('zoneName').value.trim();
+                const description = document.getElementById('zoneDescription').value.trim();
+                const active = document.getElementById('zoneActive').checked;
+                
+                if (!name) {
+                    showNotification('Errore', 'Il nome della zona è obbligatorio', 'error');
+                    return;
+                }
+                
+                if (currentZoneCAPs.length === 0) {
+                    showNotification('Attenzione', 'Aggiungi almeno un CAP alla zona', 'warning');
+                    return;
+                }
+                
+                const zoneData = {
+                    name,
+                    description,
+                    cap_list: currentZoneCAPs,
+                    active
+                };
+                
+                let error;
+                
+                if (zoneId) {
+                    // Update existing zone
+                    const result = await window.supabaseClient
+                        .from('zones')
+                        .update(zoneData)
+                        .eq('id', zoneId);
+                    error = result.error;
+                } else {
+                    // Create new zone
+                    const result = await window.supabaseClient
+                        .from('zones')
+                        .insert([zoneData]);
+                    error = result.error;
+                }
+                
+                if (error) throw error;
+                
+                showNotification('Successo', `Zona ${zoneId ? 'aggiornata' : 'creata'} con successo!`, 'success');
+                closeModal('zoneModal');
+                loadZones();
+            } catch (error) {
+                console.error('Error:', error);
+                if (error.code === '23505') {
+                    showNotification('Errore', 'Esiste già una zona con questo nome', 'error');
+                } else {
+                    showNotification('Errore', error.message, 'error');
+                }
+            }
+        };
+
+        window.openDeleteZoneModal = function(zoneId, zoneName) {
+            document.getElementById('deleteZoneId').value = zoneId;
+            document.getElementById('deleteZoneName').textContent = zoneName;
+            openModal('deleteZoneModal');
+        };
+
+        window.confirmDeleteZone = async function() {
+            try {
+                const zoneId = document.getElementById('deleteZoneId').value;
+                
+                const { error } = await window.supabaseClient
+                    .from('zones')
+                    .delete()
+                    .eq('id', zoneId);
+                
+                if (error) throw error;
+                
+                showNotification('Successo', 'Zona eliminata con successo!', 'success');
+                closeModal('deleteZoneModal');
+                loadZones();
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore', error.message, 'error');
+            }
         };
 
         // Logout
