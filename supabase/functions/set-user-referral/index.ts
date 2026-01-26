@@ -91,7 +91,7 @@ serve(async (req) => {
     const { error: updateError } = await supabaseAdmin
       .from('users')
       .update(updateData)
-      .eq('id', userId)
+      .eq('auth_user_id', userId)  // Usa auth_user_id invece di id
 
     if (updateError) {
       console.error('❌ Errore aggiornamento:', updateError)
