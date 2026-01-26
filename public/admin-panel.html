@@ -5897,40 +5897,6 @@
                 marker.addTo(zoneMap);
                 zoneMarkers.push({ marker, zone, center });
             });
-
-            // Auto-fit bounds se ci sono zone
-            if (zoneMarkers.length > 0) {
-                const bounds = L.latLngBounds(zoneMarkers.map(m => [m.center.lat, m.center.lng]));
-                zoneMap.fitBounds(bounds, { padding: [50, 50] });
-            }
-
-            console.log(`✅ Map updated with ${zoneMarkers.length} zone markers`);
-        }
-
-        window.zoomToZone = function(zoneId) {
-            const zoneMarker = zoneMarkers.find(m => m.zone.id === zoneId);
-            if (!zoneMarker) return;
-
-            // Chiudi tutti i popup
-            zoneMap.closePopup();
-
-            // Zoom sulla zona
-            const capList = zoneMarker.zone.cap_list || [];
-            const allCoords = capList
-                .map(cap => window.getCAPCoordinates(cap))
-                .filter(coord => coord !== null);
-
-            if (allCoords.length > 0) {
-                const bounds = L.latLngBounds(allCoords.map(c => [c.lat, c.lng]));
-                zoneMap.fitBounds(bounds, { padding: [80, 80], maxZoom: 12 });
-                
-                // Riapri popup dopo zoom
-                setTimeout(() => {
-                    zoneMarker.marker.openPopup();
-                }, 500);
-            }
-        };
-
         // Override loadZones per aggiornare anche la mappa
         const originalLoadZones = window.loadZones;
         window.loadZones = async function() {
