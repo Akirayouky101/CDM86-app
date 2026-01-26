@@ -1327,7 +1327,7 @@
                 const { data: userData, error } = await window.supabaseClient
                     .from('users')
                     .select('*')
-                    .eq('id', currentUser.id)
+                    .eq('auth_user_id', currentUser.id)
                     .maybeSingle();
                 
                 console.log('User query result:', { userData, error });
