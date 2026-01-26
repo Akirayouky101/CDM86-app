@@ -2799,6 +2799,9 @@
     <!-- Convex Hull Algorithm -->
     <script src="/assets/js/convex-hull.js"></script>
     
+    <!-- Zone Utils (statistiche, export, etc) -->
+    <script src="/assets/js/zone-utils.js"></script>
+    
     <script>
         // Initialize Supabase
         function initSupabase() {
@@ -5884,25 +5887,46 @@
         }
 
         function renderZonePolygons() {
-            allZones.forEach(zone => {
-                const capList = zone.cap_list || [];
-                if (capList.length === 0) return;
+            // Rimuovi poligoni esistenti
+            zonePolygons.forEach(p => zoneMap.removeLayer(p));
+            zonePolygons = [];
 
-                // Colore basato su stato
-                const fillColor = zone.active ? '#3b82f6' : '#94a3b8';
+            console.log(`📊 Rendering ${allZones.length} zone in modalità poligoni`);
+
+            allZones.forEach((zone, index) => {
+                const capList = zone.cap_list || [];
+                if (capList.length === 0) {
+                    console.warn(`⚠️ Zona "${zone.name}" senza CAP - skip`);
+                    return;
+                }
+
+                // Determina colore zona
+                const fillColor = window.ZoneUtils.getZoneColor(index, zone.active);
                 const statusIcon = zone.active ? '✅' : '⏸️';
 
                 let polygonCoords;
 
-                // Usa geometry salvato se esiste, altrimenti calcola convex hull
+                // Usa geometry salvato se esiste, altrimenti calcola automaticamente
                 if (zone.geometry && zone.geometry.coordinates && zone.geometry.coordinates.length > 0) {
                     // Usa poligono personalizzato salvato
                     polygonCoords = window.ConvexHull.toLeafletFormat(zone.geometry.coordinates[0]);
                 } else {
-                    // Calcola convex hull automatico dai CAP
-                    const hullCoords = window.ConvexHull.fromCAPList(capList, 15);
-                    if (!hullCoords) return;
-                    polygonCoords = window.ConvexHull.toLeafletFormat(hullCoords);
+                    // Se CAP singolo, crea cerchio di raggio 2km
+                    if (capList.length === 1) {
+                        polygonCoords = window.ZoneUtils.createCAPCircle(capList[0], 2000);
+                        if (!polygonCoords || polygonCoords.length === 0) {
+                            console.warn(`❌ CAP ${capList[0]} non trovato - skip zona ${zone.name}`);
+                            return;
+                        }
+                    } else {
+                        // Calcola convex hull automatico dai CAP multipli
+                        const hullCoords = window.ConvexHull.fromCAPList(capList, 15);
+                        if (!hullCoords || hullCoords.length === 0) {
+                            console.warn(`❌ Impossibile calcolare poligono per zona ${zone.name}`);
+                            return;
+                        }
+                        polygonCoords = window.ConvexHull.toLeafletFormat(hullCoords);
+                    }
                 }
 
                 // Crea poligono
@@ -5914,16 +5938,28 @@
                     opacity: 0.8
                 });
 
-                // Popup
-                const popupContent = createZonePopup(zone, capList, fillColor, statusIcon);
-                polygon.bindPopup(popupContent, {
-                    maxWidth: 300,
-                    className: 'zone-popup'
+                // Popup con statistiche complete (async, si carica dopo)
+                window.ZoneUtils.getZoneStats(zone, supabase).then(stats => {
+                    const popupContent = window.ZoneUtils.createPopup(zone, stats, fillColor, mapMode);
+                    polygon.bindPopup(popupContent, {
+                        maxWidth: 350,
+                        className: 'zone-popup'
+                    });
                 });
 
+                polygon.zoneId = zone.id; // Per edit/delete
                 polygon.addTo(zoneMap);
                 zonePolygons.push(polygon);
+
+                console.log(`✅ Zona ${index + 1}/${allZones.length}: "${zone.name}" - ${capList.length} CAP - colore: ${fillColor}`);
             });
+
+            // Auto-fit bounds per mostrare TUTTE le zone
+            if (zonePolygons.length > 0) {
+                const group = L.featureGroup(zonePolygons);
+                zoneMap.fitBounds(group.getBounds().pad(0.1));
+                console.log(`🗺️ Mappa centrata su ${zonePolygons.length} zone visualizzate`);
+            }
         }
 
         function createZonePopup(zone, capList, color, statusIcon) {
@@ -6128,6 +6164,25 @@
                 marker.addTo(zoneMap);
                 zoneMarkers.push({ marker, zone, center });
             });
+        }
+
+        // Export zona come GeoJSON (funzione globale chiamabile da popup)
+        window.exportZoneGeoJSON = async function(zoneId) {
+            const zone = allZones.find(z => z.id === zoneId);
+            if (!zone) {
+                showNotification('❌ Zona non trovata', 'error');
+                return;
+            }
+
+            try {
+                await window.ZoneUtils.exportGeoJSON(zone);
+                showNotification(`✅ GeoJSON esportato: ${zone.name}`, 'success');
+            } catch (error) {
+                console.error('Errore export:', error);
+                showNotification('❌ Errore durante export', 'error');
+            }
+        };
+
         // Override loadZones per aggiornare anche la mappa
         const originalLoadZones = window.loadZones;
         window.loadZones = async function() {
