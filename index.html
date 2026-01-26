@@ -378,15 +378,15 @@
             <i class="fas fa-home"></i>
             <span>Home</span>
         </button>
-        <button class="bottom-nav-btn" onclick="window.location.href='/public/login.html'">
+        <button class="bottom-nav-btn" onclick="document.getElementById('loginModal').style.display='block'">
             <i class="fas fa-search"></i>
             <span>Cerca</span>
         </button>
-        <button class="bottom-nav-btn" onclick="window.location.href='/public/login.html'">
+        <button class="bottom-nav-btn" onclick="document.getElementById('loginModal').style.display='block'">
             <i class="fas fa-heart"></i>
             <span>Preferiti</span>
         </button>
-        <button class="bottom-nav-btn" onclick="window.location.href='/public/login.html'">
+        <button class="bottom-nav-btn" onclick="document.getElementById('loginModal').style.display='block'">
             <i class="fas fa-user"></i>
             <span>Profilo</span>
         </button>
@@ -1092,8 +1092,18 @@
             if (refCode) {
                 console.log('🎯 Referral code detected:', refCode);
                 localStorage.setItem('referral_code', refCode);
-                // Redirect to login page with referral code
-                window.location.href = '/public/login.html?ref=' + refCode;
+                // Open registration modal instead of redirecting
+                console.log('📋 Opening registration modal with referral code:', refCode);
+                // Remove ref parameter from URL without reload
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+                // Open the modal and switch to register tab
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.getElementById('registerForm').style.display = 'block';
+                    document.getElementById('loginForm').style.display = 'none';
+                }
             }
         })();
     </script>
