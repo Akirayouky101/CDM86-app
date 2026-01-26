@@ -2116,6 +2116,9 @@
             <div class="card-header">
                 <h3><i class="fas fa-map"></i> Mappa Zone Interattiva</h3>
                 <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-primary btn-sm" onclick="toggleDrawMode()" id="drawModeBtn" style="display: none;">
+                        <i class="fas fa-pencil-ruler"></i> <span id="drawModeText">Disegna Zona</span>
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="toggleMapMode()" id="mapModeBtn">
                         <i class="fas fa-draw-polygon"></i> Mostra Poligoni
                     </button>
@@ -5564,7 +5567,209 @@
                 satellite: satelliteLayer
             };
 
-            console.log('✅ Zone map initialized');
+            // FeatureGroup per i layer disegnabili
+            const drawnItems = new L.FeatureGroup();
+            zoneMap.addLayer(drawnItems);
+            window.drawnItems = drawnItems;
+
+            // Inizializza controlli disegno
+            initDrawControls(drawnItems);
+
+            console.log('✅ Zone map initialized with draw tools');
+        }
+
+        function initDrawControls(drawnItems) {
+            // Opzioni disegno
+            drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: {
+                        allowIntersection: false,
+                        showArea: true,
+                        drawError: {
+                            color: '#e74c3c',
+                            message: '<strong>Errore!</strong> Il poligono non può intersecare se stesso!'
+                        },
+                        shapeOptions: {
+                            color: '#3b82f6',
+                            weight: 3,
+                            fillOpacity: 0.35
+                        }
+                    },
+                    polyline: false,
+                    circle: false,
+                    rectangle: {
+                        shapeOptions: {
+                            color: '#3b82f6',
+                            weight: 3,
+                            fillOpacity: 0.35
+                        }
+                    },
+                    marker: false,
+                    circlemarker: false
+                },
+                edit: {
+                    featureGroup: drawnItems,
+                    remove: true
+                }
+            });
+
+            zoneMap.addControl(drawControl);
+
+            // Eventi disegno
+            zoneMap.on('draw:created', function(e) {
+                const layer = e.layer;
+                drawnItems.addLayer(layer);
+                
+                // Apri modal per associare poligono a zona
+                showSavePolygonModal(layer);
+            });
+
+            zoneMap.on('draw:edited', function(e) {
+                const layers = e.layers;
+                layers.eachLayer(function(layer) {
+                    // Aggiorna geometry della zona associata
+                    updateZoneGeometry(layer);
+                });
+            });
+
+            zoneMap.on('draw:deleted', function(e) {
+                const layers = e.layers;
+                layers.eachLayer(function(layer) {
+                    // Rimuovi geometry dalla zona
+                    if (layer.zoneId) {
+                        removeZoneGeometry(layer.zoneId);
+                    }
+                });
+            });
+        }
+
+        function showSavePolygonModal(layer) {
+            const coords = layer.getLatLngs()[0];
+            const geoJSONCoords = coords.map(latlng => [latlng.lng, latlng.lat]);
+            geoJSONCoords.push(geoJSONCoords[0]); // Chiudi poligono
+
+            // Mostra modal per scegliere zona
+            const zoneSelect = allZones.map(z => 
+                `<option value="${z.id}">${z.name}</option>`
+            ).join('');
+
+            const modalHTML = `
+                <div style="padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #1f2937;">
+                        <i class="fas fa-draw-polygon"></i> Salva Poligono Personalizzato
+                    </h3>
+                    <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
+                        Hai disegnato un poligono sulla mappa. Associalo a una zona esistente per salvarlo.
+                    </p>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">
+                            Seleziona Zona
+                        </label>
+                        <select id="polygonZoneSelect" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                            <option value="">-- Scegli una zona --</option>
+                            ${zoneSelect}
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="closePolygonModal()" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; background: white; color: #374151; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Annulla
+                        </button>
+                        <button onclick="savePolygonToZone('${JSON.stringify(geoJSONCoords).replace(/"/g, '&quot;')}')" style="flex: 1; padding: 10px; border: none; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-save"></i> Salva
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            showNotification('Poligono disegnato', modalHTML, 'info');
+            window.currentDrawnLayer = layer;
+        }
+
+        window.closePolygonModal = function() {
+            if (window.currentDrawnLayer) {
+                window.drawnItems.removeLayer(window.currentDrawnLayer);
+                window.currentDrawnLayer = null;
+            }
+        };
+
+        window.savePolygonToZone = async function(coordsJSON) {
+            try {
+                const zoneId = document.getElementById('polygonZoneSelect').value;
+                if (!zoneId) {
+                    showNotification('Errore', 'Seleziona una zona!', 'error');
+                    return;
+                }
+
+                const coords = JSON.parse(coordsJSON.replace(/&quot;/g, '"'));
+                
+                const geometry = {
+                    type: 'Polygon',
+                    coordinates: [coords]
+                };
+
+                // Salva su database
+                const { error } = await window.supabaseClient
+                    .from('zones')
+                    .update({ geometry })
+                    .eq('id', zoneId);
+
+                if (error) throw error;
+
+                // Associa layer alla zona
+                if (window.currentDrawnLayer) {
+                    window.currentDrawnLayer.zoneId = zoneId;
+                }
+
+                showNotification('Successo', 'Poligono personalizzato salvato!', 'success');
+                loadZones(); // Ricarica zone con nuovo geometry
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore', error.message, 'error');
+            }
+        };
+
+        async function updateZoneGeometry(layer) {
+            if (!layer.zoneId) return;
+
+            const coords = layer.getLatLngs()[0];
+            const geoJSONCoords = coords.map(latlng => [latlng.lng, latlng.lat]);
+            geoJSONCoords.push(geoJSONCoords[0]);
+
+            const geometry = {
+                type: 'Polygon',
+                coordinates: [geoJSONCoords]
+            };
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('zones')
+                    .update({ geometry })
+                    .eq('id', layer.zoneId);
+
+                if (error) throw error;
+                showNotification('Successo', 'Poligono aggiornato!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore', error.message, 'error');
+            }
+        }
+
+        async function removeZoneGeometry(zoneId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('zones')
+                    .update({ geometry: null })
+                    .eq('id', zoneId);
+
+                if (error) throw error;
+                showNotification('Successo', 'Poligono rimosso!', 'success');
+                loadZones();
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore', error.message, 'error');
+            }
         }
 
         window.toggleMapView = function() {
@@ -5764,13 +5969,39 @@
             mapMode = mapMode === 'markers' ? 'polygons' : 'markers';
             
             const btn = document.getElementById('mapModeBtn');
+            const drawBtn = document.getElementById('drawModeBtn');
+            
             if (mapMode === 'polygons') {
                 btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Mostra Marker';
+                drawBtn.style.display = 'inline-block'; // Mostra pulsante disegno
             } else {
                 btn.innerHTML = '<i class="fas fa-draw-polygon"></i> Mostra Poligoni';
+                drawBtn.style.display = 'none'; // Nascondi pulsante disegno
             }
             
             updateZoneMap();
+        };
+
+        let drawModeActive = false;
+
+        window.toggleDrawMode = function() {
+            drawModeActive = !drawModeActive;
+            const btn = document.getElementById('drawModeText');
+            
+            if (drawModeActive) {
+                btn.textContent = 'Modalità Disegno: ON';
+                document.getElementById('drawModeBtn').classList.add('btn-success');
+                document.getElementById('drawModeBtn').classList.remove('btn-primary');
+                showNotification(
+                    'Modalità Disegno Attiva', 
+                    'Usa gli strumenti sulla destra per disegnare un poligono personalizzato. Poi associalo a una zona esistente.',
+                    'info'
+                );
+            } else {
+                btn.textContent = 'Disegna Zona';
+                document.getElementById('drawModeBtn').classList.remove('btn-success');
+                document.getElementById('drawModeBtn').classList.add('btn-primary');
+            }
         };
 
         window.zoomToZone = function(zoneId) {
