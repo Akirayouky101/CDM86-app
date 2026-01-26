@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CDM86 Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         * {
             margin: 0;
@@ -498,6 +502,30 @@
             background: var(--gray-200);
             color: var(--gray-900);
             transform: rotate(90deg);
+        }
+
+        /* Leaflet Map Custom Styles */
+        #zoneMap {
+            z-index: 1;
+        }
+
+        .custom-zone-marker {
+            background: none !important;
+            border: none !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 15px !important;
+        }
+
+        .zone-popup .leaflet-popup-close-button {
+            font-size: 24px !important;
+            padding: 5px 10px !important;
         }
 
         .close-btn {
@@ -2080,6 +2108,38 @@
             </button>
         </div>
 
+        <!-- MAPPA INTERATTIVA -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h3><i class="fas fa-map"></i> Mappa Zone Interattiva</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary btn-sm" onclick="centerMap()">
+                        <i class="fas fa-crosshairs"></i> Centra Italia
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="toggleMapView()">
+                        <i class="fas fa-layer-group"></i> <span id="mapViewToggle">Vista Satellite</span>
+                    </button>
+                </div>
+            </div>
+            <div id="zoneMap" style="height: 500px; border-radius: 0 0 12px 12px; background: #f3f4f6;"></div>
+            <div style="padding: 15px; background: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 12px 12px;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center; font-size: 13px; color: #6b7280;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="width: 16px; height: 16px; background: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                        <span>Zona attiva</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="width: 16px; height: 16px; background: #94a3b8; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                        <span>Zona disattivata</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-mouse-pointer" style="color: #10b981;"></i>
+                        <span>Clicca su un marker per dettagli zona</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h3><i class="fas fa-list"></i> Elenco Zone</h3>
@@ -2717,6 +2777,12 @@
 
     <!-- Supabase UMD Build -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- CAP Geo Data -->
+    <script src="/assets/js/cap-geodata.js"></script>
     
     <script>
         // Initialize Supabase
@@ -5441,10 +5507,220 @@
                 showNotification('Successo', 'Zona eliminata con successo!', 'success');
                 closeModal('deleteZoneModal');
                 loadZones();
+                updateZoneMap(); // Aggiorna anche la mappa
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Errore', error.message, 'error');
             }
+        };
+
+        // ========================================
+        // INTERACTIVE MAP FUNCTIONS
+        // ========================================
+
+        let zoneMap = null;
+        let zoneMarkers = [];
+        let currentMapLayer = 'street';
+
+        function initZoneMap() {
+            if (zoneMap) return; // Mappa già inizializzata
+
+            // Crea mappa centrata sull'Italia
+            zoneMap = L.map('zoneMap').setView([41.8719, 12.5674], 6);
+
+            // Layer street (default)
+            const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            });
+
+            // Layer satellite
+            const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri',
+                maxZoom: 18
+            });
+
+            // Aggiungi layer di default
+            streetLayer.addTo(zoneMap);
+
+            // Salva riferimenti ai layer
+            window.mapLayers = {
+                street: streetLayer,
+                satellite: satelliteLayer
+            };
+
+            console.log('✅ Zone map initialized');
+        }
+
+        window.toggleMapView = function() {
+            if (!zoneMap) return;
+
+            if (currentMapLayer === 'street') {
+                zoneMap.removeLayer(window.mapLayers.street);
+                window.mapLayers.satellite.addTo(zoneMap);
+                currentMapLayer = 'satellite';
+                document.getElementById('mapViewToggle').textContent = 'Vista Stradale';
+            } else {
+                zoneMap.removeLayer(window.mapLayers.satellite);
+                window.mapLayers.street.addTo(zoneMap);
+                currentMapLayer = 'street';
+                document.getElementById('mapViewToggle').textContent = 'Vista Satellite';
+            }
+        };
+
+        window.centerMap = function() {
+            if (!zoneMap) return;
+            zoneMap.setView([41.8719, 12.5674], 6);
+        };
+
+        async function updateZoneMap() {
+            if (!zoneMap) {
+                initZoneMap();
+            }
+
+            // Rimuovi marker esistenti
+            zoneMarkers.forEach(marker => marker.remove());
+            zoneMarkers = [];
+
+            if (!allZones || allZones.length === 0) {
+                console.log('No zones to display on map');
+                return;
+            }
+
+            // Crea marker per ogni zona
+            allZones.forEach(zone => {
+                const capList = zone.cap_list || [];
+                if (capList.length === 0) return;
+
+                // Calcola centro della zona basato sui CAP
+                const center = window.calculateCAPCenter(capList);
+                
+                if (center.count === 0) return; // Nessun CAP valido trovato
+
+                // Colore marker basato su stato attivo/disattivo
+                const markerColor = zone.active ? '#3b82f6' : '#94a3b8';
+                const statusIcon = zone.active ? '✅' : '⏸️';
+
+                // Crea custom icon
+                const customIcon = L.divIcon({
+                    className: 'custom-zone-marker',
+                    html: `
+                        <div style="
+                            width: 40px; 
+                            height: 40px; 
+                            background: ${markerColor}; 
+                            border: 3px solid white; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                            cursor: pointer;
+                            font-size: 18px;
+                        ">
+                            📍
+                        </div>
+                    `,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40]
+                });
+
+                // Crea marker
+                const marker = L.marker([center.lat, center.lng], { icon: customIcon });
+
+                // Popup con dettagli zona
+                const capPreview = capList.slice(0, 10).join(', ');
+                const moreCAPs = capList.length > 10 ? ` <strong>+${capList.length - 10} altri</strong>` : '';
+                
+                const popupContent = `
+                    <div style="min-width: 250px;">
+                        <h4 style="margin: 0 0 10px 0; color: ${markerColor}; font-size: 16px; font-weight: 700;">
+                            📍 ${zone.name}
+                        </h4>
+                        <div style="margin-bottom: 8px;">
+                            <span style="background: ${markerColor}20; color: ${markerColor}; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                ${statusIcon} ${zone.active ? 'Attiva' : 'Disattivata'}
+                            </span>
+                        </div>
+                        ${zone.description ? `
+                            <p style="margin: 8px 0; font-size: 13px; color: #6b7280; line-height: 1.4;">
+                                ${zone.description}
+                            </p>
+                        ` : ''}
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+                                <strong>${capList.length}</strong> CAP coperti
+                            </div>
+                            <div style="font-size: 11px; color: #9ca3af; line-height: 1.5; font-family: monospace;">
+                                ${capPreview}${moreCAPs}
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; display: flex; gap: 6px;">
+                            <button onclick="editZone('${zone.id}')" style="flex: 1; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-edit"></i> Modifica
+                            </button>
+                            <button onclick="zoomToZone('${zone.id}')" style="flex: 1; padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-search-plus"></i> Zoom
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent, {
+                    maxWidth: 300,
+                    className: 'zone-popup'
+                });
+
+                marker.addTo(zoneMap);
+                zoneMarkers.push({ marker, zone, center });
+            });
+
+            // Auto-fit bounds se ci sono zone
+            if (zoneMarkers.length > 0) {
+                const bounds = L.latLngBounds(zoneMarkers.map(m => [m.center.lat, m.center.lng]));
+                zoneMap.fitBounds(bounds, { padding: [50, 50] });
+            }
+
+            console.log(`✅ Map updated with ${zoneMarkers.length} zone markers`);
+        }
+
+        window.zoomToZone = function(zoneId) {
+            const zoneMarker = zoneMarkers.find(m => m.zone.id === zoneId);
+            if (!zoneMarker) return;
+
+            // Chiudi tutti i popup
+            zoneMap.closePopup();
+
+            // Zoom sulla zona
+            const capList = zoneMarker.zone.cap_list || [];
+            const allCoords = capList
+                .map(cap => window.getCAPCoordinates(cap))
+                .filter(coord => coord !== null);
+
+            if (allCoords.length > 0) {
+                const bounds = L.latLngBounds(allCoords.map(c => [c.lat, c.lng]));
+                zoneMap.fitBounds(bounds, { padding: [80, 80], maxZoom: 12 });
+                
+                // Riapri popup dopo zoom
+                setTimeout(() => {
+                    zoneMarker.marker.openPopup();
+                }, 500);
+            }
+        };
+
+        // Override loadZones per aggiornare anche la mappa
+        const originalLoadZones = window.loadZones;
+        window.loadZones = async function() {
+            await originalLoadZones();
+            updateZoneMap();
+        };
+
+        // Override saveZone per aggiornare la mappa
+        const originalSaveZone = window.saveZone;
+        window.saveZone = async function() {
+            await originalSaveZone();
+            updateZoneMap();
         };
 
         // Logout
