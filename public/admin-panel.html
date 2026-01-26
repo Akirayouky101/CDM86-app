@@ -9,6 +9,9 @@
     <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    
     <style>
         * {
             margin: 0;
@@ -2113,6 +2116,9 @@
             <div class="card-header">
                 <h3><i class="fas fa-map"></i> Mappa Zone Interattiva</h3>
                 <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleMapMode()" id="mapModeBtn">
+                        <i class="fas fa-draw-polygon"></i> Mostra Poligoni
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="centerMap()">
                         <i class="fas fa-crosshairs"></i> Centra Italia
                     </button>
@@ -2781,8 +2787,14 @@
     <!-- Leaflet JS for Maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Leaflet Draw for Drawing Polygons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    
     <!-- CAP Geo Data -->
     <script src="/assets/js/cap-geodata.js"></script>
+    
+    <!-- Convex Hull Algorithm -->
+    <script src="/assets/js/convex-hull.js"></script>
     
     <script>
         // Initialize Supabase
@@ -5520,7 +5532,10 @@
 
         let zoneMap = null;
         let zoneMarkers = [];
+        let zonePolygons = [];
         let currentMapLayer = 'street';
+        let mapMode = 'markers'; // 'markers' or 'polygons'
+        let drawControl = null;
 
         function initZoneMap() {
             if (zoneMap) return; // Mappa già inizializzata
@@ -5578,16 +5593,223 @@
                 initZoneMap();
             }
 
-            // Rimuovi marker esistenti
-            zoneMarkers.forEach(marker => marker.remove());
+            // Rimuovi marker e poligoni esistenti
+            zoneMarkers.forEach(item => item.marker.remove());
             zoneMarkers = [];
+            
+            zonePolygons.forEach(polygon => polygon.remove());
+            zonePolygons = [];
 
             if (!allZones || allZones.length === 0) {
                 console.log('No zones to display on map');
                 return;
             }
 
+            if (mapMode === 'markers') {
+                renderZoneMarkers();
+            } else {
+                renderZonePolygons();
+            }
+
+            // Auto-fit bounds se ci sono zone
+            if (mapMode === 'markers' && zoneMarkers.length > 0) {
+                const bounds = L.latLngBounds(zoneMarkers.map(m => [m.center.lat, m.center.lng]));
+                zoneMap.fitBounds(bounds, { padding: [50, 50] });
+            } else if (mapMode === 'polygons' && zonePolygons.length > 0) {
+                const group = L.featureGroup(zonePolygons);
+                zoneMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+            }
+
+            console.log(`✅ Map updated with ${mapMode === 'markers' ? zoneMarkers.length : zonePolygons.length} zones in ${mapMode} mode`);
+        }
+
+        function renderZoneMarkers() {
             // Crea marker per ogni zona
+            allZones.forEach(zone => {
+                const capList = zone.cap_list || [];
+                if (capList.length === 0) return;
+
+                // Calcola centro della zona basato sui CAP
+                const center = window.calculateCAPCenter(capList);
+                
+                if (center.count === 0) return; // Nessun CAP valido trovato
+
+                // Colore marker basato su stato attivo/disattivo
+                const markerColor = zone.active ? '#3b82f6' : '#94a3b8';
+                const statusIcon = zone.active ? '✅' : '⏸️';
+
+                // Crea custom icon
+                const customIcon = L.divIcon({
+                    className: 'custom-zone-marker',
+                    html: `
+                        <div style="
+                            width: 40px; 
+                            height: 40px; 
+                            background: ${markerColor}; 
+                            border: 3px solid white; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                            cursor: pointer;
+                            font-size: 18px;
+                        ">
+                            📍
+                        </div>
+                    `,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40]
+                });
+
+                // Crea marker
+                const marker = L.marker([center.lat, center.lng], { icon: customIcon });
+
+                // Popup con dettagli zona
+                const popupContent = createZonePopup(zone, capList, markerColor, statusIcon);
+                marker.bindPopup(popupContent, {
+                    maxWidth: 300,
+                    className: 'zone-popup'
+                });
+
+                marker.addTo(zoneMap);
+                zoneMarkers.push({ marker, zone, center });
+            });
+        }
+
+        function renderZonePolygons() {
+            allZones.forEach(zone => {
+                const capList = zone.cap_list || [];
+                if (capList.length === 0) return;
+
+                // Colore basato su stato
+                const fillColor = zone.active ? '#3b82f6' : '#94a3b8';
+                const statusIcon = zone.active ? '✅' : '⏸️';
+
+                let polygonCoords;
+
+                // Usa geometry salvato se esiste, altrimenti calcola convex hull
+                if (zone.geometry && zone.geometry.coordinates && zone.geometry.coordinates.length > 0) {
+                    // Usa poligono personalizzato salvato
+                    polygonCoords = window.ConvexHull.toLeafletFormat(zone.geometry.coordinates[0]);
+                } else {
+                    // Calcola convex hull automatico dai CAP
+                    const hullCoords = window.ConvexHull.fromCAPList(capList, 15);
+                    if (!hullCoords) return;
+                    polygonCoords = window.ConvexHull.toLeafletFormat(hullCoords);
+                }
+
+                // Crea poligono
+                const polygon = L.polygon(polygonCoords, {
+                    color: fillColor,
+                    fillColor: fillColor,
+                    fillOpacity: 0.35,
+                    weight: 3,
+                    opacity: 0.8
+                });
+
+                // Popup
+                const popupContent = createZonePopup(zone, capList, fillColor, statusIcon);
+                polygon.bindPopup(popupContent, {
+                    maxWidth: 300,
+                    className: 'zone-popup'
+                });
+
+                polygon.addTo(zoneMap);
+                zonePolygons.push(polygon);
+            });
+        }
+
+        function createZonePopup(zone, capList, color, statusIcon) {
+            const capPreview = capList.slice(0, 10).join(', ');
+            const moreCAPs = capList.length > 10 ? ` <strong>+${capList.length - 10} altri</strong>` : '';
+            
+            return `
+                <div style="min-width: 250px;">
+                    <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 16px; font-weight: 700;">
+                        ${mapMode === 'polygons' ? '🔷' : '📍'} ${zone.name}
+                    </h4>
+                    <div style="margin-bottom: 8px;">
+                        <span style="background: ${color}20; color: ${color}; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                            ${statusIcon} ${zone.active ? 'Attiva' : 'Disattivata'}
+                        </span>
+                    </div>
+                    ${zone.description ? `
+                        <p style="margin: 8px 0; font-size: 13px; color: #6b7280; line-height: 1.4;">
+                            ${zone.description}
+                        </p>
+                    ` : ''}
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+                            <strong>${capList.length}</strong> CAP coperti
+                        </div>
+                        <div style="font-size: 11px; color: #9ca3af; line-height: 1.5; font-family: monospace;">
+                            ${capPreview}${moreCAPs}
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; gap: 6px;">
+                        <button onclick="editZone('${zone.id}')" style="flex: 1; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-edit"></i> Modifica
+                        </button>
+                        <button onclick="zoomToZone('${zone.id}')" style="flex: 1; padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-search-plus"></i> Zoom
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.toggleMapMode = function() {
+            mapMode = mapMode === 'markers' ? 'polygons' : 'markers';
+            
+            const btn = document.getElementById('mapModeBtn');
+            if (mapMode === 'polygons') {
+                btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Mostra Marker';
+            } else {
+                btn.innerHTML = '<i class="fas fa-draw-polygon"></i> Mostra Poligoni';
+            }
+            
+            updateZoneMap();
+        };
+
+        window.zoomToZone = function(zoneId) {
+            if (mapMode === 'markers') {
+                const zoneMarker = zoneMarkers.find(m => m.zone.id === zoneId);
+                if (!zoneMarker) return;
+
+                // Chiudi tutti i popup
+                zoneMap.closePopup();
+
+                // Zoom sulla zona
+                const capList = zoneMarker.zone.cap_list || [];
+                const allCoords = capList
+                    .map(cap => window.getCAPCoordinates(cap))
+                    .filter(coord => coord !== null);
+
+                if (allCoords.length > 0) {
+                    const bounds = L.latLngBounds(allCoords.map(c => [c.lat, c.lng]));
+                    zoneMap.fitBounds(bounds, { padding: [80, 80], maxZoom: 12 });
+                    
+                    // Riapri popup dopo zoom
+                    setTimeout(() => {
+                        zoneMarker.marker.openPopup();
+                    }, 500);
+                }
+            } else {
+                const polygon = zonePolygons.find((p, i) => allZones[i].id === zoneId);
+                if (!polygon) return;
+
+                zoneMap.closePopup();
+                zoneMap.fitBounds(polygon.getBounds(), { padding: [80, 80] });
+                
+                setTimeout(() => {
+                    polygon.openPopup();
+                }, 500);
+            }
+        };
+
+        // Override loadZones per aggiornare anche la mappa
             allZones.forEach(zone => {
                 const capList = zone.cap_list || [];
                 if (capList.length === 0) return;
