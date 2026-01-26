@@ -52,7 +52,7 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select('role')
-      .eq('id', user.id)
+      .eq('auth_user_id', user.id)
       .single()
 
     if (userError || userData?.role !== 'admin') {
@@ -64,8 +64,8 @@ serve(async (req) => {
     
     const { data: userRecord } = await supabaseAdmin
       .from('users')
-      .select('id')
-      .eq('id', userId)
+      .select('id, auth_user_id')
+      .eq('auth_user_id', userId)
       .single()
     
     const { data: orgRecord } = await supabaseAdmin
@@ -93,7 +93,7 @@ serve(async (req) => {
         const { data: deletedUserInfo } = await supabaseAdmin
           .from('users')
           .select('email, first_name, last_name')
-          .eq('id', userId)
+          .eq('auth_user_id', userId)
           .maybeSingle()
 
         const deletedUserName = deletedUserInfo 
@@ -148,7 +148,44 @@ serve(async (req) => {
       }
     }
 
-    // STEP 2: Cancella i dati del database
+    // STEP 2: Cancella commissioni collegate
+    if (userRecord) {
+      console.log('💰 Cancellazione commissioni collegate...')
+      
+      // Cancella commissioni dove l'utente è organization_id
+      const { error: commError1 } = await supabaseAdmin
+        .from('commissions')
+        .delete()
+        .eq('organization_id', userRecord.id)
+      
+      if (commError1) {
+        console.error('⚠️ Errore cancellazione commissioni (organization_id):', commError1)
+      }
+      
+      // Cancella commissioni dove l'utente è referred_user_id
+      const { error: commError2 } = await supabaseAdmin
+        .from('commissions')
+        .delete()
+        .eq('referred_user_id', userRecord.id)
+      
+      if (commError2) {
+        console.error('⚠️ Errore cancellazione commissioni (referred_user_id):', commError2)
+      }
+      
+      // Cancella commissioni dove l'utente è referred_organization_id
+      const { error: commError3 } = await supabaseAdmin
+        .from('commissions')
+        .delete()
+        .eq('referred_organization_id', userRecord.id)
+      
+      if (commError3) {
+        console.error('⚠️ Errore cancellazione commissioni (referred_organization_id):', commError3)
+      }
+      
+      console.log('✅ Commissioni cancellate')
+    }
+
+    // STEP 3: Cancella i dati del database
     console.log(`🗑️ Cancellazione dati database per: ${userId}`)
     
     try {
@@ -158,7 +195,7 @@ serve(async (req) => {
         const { error: dbError } = await supabaseAdmin
           .from('users')
           .delete()
-          .eq('id', userId)
+          .eq('auth_user_id', userId)
         
         if (dbError) {
           console.error('⚠️ Errore cancellazione users:', dbError)

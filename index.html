@@ -611,6 +611,34 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="registerBirthdate">Data di Nascita *</label>
+                            <input type="date" id="registerBirthdate" required max="{{TODAY_MINUS_18}}">
+                            <small id="birthdateError" style="color: #dc2626; display: none; margin-top: 4px;"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerSex">Sesso *</label>
+                            <select id="registerSex" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                                <option value="">Seleziona...</option>
+                                <option value="M">Maschio</option>
+                                <option value="F">Femmina</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerCodiceFiscale">Codice Fiscale *</label>
+                            <input type="text" id="registerCodiceFiscale" required placeholder="RSSMRA85M01H501Z" maxlength="16" class="uppercase-input" style="text-transform: uppercase;">
+                            <small id="cfError" style="color: #dc2626; display: none; margin-top: 4px;"></small>
+                            <small id="cfSuccess" style="color: #16a34a; display: none; margin-top: 4px;">✓ Codice Fiscale valido</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerCAP">CAP Residenza *</label>
+                            <input type="text" id="registerCAP" required placeholder="00100" maxlength="5" pattern="[0-9]{5}">
+                            <small style="color: #6b7280; margin-top: 4px;">Inserisci il CAP della tua città</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="registerEmail">Email *</label>
                             <input type="email" id="registerEmail" required placeholder="mario.rossi@test.com">
                         </div>
@@ -630,7 +658,7 @@
                             <input type="text" id="registerReferral" required placeholder="ADMIN001" class="uppercase-input">
                         </div>
 
-                        <button type="submit" class="form-btn form-btn-primary">Registrati</button>
+                        <button type="submit" class="form-btn form-btn-primary" id="registerSubmitBtn">Registrati</button>
                     </form>
 
                     <div class="form-loading" id="registerLoading">
@@ -925,7 +953,20 @@
     </script>
     
     <!-- Login Modal System (NO module type - plain script) -->
+    <script src="assets/js/codice-fiscale.js"></script>
     <script src="assets/js/login-modal.js"></script>
+    
+    <script>
+        // Imposta data massima per campo data nascita (18 anni fa)
+        document.addEventListener('DOMContentLoaded', function() {
+            const birthdateInput = document.getElementById('registerBirthdate');
+            if (birthdateInput) {
+                const oggi = new Date();
+                const maxDate = new Date(oggi.getFullYear() - 18, oggi.getMonth(), oggi.getDate());
+                birthdateInput.max = maxDate.toISOString().split('T')[0];
+            }
+        });
+    </script>
     
     <script>
         // Simple helper functions

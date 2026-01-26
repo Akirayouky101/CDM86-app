@@ -537,9 +537,27 @@ async function handleRegister(event) {
 
     const firstName = document.getElementById('registerFirstname').value.trim();
     const lastName = document.getElementById('registerLastname').value.trim();
+    const birthdate = document.getElementById('registerBirthdate').value;
+    const sesso = document.getElementById('registerSex').value;
+    const codiceFiscale = document.getElementById('registerCodiceFiscale').value.toUpperCase().trim();
+    const cap = document.getElementById('registerCAP').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const referralCode = document.getElementById('registerReferral').value.toUpperCase().trim();
+
+    // VALIDAZIONE 1: Maggiorenne
+    const dataNascita = new Date(birthdate);
+    if (!CodiceFiscale.isMaggiorenne(dataNascita)) {
+        showAlert('⚠️ Devi essere maggiorenne per registrarti alla piattaforma', 'error');
+        return false;
+    }
+
+    // VALIDAZIONE 2: Codice Fiscale
+    const cfValidation = CodiceFiscale.valida(codiceFiscale, firstName, lastName, dataNascita, sesso);
+    if (!cfValidation.valid) {
+        showAlert(`❌ Codice Fiscale non valido: ${cfValidation.error}`, 'error');
+        return false;
+    }
 
     const loading = document.getElementById('registerLoading');
     const form = document.getElementById('registerForm');
@@ -622,6 +640,10 @@ async function handleRegister(event) {
                 data: {
                     first_name: firstName,
                     last_name: lastName,
+                    data_nascita: birthdate,
+                    sesso: sesso,
+                    codice_fiscale: codiceFiscale,
+                    cap_residenza: cap,
                     referral_code_used: referralCode  // 👈 AGGIUNTO!
                 }
             }
@@ -1226,12 +1248,90 @@ window.CompanyWizard = CompanyWizard;
 // AUTO-INITIALIZE
 // ==========================================
 
+
 // Wait for DOM to load and check auth status
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         checkAuthStatus();
+        initFormValidations();
     });
 } else {
     checkAuthStatus();
+    initFormValidations();
+}
+
+// Inizializza validazioni real-time del form
+function initFormValidations() {
+    // Validazione CF real-time
+    const cfInput = document.getElementById('registerCodiceFiscale');
+    const birthdateInput = document.getElementById('registerBirthdate');
+    const sexInput = document.getElementById('registerSex');
+    const firstNameInput = document.getElementById('registerFirstname');
+    const lastNameInput = document.getElementById('registerLastname');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    
+    if (cfInput) {
+        // Validazione quando cambiano i campi
+        const validateCF = () => {
+            const cf = cfInput.value.toUpperCase().trim();
+            const firstName = firstNameInput?.value.trim();
+            const lastName = lastNameInput?.value.trim();
+            const birthdate = birthdateInput?.value;
+            const sex = sexInput?.value;
+            
+            const cfError = document.getElementById('cfError');
+            const cfSuccess = document.getElementById('cfSuccess');
+            
+            if (!cf || cf.length < 16) {
+                cfError.style.display = 'none';
+                cfSuccess.style.display = 'none';
+                return;
+            }
+            
+            if (!firstName || !lastName || !birthdate || !sex) {
+                cfError.textContent = 'Compila prima nome, cognome, data di nascita e sesso';
+                cfError.style.display = 'block';
+                cfSuccess.style.display = 'none';
+                return;
+            }
+            
+            const dataNascita = new Date(birthdate);
+            const validation = CodiceFiscale.valida(cf, firstName, lastName, dataNascita, sex);
+            
+            if (validation.valid) {
+                cfError.style.display = 'none';
+                cfSuccess.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = false;
+            } else {
+                cfError.textContent = validation.error;
+                cfError.style.display = 'block';
+                cfSuccess.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = true;
+            }
+        };
+        
+        cfInput.addEventListener('input', validateCF);
+        birthdateInput?.addEventListener('change', validateCF);
+        sexInput?.addEventListener('change', validateCF);
+        firstNameInput?.addEventListener('input', validateCF);
+        lastNameInput?.addEventListener('input', validateCF);
+    }
+    
+    // Validazione maggiorenne
+    if (birthdateInput) {
+        birthdateInput.addEventListener('change', function() {
+            const dataNascita = new Date(this.value);
+            const birthdateError = document.getElementById('birthdateError');
+            
+            if (!CodiceFiscale.isMaggiorenne(dataNascita)) {
+                birthdateError.textContent = '⚠️ Devi essere maggiorenne (18+) per registrarti';
+                birthdateError.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = true;
+            } else {
+                birthdateError.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
 }
 
