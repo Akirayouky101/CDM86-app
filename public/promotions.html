@@ -1570,7 +1570,7 @@
                                     <span class="price-original">€${originalPrice.toFixed(2)}</span>
                                     <span class="price-final">€${discountedPrice.toFixed(2)}</span>
                                 </div>
-                                <button class="btn-promo" onclick="viewPromotion('${promo.id}')">
+                                <button class="btn-promo" onclick="viewPromotion('${promo.id}', event)">
                                     <span>Dettagli</span>
                                     <i class="fas fa-arrow-right"></i>
                                 </button>
@@ -1657,8 +1657,23 @@
             toggleFavorite(promotionId, event);
         };
         
-        window.viewPromotion = function(promotionId) {
-            window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+        window.viewPromotion = function(promotionId, event) {
+            // Get the card element
+            const cardElement = event?.target?.closest('.promo-card') || 
+                               document.querySelector(`.promo-card[data-id="${promotionId}"]`);
+            
+            if (cardElement) {
+                // Add flip animation
+                cardElement.classList.add('flipping');
+                
+                // Navigate after animation
+                setTimeout(() => {
+                    window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+                }, 600);
+            } else {
+                // Fallback if card not found
+                window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+            }
         };
         
         // Filter state
