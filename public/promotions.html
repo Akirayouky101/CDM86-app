@@ -1520,6 +1520,9 @@
                 return;
             }
             
+            // Show the grid
+            grid.style.display = 'grid';
+            
             grid.innerHTML = promotions.map(promo => {
                 const isFavorite = favoriteIds.has(promo.id);
                 const heartIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
