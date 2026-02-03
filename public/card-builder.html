@@ -942,7 +942,7 @@
         }
 
         // Handle image upload
-        // Handle image upload to Supabase Storage
+        // Handle image upload to Vercel Blob Storage
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -953,8 +953,8 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                alert('⚠️ Immagine troppo grande! Max 5MB');
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                alert('⚠️ Immagine troppo grande! Max 10MB');
                 return;
             }
 
@@ -969,30 +969,28 @@
                     throw new Error('Devi essere loggato per caricare immagini');
                 }
 
-                // Generate unique filename
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+                // Upload to Vercel Blob via API
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', 'card');
+                formData.append('userId', session.user.id);
 
-                // Upload to Supabase Storage
-                const { data, error } = await supabaseClient.storage
-                    .from('organization-images')
-                    .upload(fileName, file, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                const response = await fetch('/api/upload-org', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                if (error) throw error;
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
 
-                // Get public URL
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('organization-images')
-                    .getPublicUrl(fileName);
-
-                currentImage = publicUrlData.publicUrl;
+                const result = await response.json();
+                currentImage = result.url;
                 showImagePreview(currentImage);
                 updatePreview();
 
-                console.log('✅ Image uploaded:', currentImage);
+                console.log('✅ Image uploaded to Vercel Blob:', currentImage);
 
             } catch (error) {
                 console.error('Error uploading image:', error);

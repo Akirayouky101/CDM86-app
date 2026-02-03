@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Crea Promo Card - CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+        }
+
+        .creator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+        }
+
+        .upload-zone.has-image {
+            border-style: solid;
+            border-color: #10b981;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 1rem;
+        }
+
+        .card-preview {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            color: white;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .preview-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .preview-image-container {
+            width: 100%;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-placeholder {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .preview-content {
+            flex: 1;
+        }
+
+        .preview-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .preview-description {
+            font-size: 1.125rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .preview-price {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .preview-original-price {
+            font-size: 1.25rem;
+            text-decoration: line-through;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        .preview-cta {
+            background: #fbbf24;
+            color: #1e3a8a;
+            padding: 1.25rem 2.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .preview-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.5);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-modal.active {
+            display: flex;
+        }
+
+        .success-content {
+            background: white;
+            border-radius: 2rem;
+            padding: 3rem;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .success-url {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 968px) {
+            .creator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Crea la tua Promo Card</h1>
+            <p>Design professionale in pochi click</p>
+        </div>
+
+        <div class="creator-grid">
+            <!-- Editor Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-edit"></i>
+                    Dettagli Promozione
+                </div>
+
+                <div class="form-group">
+                    <label>📸 Immagine Principale</label>
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <div id="uploadContent">
+                            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="upload-text">Carica immagine</div>
+                            <div class="upload-hint">JPG, PNG, GIF - Max 10MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🏷️ Titolo Promozione</label>
+                    <input type="text" id="titleInput" placeholder="es. Pizza Margherita Gratis!" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>📝 Descrizione</label>
+                    <textarea id="descriptionInput" placeholder="Descrivi la tua promozione..." oninput="updatePreview()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>💰 Prezzo Promozionale</label>
+                    <input type="text" id="priceInput" placeholder="es. €9.99 o GRATIS" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>💸 Prezzo Originale (opzionale)</label>
+                    <input type="text" id="originalPriceInput" placeholder="es. €19.99" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>🎯 Call-to-Action</label>
+                    <input type="text" id="ctaInput" placeholder="es. RISCATTA ORA!" value="RISCATTA ORA!" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Categoria</label>
+                    <select id="categoryInput" onchange="updatePreview()">
+                        <option value="food">🍕 Cibo & Drink</option>
+                        <option value="beauty">💇 Bellezza</option>
+                        <option value="wellness">🧘 Benessere</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="entertainment">🎭 Intrattenimento</option>
+                        <option value="travel">✈️ Viaggi</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-eye"></i>
+                    Anteprima Card
+                </div>
+
+                <div class="card-preview" id="cardPreview">
+                    <div class="preview-badge" id="previewBadge">🍕 CIBO & DRINK</div>
+                    
+                    <div class="preview-image-container" id="previewImageContainer">
+                        <div class="preview-placeholder">📸</div>
+                    </div>
+
+                    <div class="preview-content">
+                        <div class="preview-title" id="previewTitle">Titolo Promozione</div>
+                        <div class="preview-description" id="previewDescription">Descrivi qui la tua fantastica offerta!</div>
+                        
+                        <div class="preview-price" id="previewPrice">€ --</div>
+                        <div class="preview-original-price" id="previewOriginalPrice" style="display: none;">€ --</div>
+                        
+                        <button class="preview-cta" id="previewCta">RISCATTA ORA!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <button class="btn btn-primary" onclick="publishPromo()">
+                    <i class="fas fa-rocket"></i> Pubblica Promo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="success-content">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">Promo Pubblicata!</div>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">La tua promozione è online e pronta per essere condivisa!</p>
+            <div class="success-url" id="successUrl"></div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="closeModal()">
+                <i class="fas fa-check"></i> Perfetto!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let supabaseClient;
+        let uploadedImageUrl = null;
+
+        // Inizializza Supabase
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof CDM86_CONFIG !== 'undefined' && CDM86_CONFIG.supabase) {
+                supabaseClient = supabase.createClient(
+                    CDM86_CONFIG.supabase.url, 
+                    CDM86_CONFIG.supabase.anonKey
+                );
+                console.log('✅ Supabase initialized');
+            } else {
+                console.error('❌ Supabase config not found');
+            }
+        });
+
+        const categoryIcons = {
+            food: '🍕 CIBO & DRINK',
+            beauty: '💇 BELLEZZA',
+            wellness: '🧘 BENESSERE',
+            shopping: '🛍️ SHOPPING',
+            entertainment: '🎭 INTRATTENIMENTO',
+            travel: '✈️ VIAGGI'
+        };
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('⚠️ Seleziona un\'immagine!');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('⚠️ Immagine troppo grande! Max 10MB');
+                return;
+            }
+
+            try {
+                const zone = document.getElementById('uploadZone');
+                zone.innerHTML = '<div style="padding: 3rem;"><i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i></div>';
+
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const userId = session?.user?.id || 'anonymous';
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', 'card');
+                formData.append('userId', userId);
+
+                const response = await fetch('/api/upload-org', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Upload failed');
+                }
+
+                uploadedImageUrl = result.url;
+                
+                zone.classList.add('has-image');
+                zone.innerHTML = `<img src="${result.url}" class="preview-image" alt="Uploaded">`;
+
+                updatePreview();
+
+                console.log('✅ Image uploaded:', result.url);
+
+            } catch (error) {
+                console.error('❌ Upload error:', error);
+                alert('❌ Errore upload: ' + error.message);
+                
+                const zone = document.getElementById('uploadZone');
+                zone.innerHTML = `
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Carica immagine</div>
+                    <div class="upload-hint">JPG, PNG, GIF - Max 10MB</div>
+                `;
+            }
+        }
+
+        function updatePreview() {
+            const title = document.getElementById('titleInput').value || 'Titolo Promozione';
+            const description = document.getElementById('descriptionInput').value || 'Descrivi qui la tua fantastica offerta!';
+            const price = document.getElementById('priceInput').value || '€ --';
+            const originalPrice = document.getElementById('originalPriceInput').value;
+            const cta = document.getElementById('ctaInput').value || 'RISCATTA ORA!';
+            const category = document.getElementById('categoryInput').value;
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewDescription').textContent = description;
+            document.getElementById('previewPrice').textContent = price;
+            document.getElementById('previewCta').textContent = cta;
+            document.getElementById('previewBadge').textContent = categoryIcons[category];
+
+            const originalPriceEl = document.getElementById('previewOriginalPrice');
+            if (originalPrice) {
+                originalPriceEl.textContent = originalPrice;
+                originalPriceEl.style.display = 'block';
+            } else {
+                originalPriceEl.style.display = 'none';
+            }
+
+            if (uploadedImageUrl) {
+                document.getElementById('previewImageContainer').innerHTML = `<img src="${uploadedImageUrl}" alt="Promo">`;
+            }
+        }
+
+        async function publishPromo() {
+            const title = document.getElementById('titleInput').value;
+            const description = document.getElementById('descriptionInput').value;
+            const price = document.getElementById('priceInput').value;
+
+            if (!title || !description || !price) {
+                alert('⚠️ Compila almeno Titolo, Descrizione e Prezzo!');
+                return;
+            }
+
+            if (!uploadedImageUrl) {
+                alert('⚠️ Carica un\'immagine per la promo!');
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    alert('⚠️ Devi essere loggato per pubblicare!');
+                    window.location.href = '/public/promotions.html';
+                    return;
+                }
+
+                const slug = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+
+                const promoData = {
+                    title: title,
+                    description: description,
+                    price: parseFloat(price.replace(/[^0-9.]/g, '')) || 0,
+                    original_price: document.getElementById('originalPriceInput').value ? 
+                        parseFloat(document.getElementById('originalPriceInput').value.replace(/[^0-9.]/g, '')) : null,
+                    image_url: uploadedImageUrl,
+                    category: document.getElementById('categoryInput').value,
+                    cta_text: document.getElementById('ctaInput').value,
+                    landing_slug: slug,
+                    organization_id: session.user.id,
+                    is_active: true
+                };
+
+                const { data, error } = await supabaseClient
+                    .from('promotions')
+                    .insert(promoData)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                const landingUrl = `${window.location.origin}/promo/${slug}`;
+                document.getElementById('successUrl').textContent = landingUrl;
+                document.getElementById('successModal').classList.add('active');
+
+                console.log('✅ Promo pubblicata:', data);
+
+            } catch (error) {
+                console.error('❌ Errore pubblicazione:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('titleInput').value = '';
+            document.getElementById('descriptionInput').value = '';
+            document.getElementById('priceInput').value = '';
+            document.getElementById('originalPriceInput').value = '';
+            document.getElementById('ctaInput').value = 'RISCATTA ORA!';
+            uploadedImageUrl = null;
+            
+            const zone = document.getElementById('uploadZone');
+            zone.classList.remove('has-image');
+            zone.innerHTML = `
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Carica immagine</div>
+                <div class="upload-hint">JPG, PNG, GIF - Max 10MB</div>
+            `;
+            
+            updatePreview();
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+            resetForm();
+        }
+    </script>
+</body>
+</html>

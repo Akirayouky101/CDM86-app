@@ -112,6 +112,10 @@
             display: none;
         }
         
+        .hidden {
+            display: none !important;
+        }
+        
         .container {
             max-width: 1200px;
             margin: 30px auto;
@@ -560,6 +564,239 @@
             color: #3b82f6;
             font-size: 14px;
         }
+
+        /* COMPANY MANAGEMENT STYLES */
+        .company-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .company-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .company-card-header h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+        }
+
+        .company-card-description {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .company-card-body {
+            margin-top: 20px;
+        }
+
+        #card-status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        #card-status-badge.published {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        #card-status-badge.draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        #card-preview {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
+
+        #promotions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .promotion-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .promotion-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .promotion-card-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .promotion-card-body {
+            padding: 16px;
+        }
+
+        .promotion-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+        }
+
+        .promotion-card-description {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+
+        .promotion-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .promotion-points {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .promotion-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .promotion-status.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .promotion-status.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1e293b;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+            transform: scale(1.05);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .modal-close {
+            background: #fee2e2;
+            color: #991b1b;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #fecaca;
+            transform: rotate(90deg);
+        }
     </style>
     <script src="/assets/js/config.js"></script>
 </head>
@@ -752,6 +989,77 @@
             <div class="section hidden" id="organization-section">
                 <h3>🏢 Organizzazione</h3>
                 <div id="organization-content"></div>
+            </div>
+
+            <!-- SEZIONE GESTIONE AZIENDA (solo per organizations) -->
+            <div class="section hidden" id="company-management-section">
+                <h3>🏪 Gestione Azienda</h3>
+                
+                <!-- Card Promozione -->
+                <div class="company-card">
+                    <div class="company-card-header">
+                        <div>
+                            <h4>📣 Card Promozione</h4>
+                            <p class="company-card-description">Crea la card che apparirà nella homepage per attirare clienti</p>
+                        </div>
+                        <div id="card-status-badge"></div>
+                    </div>
+                    <div class="company-card-body">
+                        <div id="card-preview"></div>
+                        <button class="btn-primary" onclick="openCardEditor()">
+                            <i class="fas fa-edit"></i> Crea/Modifica Card
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gestione Promozioni -->
+                <div class="company-card">
+                    <div class="company-card-header">
+                        <div>
+                            <h4>🎁 Promozioni e Offerte</h4>
+                            <p class="company-card-description">Crea promozioni professionali con landing page dedicata</p>
+                        </div>
+                        <button class="btn-success" onclick="window.location.href='/public/promo-creator.html'">
+                            <i class="fas fa-magic"></i> Crea Nuova Promo
+                        </button>
+                    </div>
+                    <div class="company-card-body">
+                        <div id="promotions-grid"></div>
+                        <div class="info-box info-box-blue" style="margin-top: 20px;">
+                            <p class="info-text">
+                                <i class="fas fa-lightbulb icon-margin"></i>
+                                <strong>Nuovo Editor Promo!</strong><br>
+                                Crea card professionali in pochi click con anteprima live, upload immagini automatico e landing page personalizzata per condivisione social.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiche Azienda -->
+                <div class="company-card">
+                    <div class="company-card-header">
+                        <div>
+                            <h4>📊 Statistiche</h4>
+                            <p class="company-card-description">Monitora le performance della tua pagina aziendale</p>
+                        </div>
+                    </div>
+                    <div class="company-card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="value" id="card-views">0</div>
+                                <div class="label">Visualizzazioni Card</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="value" id="active-promotions">0</div>
+                                <div class="label">Promozioni Attive</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="value" id="total-redemptions">0</div>
+                                <div class="label">Riscatti Totali</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Segnalazioni Aziende -->
@@ -1197,6 +1505,18 @@
                 // Load organization requests
                 await loadOrganizationRequests();
                 
+                // Load organization card and promotions if user is an organization
+                if (user.is_organization) {
+                    console.log('🏢 User is organization, loading card and promotions...');
+                    const companySection = document.getElementById('company-management-section');
+                    if (companySection) {
+                        companySection.classList.remove('hidden');
+                        companySection.style.display = 'block';
+                    }
+                    await loadOrganizationCard();
+                    await loadOrganizationPromotions();
+                }
+                
                 // Hide loading, show content
                 const loading = document.getElementById('loading');
                 const content = document.getElementById('content');
@@ -1370,6 +1690,496 @@
             }
             
             displayOrgRequests(filtered);
+        };
+        
+        // ============================================
+        // ORGANIZATION CARD & PROMOTIONS MANAGEMENT
+        // ============================================
+        
+        // Load organization card data
+        async function loadOrganizationCard() {
+            try {
+                const { data: userData, error: userError } = await window.supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .single();
+                
+                if (!userData || !userData.is_organization) return;
+                
+                const { data, error } = await window.supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', userData.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error loading organization card:', error);
+                    return;
+                }
+                
+                const cardStatusBadge = document.getElementById('card-status-badge');
+                const cardPreview = document.getElementById('card-preview');
+                
+                if (data && data.card_published) {
+                    cardStatusBadge.innerHTML = '<span style="background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">✅ Pubblicata</span>';
+                    
+                    const cardData = data.card_data || {};
+                    cardPreview.innerHTML = `
+                        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <h4 style="margin: 0 0 8px 0; color: #1e293b;">${cardData.title || 'Card Aziendale'}</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 14px;">${cardData.description ? cardData.description.substring(0, 100) + '...' : 'Nessuna descrizione'}</p>
+                        </div>
+                    `;
+                } else {
+                    cardStatusBadge.innerHTML = '<span style="background: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">📝 Bozza</span>';
+                    cardPreview.innerHTML = '<div style="color: #9ca3af; text-align: center;">Nessuna card creata. Clicca sul pulsante per iniziare!</div>';
+                }
+            } catch (error) {
+                console.error('Error in loadOrganizationCard:', error);
+            }
+        }
+        
+        // Load organization promotions
+        async function loadOrganizationPromotions() {
+            try {
+                const { data: userData, error: userError } = await window.supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .single();
+                
+                if (!userData || !userData.is_organization) return;
+                
+                const { data: promotions, error } = await window.supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .eq('organization_id', userData.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Error loading promotions:', error);
+                    return;
+                }
+                
+                const promotionsGrid = document.getElementById('promotions-grid');
+                if (!promotionsGrid) return;
+                
+                if (!promotions || promotions.length === 0) {
+                    promotionsGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎨</div>
+                            <p style="color: #9ca3af; font-size: 1.125rem;">Nessuna promozione creata ancora</p>
+                            <button onclick="window.location.href='/public/promo-creator.html'" style="margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-magic"></i> Crea la tua prima Promo
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                promotionsGrid.innerHTML = promotions.map(promo => `
+                    <div class="promotion-card">
+                        <div class="promotion-card-image" style="background: ${promo.image_url ? 'transparent' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};">
+                            ${promo.image_url ? `<img src="${promo.image_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="${promo.title}">` : '<div style="color: white; font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">🎁</div>'}
+                        </div>
+                        <div class="promotion-card-body">
+                            <h4 class="promotion-card-title">${promo.title}</h4>
+                            <p class="promotion-card-description">${promo.description.substring(0, 100)}${promo.description.length > 100 ? '...' : ''}</p>
+                            <div class="promotion-card-footer">
+                                <div class="promotion-points">
+                                    ${promo.price ? '€' + promo.price.toFixed(2) : promo.points_required ? promo.points_required + ' punti' : 'GRATIS'}
+                                </div>
+                                <span class="promotion-status ${promo.is_active ? 'active' : 'inactive'}">
+                                    ${promo.is_active ? '✅ Attiva' : '❌ Inattiva'}
+                                </span>
+                            </div>
+                            ${promo.landing_slug ? `
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                                    <a href="/promo/${promo.landing_slug}" target="_blank" style="display: flex; align-items: center; gap: 8px; color: #667eea; text-decoration: none; font-size: 0.875rem; font-weight: 600;">
+                                        <i class="fas fa-external-link-alt"></i> Vedi Landing Page
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error in loadOrganizationPromotions:', error);
+            }
+        }
+        
+        // Open card editor modal
+        window.openCardEditor = async function() {
+            const modal = document.getElementById('cardEditorModal');
+            modal.classList.remove('hidden');
+            
+            // Load existing card if present
+            await loadExistingCardData();
+            
+            // Setup event listeners for live preview
+            setupCardEditorListeners();
+        };
+        
+        // Close card editor
+        window.closeCardEditor = function() {
+            const modal = document.getElementById('cardEditorModal');
+            modal.classList.add('hidden');
+            resetCardEditorForm();
+        };
+        
+        // Load existing card data into editor
+        async function loadExistingCardData() {
+            try {
+                const { data: userData } = await window.supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .single();
+                
+                if (!userData || !userData.is_organization) return;
+                
+                const { data, error } = await window.supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .eq('organization_id', userData.id)
+                    .single();
+                
+                if (data && data.card_data) {
+                    const cardData = data.card_data;
+                    document.getElementById('card-image-url').value = cardData.image_url || '';
+                    document.getElementById('card-title-input').value = cardData.title || '';
+                    document.getElementById('card-desc-input').value = cardData.description || '';
+                    document.getElementById('card-gradient-select').value = cardData.gradient || 'purple';
+                    document.getElementById('cta-text-input').value = cardData.cta_text || '';
+                    document.getElementById('cta-link-input').value = cardData.cta_link || '';
+                    document.getElementById('card-published-toggle').checked = data.card_published || false;
+                    
+                    // Update counters
+                    document.getElementById('title-counter').textContent = (cardData.title || '').length;
+                    document.getElementById('desc-counter').textContent = (cardData.description || '').length;
+                    
+                    // Update preview
+                    updateCardLivePreview();
+                }
+            } catch (error) {
+                console.error('Error loading existing card:', error);
+            }
+        }
+        
+        // Setup event listeners for card editor
+        function setupCardEditorListeners() {
+            // Title counter and preview update
+            const titleInput = document.getElementById('card-title-input');
+            titleInput.addEventListener('input', function() {
+                document.getElementById('title-counter').textContent = this.value.length;
+                updateCardLivePreview();
+            });
+            
+            // Description counter and preview update
+            const descInput = document.getElementById('card-desc-input');
+            descInput.addEventListener('input', function() {
+                document.getElementById('desc-counter').textContent = this.value.length;
+                updateCardLivePreview();
+            });
+            
+            // Image URL preview
+            const imageInput = document.getElementById('card-image-url');
+            imageInput.addEventListener('input', function() {
+                const preview = document.getElementById('card-image-preview');
+                if (this.value) {
+                    preview.innerHTML = `<img src="${this.value}" style="max-width: 100%; max-height: 200px; border-radius: 8px;" onerror="this.parentElement.innerHTML='<span style=color:#ef4444>Immagine non valida</span>'">`;
+                } else {
+                    preview.innerHTML = '<span style="color: #9ca3af;">Anteprima immagine</span>';
+                }
+                updateCardLivePreview();
+            });
+            
+            // Image FILE upload preview
+            const imageFileInput = document.getElementById('card-image-file');
+            imageFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById('card-image-preview');
+                        const imageDataUrl = event.target.result;
+                        preview.innerHTML = `
+                            <img src="${imageDataUrl}" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain;">
+                        `;
+                        // Store in hidden field for later use
+                        document.getElementById('card-image-url').value = imageDataUrl;
+                        updateCardLivePreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Gradient, CTA updates
+            document.getElementById('card-gradient-select').addEventListener('change', updateCardLivePreview);
+            document.getElementById('cta-text-input').addEventListener('input', updateCardLivePreview);
+            document.getElementById('cta-link-input').addEventListener('input', updateCardLivePreview);
+        }
+        
+        // Update live preview card
+        function updateCardLivePreview() {
+            const title = document.getElementById('card-title-input').value;
+            const description = document.getElementById('card-desc-input').value;
+            const imageUrl = document.getElementById('card-image-url').value;
+            const gradient = document.getElementById('card-gradient-select').value;
+            const ctaText = document.getElementById('cta-text-input').value;
+            const ctaLink = document.getElementById('cta-link-input').value;
+            
+            const gradients = {
+                purple: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                blue: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                green: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                orange: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                red: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                pink: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+            };
+            
+            const preview = document.getElementById('card-live-preview');
+            
+            if (!title && !description) {
+                preview.innerHTML = '<div style="text-align: center; color: #9ca3af;">Compila i campi sopra per vedere l\'anteprima</div>';
+                return;
+            }
+            
+            preview.innerHTML = `
+                <div style="background: ${gradients[gradient]}; border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    ${imageUrl ? `<img src="${imageUrl}" style="width: 80px; height: 80px; border-radius: 12px; margin-bottom: 16px; object-fit: cover; border: 3px solid white;">` : ''}
+                    <h3 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700; color: white;">${title || 'Titolo Card'}</h3>
+                    <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.95);">${description || 'Descrizione della tua azienda...'}</p>
+                    ${ctaText ? `<button style="background: white; color: ${gradient === 'purple' ? '#667eea' : '#4facfe'}; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">${ctaText}</button>` : ''}
+                </div>
+            `;
+        }
+        
+        // Reset card editor form
+        function resetCardEditorForm() {
+            document.getElementById('card-image-url').value = '';
+            document.getElementById('card-title-input').value = '';
+            document.getElementById('card-desc-input').value = '';
+            document.getElementById('card-gradient-select').value = 'purple';
+            document.getElementById('cta-text-input').value = '';
+            document.getElementById('cta-link-input').value = '';
+            document.getElementById('card-published-toggle').checked = false;
+            document.getElementById('title-counter').textContent = '0';
+            document.getElementById('desc-counter').textContent = '0';
+            document.getElementById('card-image-preview').innerHTML = '<span style="color: #9ca3af;">Anteprima immagine</span>';
+            document.getElementById('card-live-preview').innerHTML = '<div style="text-align: center; color: #9ca3af;">Compila i campi sopra per vedere l\'anteprima</div>';
+        }
+        
+        // Save organization card
+        window.saveOrganizationCard = async function() {
+            const title = document.getElementById('card-title-input').value.trim();
+            const description = document.getElementById('card-desc-input').value.trim();
+            
+            if (!title || !description) {
+                alert('❌ Titolo e Descrizione sono obbligatori!');
+                return;
+            }
+            
+            try {
+                // Get organization data from organizations table
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .single();
+                
+                if (orgError || !orgData) {
+                    alert('❌ Errore: utente non è un\'organizzazione');
+                    console.error('Organization query error:', orgError);
+                    return;
+                }
+                
+                const cardData = {
+                    title: title,
+                    description: description,
+                    image_url: document.getElementById('card-image-url').value.trim() || null,
+                    gradient: document.getElementById('card-gradient-select').value,
+                    cta_text: document.getElementById('cta-text-input').value.trim() || null,
+                    cta_link: document.getElementById('cta-link-input').value.trim() || null
+                };
+                
+                const published = document.getElementById('card-published-toggle').checked;
+                
+                // Check if card already exists
+                const { data: existingCard } = await window.supabaseClient
+                    .from('organization_pages')
+                    .select('id')
+                    .eq('organization_id', orgData.id)
+                    .single();
+                
+                let error;
+                if (existingCard) {
+                    // Update existing card
+                    const result = await window.supabaseClient
+                        .from('organization_pages')
+                        .update({
+                            card_data: cardData,
+                            card_published: published,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('organization_id', orgData.id);
+                    error = result.error;
+                } else {
+                    // Insert new card
+                    const result = await window.supabaseClient
+                        .from('organization_pages')
+                        .insert({
+                            organization_id: orgData.id,
+                            card_data: cardData,
+                            card_published: published,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        });
+                    error = result.error;
+                }
+                
+                if (error) {
+                    console.error('Error saving card:', error);
+                    alert('❌ Errore nel salvataggio: ' + error.message);
+                    return;
+                }
+                
+                alert('✅ Card salvata con successo!');
+                closeCardEditor();
+                await loadOrganizationCard(); // Refresh preview
+                
+            } catch (error) {
+                console.error('Error in saveOrganizationCard:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
+        
+        // Open create promotion modal
+        window.openCreatePromotionModal = function() {
+            const modal = document.getElementById('createPromotionModal');
+            modal.classList.remove('hidden');
+            setupPromotionModalListeners();
+        };
+        
+        // Close promotion modal
+        window.closePromotionModal = function() {
+            const modal = document.getElementById('createPromotionModal');
+            modal.classList.add('hidden');
+            resetPromotionForm();
+        };
+        
+        // Setup promotion modal listeners
+        function setupPromotionModalListeners() {
+            // Title counter
+            const titleInput = document.getElementById('promo-title-input');
+            titleInput.addEventListener('input', function() {
+                document.getElementById('promo-title-counter').textContent = this.value.length;
+            });
+            
+            // Description counter
+            const descInput = document.getElementById('promo-desc-input');
+            descInput.addEventListener('input', function() {
+                document.getElementById('promo-desc-counter').textContent = this.value.length;
+            });
+            
+            // Image URL preview
+            const imageUrlInput = document.getElementById('promo-image-url');
+            imageUrlInput.addEventListener('input', function() {
+                const preview = document.getElementById('promo-image-preview');
+                if (this.value) {
+                    preview.innerHTML = `<img src="${this.value}" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain;" onerror="this.parentElement.innerHTML='<span style=color:#ef4444>Immagine non valida</span>'">`;
+                } else {
+                    preview.innerHTML = '<span style="color: #9ca3af;">Anteprima immagine</span>';
+                }
+            });
+            
+            // Image FILE upload preview
+            const imageFileInput = document.getElementById('promo-image-file');
+            imageFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById('promo-image-preview');
+                        const imageDataUrl = event.target.result;
+                        preview.innerHTML = `
+                            <img src="${imageDataUrl}" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain;">
+                        `;
+                        // Store in URL field
+                        document.getElementById('promo-image-url').value = imageDataUrl;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Reset promotion form
+        function resetPromotionForm() {
+            document.getElementById('promo-title-input').value = '';
+            document.getElementById('promo-desc-input').value = '';
+            document.getElementById('promo-image-url').value = '';
+            document.getElementById('promo-image-file').value = '';
+            document.getElementById('promo-expiry-input').value = '';
+            document.getElementById('promo-active-toggle').checked = true;
+            document.getElementById('promo-title-counter').textContent = '0';
+            document.getElementById('promo-desc-counter').textContent = '0';
+            document.getElementById('promo-image-preview').innerHTML = '<span style="color: #9ca3af;">Anteprima immagine</span>';
+        }
+        
+        // Save promotion
+        window.savePromotion = async function() {
+            const title = document.getElementById('promo-title-input').value.trim();
+            const description = document.getElementById('promo-desc-input').value.trim();
+            
+            if (!title || !description) {
+                alert('❌ Compila tutti i campi obbligatori (titolo e descrizione)!');
+                return;
+            }
+            
+            try {
+                // Get organization data from organizations table
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .single();
+                
+                if (orgError || !orgData) {
+                    alert('❌ Errore: utente non è un\'organizzazione');
+                    console.error('Organization query error:', orgError);
+                    return;
+                }
+                
+                const promoData = {
+                    organization_id: orgData.id,
+                    title: title,
+                    description: description,
+                    image_url: document.getElementById('promo-image-url').value.trim() || null,
+                    points_required: 0, // Set to 0 since we removed the field
+                    expiry_date: document.getElementById('promo-expiry-input').value || null,
+                    active: document.getElementById('promo-active-toggle').checked,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { error } = await window.supabaseClient
+                    .from('promotions')
+                    .insert(promoData);
+                
+                if (error) {
+                    console.error('Error saving promotion:', error);
+                    alert('❌ Errore nel salvataggio: ' + error.message);
+                    return;
+                }
+                
+                alert('✅ Promozione creata con successo!');
+                closePromotionModal();
+                await loadOrganizationPromotions(); // Refresh grid
+                
+            } catch (error) {
+                console.error('Error in savePromotion:', error);
+                alert('❌ Errore: ' + error.message);
+            }
         };
         
         // Generate QR Code
@@ -3722,6 +4532,285 @@
                         <p>Caricamento rete...</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         MODAL CARD EDITOR AZIENDALE
+         ============================================ -->
+    <div id="cardEditorModal" class="modal-overlay hidden">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>📣 Editor Card Aziendale</h2>
+                <button class="modal-close" onclick="closeCardEditor()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Upload Immagine -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-image"></i> Immagine/Logo Aziendale
+                    </label>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <input 
+                                type="file" 
+                                id="card-image-file" 
+                                accept="image/*"
+                                class="form-control"
+                                style="display: none;"
+                            >
+                            <button 
+                                type="button"
+                                onclick="document.getElementById('card-image-file').click()"
+                                class="btn-secondary"
+                                style="width: 100%; padding: 12px; margin-bottom: 8px;"
+                            >
+                                <i class="fas fa-upload"></i> Carica Immagine
+                            </button>
+                            <input 
+                                type="url" 
+                                id="card-image-url" 
+                                placeholder="oppure incolla URL immagine"
+                                class="form-control"
+                                style="font-size: 13px;"
+                            >
+                        </div>
+                    </div>
+                    <small style="color: #64748b;">Carica un file dal tuo computer o inserisci un URL</small>
+                    <div id="card-image-preview" style="margin-top: 12px; min-height: 120px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                        <span style="color: #9ca3af;">Anteprima immagine</span>
+                    </div>
+                </div>
+
+                <!-- Titolo -->
+                <div class="form-group">
+                    <label for="card-title-input">
+                        <i class="fas fa-heading"></i> Titolo Card *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="card-title-input" 
+                        class="form-control"
+                        maxlength="60" 
+                        placeholder="Es: Benvenuti da [Nome Azienda]"
+                        required
+                    >
+                    <small style="color: #64748b;"><span id="title-counter">0</span>/60 caratteri</small>
+                </div>
+
+                <!-- Descrizione -->
+                <div class="form-group">
+                    <label for="card-desc-input">
+                        <i class="fas fa-align-left"></i> Descrizione *
+                    </label>
+                    <textarea 
+                        id="card-desc-input" 
+                        class="form-control"
+                        rows="4" 
+                        maxlength="200"
+                        placeholder="Descrivi la tua attività e cosa offri agli utenti CDM86..."
+                        required
+                    ></textarea>
+                    <small style="color: #64748b;"><span id="desc-counter">0</span>/200 caratteri</small>
+                </div>
+
+                <!-- Gradient Color -->
+                <div class="form-group">
+                    <label for="card-gradient-select">
+                        <i class="fas fa-palette"></i> Colore Gradiente
+                    </label>
+                    <select id="card-gradient-select" class="form-control">
+                        <option value="purple">🟣 Viola (Default)</option>
+                        <option value="blue">🔵 Blu</option>
+                        <option value="green">🟢 Verde</option>
+                        <option value="orange">🟠 Arancione</option>
+                        <option value="red">🔴 Rosso</option>
+                        <option value="pink">🩷 Rosa</option>
+                    </select>
+                </div>
+
+                <!-- CTA Button -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label for="cta-text-input">
+                            <i class="fas fa-mouse-pointer"></i> Testo Pulsante
+                        </label>
+                        <input 
+                            type="text" 
+                            id="cta-text-input" 
+                            class="form-control"
+                            placeholder="Es: Scopri di più"
+                            maxlength="30"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="cta-link-input">
+                            <i class="fas fa-link"></i> Link Pulsante
+                        </label>
+                        <input 
+                            type="url" 
+                            id="cta-link-input" 
+                            class="form-control"
+                            placeholder="https://tuosito.com"
+                        >
+                    </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div class="form-group">
+                    <label><i class="fas fa-eye"></i> Anteprima Live</label>
+                    <div id="card-live-preview" style="background: #f9fafb; border-radius: 16px; padding: 24px; border: 2px dashed #e5e7eb;">
+                        <div style="text-align: center; color: #9ca3af;">
+                            Compila i campi sopra per vedere l'anteprima
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Publish Toggle -->
+                <div class="form-group" style="background: #fef3c7; padding: 16px; border-radius: 8px; border-left: 4px solid #fbbf24;">
+                    <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" id="card-published-toggle" style="width: 20px; height: 20px;">
+                        <div>
+                            <div style="font-weight: 600; color: #92400e;">
+                                <i class="fas fa-globe"></i> Pubblica card sulla homepage
+                            </div>
+                            <small style="color: #92400e;">
+                                La card sarà visibile a tutti gli utenti nella sezione promozioni
+                            </small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCardEditor()">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="btn-primary" onclick="saveOrganizationCard()">
+                    <i class="fas fa-save"></i> Salva Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         MODAL CREA PROMOZIONE
+         ============================================ -->
+    <div id="createPromotionModal" class="modal-overlay hidden">
+        <div class="modal-container" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>🎁 Nuova Promozione</h2>
+                <button class="modal-close" onclick="closePromotionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Titolo -->
+                <div class="form-group">
+                    <label for="promo-title-input">
+                        <i class="fas fa-tag"></i> Titolo Promozione *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promo-title-input" 
+                        class="form-control"
+                        required 
+                        maxlength="80"
+                        placeholder="Es: Sconto 20% su tutti i prodotti"
+                    >
+                    <small style="color: #64748b;"><span id="promo-title-counter">0</span>/80 caratteri</small>
+                </div>
+
+                <!-- Descrizione -->
+                <div class="form-group">
+                    <label for="promo-desc-input">
+                        <i class="fas fa-align-left"></i> Descrizione *
+                    </label>
+                    <textarea 
+                        id="promo-desc-input" 
+                        class="form-control"
+                        rows="4" 
+                        required 
+                        maxlength="250"
+                        placeholder="Descrivi in dettaglio l'offerta e come gli utenti possono usufruirne..."
+                    ></textarea>
+                    <small style="color: #64748b;"><span id="promo-desc-counter">0</span>/250 caratteri</small>
+                </div>
+
+                <!-- Immagine Upload -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-image"></i> Immagine Promozione
+                    </label>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <input 
+                                type="file" 
+                                id="promo-image-file" 
+                                accept="image/*"
+                                class="form-control"
+                                style="display: none;"
+                            >
+                            <button 
+                                type="button"
+                                onclick="document.getElementById('promo-image-file').click()"
+                                class="btn-secondary"
+                                style="width: 100%; padding: 12px; margin-bottom: 8px;"
+                            >
+                                <i class="fas fa-upload"></i> Carica Immagine
+                            </button>
+                            <input 
+                                type="url" 
+                                id="promo-image-url" 
+                                placeholder="oppure incolla URL immagine"
+                                class="form-control"
+                                style="font-size: 13px;"
+                            >
+                        </div>
+                    </div>
+                    <small style="color: #64748b;">Carica un file o inserisci URL (opzionale - se vuoto verrà usato un gradiente)</small>
+                    <div id="promo-image-preview" style="margin-top: 12px; min-height: 120px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <span style="color: #9ca3af;">Anteprima immagine</span>
+                    </div>
+                </div>
+
+                <!-- Data Scadenza -->
+                <div class="form-group">
+                    <label for="promo-expiry-input">
+                        <i class="fas fa-calendar-alt"></i> Data Scadenza (opzionale)
+                    </label>
+                    <input 
+                        type="date" 
+                        id="promo-expiry-input" 
+                        class="form-control"
+                    >
+                    <small style="color: #64748b;">Lascia vuoto per promozione senza scadenza</small>
+                </div>
+
+                <!-- Attiva -->
+                <div class="form-group" style="background: #d1fae5; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" id="promo-active-toggle" checked style="width: 20px; height: 20px;">
+                        <div>
+                            <div style="font-weight: 600; color: #065f46;">
+                                <i class="fas fa-toggle-on"></i> Attiva immediatamente
+                            </div>
+                            <small style="color: #065f46;">
+                                La promozione sarà subito disponibile agli utenti
+                            </small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closePromotionModal()">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="btn-success" onclick="savePromotion()">
+                    <i class="fas fa-plus-circle"></i> Crea Promozione
+                </button>
             </div>
         </div>
     </div>

@@ -503,7 +503,7 @@ async function handleLogin(event) {
                 if (orgData) {
                     // It's an organization
                     console.log('✅ Organization login:', orgData.name);
-                    window.location.href = '/public/organization-dashboard.html';
+                    window.location.href = '/public/dashboard.html';
                 } else if (userData && userData.role === 'admin') {
                     // It's an admin user
                     console.log('✅ Admin login');

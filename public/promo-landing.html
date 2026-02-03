@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Promozione - CDM86</title>
+    <meta name="description" id="pageDescription" content="Scopri questa incredibile offerta!">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" id="ogTitle" content="Promozione CDM86">
+    <meta property="og:description" id="ogDescription" content="Scopri questa incredibile offerta!">
+    <meta property="og:image" id="ogImage" content="">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" id="twitterTitle" content="Promozione CDM86">
+    <meta property="twitter:description" id="twitterDescription" content="Scopri questa incredibile offerta!">
+    <meta property="twitter:image" id="twitterImage" content="">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .promo-card {
+            background: white;
+            border-radius: 2rem;
+            overflow: hidden;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .promo-badge {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(251, 191, 36, 0.95);
+            color: #1e3a8a;
+            padding: 0.75rem 1.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .promo-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+
+        .promo-content {
+            padding: 3rem;
+        }
+
+        .promo-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .promo-description {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .promo-pricing {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .promo-price {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #667eea;
+        }
+
+        .promo-original-price {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+
+        .promo-savings {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .promo-cta {
+            width: 100%;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1e3a8a;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: 800;
+            font-size: 1.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.4);
+            margin-bottom: 1.5rem;
+        }
+
+        .promo-cta:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(251, 191, 36, 0.5);
+        }
+
+        .promo-cta:active {
+            transform: translateY(-2px);
+        }
+
+        .share-section {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .share-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .share-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .share-btn.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .share-btn.facebook {
+            background: #1877F2;
+            color: white;
+        }
+
+        .share-btn.twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+
+        .share-btn.copy {
+            background: #64748b;
+            color: white;
+        }
+
+        .share-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+        }
+
+        .loading-spinner {
+            font-size: 4rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-screen {
+            text-align: center;
+            color: white;
+            padding: 3rem;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .countdown-badge {
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .promo-title {
+                font-size: 2rem;
+            }
+
+            .promo-price {
+                font-size: 3rem;
+            }
+
+            .promo-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"><i class="fas fa-circle-notch"></i></div>
+        <div style="font-size: 1.25rem; font-weight: 600;">Caricamento promo...</div>
+    </div>
+
+    <div class="promo-card" id="promoCard" style="display: none;">
+        <!-- Content will be injected by JavaScript -->
+    </div>
+
+    <script>
+        let supabaseClient;
+
+        // Get slug from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = window.location.pathname.split('/promo/')[1] || urlParams.get('slug');
+
+        // Initialize Supabase
+        if (typeof CDM86_CONFIG !== 'undefined' && CDM86_CONFIG.supabase) {
+            supabaseClient = supabase.createClient(
+                CDM86_CONFIG.supabase.url,
+                CDM86_CONFIG.supabase.anonKey
+            );
+        }
+
+        async function loadPromo() {
+            if (!slug) {
+                showError('Promo non trovata', 'URL non valido');
+                return;
+            }
+
+            if (!supabaseClient) {
+                showError('Errore di configurazione', 'Impossibile connettersi al database');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .eq('landing_slug', slug)
+                    .eq('is_active', true)
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('Promo non trovata');
+
+                renderPromo(data);
+
+            } catch (error) {
+                console.error('Error loading promo:', error);
+                showError('Promo non trovata', error.message);
+            }
+        }
+
+        function renderPromo(promo) {
+            // Update meta tags
+            document.getElementById('pageTitle').textContent = promo.title + ' - CDM86';
+            document.getElementById('pageDescription').setAttribute('content', promo.description);
+            document.getElementById('ogTitle').setAttribute('content', promo.title);
+            document.getElementById('ogDescription').setAttribute('content', promo.description);
+            document.getElementById('ogImage').setAttribute('content', promo.image_url);
+            document.getElementById('twitterTitle').setAttribute('content', promo.title);
+            document.getElementById('twitterDescription').setAttribute('content', promo.description);
+            document.getElementById('twitterImage').setAttribute('content', promo.image_url);
+
+            // Calculate savings
+            const savings = promo.original_price ? 
+                Math.round(((promo.original_price - promo.price) / promo.original_price) * 100) : 0;
+
+            // Render card
+            const card = document.getElementById('promoCard');
+            card.innerHTML = `
+                <div class="promo-badge">${getCategoryIcon(promo.category)}</div>
+                <img src="${promo.image_url}" alt="${promo.title}" class="promo-image" onerror="this.src='https://via.placeholder.com/600x400/667eea/ffffff?text=CDM86'">
+                
+                <div class="promo-content">
+                    <h1 class="promo-title">${promo.title}</h1>
+                    <p class="promo-description">${promo.description}</p>
+                    
+                    <div class="promo-pricing">
+                        <div class="promo-price">€${promo.price.toFixed(2)}</div>
+                        ${promo.original_price ? `<div class="promo-original-price">€${promo.original_price.toFixed(2)}</div>` : ''}
+                    </div>
+                    
+                    ${savings > 0 ? `<div class="promo-savings">🎉 Risparmi ${savings}%</div>` : ''}
+                    
+                    <button class="promo-cta" onclick="redeemPromo('${promo.id}')">
+                        <i class="fas fa-gift"></i> ${promo.cta_text || 'RISCATTA ORA'}
+                    </button>
+                    
+                    <div class="share-section">
+                        <div class="share-title">Condividi con gli amici</div>
+                        <div class="share-buttons">
+                            <button class="share-btn whatsapp" onclick="shareWhatsApp()" title="Condividi su WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="share-btn facebook" onclick="shareFacebook()" title="Condividi su Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="share-btn twitter" onclick="shareTwitter()" title="Condividi su Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="share-btn copy" onclick="copyLink()" title="Copia link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('loadingScreen').style.display = 'none';
+            card.style.display = 'block';
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                food: '🍕 CIBO & DRINK',
+                beauty: '💇 BELLEZZA',
+                wellness: '🧘 BENESSERE',
+                shopping: '🛍️ SHOPPING',
+                entertainment: '🎭 INTRATTENIMENTO',
+                travel: '✈️ VIAGGI'
+            };
+            return icons[category] || '🎁 OFFERTA SPECIALE';
+        }
+
+        async function redeemPromo(promoId) {
+            // Qui puoi implementare la logica di riscatto
+            alert('🎉 Promo riscattata! Ti invieremo i dettagli via email.');
+            
+            // Log redemption in DB
+            if (supabaseClient) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session) {
+                        await supabaseClient.from('promotion_redemptions').insert({
+                            promotion_id: promoId,
+                            user_id: session.user.id
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error logging redemption:', error);
+                }
+            }
+        }
+
+        function shareWhatsApp() {
+            const text = encodeURIComponent(`Guarda questa offerta: ${document.getElementById('pageTitle').textContent} ${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareFacebook() {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+        }
+
+        function shareTwitter() {
+            const text = encodeURIComponent(document.getElementById('pageTitle').textContent);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            alert('✅ Link copiato negli appunti!');
+        }
+
+        function showError(title, message) {
+            document.getElementById('loadingScreen').innerHTML = `
+                <div class="error-screen">
+                    <div class="error-icon">😢</div>
+                    <div class="error-title">${title}</div>
+                    <p style="font-size: 1.125rem; margin-bottom: 2rem;">${message}</p>
+                    <button class="promo-cta" style="max-width: 300px;" onclick="window.location.href='/public/promotions.html'">
+                        Torna alle Promozioni
+                    </button>
+                </div>
+            `;
+        }
+
+        // Load promo on page load
+        window.addEventListener('DOMContentLoaded', loadPromo);
+    </script>
+</body>
+</html>

@@ -1027,7 +1027,7 @@
             }
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('⚠️ Immagine troppo grande! Max 5MB');
+                alert('⚠️ Immagine troppo grande! Max 10MB');
                 return;
             }
 
@@ -1040,28 +1040,29 @@
                     throw new Error('Devi essere loggato');
                 }
 
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${session.user.id}/main-${Date.now()}.${fileExt}`;
+                // Upload to Vercel Blob via API
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', 'card'); // or 'hero' depending on context
+                formData.append('userId', session.user.id);
 
-                const { data, error } = await supabaseClient.storage
-                    .from('organization-images')
-                    .upload(fileName, file, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                const response = await fetch('/api/upload-org', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                if (error) throw error;
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
 
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('organization-images')
-                    .getPublicUrl(fileName);
-
-                wizardData.mainImage = publicUrlData.publicUrl;
+                const result = await response.json();
+                wizardData.mainImage = result.url;
                 
                 uploadArea.classList.add('has-image');
-                uploadArea.innerHTML = `<img src="${publicUrlData.publicUrl}" class="image-preview" alt="Main image">`;
+                uploadArea.innerHTML = `<img src="${result.url}" class="image-preview" alt="Main image">`;
 
-                console.log('✅ Image uploaded:', wizardData.mainImage);
+                console.log('✅ Image uploaded to Vercel Blob:', wizardData.mainImage);
 
             } catch (error) {
                 console.error('Error:', error);
@@ -1071,7 +1072,7 @@
                     <div class="upload-placeholder">
                         <i class="fas fa-cloud-upload-alt upload-icon"></i>
                         <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Clicca per caricare l'immagine</div>
-                        <small>JPG o PNG, max 5MB</small>
+                        <small>JPG o PNG, max 10MB</small>
                     </div>
                 `;
             }

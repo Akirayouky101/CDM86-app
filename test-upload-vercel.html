@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload Vercel Blob</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .upload-section {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.75rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+        }
+
+        .upload-section.uploading {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .upload-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .type-btn {
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .type-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .type-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .result {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+        .result-title {
+            font-weight: 700;
+            color: #166534;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result.error .result-title {
+            color: #991b1b;
+        }
+
+        .result-url {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #065f46;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            word-break: break-all;
+            margin-bottom: 0.75rem;
+        }
+
+        .result.error .result-url {
+            color: #991b1b;
+        }
+
+        .result-img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #cbd5e1;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info {
+            background: #eff6ff;
+            border: 1px solid #93c5fd;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Upload Vercel Blob</h1>
+        <p class="subtitle">Testa il nuovo endpoint /api/upload-org</p>
+
+        <div class="type-selector">
+            <button class="type-btn active" data-type="card" onclick="selectType('card')">
+                📇 Card
+            </button>
+            <button class="type-btn" data-type="hero" onclick="selectType('hero')">
+                🎨 Hero
+            </button>
+            <button class="type-btn" data-type="about" onclick="selectType('about')">
+                ℹ️ About
+            </button>
+            <button class="type-btn" data-type="logo" onclick="selectType('logo')">
+                🏷️ Logo
+            </button>
+        </div>
+
+        <div class="upload-section" id="uploadSection" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" onchange="handleUpload(event)">
+            <div id="uploadContent">
+                <div class="upload-icon">☁️</div>
+                <div class="upload-text">Clicca per caricare un'immagine</div>
+                <div class="upload-hint">JPG, PNG, GIF - Max 10MB</div>
+            </div>
+        </div>
+
+        <div class="result" id="result">
+            <div class="result-title">
+                <span id="resultIcon">✅</span>
+                <span id="resultText">Upload completato!</span>
+            </div>
+            <div class="result-url" id="resultUrl"></div>
+            <img class="result-img" id="resultImg" alt="Uploaded image">
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ Info:</strong> Questo test usa il mock userId "test-user-123". In produzione userà l'utente autenticato.
+        </div>
+    </div>
+
+    <script>
+        let selectedType = 'card';
+
+        function selectType(type) {
+            selectedType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+        }
+
+        async function handleUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate
+            if (!file.type.startsWith('image/')) {
+                showError('Per favore seleziona un\'immagine!');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showError('Immagine troppo grande! Max 10MB');
+                return;
+            }
+
+            // Show loading
+            const section = document.getElementById('uploadSection');
+            const content = document.getElementById('uploadContent');
+            section.classList.add('uploading');
+            content.innerHTML = '<div class="spinner"></div><div style="margin-top: 1rem; color: #667eea; font-weight: 600;">Caricamento in corso...</div>';
+
+            try {
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', selectedType);
+                formData.append('userId', 'test-user-123'); // Mock user ID
+
+                console.log('📤 Uploading:', {
+                    file: file.name,
+                    type: selectedType,
+                    size: (file.size / 1024).toFixed(2) + ' KB'
+                });
+
+                // Upload
+                const response = await fetch('/api/upload-org', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Upload failed');
+                }
+
+                console.log('✅ Success:', result);
+
+                // Show success
+                showSuccess(result);
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showError(error.message);
+            } finally {
+                // Reset upload section
+                section.classList.remove('uploading');
+                content.innerHTML = `
+                    <div class="upload-icon">☁️</div>
+                    <div class="upload-text">Clicca per caricare un'immagine</div>
+                    <div class="upload-hint">JPG, PNG, GIF - Max 10MB</div>
+                `;
+                event.target.value = ''; // Reset file input
+            }
+        }
+
+        function showSuccess(result) {
+            const resultDiv = document.getElementById('result');
+            const resultUrl = document.getElementById('resultUrl');
+            const resultImg = document.getElementById('resultImg');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultText = document.getElementById('resultText');
+
+            resultDiv.classList.remove('error');
+            resultIcon.textContent = '✅';
+            resultText.textContent = 'Upload completato su Vercel Blob!';
+            
+            resultUrl.innerHTML = `
+                <strong>URL:</strong><br>
+                ${result.url}<br><br>
+                <strong>Type:</strong> ${result.type}<br>
+                <strong>Dimensioni:</strong> ${result.dimensions.width}x${result.dimensions.height}px<br>
+                <strong>Size:</strong> ${(result.size / 1024).toFixed(2)} KB
+            `;
+            
+            resultImg.src = result.url;
+            resultImg.style.display = 'block';
+            
+            resultDiv.classList.add('show');
+        }
+
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            const resultUrl = document.getElementById('resultUrl');
+            const resultImg = document.getElementById('resultImg');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultText = document.getElementById('resultText');
+
+            resultDiv.classList.add('error');
+            resultIcon.textContent = '❌';
+            resultText.textContent = 'Errore durante l\'upload';
+            resultUrl.textContent = message;
+            resultImg.style.display = 'none';
+            
+            resultDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>

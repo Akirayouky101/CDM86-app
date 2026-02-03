@@ -5,7 +5,6 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "nodemon server/index.js",
     "seed": "node server/seed.js",
     "seed:prod": "NODE_ENV=production node server/seed.js",
     "reset:clean": "node reset_db_clean.js",
