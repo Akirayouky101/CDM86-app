@@ -601,6 +601,13 @@
                     return;
                 }
 
+                // Prendi info organizzazione dal profilo utente
+                const { data: userData } = await supabaseClient
+                    .from('users')
+                    .select('first_name, last_name, email')
+                    .eq('id', session.user.id)
+                    .single();
+
                 const slug = title.toLowerCase()
                     .normalize('NFD')
                     .replace(/[\u0300-\u036f]/g, '')
@@ -610,15 +617,18 @@
                 const promoData = {
                     title: title,
                     description: description,
-                    price: parseFloat(price.replace(/[^0-9.]/g, '')) || 0,
+                    slug: slug,
+                    partner_name: userData ? `${userData.first_name} ${userData.last_name}` : 'Partner',
+                    partner_email: userData?.email || session.user.email,
+                    category: document.getElementById('categoryInput').value,
+                    image_url: uploadedImageUrl,
                     original_price: document.getElementById('originalPriceInput').value ? 
                         parseFloat(document.getElementById('originalPriceInput').value.replace(/[^0-9.]/g, '')) : null,
-                    image_url: uploadedImageUrl,
-                    category: document.getElementById('categoryInput').value,
-                    cta_text: document.getElementById('ctaInput').value,
+                    discounted_price: parseFloat(price.replace(/[^0-9.]/g, '')) || 0,
+                    points_cost: 0,
+                    is_active: true,
                     landing_slug: slug,
-                    organization_id: session.user.id,
-                    is_active: true
+                    cta_text: document.getElementById('ctaInput').value
                 };
 
                 const { data, error } = await supabaseClient
