@@ -1527,26 +1527,30 @@
                 
                 const originalPrice = parseFloat(promo.original_price) || 0;
                 const discountedPrice = parseFloat(promo.discounted_price) || originalPrice;
+                const description = promo.short_description || promo.description || 'Nessuna descrizione';
+                const title = promo.title || 'Promo';
+                const partnerName = promo.partner_name || 'Partner';
+                const imageUrl = promo.image_url || '/assets/images/placeholder.jpg';
                 
                 return `
                     <div class="promo-card" data-id="${promo.id}">
                         <div class="promo-image">
-                            <img src="${promo.image_url || '/assets/images/placeholder.jpg'}" alt="${promo.title}">
+                            <img src="${imageUrl}" alt="${title}" onerror="this.src='/assets/images/placeholder.jpg'">
                             <button class="promo-favorite ${favoriteClass}" onclick="toggleFavorite('${promo.id}', event)" aria-label="Toggle favorite">
                                 <i class="${heartIcon}"></i>
                             </button>
                         </div>
                         <div class="promo-content">
                             <div class="promo-header">
-                                <h3 class="promo-title">${promo.title}</h3>
+                                <h3 class="promo-title">${title}</h3>
                                 <div class="promo-category-badge">
                                     <i class="fas fa-tag"></i>
                                 </div>
                             </div>
-                            <p class="promo-description">${promo.short_description || promo.description}</p>
+                            <p class="promo-description">${description}</p>
                             <div class="promo-partner">
                                 <i class="fas fa-store"></i>
-                                <span>${promo.partner_name}</span>
+                                <span>${partnerName}</span>
                             </div>
                             <div class="promo-footer">
                                 <div class="promo-price">
