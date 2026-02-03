@@ -187,6 +187,80 @@
             overflow-y: auto;
         }
 
+        .section-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .section-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .section-option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .section-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .section-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .section-option i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .section-option h4 {
+            font-size: 0.9rem;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .active-sections {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .active-sections h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        .section-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            margin: 5px;
+            border: 2px solid #667eea;
+            color: #667eea;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .section-chip i {
+            cursor: pointer;
+        }
+
         .editable-section {
             cursor: pointer;
             position: relative;
@@ -362,9 +436,9 @@
         <div class="steps">
             <div class="step active" id="step1">
                 <span class="step-number">1</span>
-                <span>Scegli Template</span>
+                <span>Aggiungi Sezioni</span>
             </div>
-            <div class="step" id="step2">
+            <div class="step active" id="step2">
                 <span class="step-number">2</span>
                 <span>Personalizza</span>
             </div>
@@ -374,69 +448,58 @@
             </div>
         </div>
 
-        <!-- Step 1: Template Selection -->
-        <div id="templateSelection">
-            <div class="template-grid">
-                <!-- Template 1: Modern Minimal -->
-                <div class="template-card" onclick="selectTemplate('modern')">
-                    <div class="template-preview template-modern">
-                        <div class="template-badge">POPOLARE</div>
-                        <h1 class="editable-section">Il Tuo Titolo</h1>
-                        <p class="editable-section">Descrizione della tua offerta straordinaria che attirerà tutti i clienti.</p>
-                        <span class="cta-button">SCOPRI DI PIÙ</span>
-                    </div>
-                    <div class="template-info">
-                        <h3>Modern Minimal</h3>
-                        <p>Design pulito e professionale, perfetto per servizi e prodotti premium.</p>
-                    </div>
-                </div>
-
-                <!-- Template 2: Bold Impact -->
-                <div class="template-card" onclick="selectTemplate('bold')">
-                    <div class="template-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; text-align: center;">
-                        <div class="template-badge" style="background: white; color: #667eea;">IMPATTO</div>
-                        <h1 style="font-size: 3rem; margin-bottom: 20px;">SUPER OFFERTA</h1>
-                        <p style="font-size: 1.5rem; margin-bottom: 30px;">Fino a -50%</p>
-                        <span style="background: white; color: #667eea; padding: 15px 40px; border-radius: 50px; font-weight: 700; display: inline-block;">APPROFITTA ORA</span>
-                    </div>
-                    <div class="template-info">
-                        <h3>Bold Impact</h3>
-                        <p>Design d'impatto con colori vivaci, ideale per promozioni e sconti importanti.</p>
-                    </div>
-                </div>
-
-                <!-- Template 3: Elegant Story -->
-                <div class="template-card" onclick="selectTemplate('elegant')">
-                    <div class="template-preview" style="padding: 40px; background: #f8fafc;">
-                        <div class="template-badge">ELEGANTE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
-                            <div>
-                                <h2 style="font-size: 2rem; color: #1e293b; margin-bottom: 15px;">La Tua Storia</h2>
-                                <p style="color: #64748b; line-height: 1.8;">Racconta la storia del tuo brand in modo elegante e coinvolgente.</p>
-                            </div>
-                            <div style="background: #cbd5e1; height: 200px; border-radius: 12px;"></div>
-                        </div>
-                    </div>
-                    <div class="template-info">
-                        <h3>Elegant Story</h3>
-                        <p>Layout elegante con immagini e testo affiancati, perfetto per storytelling.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 2: Editor -->
-        <div class="editor-container" id="editorContainer">
+        <!-- Editor (no template selection) -->
+        <div class="editor-container active" id="editorContainer">
             <div class="preview-panel" id="livePreview">
                 <!-- Anteprima live del template selezionato -->
             </div>
 
             <div class="controls-panel">
-                <h2 style="margin-bottom: 20px;">Personalizza</h2>
+                <h2 style="margin-bottom: 20px;">Aggiungi Sezioni (max 5)</h2>
+                
+                <!-- Active Sections -->
+                <div class="active-sections">
+                    <h3>📋 Sezioni Attive (<span id="sectionCount">1</span>/5)</h3>
+                    <div id="activeSectionsList"></div>
+                </div>
+
+                <!-- Section Selector -->
+                <div class="section-selector">
+                    <div class="section-option" data-section="hero" onclick="addSection('hero')">
+                        <i class="fas fa-star"></i>
+                        <h4>Hero</h4>
+                        <small>Titolo + CTA</small>
+                    </div>
+                    <div class="section-option" data-section="about" onclick="addSection('about')">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Chi Siamo</h4>
+                        <small>Descrizione</small>
+                    </div>
+                    <div class="section-option" data-section="services" onclick="addSection('services')">
+                        <i class="fas fa-th"></i>
+                        <h4>Servizi</h4>
+                        <small>3 card</small>
+                    </div>
+                    <div class="section-option" data-section="gallery" onclick="addSection('gallery')">
+                        <i class="fas fa-images"></i>
+                        <h4>Galleria</h4>
+                        <small>Grid foto</small>
+                    </div>
+                    <div class="section-option" data-section="contact" onclick="addSection('contact')">
+                        <i class="fas fa-phone"></i>
+                        <h4>Contatti</h4>
+                        <small>Info + form</small>
+                    </div>
+                </div>
+
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+                <h2 style="margin-bottom: 20px;">Personalizza Sezioni</h2>
                 
                 <div class="control-group">
                     <label>Titolo Principale</label>
                     <input type="text" id="titleInput" placeholder="Il tuo titolo accattivante" onchange="updatePreview()">
+                </div>
                 </div>
 
                 <div class="control-group">
@@ -462,10 +525,6 @@
                 <button class="btn-primary" onclick="publishLanding()">
                     <i class="fas fa-rocket"></i> Pubblica Landing Page
                 </button>
-
-                <button class="btn-secondary" onclick="backToTemplates()">
-                    <i class="fas fa-arrow-left"></i> Cambia Template
-                </button>
             </div>
         </div>
     </div>
@@ -475,6 +534,161 @@
     <script>
         let selectedTemplate = null;
         let uploadedImageUrl = null;
+        let activeSections = ['hero']; // Hero sempre presente
+        const MAX_SECTIONS = 5;
+
+        // Section Templates
+        const sectionTemplates = {
+            hero: {
+                name: 'Hero',
+                icon: 'fa-star',
+                html: `
+                    <div class="section-hero" style="text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 900;">[[TITLE]]</h1>
+                        <p style="font-size: 1.5rem; margin-bottom: 40px; opacity: 0.95;">[[DESCRIPTION]]</p>
+                        <button style="background: white; color: #667eea; padding: 20px 60px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.2rem; cursor: pointer;">[[CTA]]</button>
+                    </div>
+                `
+            },
+            about: {
+                name: 'Chi Siamo',
+                icon: 'fa-info-circle',
+                html: `
+                    <div class="section-about" style="padding: 80px 40px; background: white;">
+                        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                            <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 30px;">Chi Siamo</h2>
+                            <p style="font-size: 1.2rem; line-height: 1.8; color: #64748b;">La nostra azienda si distingue per professionalità e qualità. Da oltre 10 anni offriamo servizi eccellenti ai nostri clienti, garantendo sempre il massimo della soddisfazione.</p>
+                        </div>
+                    </div>
+                `
+            },
+            services: {
+                name: 'Servizi',
+                icon: 'fa-th',
+                html: `
+                    <div class="section-services" style="padding: 80px 40px; background: #f8fafc;">
+                        <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 50px; text-align: center;">I Nostri Servizi</h2>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1200px; margin: 0 auto;">
+                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <i class="fas fa-star" style="font-size: 3rem; color: #667eea; margin-bottom: 20px;"></i>
+                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 1</h3>
+                                <p style="color: #64748b;">Descrizione del primo servizio eccezionale che offriamo.</p>
+                            </div>
+                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <i class="fas fa-heart" style="font-size: 3rem; color: #f43f5e; margin-bottom: 20px;"></i>
+                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 2</h3>
+                                <p style="color: #64748b;">Descrizione del secondo servizio di alta qualità.</p>
+                            </div>
+                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <i class="fas fa-rocket" style="font-size: 3rem; color: #10b981; margin-bottom: 20px;"></i>
+                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 3</h3>
+                                <p style="color: #64748b;">Descrizione del terzo servizio innovativo.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            gallery: {
+                name: 'Galleria',
+                icon: 'fa-images',
+                html: `
+                    <div class="section-gallery" style="padding: 80px 40px; background: white;">
+                        <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 50px; text-align: center;">I Nostri Lavori</h2>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto;">
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
+                        </div>
+                    </div>
+                `
+            },
+            contact: {
+                name: 'Contatti',
+                icon: 'fa-phone',
+                html: `
+                    <div class="section-contact" style="padding: 80px 40px; background: #1e293b; color: white;">
+                        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+                            <h2 style="font-size: 2.5rem; margin-bottom: 30px;">Contattaci</h2>
+                            <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9;">Siamo a tua disposizione per qualsiasi informazione</p>
+                            <div style="text-align: left; margin-bottom: 30px;">
+                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-phone" style="margin-right: 15px; color: #667eea;"></i> +39 123 456 7890</p>
+                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-envelope" style="margin-right: 15px; color: #667eea;"></i> info@azienda.it</p>
+                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-map-marker-alt" style="margin-right: 15px; color: #667eea;"></i> Via Roma 123, Milano</p>
+                            </div>
+                            <button style="background: #667eea; color: white; padding: 18px 50px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%;">RICHIEDI INFORMAZIONI</button>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        function addSection(sectionType) {
+            if (activeSections.length >= MAX_SECTIONS) {
+                alert('Puoi aggiungere massimo 5 sezioni!');
+                return;
+            }
+
+            if (activeSections.includes(sectionType)) {
+                alert('Questa sezione è già stata aggiunta!');
+                return;
+            }
+
+            activeSections.push(sectionType);
+            updateActiveSections();
+            updatePreview();
+        }
+
+        function removeSection(sectionType) {
+            if (sectionType === 'hero') {
+                alert('La sezione Hero è obbligatoria!');
+                return;
+            }
+
+            activeSections = activeSections.filter(s => s !== sectionType);
+            updateActiveSections();
+            updatePreview();
+        }
+
+        function updateActiveSections() {
+            const count = document.getElementById('sectionCount');
+            const list = document.getElementById('activeSectionsList');
+            
+            count.textContent = activeSections.length;
+
+            // Update chips
+            list.innerHTML = activeSections.map(section => {
+                const template = sectionTemplates[section];
+                const canRemove = section !== 'hero';
+                return `
+                    <span class="section-chip">
+                        <i class="fas ${template.icon}"></i>
+                        ${template.name}
+                        ${canRemove ? `<i class="fas fa-times" onclick="removeSection('${section}')"></i>` : ''}
+                    </span>
+                `;
+            }).join('');
+
+            // Update section selector buttons
+            document.querySelectorAll('.section-option').forEach(option => {
+                const type = option.dataset.section;
+                if (activeSections.includes(type)) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+                
+                if (activeSections.length >= MAX_SECTIONS && !activeSections.includes(type)) {
+                    option.classList.add('disabled');
+                    option.style.pointerEvents = 'none';
+                } else if (!activeSections.includes(type)) {
+                    option.classList.remove('disabled');
+                    option.style.pointerEvents = 'auto';
+                }
+            });
+        }
 
         function selectTemplate(template) {
             selectedTemplate = template;
@@ -485,64 +699,35 @@
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
 
-            // Load template
-            loadTemplatePreview(template);
-        }
-
-        function loadTemplatePreview(template) {
-            const preview = document.getElementById('livePreview');
-            
-            if (template === 'modern') {
-                preview.innerHTML = `
-                    <div style="text-align: center; padding: 60px 40px;">
-                        <h1 id="previewTitle" style="font-size: 3rem; color: #1e293b; margin-bottom: 30px;">Il Tuo Titolo</h1>
-                        <p id="previewDescription" style="color: #64748b; font-size: 1.2rem; line-height: 1.8; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">Descrizione della tua offerta straordinaria che attirerà tutti i clienti.</p>
-                        <div id="previewImageContainer" style="margin-bottom: 40px; display: none;">
-                            <img id="previewImg" style="max-width: 100%; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
-                        </div>
-                        <button id="previewCta" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 60px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.2rem; cursor: pointer;">SCOPRI DI PIÙ</button>
-                    </div>
-                `;
-            } else if (template === 'bold') {
-                preview.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 40px; text-align: center; min-height: 500px; display: flex; flex-direction: column; justify-content: center;">
-                        <h1 id="previewTitle" style="font-size: 4rem; margin-bottom: 30px; font-weight: 900; text-transform: uppercase;">SUPER OFFERTA</h1>
-                        <p id="previewDescription" style="font-size: 1.8rem; margin-bottom: 50px; opacity: 0.95;">Fino a -50% su tutti i prodotti</p>
-                        <div id="previewImageContainer" style="margin-bottom: 40px; display: none;">
-                            <img id="previewImg" style="max-width: 80%; border-radius: 20px; margin: 0 auto; display: block;">
-                        </div>
-                        <div>
-                            <button id="previewCta" style="background: white; color: #667eea; padding: 25px 70px; border: none; border-radius: 50px; font-weight: 900; font-size: 1.3rem; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">APPROFITTA ORA</button>
-                        </div>
-                    </div>
-                `;
-            } else if (template === 'elegant') {
-                preview.innerHTML = `
-                    <div style="padding: 60px 40px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
-                            <div>
-                                <h1 id="previewTitle" style="font-size: 2.8rem; color: #1e293b; margin-bottom: 25px; line-height: 1.2;">La Tua Storia Inizia Qui</h1>
-                                <p id="previewDescription" style="color: #64748b; font-size: 1.1rem; line-height: 1.9; margin-bottom: 35px;">Racconta la storia del tuo brand in modo elegante e coinvolgente. Crea una connessione emotiva con i tuoi clienti.</p>
-                                <button id="previewCta" style="background: #1e293b; color: white; padding: 18px 45px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer;">SCOPRI LA STORIA</button>
-                            </div>
-                            <div id="previewImageContainer">
-                                <div id="placeholderImage" style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 400px; border-radius: 20px;"></div>
-                                <img id="previewImg" style="width: 100%; border-radius: 20px; display: none;">
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+            // Initialize with hero section
+            activeSections = ['hero'];
+            updateActiveSections();
+            updatePreview();
         }
 
         function updatePreview() {
-            const title = document.getElementById('titleInput').value;
-            const description = document.getElementById('descriptionInput').value;
-            const cta = document.getElementById('ctaInput').value;
+            const preview = document.getElementById('livePreview');
+            const title = document.getElementById('titleInput')?.value || 'Il Tuo Titolo Fantastico';
+            const description = document.getElementById('descriptionInput')?.value || 'Scopri la nostra incredibile offerta esclusiva';
+            const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
 
-            if (title) document.getElementById('previewTitle').textContent = title;
-            if (description) document.getElementById('previewDescription').textContent = description;
-            if (cta) document.getElementById('previewCta').textContent = cta;
+            // Build HTML from active sections
+            let html = '';
+            activeSections.forEach(sectionType => {
+                let sectionHtml = sectionTemplates[sectionType].html;
+                
+                // Replace placeholders only for hero section
+                if (sectionType === 'hero') {
+                    sectionHtml = sectionHtml
+                        .replace('[[TITLE]]', title)
+                        .replace('[[DESCRIPTION]]', description)
+                        .replace('[[CTA]]', cta);
+                }
+                
+                html += sectionHtml;
+            });
+
+            preview.innerHTML = html;
         }
 
         async function handleImageUpload(event) {
@@ -589,17 +774,76 @@
             }
         }
 
-        function backToTemplates() {
-            document.getElementById('templateSelection').style.display = 'block';
-            document.getElementById('editorContainer').classList.remove('active');
-            document.getElementById('step1').classList.add('active');
-            document.getElementById('step2').classList.remove('active');
+        async function publishLanding() {
+            const title = document.getElementById('titleInput')?.value;
+            const description = document.getElementById('descriptionInput')?.value;
+            const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
+
+            if (!title || !description) {
+                alert('Compila almeno titolo e descrizione!');
+                return;
+            }
+
+            // Generate slug from title
+            const slug = title.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .substring(0, 50);
+
+            // Save to database
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    alert('Devi essere loggato!');
+                    return;
+                }
+
+                // Get organization
+                const { data: orgData } = await supabase
+                    .from('users')
+                    .select('organization_id')
+                    .eq('id', user.id)
+                    .single();
+
+                const landingData = {
+                    organization_id: orgData.organization_id,
+                    title: title,
+                    description: description,
+                    landing_slug: slug,
+                    cta_text: cta,
+                    template_type: selectedTemplate,
+                    sections: JSON.stringify(activeSections),
+                    image_url: uploadedImageUrl,
+                    is_active: true,
+                    created_at: new Date().toISOString()
+                };
+
+                const { data, error } = await supabase
+                    .from('promotions')
+                    .insert([landingData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                alert(`✅ Landing Page pubblicata!\n\nURL: https://cdm86.com/promo/${slug}`);
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = '/public/organization-dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Errore nella pubblicazione: ' + error.message);
+            }
         }
 
-        async function publishLanding() {
-            // TODO: Implement saving to database
-            alert('Landing page creata con successo! (Funzione in sviluppo)');
-        }
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateActiveSections();
+            updatePreview();
+        });
     </script>
 </body>
 </html>
