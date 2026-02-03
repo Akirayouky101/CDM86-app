@@ -1535,9 +1535,19 @@
                 const partnerName = promo.partner_name || 'Partner';
                 const imageUrl = promo.image_url || '/assets/images/placeholder.jpg';
                 
+                // Calculate discount percentage
+                const discountPercent = originalPrice > 0 
+                    ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+                    : 0;
+                
+                const discountBadge = discountPercent > 0 
+                    ? `<div class="promo-badge">-${discountPercent}%</div>` 
+                    : '';
+                
                 return `
                     <div class="promo-card" data-id="${promo.id}">
                         <div class="promo-image">
+                            ${discountBadge}
                             <img src="${imageUrl}" alt="${title}" onerror="this.src='/assets/images/placeholder.jpg'">
                             <button class="promo-favorite ${favoriteClass}" onclick="toggleFavorite('${promo.id}', event)" aria-label="Toggle favorite">
                                 <i class="${heartIcon}"></i>
