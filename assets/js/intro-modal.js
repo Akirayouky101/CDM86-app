@@ -8,7 +8,7 @@
   'use strict';
 
   const STORAGE_KEY = 'cdm86_intro_seen';
-  const STEP_DURATION = 3200; // ms per step automatico
+  const STEP_DURATION = 5000; // ms per step automatico
 
   const STEPS = [
     {
