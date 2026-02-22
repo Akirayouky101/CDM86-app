@@ -340,15 +340,15 @@
     overlay.style.animation = 'im-fade-out 0.35s ease forwards';
     setTimeout(() => overlay.remove(), 350);
     // Salva nel localStorage per non mostrarlo di nuovo
-    try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) { /* noop */ }
+    try { localStorage.setItem(STORAGE_KEY, 'permanent'); } catch (e) { /* noop */ }
   }
 
   // ─── Init ──────────────────────────────────────────────────────
 
   function init() {
-    // Non mostrare se già visto
+    // Non mostrare se già visto (solo dopo aver cliccato il bottone "Ho capito")
     try {
-      if (localStorage.getItem(STORAGE_KEY)) return;
+      if (localStorage.getItem(STORAGE_KEY) === 'permanent') return;
     } catch (e) { /* noop */ }
 
     const overlay = buildModal();
@@ -417,8 +417,8 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    // Piccolo delay per non bloccare il render della pagina
-    setTimeout(init, 300);
+    // Delay per non bloccare il render della pagina
+    setTimeout(init, 500);
   }
 
 })();
