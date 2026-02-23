@@ -420,6 +420,131 @@
         .hidden {
             display: none;
         }
+
+        /* Social Links Section */
+        .social-links-section {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 25px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .social-links-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-link-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .social-link-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .social-link-icon.facebook { background: #1877f2; }
+        .social-link-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .social-link-icon.twitter { background: #000000; }
+        .social-link-icon.linkedin { background: #0a66c2; }
+        .social-link-icon.tiktok { background: #010101; }
+        .social-link-icon.whatsapp { background: #25d366; }
+        .social-link-icon.website { background: #667eea; }
+
+        .social-link-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .social-link-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Social Section Preview in Landing */
+        .landing-social-bar {
+            background: #1e293b;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .landing-social-bar h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .landing-social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .landing-social-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .landing-social-link:hover {
+            transform: translateY(-4px) scale(1.1);
+        }
+
+        /* Published URL box */
+        .published-url-box {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .published-url-box.visible {
+            display: block;
+        }
+
+        .published-url-box p {
+            color: #065f46;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .published-url-box .url-text {
+            color: #0d9488;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -490,6 +615,11 @@
                         <h4>Contatti</h4>
                         <small>Info + form</small>
                     </div>
+                    <div class="section-option" data-section="social" onclick="addSection('social')">
+                        <i class="fas fa-share-alt"></i>
+                        <h4>Social</h4>
+                        <small>Link social</small>
+                    </div>
                 </div>
 
                 <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
@@ -498,18 +628,17 @@
                 
                 <div class="control-group">
                     <label>Titolo Principale</label>
-                    <input type="text" id="titleInput" placeholder="Il tuo titolo accattivante" onchange="updatePreview()">
-                </div>
+                    <input type="text" id="titleInput" placeholder="Il tuo titolo accattivante" oninput="updatePreview()">
                 </div>
 
                 <div class="control-group">
                     <label>Descrizione</label>
-                    <textarea id="descriptionInput" placeholder="Descrivi la tua offerta..." onchange="updatePreview()"></textarea>
+                    <textarea id="descriptionInput" placeholder="Descrivi la tua offerta..." oninput="updatePreview()"></textarea>
                 </div>
 
                 <div class="control-group">
-                    <label>Testo Bottone</label>
-                    <input type="text" id="ctaInput" placeholder="es. SCOPRI DI PIÙ" onchange="updatePreview()">
+                    <label>Testo Bottone CTA</label>
+                    <input type="text" id="ctaInput" placeholder="es. SCOPRI DI PIÙ" oninput="updatePreview()">
                 </div>
 
                 <div class="control-group">
@@ -522,9 +651,51 @@
                     <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 </div>
 
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+                <!-- SOCIAL LINKS SECTION -->
+                <div class="social-links-section">
+                    <h3><i class="fas fa-share-alt" style="color: #667eea;"></i> Link Social Media</h3>
+                    
+                    <div class="social-link-row">
+                        <div class="social-link-icon facebook"><i class="fab fa-facebook-f"></i></div>
+                        <input type="url" id="socialFacebook" placeholder="https://facebook.com/tuapagina" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon instagram"><i class="fab fa-instagram"></i></div>
+                        <input type="url" id="socialInstagram" placeholder="https://instagram.com/tuoprofilo" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon twitter"><i class="fab fa-x-twitter"></i></div>
+                        <input type="url" id="socialTwitter" placeholder="https://x.com/tuoprofilo" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+                        <input type="url" id="socialLinkedin" placeholder="https://linkedin.com/company/tuaazienda" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon tiktok"><i class="fab fa-tiktok"></i></div>
+                        <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@tuoprofilo" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+                        <input type="url" id="socialWhatsapp" placeholder="https://wa.me/39XXXXXXXXXX" oninput="updatePreview()">
+                    </div>
+                    <div class="social-link-row">
+                        <div class="social-link-icon website"><i class="fas fa-globe"></i></div>
+                        <input type="url" id="socialWebsite" placeholder="https://www.tuosito.it" oninput="updatePreview()">
+                    </div>
+                </div>
+
                 <button class="btn-primary" onclick="publishLanding()">
                     <i class="fas fa-rocket"></i> Pubblica Landing Page
                 </button>
+
+                <!-- Published URL Box -->
+                <div class="published-url-box" id="publishedUrlBox">
+                    <p>✅ Landing Page Pubblicata!</p>
+                    <div class="url-text" id="publishedUrlText"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -535,9 +706,22 @@
         let selectedTemplate = null;
         let uploadedImageUrl = null;
         let activeSections = ['hero']; // Hero sempre presente
-        const MAX_SECTIONS = 5;
+        const MAX_SECTIONS = 6;
+        let supabaseClient = null;
 
-        // Section Templates
+        // Init Supabase
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
+                supabaseClient = supabase.createClient(
+                    CDM86_CONFIG.supabase.url,
+                    CDM86_CONFIG.supabase.anonKey
+                );
+            }
+            updateActiveSections();
+            updatePreview();
+        });
+
+        // ─── Section Templates ──────────────────────────────────────────────────
         const sectionTemplates = {
             hero: {
                 name: 'Hero',
@@ -546,7 +730,7 @@
                     <div class="section-hero" style="text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                         <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 900;">[[TITLE]]</h1>
                         <p style="font-size: 1.5rem; margin-bottom: 40px; opacity: 0.95;">[[DESCRIPTION]]</p>
-                        <button style="background: white; color: #667eea; padding: 20px 60px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.2rem; cursor: pointer;">[[CTA]]</button>
+                        <a href="[[CTA_LINK]]" style="background: white; color: #667eea; padding: 20px 60px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.2rem; cursor: pointer; text-decoration: none; display: inline-block;">[[CTA]]</a>
                     </div>
                 `
             },
@@ -622,20 +806,24 @@
                         </div>
                     </div>
                 `
+            },
+            social: {
+                name: 'Social',
+                icon: 'fa-share-alt',
+                html: `[[SOCIAL_HTML]]`
             }
         };
 
+        // ─── Section Management ──────────────────────────────────────────────────
         function addSection(sectionType) {
             if (activeSections.length >= MAX_SECTIONS) {
-                alert('Puoi aggiungere massimo 5 sezioni!');
+                alert('Puoi aggiungere massimo ' + MAX_SECTIONS + ' sezioni!');
                 return;
             }
-
             if (activeSections.includes(sectionType)) {
                 alert('Questa sezione è già stata aggiunta!');
                 return;
             }
-
             activeSections.push(sectionType);
             updateActiveSections();
             updatePreview();
@@ -646,7 +834,6 @@
                 alert('La sezione Hero è obbligatoria!');
                 return;
             }
-
             activeSections = activeSections.filter(s => s !== sectionType);
             updateActiveSections();
             updatePreview();
@@ -658,7 +845,6 @@
             
             count.textContent = activeSections.length;
 
-            // Update chips
             list.innerHTML = activeSections.map(section => {
                 const template = sectionTemplates[section];
                 const canRemove = section !== 'hero';
@@ -671,7 +857,6 @@
                 `;
             }).join('');
 
-            // Update section selector buttons
             document.querySelectorAll('.section-option').forEach(option => {
                 const type = option.dataset.section;
                 if (activeSections.includes(type)) {
@@ -679,7 +864,6 @@
                 } else {
                     option.classList.remove('selected');
                 }
-                
                 if (activeSections.length >= MAX_SECTIONS && !activeSections.includes(type)) {
                     option.classList.add('disabled');
                     option.style.pointerEvents = 'none';
@@ -690,70 +874,93 @@
             });
         }
 
-        function selectTemplate(template) {
-            selectedTemplate = template;
-            
-            // Update UI
-            document.getElementById('templateSelection').style.display = 'none';
-            document.getElementById('editorContainer').classList.add('active');
-            document.getElementById('step1').classList.remove('active');
-            document.getElementById('step2').classList.add('active');
+        // ─── Build Social Bar HTML ───────────────────────────────────────────────
+        function buildSocialHtml() {
+            const socials = [
+                { id: 'socialFacebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
+                { id: 'socialInstagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
+                { id: 'socialTwitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X / Twitter' },
+                { id: 'socialLinkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
+                { id: 'socialTiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
+                { id: 'socialWhatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
+                { id: 'socialWebsite',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
+            ];
 
-            // Initialize with hero section
-            activeSections = ['hero'];
-            updateActiveSections();
-            updatePreview();
+            const activeLinks = socials.filter(s => {
+                const el = document.getElementById(s.id);
+                return el && el.value.trim() !== '';
+            });
+
+            if (activeLinks.length === 0) {
+                return `
+                    <div class="landing-social-bar">
+                        <h3>Seguici sui Social</h3>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">Aggiungi i tuoi link social nel pannello laterale</p>
+                    </div>
+                `;
+            }
+
+            const iconsHtml = activeLinks.map(s => {
+                const url = document.getElementById(s.id).value.trim();
+                return `<a href="${url}" class="landing-social-link" style="background: ${s.color};" target="_blank" rel="noopener" title="${s.label}">
+                    <i class="${s.icon}"></i>
+                </a>`;
+            }).join('');
+
+            return `
+                <div class="landing-social-bar">
+                    <h3>Seguici sui Social</h3>
+                    <div class="landing-social-icons">${iconsHtml}</div>
+                </div>
+            `;
         }
 
+        // ─── Live Preview ────────────────────────────────────────────────────────
         function updatePreview() {
             const preview = document.getElementById('livePreview');
             const title = document.getElementById('titleInput')?.value || 'Il Tuo Titolo Fantastico';
             const description = document.getElementById('descriptionInput')?.value || 'Scopri la nostra incredibile offerta esclusiva';
             const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
 
-            // Build HTML from active sections
+            // Build the current slug for the CTA link preview
+            const slugPreview = title.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                .substring(0, 50);
+
             let html = '';
             activeSections.forEach(sectionType => {
                 let sectionHtml = sectionTemplates[sectionType].html;
-                
-                // Replace placeholders only for hero section
+
                 if (sectionType === 'hero') {
                     sectionHtml = sectionHtml
                         .replace('[[TITLE]]', title)
                         .replace('[[DESCRIPTION]]', description)
-                        .replace('[[CTA]]', cta);
+                        .replace('[[CTA]]', cta)
+                        .replace('[[CTA_LINK]]', `#`);
+                } else if (sectionType === 'social') {
+                    sectionHtml = buildSocialHtml();
                 }
-                
+
                 html += sectionHtml;
             });
 
             preview.innerHTML = html;
         }
 
+        // ─── Image Upload ────────────────────────────────────────────────────────
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Show preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = document.getElementById('previewImage');
                 img.src = e.target.result;
                 img.style.display = 'block';
-
-                // Update live preview
-                const previewImg = document.getElementById('previewImg');
-                if (previewImg) {
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                    document.getElementById('previewImageContainer').style.display = 'block';
-                    const placeholder = document.getElementById('placeholderImage');
-                    if (placeholder) placeholder.style.display = 'none';
-                }
             };
             reader.readAsDataURL(file);
 
-            // Upload to Vercel Blob
             try {
                 const formData = new FormData();
                 formData.append('file', file);
@@ -774,76 +981,217 @@
             }
         }
 
+        // ─── Collect Social Links ─────────────────────────────────────────────────
+        function collectSocialLinks() {
+            return {
+                facebook:  document.getElementById('socialFacebook')?.value.trim()  || null,
+                instagram: document.getElementById('socialInstagram')?.value.trim() || null,
+                twitter:   document.getElementById('socialTwitter')?.value.trim()   || null,
+                linkedin:  document.getElementById('socialLinkedin')?.value.trim()  || null,
+                tiktok:    document.getElementById('socialTiktok')?.value.trim()    || null,
+                whatsapp:  document.getElementById('socialWhatsapp')?.value.trim()  || null,
+                website:   document.getElementById('socialWebsite')?.value.trim()   || null,
+            };
+        }
+
+        // ─── Publish Landing ─────────────────────────────────────────────────────
         async function publishLanding() {
-            const title = document.getElementById('titleInput')?.value;
-            const description = document.getElementById('descriptionInput')?.value;
-            const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
+            const title = document.getElementById('titleInput')?.value?.trim();
+            const description = document.getElementById('descriptionInput')?.value?.trim();
+            const cta = document.getElementById('ctaInput')?.value?.trim() || 'SCOPRI DI PIÙ';
 
             if (!title || !description) {
-                alert('Compila almeno titolo e descrizione!');
+                alert('⚠️ Compila almeno il Titolo e la Descrizione!');
                 return;
             }
 
-            // Generate slug from title
+            if (!supabaseClient) {
+                alert('❌ Errore: Supabase non inizializzato');
+                return;
+            }
+
+            // Generate slug
             const slug = title.toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/\s+/g, '-')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
                 .substring(0, 50);
 
-            // Save to database
+            const landingUrl = `${window.location.origin}/promo/${slug}`;
+
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    alert('Devi essere loggato!');
+                // Get current user
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                if (authError || !user) {
+                    alert('⚠️ Devi essere loggato!');
+                    window.location.href = '/public/login.html';
                     return;
                 }
 
-                // Get organization
-                const { data: orgData } = await supabase
+                // Get organization_id from users table
+                const { data: userData, error: userError } = await supabaseClient
                     .from('users')
                     .select('organization_id')
                     .eq('id', user.id)
                     .single();
 
-                const landingData = {
-                    organization_id: orgData.organization_id,
+                if (userError || !userData?.organization_id) {
+                    alert('❌ Profilo organizzazione non trovato. Completa la registrazione azienda prima.');
+                    return;
+                }
+
+                const socialLinks = collectSocialLinks();
+
+                // Build the card_data payload (used by promotions.html to render the card)
+                const cardData = {
                     title: title,
                     description: description,
-                    landing_slug: slug,
-                    cta_text: cta,
-                    template_type: selectedTemplate,
-                    sections: JSON.stringify(activeSections),
-                    image_url: uploadedImageUrl,
-                    is_active: true,
-                    created_at: new Date().toISOString()
+                    ctaText: cta,
+                    ctaLink: landingUrl,          // ← This is what promotions.html uses for the button!
+                    image: uploadedImageUrl || null,
+                    badge: 'OFFERTA',
+                    features: [],
+                    socialLinks: socialLinks
                 };
 
-                const { data, error } = await supabase
-                    .from('promotions')
-                    .insert([landingData])
-                    .select()
-                    .single();
+                // Build the full landing page HTML snapshot
+                const htmlContent = buildLandingHtml(title, description, cta, slug, socialLinks);
 
-                if (error) throw error;
+                // Check if a landing page already exists for this organization
+                const { data: existing } = await supabaseClient
+                    .from('organization_pages')
+                    .select('id')
+                    .eq('organization_id', userData.organization_id)
+                    .maybeSingle();
 
-                alert(`✅ Landing Page pubblicata!\n\nURL: https://cdm86.com/promo/${slug}`);
-                
-                // Redirect to dashboard
+                // page_data: full page state (used by page.html to render the landing)
+                const pageData = {
+                    sections: activeSections,
+                    title: title,
+                    description: description,
+                    cta: cta,
+                    imageUrl: uploadedImageUrl || null,
+                    socialLinks: socialLinks,
+                    style: 'modern'
+                };
+
+                const payload = {
+                    page_title: title,
+                    page_description: description,
+                    slug: slug,
+                    landing_slug: slug,
+                    page_type: 'landing',
+                    page_data: pageData,
+                    content: htmlContent,
+                    card_data: cardData,
+                    social_links: socialLinks,
+                    sections: JSON.stringify(activeSections),
+                    image_url: uploadedImageUrl,
+                    cta_text: cta,
+                    is_active: true,
+                    card_published: true,
+                    status: 'published',
+                    published_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                let result;
+                if (existing?.id) {
+                    // UPDATE existing
+                    const { data, error } = await supabaseClient
+                        .from('organization_pages')
+                        .update(payload)
+                        .eq('id', existing.id)
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    result = data;
+                } else {
+                    // INSERT new
+                    const { data, error } = await supabaseClient
+                        .from('organization_pages')
+                        .insert([{
+                            ...payload,
+                            organization_id: userData.organization_id,
+                            created_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    result = data;
+                }
+
+                console.log('✅ Landing pubblicata:', result);
+
+                // Show success
+                document.getElementById('step3').classList.add('active');
+                const urlBox = document.getElementById('publishedUrlBox');
+                document.getElementById('publishedUrlText').textContent = landingUrl;
+                urlBox.classList.add('visible');
+
+                // Scroll to button
+                urlBox.scrollIntoView({ behavior: 'smooth' });
+
                 setTimeout(() => {
-                    window.location.href = '/public/organization-dashboard.html';
-                }, 2000);
+                    if (confirm(`✅ Landing Page pubblicata!\n\nURL: ${landingUrl}\n\nVuoi tornare alla dashboard?`)) {
+                        window.location.href = '/public/dashboard.html';
+                    }
+                }, 800);
 
             } catch (error) {
-                console.error('❌ Error:', error);
-                alert('Errore nella pubblicazione: ' + error.message);
+                console.error('❌ Publish error:', error);
+                alert('❌ Errore nella pubblicazione: ' + error.message);
             }
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            updateActiveSections();
-            updatePreview();
-        });
+        // ─── Build Full Landing HTML ──────────────────────────────────────────────
+        function buildLandingHtml(title, description, cta, slug, socialLinks) {
+            const ctaLink = `${window.location.origin}/promo/${slug}`;
+            let html = '';
+            activeSections.forEach(sectionType => {
+                let sectionHtml = sectionTemplates[sectionType].html;
+                if (sectionType === 'hero') {
+                    sectionHtml = sectionHtml
+                        .replace('[[TITLE]]', title)
+                        .replace('[[DESCRIPTION]]', description)
+                        .replace('[[CTA]]', cta)
+                        .replace('[[CTA_LINK]]', ctaLink);
+                } else if (sectionType === 'social') {
+                    sectionHtml = buildSocialHtmlFromData(socialLinks);
+                }
+                html += sectionHtml;
+            });
+            return html;
+        }
+
+        function buildSocialHtmlFromData(socialLinks) {
+            const defs = [
+                { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
+                { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
+                { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X / Twitter' },
+                { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
+                { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
+                { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
+                { key: 'website',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
+            ];
+
+            const activeLinks = defs.filter(d => socialLinks && socialLinks[d.key]);
+
+            if (activeLinks.length === 0) return '';
+
+            const iconsHtml = activeLinks.map(d => `
+                <a href="${socialLinks[d.key]}" class="landing-social-link" style="background: ${d.color};" target="_blank" rel="noopener" title="${d.label}">
+                    <i class="${d.icon}"></i>
+                </a>`).join('');
+
+            return `
+                <div class="landing-social-bar">
+                    <h3>Seguici sui Social</h3>
+                    <div class="landing-social-icons">${iconsHtml}</div>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>

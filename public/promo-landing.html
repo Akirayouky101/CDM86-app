@@ -306,6 +306,20 @@
             }
 
             try {
+                // 1️⃣ Prima cerca in organization_pages (landing builder)
+                const { data: orgPage } = await supabaseClient
+                    .from('organization_pages')
+                    .select('*')
+                    .or(`slug.eq.${slug},landing_slug.eq.${slug}`)
+                    .eq('card_published', true)
+                    .maybeSingle();
+
+                if (orgPage) {
+                    renderOrgLanding(orgPage);
+                    return;
+                }
+
+                // 2️⃣ Fallback: cerca in promotions (promo-creator)
                 const { data, error } = await supabaseClient
                     .from('promotions')
                     .select('*')
@@ -322,6 +336,86 @@
                 console.error('Error loading promo:', error);
                 showError('Promo non trovata', error.message);
             }
+        }
+
+        // Render landing page from organization_pages (landing builder)
+        function renderOrgLanding(page) {
+            const card = document.getElementById('promoCard');
+            const pageData = page.page_data || {};
+            const cardData = page.card_data || {};
+
+            // If we have an HTML content snapshot, use it
+            if (page.content) {
+                // Full page render mode
+                document.body.innerHTML = page.content;
+                // Add Font Awesome for icons
+                const fa = document.createElement('link');
+                fa.rel = 'stylesheet';
+                fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+                document.head.appendChild(fa);
+                // Add base styles for social bar
+                const style = document.createElement('style');
+                style.textContent = `
+                    .landing-social-bar { background: #1e293b; padding: 30px 40px; text-align: center; }
+                    .landing-social-bar h3 { color: white; margin-bottom: 20px; font-size: 1.3rem; font-family: sans-serif; }
+                    .landing-social-icons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+                    .landing-social-link { width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; text-decoration: none; transition: all 0.3s; }
+                    .landing-social-link:hover { transform: translateY(-4px) scale(1.1); }
+                `;
+                document.head.appendChild(style);
+                document.getElementById('loadingScreen')?.remove();
+                return;
+            }
+
+            // Fallback: render card style from card_data
+            document.title = (cardData.title || page.page_title || 'CDM86') + ' - CDM86';
+            card.style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+
+            const socialLinks = page.social_links || cardData.socialLinks || {};
+            const socialHtml = buildSocialIconsHtml(socialLinks);
+
+            card.innerHTML = `
+                ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title || ''}" class="promo-image" style="width:100%;border-radius:1rem;margin-bottom:1.5rem;">` : ''}
+                <div class="promo-content">
+                    <h1 class="promo-title">${cardData.title || page.page_title || 'Offerta Speciale'}</h1>
+                    <p class="promo-description">${cardData.description || page.page_description || ''}</p>
+                    ${cardData.ctaLink ? `
+                        <a href="${cardData.ctaLink}" class="promo-cta" style="display:inline-block;text-decoration:none;">
+                            <i class="fas fa-arrow-right"></i> ${cardData.ctaText || 'SCOPRI DI PIÙ'}
+                        </a>
+                    ` : ''}
+                    ${socialHtml}
+                </div>
+            `;
+        }
+
+        function buildSocialIconsHtml(links) {
+            if (!links || Object.keys(links).every(k => !links[k])) return '';
+            const defs = [
+                { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
+                { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
+                { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X' },
+                { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
+                { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
+                { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
+                { key: 'website',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
+            ];
+            const active = defs.filter(d => links[d.key]);
+            if (!active.length) return '';
+            return `
+                <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.2);">
+                    <p style="font-size:0.9rem; margin-bottom:1rem; opacity:0.8;">Seguici sui social</p>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                        ${active.map(d => `
+                            <a href="${links[d.key]}" target="_blank" rel="noopener" title="${d.label}"
+                               style="width:44px;height:44px;border-radius:50%;background:${d.color};display:inline-flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:1.1rem;">
+                                <i class="${d.icon}"></i>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         }
 
         function renderPromo(promo) {
