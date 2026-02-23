@@ -580,11 +580,11 @@
             </div>
 
             <div class="controls-panel">
-                <h2 style="margin-bottom: 20px;">Aggiungi Sezioni (max 5)</h2>
+                <h2 style="margin-bottom: 20px;">Aggiungi Sezioni (max 6)</h2>
                 
                 <!-- Active Sections -->
                 <div class="active-sections">
-                    <h3>📋 Sezioni Attive (<span id="sectionCount">1</span>/5)</h3>
+                    <h3>📋 Sezioni Attive (<span id="sectionCount">1</span>/6)</h3>
                     <div id="activeSectionsList"></div>
                 </div>
 
@@ -639,6 +639,11 @@
                 <div class="control-group">
                     <label>Testo Bottone CTA</label>
                     <input type="text" id="ctaInput" placeholder="es. SCOPRI DI PIÙ" oninput="updatePreview()">
+                </div>
+
+                <div class="control-group">
+                    <label>Link Bottone CTA <small style="color:#94a3b8;font-weight:400;">(es. link WhatsApp o pagina esterna)</small></label>
+                    <input type="url" id="ctaLinkInput" placeholder="https://wa.me/39..." oninput="updatePreview()">
                 </div>
 
                 <div class="control-group">
@@ -710,7 +715,7 @@
         let supabaseClient = null;
 
         // Init Supabase
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
                 supabaseClient = supabase.createClient(
                     CDM86_CONFIG.supabase.url,
@@ -719,6 +724,8 @@
             }
             updateActiveSections();
             updatePreview();
+            // Load existing data if user already has a landing page
+            await loadExistingLanding();
         });
 
         // ─── Section Templates ──────────────────────────────────────────────────
@@ -874,6 +881,79 @@
             });
         }
 
+        // ─── Load Existing Landing (populate form if already published) ──────────
+        async function loadExistingLanding() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return;
+
+                // Get organization_id (may be null for some users)
+                const { data: userData } = await supabaseClient
+                    .from('users')
+                    .select('organization_id')
+                    .eq('id', user.id)
+                    .single();
+
+                const orgId = userData?.organization_id;
+
+                // Fetch existing landing page
+                let query = supabaseClient.from('organization_pages').select('*');
+                if (orgId) {
+                    query = query.eq('organization_id', orgId);
+                } else {
+                    // Fallback: find by user auth id via users table join
+                    return; // no org id, skip pre-fill
+                }
+
+                const { data: page } = await query.maybeSingle();
+                if (!page) return;
+
+                // Pre-fill form fields
+                const pageData = page.page_data || {};
+                const socialLinks = page.social_links || pageData.socialLinks || {};
+
+                if (pageData.title)       document.getElementById('titleInput').value = pageData.title;
+                if (pageData.description) document.getElementById('descriptionInput').value = pageData.description;
+                if (pageData.cta)         document.getElementById('ctaInput').value = pageData.cta;
+                if (pageData.ctaLinkHero) document.getElementById('ctaLinkInput').value = pageData.ctaLinkHero;
+                if (pageData.imageUrl) {
+                    uploadedImageUrl = pageData.imageUrl;
+                    const img = document.getElementById('previewImage');
+                    img.src = pageData.imageUrl;
+                    img.style.display = 'block';
+                }
+
+                // Social links
+                if (socialLinks.facebook)  document.getElementById('socialFacebook').value  = socialLinks.facebook;
+                if (socialLinks.instagram) document.getElementById('socialInstagram').value = socialLinks.instagram;
+                if (socialLinks.twitter)   document.getElementById('socialTwitter').value   = socialLinks.twitter;
+                if (socialLinks.linkedin)  document.getElementById('socialLinkedin').value  = socialLinks.linkedin;
+                if (socialLinks.tiktok)    document.getElementById('socialTiktok').value    = socialLinks.tiktok;
+                if (socialLinks.whatsapp)  document.getElementById('socialWhatsapp').value  = socialLinks.whatsapp;
+                if (socialLinks.website)   document.getElementById('socialWebsite').value   = socialLinks.website;
+
+                // Active sections
+                if (pageData.sections && Array.isArray(pageData.sections) && pageData.sections.length > 0) {
+                    activeSections = pageData.sections;
+                    updateActiveSections();
+                }
+
+                updatePreview();
+
+                // Show the published URL box if already published
+                if (page.status === 'published' && page.slug) {
+                    const landingUrl = `${window.location.origin}/promo/${page.slug}`;
+                    document.getElementById('publishedUrlText').textContent = landingUrl;
+                    document.getElementById('publishedUrlBox').classList.add('visible');
+                    document.getElementById('step3').classList.add('active');
+                }
+
+            } catch (err) {
+                console.warn('Could not load existing landing:', err.message);
+            }
+        }
+
         // ─── Build Social Bar HTML ───────────────────────────────────────────────
         function buildSocialHtml() {
             const socials = [
@@ -921,12 +1001,7 @@
             const title = document.getElementById('titleInput')?.value || 'Il Tuo Titolo Fantastico';
             const description = document.getElementById('descriptionInput')?.value || 'Scopri la nostra incredibile offerta esclusiva';
             const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
-
-            // Build the current slug for the CTA link preview
-            const slugPreview = title.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-                .substring(0, 50);
+            const ctaLink = document.getElementById('ctaLinkInput')?.value?.trim() || '#contact';
 
             let html = '';
             activeSections.forEach(sectionType => {
@@ -937,7 +1012,7 @@
                         .replace('[[TITLE]]', title)
                         .replace('[[DESCRIPTION]]', description)
                         .replace('[[CTA]]', cta)
-                        .replace('[[CTA_LINK]]', `#`);
+                        .replace('[[CTA_LINK]]', ctaLink);
                 } else if (sectionType === 'social') {
                     sectionHtml = buildSocialHtml();
                 }
@@ -999,6 +1074,7 @@
             const title = document.getElementById('titleInput')?.value?.trim();
             const description = document.getElementById('descriptionInput')?.value?.trim();
             const cta = document.getElementById('ctaInput')?.value?.trim() || 'SCOPRI DI PIÙ';
+            const ctaLinkCustom = document.getElementById('ctaLinkInput')?.value?.trim() || '';
 
             if (!title || !description) {
                 alert('⚠️ Compila almeno il Titolo e la Descrizione!');
@@ -1030,23 +1106,34 @@
                 // Get organization_id from users table
                 const { data: userData, error: userError } = await supabaseClient
                     .from('users')
-                    .select('organization_id')
+                    .select('organization_id, is_organization')
                     .eq('id', user.id)
                     .single();
 
-                if (userError || !userData?.organization_id) {
-                    alert('❌ Profilo organizzazione non trovato. Completa la registrazione azienda prima.');
+                if (userError) {
+                    console.warn('User lookup error:', userError.message);
+                }
+
+                // Use organization_id if available, otherwise use user.id as org identifier
+                const orgId = userData?.organization_id || null;
+
+                if (!orgId && !userData?.is_organization) {
+                    alert('❌ Devi essere registrato come azienda per pubblicare una landing page.');
                     return;
                 }
 
                 const socialLinks = collectSocialLinks();
 
                 // Build the card_data payload (used by promotions.html to render the card)
+                // ctaLink on the card points to the landing page URL
+                // ctaLinkHero is the button inside the landing (e.g. WhatsApp, external site)
+                const ctaLinkHero = ctaLinkCustom || socialLinks.whatsapp || socialLinks.website || '#contact';
                 const cardData = {
                     title: title,
                     description: description,
                     ctaText: cta,
-                    ctaLink: landingUrl,          // ← This is what promotions.html uses for the button!
+                    ctaLink: landingUrl,          // ← Used by promotions.html card button → opens this landing page
+                    ctaLinkHero: ctaLinkHero,     // ← Used by the CTA button INSIDE the landing page
                     image: uploadedImageUrl || null,
                     badge: 'OFFERTA',
                     features: [],
@@ -1054,14 +1141,21 @@
                 };
 
                 // Build the full landing page HTML snapshot
-                const htmlContent = buildLandingHtml(title, description, cta, slug, socialLinks);
+                const htmlContent = buildLandingHtml(title, description, cta, slug, socialLinks, ctaLinkHero);
 
                 // Check if a landing page already exists for this organization
-                const { data: existing } = await supabaseClient
+                let existingQuery = supabaseClient
                     .from('organization_pages')
-                    .select('id')
-                    .eq('organization_id', userData.organization_id)
-                    .maybeSingle();
+                    .select('id');
+
+                if (orgId) {
+                    existingQuery = existingQuery.eq('organization_id', orgId);
+                } else {
+                    // Fallback: search by slug matching user's previous submissions
+                    existingQuery = existingQuery.eq('slug', slug);
+                }
+
+                const { data: existing } = await existingQuery.maybeSingle();
 
                 // page_data: full page state (used by page.html to render the landing)
                 const pageData = {
@@ -1069,6 +1163,7 @@
                     title: title,
                     description: description,
                     cta: cta,
+                    ctaLinkHero: ctaLinkHero,
                     imageUrl: uploadedImageUrl || null,
                     socialLinks: socialLinks,
                     style: 'modern'
@@ -1108,13 +1203,15 @@
                     result = data;
                 } else {
                     // INSERT new
+                    const insertPayload = {
+                        ...payload,
+                        created_at: new Date().toISOString()
+                    };
+                    if (orgId) insertPayload.organization_id = orgId;
+
                     const { data, error } = await supabaseClient
                         .from('organization_pages')
-                        .insert([{
-                            ...payload,
-                            organization_id: userData.organization_id,
-                            created_at: new Date().toISOString()
-                        }])
+                        .insert([insertPayload])
                         .select()
                         .single();
 
@@ -1146,8 +1243,9 @@
         }
 
         // ─── Build Full Landing HTML ──────────────────────────────────────────────
-        function buildLandingHtml(title, description, cta, slug, socialLinks) {
-            const ctaLink = `${window.location.origin}/promo/${slug}`;
+        function buildLandingHtml(title, description, cta, slug, socialLinks, ctaLinkHero) {
+            // ctaLinkHero = the CTA button URL INSIDE the landing (WhatsApp, external, etc.)
+            const heroCtaLink = ctaLinkHero || '#contact';
             let html = '';
             activeSections.forEach(sectionType => {
                 let sectionHtml = sectionTemplates[sectionType].html;
@@ -1156,7 +1254,7 @@
                         .replace('[[TITLE]]', title)
                         .replace('[[DESCRIPTION]]', description)
                         .replace('[[CTA]]', cta)
-                        .replace('[[CTA_LINK]]', ctaLink);
+                        .replace('[[CTA_LINK]]', heroCtaLink);
                 } else if (sectionType === 'social') {
                     sectionHtml = buildSocialHtmlFromData(socialLinks);
                 }

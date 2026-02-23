@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diventa Collaboratore — CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .logo-badge i { color: #fbbf24; }
+        .logo p { color: #64748b; font-size: 0.9rem; }
+        h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 28px; }
+
+        .info-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            color: #166534;
+        }
+        .info-box strong { display: block; margin-bottom: 6px; font-size: 0.95rem; }
+        .info-box ul { padding-left: 18px; line-height: 1.8; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; color: #374151; margin-bottom: 6px; }
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        input:focus, textarea:focus { border-color: #0f172a; }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .password-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0f172a, #1e3a5f);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,0.3); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .alert.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
+        .alert.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; display: block; }
+
+        .footer-link { text-align: center; margin-top: 20px; font-size: 0.875rem; color: #64748b; }
+        .footer-link a { color: #0f172a; font-weight: 600; text-decoration: none; }
+
+        .section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 14px;
+            margin-top: 8px;
+        }
+
+        .success-screen {
+            text-align: center;
+            display: none;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+        .success-screen h2 { font-size: 1.5rem; color: #0f172a; margin-bottom: 10px; }
+        .success-screen p { color: #64748b; line-height: 1.6; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-badge">
+                <i class="fas fa-handshake"></i>
+                CDM86 Collaboratori
+            </div>
+            <p>Unisciti alla rete collaboratori CDM86</p>
+        </div>
+
+        <!-- Form di registrazione -->
+        <div id="registerForm">
+            <h1>Diventa Collaboratore</h1>
+            <p class="subtitle">Compila il modulo — la tua richiesta verrà esaminata entro 24 ore</p>
+
+            <div class="info-box">
+                <strong>💰 Come funzionano i guadagni?</strong>
+                <ul>
+                    <li>€2 per ogni utente che iscrivi direttamente</li>
+                    <li>€50 per ogni azienda che porti</li>
+                    <li>Guadagni anche dalle iscrizioni della tua rete (L2 e L3)</li>
+                </ul>
+            </div>
+
+            <div class="alert" id="alertBox"></div>
+
+            <div class="section-title">Dati personali</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Nome *</label>
+                    <input type="text" id="firstName" placeholder="Mario" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Cognome *</label>
+                    <input type="text" id="lastName" placeholder="Rossi" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" placeholder="mario.rossi@email.com" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefono *</label>
+                <input type="tel" id="phone" placeholder="+39 333 123 4567" required>
+            </div>
+
+            <div class="section-title">Sicurezza</div>
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" placeholder="Minimo 8 caratteri" required minlength="8">
+                <div class="password-hint">Almeno 8 caratteri, una maiuscola e un numero</div>
+            </div>
+            <div class="form-group">
+                <label for="passwordConfirm">Conferma password *</label>
+                <input type="password" id="passwordConfirm" placeholder="Ripeti la password" required>
+            </div>
+
+            <div class="section-title">Codice referral (opzionale)</div>
+            <div class="form-group">
+                <label for="referralCode">Codice di chi ti ha invitato</label>
+                <input type="text" id="referralCode" placeholder="es. ABC12345" maxlength="10"
+                       style="text-transform: uppercase;">
+                <div class="password-hint">Se hai ricevuto un codice da un altro collaboratore o utente</div>
+            </div>
+
+            <div class="section-title">Presentati</div>
+            <div class="form-group">
+                <label for="motivation">Perché vuoi diventare collaboratore? (opzionale)</label>
+                <textarea id="motivation" placeholder="Raccontaci brevemente come intendi sviluppare la tua rete..."></textarea>
+            </div>
+
+            <button class="btn" id="submitBtn" onclick="register()">
+                <i class="fas fa-paper-plane"></i> Invia richiesta
+            </button>
+
+            <div class="footer-link">
+                Hai già un account? <a href="/collaboratori/login.html">Accedi</a>
+            </div>
+        </div>
+
+        <!-- Schermata di successo -->
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon">🎉</div>
+            <h2>Richiesta inviata!</h2>
+            <p>
+                La tua richiesta di collaborazione è stata ricevuta.<br>
+                Verrà esaminata dal team CDM86 entro <strong>24 ore</strong>.<br><br>
+                Riceverai una email di conferma non appena il tuo account sarà approvato.
+            </p>
+            <div style="background:#f8fafc; border-radius:12px; padding:16px; text-align:left; font-size:0.875rem; color:#64748b;">
+                <strong style="color:#0f172a;">Cosa succede ora?</strong>
+                <ol style="padding-left:18px; margin-top:8px; line-height:2;">
+                    <li>Il team CDM86 verifica la tua richiesta</li>
+                    <li>Ricevi approvazione via email</li>
+                    <li>Accedi al pannello con le tue credenziali</li>
+                    <li>Inizia a guadagnare con il tuo codice referral</li>
+                </ol>
+            </div>
+            <a href="/collaboratori/login.html"
+               style="display:block; margin-top:20px; padding:14px; background: linear-gradient(135deg,#0f172a,#1e3a5f); color:white; border-radius:12px; text-decoration:none; font-weight:700; text-align:center;">
+                <i class="fas fa-sign-in-alt"></i> Vai al Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let supabase_client;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
+                supabase_client = supabase.createClient(
+                    CDM86_CONFIG.supabase.url,
+                    CDM86_CONFIG.supabase.anonKey
+                );
+            }
+
+            // Uppercase referral code while typing
+            document.getElementById('referralCode').addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+
+        function showAlert(msg, type = 'error') {
+            const el = document.getElementById('alertBox');
+            el.textContent = msg;
+            el.className = 'alert ' + type;
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').className = 'alert';
+        }
+
+        function generateReferralCode(firstName, lastName) {
+            const base = (firstName.substring(0, 3) + lastName.substring(0, 3)).toUpperCase();
+            const num  = Math.floor(1000 + Math.random() * 9000);
+            return base + num;
+        }
+
+        async function register() {
+            hideAlert();
+            const btn = document.getElementById('submitBtn');
+
+            const firstName      = document.getElementById('firstName').value.trim();
+            const lastName       = document.getElementById('lastName').value.trim();
+            const email          = document.getElementById('email').value.trim();
+            const phone          = document.getElementById('phone').value.trim();
+            const password       = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+            const referralCode   = document.getElementById('referralCode').value.trim().toUpperCase();
+            const motivation     = document.getElementById('motivation').value.trim();
+
+            // Validazioni
+            if (!firstName || !lastName || !email || !phone || !password) {
+                showAlert('Compila tutti i campi obbligatori.');
+                return;
+            }
+            if (password.length < 8) {
+                showAlert('La password deve essere di almeno 8 caratteri.');
+                return;
+            }
+            if (password !== passwordConfirm) {
+                showAlert('Le password non coincidono.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Invio in corso...';
+
+            if (!supabase_client) {
+                showAlert('Errore di configurazione. Riprova più tardi.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
+                return;
+            }
+
+            try {
+                // Verifica referral code se inserito
+                let referredById = null;
+                if (referralCode) {
+                    const { data: referrer } = await supabase_client
+                        .from('users')
+                        .select('id')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    if (!referrer) {
+                        showAlert('Codice referral non valido. Lascialo vuoto se non ne hai uno.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
+                        return;
+                    }
+                    referredById = referrer.id;
+                }
+
+                // Genera codice referral unico
+                const newReferralCode = generateReferralCode(firstName, lastName);
+
+                // Registra su Supabase Auth
+                const { data: authData, error: authError } = await supabase_client.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name:  lastName
+                        }
+                    }
+                });
+
+                if (authError) throw authError;
+
+                // Crea profilo utente nella tabella users
+                const { error: profileError } = await supabase_client
+                    .from('users')
+                    .insert([{
+                        id:                          authData.user.id,
+                        email:                       email,
+                        first_name:                  firstName,
+                        last_name:                   lastName,
+                        phone:                       phone,
+                        referral_code:               newReferralCode,
+                        referred_by_id:              referredById,
+                        role:                        'user',
+                        is_verified:                 false,
+                        is_active:                   true,
+                        is_collaborator:             true,
+                        collaborator_status:         'pending',
+                        collaborator_registered_at:  new Date().toISOString(),
+                        collaborator_notes:          motivation ? `Motivazione: ${motivation}` : null,
+                        password_hash:               'managed_by_supabase_auth'
+                    }]);
+
+                if (profileError) {
+                    // Se il profilo fallisce, cancella l'auth user
+                    console.error('Profile error:', profileError);
+                    throw new Error('Errore nella creazione del profilo: ' + profileError.message);
+                }
+
+                // Logout immediato (deve aspettare approvazione)
+                await supabase_client.auth.signOut();
+
+                // Mostra schermata successo
+                document.getElementById('registerForm').style.display  = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+
+            } catch (err) {
+                let msg = err.message;
+                if (msg.includes('already registered') || msg.includes('already been registered')) {
+                    msg = 'Questa email è già registrata. <a href="/collaboratori/login.html">Accedi</a>';
+                }
+                showAlert(msg);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
+            }
+        }
+    </script>
+</body>
+</html>

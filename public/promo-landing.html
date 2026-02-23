@@ -375,13 +375,17 @@
             const socialLinks = page.social_links || cardData.socialLinks || {};
             const socialHtml = buildSocialIconsHtml(socialLinks);
 
+            // ctaLinkHero = the button URL inside the landing page (e.g. WhatsApp, external site)
+            // NOT the same as cardData.ctaLink which points back to this landing (used by promotions.html)
+            const ctaLinkHero = cardData.ctaLinkHero || pageData.ctaLinkHero || socialLinks.whatsapp || socialLinks.website || null;
+
             card.innerHTML = `
                 ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title || ''}" class="promo-image" style="width:100%;border-radius:1rem;margin-bottom:1.5rem;">` : ''}
                 <div class="promo-content">
                     <h1 class="promo-title">${cardData.title || page.page_title || 'Offerta Speciale'}</h1>
                     <p class="promo-description">${cardData.description || page.page_description || ''}</p>
-                    ${cardData.ctaLink ? `
-                        <a href="${cardData.ctaLink}" class="promo-cta" style="display:inline-block;text-decoration:none;">
+                    ${ctaLinkHero ? `
+                        <a href="${ctaLinkHero}" class="promo-cta" style="display:inline-block;text-decoration:none;" target="_blank" rel="noopener">
                             <i class="fas fa-arrow-right"></i> ${cardData.ctaText || 'SCOPRI DI PIÙ'}
                         </a>
                     ` : ''}

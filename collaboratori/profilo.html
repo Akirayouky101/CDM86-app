@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo — CDM86 Collaboratori</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f1f5f9; min-height: 100vh; }
+        /* Sidebar */
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 800; }
+        .sidebar-logo .brand i { color: #fbbf24; }
+        .sidebar-logo .subtitle { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        nav { flex: 1; padding: 20px 12px; }
+        nav a { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; transition: all 0.2s; }
+        nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        nav a.active { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        nav a i { width: 18px; text-align: center; }
+        .sidebar-user { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .sidebar-user .name { font-weight: 700; color: white; }
+        .sidebar-user .email { color: #94a3b8; font-size: 0.75rem; margin-top: 2px; }
+        .sidebar-user .logout { display: inline-flex; align-items: center; gap: 6px; color: #64748b; font-size: 0.75rem; cursor: pointer; margin-top: 8px; transition: color 0.2s; }
+        .sidebar-user .logout:hover { color: #ef4444; }
+        /* Main */
+        .main { margin-left: 240px; padding: 28px 32px; }
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+        .page-header p { color: #64748b; margin-top: 4px; }
+        /* Layout */
+        .profile-grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+        /* Profile card */
+        .profile-card { background: white; border-radius: 20px; padding: 28px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); text-align: center; }
+        .avatar-big {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: 800; color: white;
+            margin: 0 auto 16px;
+        }
+        .profile-card .full-name { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+        .profile-card .email-label { color: #64748b; font-size: 0.875rem; margin-top: 4px; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px; border-radius: 50px;
+            font-size: 0.8rem; font-weight: 700; margin: 12px 0;
+        }
+        .status-active   { background: #dcfce7; color: #16a34a; }
+        .status-pending  { background: #fef3c7; color: #d97706; }
+        .status-suspended{ background: #fef2f2; color: #dc2626; }
+        .divider { border: none; border-top: 1px solid #f1f5f9; margin: 18px 0; }
+        .referral-section { text-align: left; }
+        .ref-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+        .ref-code-box {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            border-radius: 12px; padding: 12px 16px;
+        }
+        .ref-code-box .code { font-size: 1.4rem; font-weight: 900; color: #fbbf24; letter-spacing: 0.08em; }
+        .ref-code-box .copy { background: rgba(255,255,255,0.15); border: none; border-radius: 8px; padding: 6px 14px; color: white; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: background 0.2s; }
+        .ref-code-box .copy:hover { background: rgba(251,191,36,0.3); }
+        .ref-link { font-size: 0.75rem; color: #94a3b8; margin-top: 8px; word-break: break-all; }
+        .member-since { font-size: 0.8rem; color: #94a3b8; margin-top: 14px; }
+
+        /* Edit form */
+        .edit-panel { background: white; border-radius: 20px; padding: 28px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
+        .panel-section-title { font-size: 0.85rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; margin-top: 24px; }
+        .panel-section-title:first-child { margin-top: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-weight: 600; font-size: 0.83rem; color: #374151; margin-bottom: 6px; }
+        input { width: 100%; padding: 11px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #0f172a; }
+        input[disabled] { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+        .btn-save { padding: 12px 28px; background: linear-gradient(135deg, #0f172a, #1e3a5f); color: white; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,23,42,0.3); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .alert { padding: 10px 14px; border-radius: 8px; font-size: 0.875rem; margin-bottom: 14px; display: none; }
+        .alert.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; display: block; }
+        .alert.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
+        /* Tabella piano compensi */
+        .comp-table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; border: 1px solid #f1f5f9; }
+        .comp-table thead th { background: #f8fafc; padding: 10px 14px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .comp-table thead th:first-child { text-align: left; }
+        .comp-table tbody td { padding: 10px 14px; text-align: center; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; }
+        .comp-table tbody td:first-child { text-align: left; font-weight: 600; color: #374151; }
+        .comp-table tbody tr:last-child td { border-bottom: none; }
+        .l1-cell { background: #dcfce7; color: #16a34a; font-weight: 700; border-radius: 6px; padding: 4px 10px; display: inline-block; }
+        .l2-cell { background: #dbeafe; color: #2563eb; font-weight: 700; border-radius: 6px; padding: 4px 10px; display: inline-block; }
+        .l3-cell { background: #fef3c7; color: #d97706; font-weight: 700; border-radius: 6px; padding: 4px 10px; display: inline-block; }
+        .zero-cell { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="brand"><i class="fas fa-handshake"></i> CDM86</div>
+        <div class="subtitle">Pannello Collaboratori</div>
+    </div>
+    <nav>
+        <a href="/collaboratori/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="/collaboratori/rete.html"><i class="fas fa-sitemap"></i> La mia rete</a>
+        <a href="/collaboratori/guadagni.html"><i class="fas fa-euro-sign"></i> Guadagni</a>
+        <a href="/collaboratori/profilo.html" class="active"><i class="fas fa-user-circle"></i> Profilo</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+        <div class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Esci</div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1><i class="fas fa-user-circle" style="color:#6366f1; margin-right:10px;"></i>Il mio profilo</h1>
+        <p>Gestisci le tue informazioni e visualizza il codice referral</p>
+    </div>
+
+    <div class="profile-grid">
+
+        <!-- Left: profile card -->
+        <div>
+            <div class="profile-card">
+                <div class="avatar-big" id="avatarBig">??</div>
+                <div class="full-name" id="fullName">—</div>
+                <div class="email-label" id="emailLabel">—</div>
+                <div class="status-badge status-active" id="statusBadge">
+                    <i class="fas fa-circle" style="font-size:0.5rem;"></i> Attivo
+                </div>
+                <hr class="divider">
+                <div class="referral-section">
+                    <div class="ref-label">Il tuo codice referral</div>
+                    <div class="ref-code-box">
+                        <span class="code" id="refCode">———</span>
+                        <button class="copy" onclick="copyCode()"><i class="fas fa-copy"></i> Copia</button>
+                    </div>
+                    <div class="ref-link" id="refLink">—</div>
+                </div>
+                <div class="member-since" id="memberSince"></div>
+            </div>
+        </div>
+
+        <!-- Right: edit form + comp table -->
+        <div class="edit-panel">
+            <div class="alert" id="alertBox"></div>
+
+            <div class="panel-section-title">Dati personali</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="fieldFirstName" placeholder="Nome">
+                </div>
+                <div class="form-group">
+                    <label>Cognome</label>
+                    <input type="text" id="fieldLastName" placeholder="Cognome">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="fieldEmail" disabled>
+            </div>
+            <div class="form-group">
+                <label>Telefono</label>
+                <input type="tel" id="fieldPhone" placeholder="+39 333 123 4567">
+            </div>
+
+            <button class="btn-save" id="saveBtn" onclick="saveProfile()">
+                <i class="fas fa-save"></i> Salva modifiche
+            </button>
+
+            <div class="panel-section-title" style="margin-top:32px;">Cambia password</div>
+            <div class="form-group">
+                <label>Nuova password</label>
+                <input type="password" id="newPwd" placeholder="Minimo 8 caratteri">
+            </div>
+            <div class="form-group">
+                <label>Conferma nuova password</label>
+                <input type="password" id="newPwdConfirm" placeholder="Ripeti la password">
+            </div>
+            <button class="btn-save" onclick="changePassword()" style="background: linear-gradient(135deg,#4f46e5,#6366f1);">
+                <i class="fas fa-lock"></i> Aggiorna password
+            </button>
+
+            <div class="panel-section-title" style="margin-top:32px;">Piano compensi</div>
+            <table class="comp-table" id="compTable">
+                <thead>
+                    <tr>
+                        <th>Tipo iscrizione</th>
+                        <th>L1 (diretto)</th>
+                        <th>L2 (indiretto)</th>
+                        <th>L3 (collab.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>👤 Utente</td>
+                        <td><span class="l1-cell" id="c_l1u">€2,00</span></td>
+                        <td><span class="l2-cell" id="c_l2u">€1,00</span></td>
+                        <td><span class="l3-cell" id="c_l3u">€0,50</span></td>
+                    </tr>
+                    <tr>
+                        <td>🏢 Azienda</td>
+                        <td><span class="l1-cell" id="c_l1a">€50,00</span></td>
+                        <td><span class="l2-cell" id="c_l2a">€20,00</span></td>
+                        <td><span class="l3-cell" id="c_l3a">€5,00</span></td>
+                    </tr>
+                    <tr>
+                        <td>🤝 Associazione</td>
+                        <td><span class="zero-cell">€0,00</span></td>
+                        <td><span class="zero-cell">€0,00</span></td>
+                        <td><span class="zero-cell">€0,00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let supabase_client, currentUser, userData;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        supabase_client = supabase.createClient(CDM86_CONFIG.supabase.url, CDM86_CONFIG.supabase.anonKey);
+        const { data: { session } } = await supabase_client.auth.getSession();
+        if (!session) { window.location.href = '/collaboratori/login.html'; return; }
+        currentUser = session.user;
+
+        const { data: user } = await supabase_client.from('users').select('*').eq('id', currentUser.id).single();
+        if (!user?.is_collaborator || user.collaborator_status !== 'active') {
+            window.location.href = '/collaboratori/login.html'; return;
+        }
+        userData = user;
+        renderProfile(user);
+        loadSettings();
+    });
+
+    function renderProfile(u) {
+        const name = `${u.first_name} ${u.last_name}`;
+        const initials = `${u.first_name[0]}${u.last_name[0]}`.toUpperCase();
+        document.getElementById('avatarBig').textContent   = initials;
+        document.getElementById('fullName').textContent    = name;
+        document.getElementById('emailLabel').textContent  = u.email;
+        document.getElementById('sidebarName').textContent = name;
+        document.getElementById('sidebarEmail').textContent= u.email;
+        document.getElementById('refCode').textContent     = u.referral_code || '—';
+        document.getElementById('refLink').textContent     = `cdmottantasei.com/?ref=${u.referral_code}`;
+        document.getElementById('fieldFirstName').value    = u.first_name;
+        document.getElementById('fieldLastName').value     = u.last_name;
+        document.getElementById('fieldEmail').value        = u.email;
+        document.getElementById('fieldPhone').value        = u.phone || '';
+        if (u.collaborator_registered_at) {
+            const d = new Date(u.collaborator_registered_at).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('memberSince').textContent = `🗓 Collaboratore dal ${d}`;
+        }
+        const badge = document.getElementById('statusBadge');
+        const statusMap = { active: ['status-active', '✅ Attivo'], pending: ['status-pending', '⏳ In attesa'], suspended: ['status-suspended', '🚫 Sospeso'] };
+        const [cls, label] = statusMap[u.collaborator_status] || ['status-active', u.collaborator_status];
+        badge.className = `status-badge ${cls}`;
+        badge.textContent = label;
+    }
+
+    async function loadSettings() {
+        const { data: s } = await supabase_client.from('collaborator_settings').select('*').single();
+        if (!s) return;
+        const fmt = n => '€' + parseFloat(n).toFixed(2).replace('.', ',');
+        document.getElementById('c_l1u').textContent = fmt(s.l1_user_amount || 2);
+        document.getElementById('c_l2u').textContent = fmt(s.l2_user_amount || 1);
+        document.getElementById('c_l3u').textContent = fmt(s.l3_user_amount || 0.5);
+        document.getElementById('c_l1a').textContent = fmt(s.l1_azienda_amount || 50);
+        document.getElementById('c_l2a').textContent = fmt(s.l2_azienda_amount || 20);
+        document.getElementById('c_l3a').textContent = fmt(s.l3_azienda_amount || 5);
+    }
+
+    async function saveProfile() {
+        const btn = document.getElementById('saveBtn');
+        const firstName = document.getElementById('fieldFirstName').value.trim();
+        const lastName  = document.getElementById('fieldLastName').value.trim();
+        const phone     = document.getElementById('fieldPhone').value.trim();
+        if (!firstName || !lastName) { showAlert('Nome e cognome sono obbligatori.', 'error'); return; }
+        btn.disabled = true; btn.textContent = 'Salvataggio...';
+
+        const { error } = await supabase_client.from('users')
+            .update({ first_name: firstName, last_name: lastName, phone })
+            .eq('id', currentUser.id);
+
+        if (error) { showAlert('Errore: ' + error.message, 'error'); }
+        else {
+            showAlert('Profilo aggiornato con successo!', 'success');
+            document.getElementById('fullName').textContent    = `${firstName} ${lastName}`;
+            document.getElementById('sidebarName').textContent = `${firstName} ${lastName}`;
+            document.getElementById('avatarBig').textContent   = `${firstName[0]}${lastName[0]}`.toUpperCase();
+        }
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Salva modifiche';
+    }
+
+    async function changePassword() {
+        const pwd  = document.getElementById('newPwd').value;
+        const pwd2 = document.getElementById('newPwdConfirm').value;
+        if (!pwd || pwd.length < 8) { showAlert('La password deve essere di almeno 8 caratteri.', 'error'); return; }
+        if (pwd !== pwd2) { showAlert('Le password non coincidono.', 'error'); return; }
+
+        const { error } = await supabase_client.auth.updateUser({ password: pwd });
+        if (error) showAlert('Errore: ' + error.message, 'error');
+        else {
+            showAlert('Password aggiornata con successo!', 'success');
+            document.getElementById('newPwd').value = '';
+            document.getElementById('newPwdConfirm').value = '';
+        }
+    }
+
+    function copyCode() {
+        const code = userData?.referral_code;
+        if (!code) return;
+        navigator.clipboard.writeText(code);
+        showToast('Codice copiato!');
+    }
+
+    function showAlert(msg, type) {
+        const el = document.getElementById('alertBox');
+        el.textContent = msg; el.className = 'alert ' + type;
+        setTimeout(() => el.className = 'alert', 4000);
+    }
+
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        Object.assign(t.style, { position:'fixed', bottom:'20px', left:'50%', transform:'translateX(-50%)', background:'#0f172a', color:'white', padding:'10px 20px', borderRadius:'8px', fontSize:'0.875rem', fontWeight:'600', zIndex:'9999' });
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+
+    async function logout() {
+        await supabase_client.auth.signOut();
+        window.location.href = '/collaboratori/login.html';
+    }
+</script>
+</body>
+</html>

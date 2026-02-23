@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accedi — Pannello Collaboratori CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .logo-badge i { color: #fbbf24; }
+        .logo p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        input:focus { border-color: #0f172a; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0f172a, #1e3a5f);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,0.3); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .alert.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
+        .alert.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; display: block; }
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .footer-link a { color: #0f172a; font-weight: 600; text-decoration: none; }
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-suspended { background: #fef2f2; color: #dc2626; }
+        .status-banned { background: #1f2937; color: #f87171; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-badge">
+                <i class="fas fa-handshake"></i>
+                CDM86 Collaboratori
+            </div>
+            <p>Pannello riservato ai collaboratori</p>
+        </div>
+
+        <h1>Accedi</h1>
+        <p class="subtitle">Inserisci le tue credenziali per entrare nel tuo pannello</p>
+
+        <div class="alert" id="alertBox"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="la-tua@email.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Accedi
+            </button>
+        </form>
+
+        <div class="divider">oppure</div>
+
+        <div class="footer-link">
+            Non sei ancora collaboratore?
+            <a href="/collaboratori/register.html">Registrati qui</a>
+        </div>
+    </div>
+
+    <script>
+        let supabase_client;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
+                supabase_client = supabase.createClient(
+                    CDM86_CONFIG.supabase.url,
+                    CDM86_CONFIG.supabase.anonKey
+                );
+            }
+        });
+
+        function showAlert(msg, type = 'error') {
+            const el = document.getElementById('alertBox');
+            el.textContent = msg;
+            el.className = 'alert ' + type;
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').className = 'alert';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accesso in corso...';
+
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!supabase_client) {
+                showAlert('Errore di configurazione. Riprova più tardi.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Accedi';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase_client.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                // Verifica che sia un collaboratore
+                const { data: userData, error: userErr } = await supabase_client
+                    .from('users')
+                    .select('is_collaborator, collaborator_status, first_name')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (userErr || !userData) throw new Error('Profilo non trovato.');
+
+                if (!userData.is_collaborator) {
+                    await supabase_client.auth.signOut();
+                    throw new Error('Questo account non è registrato come collaboratore.');
+                }
+
+                switch (userData.collaborator_status) {
+                    case 'pending':
+                        await supabase_client.auth.signOut();
+                        throw new Error('⏳ La tua registrazione è in attesa di approvazione. Riceverai conferma a breve.');
+                    case 'suspended':
+                        await supabase_client.auth.signOut();
+                        throw new Error('⚠️ Il tuo account è stato sospeso. Contatta l\'assistenza.');
+                    case 'banned':
+                        await supabase_client.auth.signOut();
+                        throw new Error('🚫 Il tuo account è stato bannato.');
+                    case 'active':
+                        window.location.href = '/collaboratori/dashboard.html';
+                        break;
+                    default:
+                        await supabase_client.auth.signOut();
+                        throw new Error('Stato account non valido.');
+                }
+
+            } catch (err) {
+                let msg = err.message;
+                if (msg.includes('Invalid login credentials')) msg = 'Email o password errati.';
+                showAlert(msg);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Accedi';
+            }
+        });
+    </script>
+</body>
+</html>

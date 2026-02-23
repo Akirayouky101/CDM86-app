@@ -16,6 +16,18 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/collaboratori",
+      "destination": "/collaboratori/login.html"
+    },
+    {
+      "source": "/collaboratori/",
+      "destination": "/collaboratori/login.html"
+    },
+    {
+      "source": "/collaboratori/:page",
+      "destination": "/collaboratori/:page"
+    },
+    {
       "source": "/promo/:slug",
       "destination": "/public/promo-landing.html"
     },
