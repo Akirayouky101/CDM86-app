@@ -71,8 +71,12 @@ self.addEventListener('fetch', (event) => {
   // Skippa richieste a Supabase e API esterne - usa fetch normale
   if (url.hostname.includes('supabase.co') || 
       url.hostname.includes('unpkg.com') ||
+      url.hostname.includes('jsdelivr.net') ||
       url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('cloudflare.com')) {
+      url.hostname.includes('cloudflare.com') ||
+      url.hostname.includes('cdnjs.cloudflare.com') ||
+      url.hostname.includes('fonts.gstatic.com') ||
+      url.hostname.includes('vercel-storage.com')) {
     return; // Lascia che il browser gestisca normalmente
   }
 

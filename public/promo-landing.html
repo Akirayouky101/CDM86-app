@@ -533,6 +533,7 @@
                 <div class="qr-progress"><div class="qr-progress-bar" id="qrProgressBar" style="width:100%"></div></div>
                 <div class="qr-countdown" id="qrCountdown">5:00</div>
                 <div class="qr-status-msg" id="qrStatusMsg">In attesa di validazione dal gestore...</div>
+                <div id="qrDisplayUsesInfo" style="font-size:0.82rem;margin-top:0.4rem;"></div>
                 <div class="qr-expired-msg" id="qrExpiredMsg">
                     ⏰ Codice scaduto!<br><small>Genera un nuovo QR per riprovare.</small>
                 </div>
@@ -832,7 +833,51 @@
             document.getElementById('qrConfirmStep').style.display = 'block';
             document.getElementById('qrDisplayStep').style.display = 'none';
             document.getElementById('qrPromoName').textContent = currentPromoTitle || document.title.replace(' — CDM86','');
+            document.getElementById('qrUsesInfo').textContent = '';
             document.getElementById('qrOverlay').classList.add('show');
+
+            // Pre-load uses info
+            loadUsesInfo();
+        }
+
+        async function loadUsesInfo() {
+            if (!supabaseClient || !currentPromoId) return;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) return;
+
+                // Count used tokens
+                const { count: usedCount } = await supabaseClient
+                    .from('redemption_tokens')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('promo_id', currentPromoId)
+                    .eq('user_id', session.user.id)
+                    .eq('status', 'used');
+
+                // Get max_uses from promotions
+                const { data: promo } = await supabaseClient
+                    .from('promotions')
+                    .select('max_uses_per_user')
+                    .eq('id', currentPromoId)
+                    .maybeSingle();
+
+                const maxUses = promo?.max_uses_per_user ?? 1;
+                const used = usedCount ?? 0;
+                const remaining = maxUses - used;
+                const el = document.getElementById('qrUsesInfo');
+                if (!el) return;
+
+                if (maxUses === 1) {
+                    el.textContent = used >= 1
+                        ? '⚠️ Hai già usato questo codice.'
+                        : '🎟️ Questo codice è utilizzabile 1 sola volta.';
+                } else {
+                    el.textContent = remaining <= 0
+                        ? '⚠️ Hai esaurito tutti gli utilizzi disponibili.'
+                        : `🎟️ Puoi ancora utilizzare questo codice ${remaining} volta${remaining > 1 ? '' : ''} (${used}/${maxUses} usati).`;
+                }
+                el.style.color = remaining <= 0 ? '#ef4444' : remaining === 1 ? '#f59e0b' : '#64748b';
+            } catch (e) { /* silently ignore */ }
         }
 
         function closeRedeemModal() {
@@ -877,6 +922,21 @@
                     btn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
                     btn.disabled = false;
                     return;
+                }
+
+                // Aggiorna badge utilizzi rimanenti nel display step
+                const remaining = data.remaining_uses ?? (data.max_uses - data.used_count - 1);
+                const usesEl = document.getElementById('qrDisplayUsesInfo');
+                if (usesEl) {
+                    if (remaining <= 0) {
+                        usesEl.textContent = '⚠️ Questo è l\'ultimo utilizzo disponibile.';
+                        usesEl.style.color = '#f59e0b';
+                    } else {
+                        usesEl.textContent = remaining === 1
+                            ? 'Dopo questo ti resterà ancora 1 utilizzo.'
+                            : `Dopo questo ti resteranno ancora ${remaining} utilizzi.`;
+                        usesEl.style.color = '#64748b';
+                    }
                 }
 
                 // Show QR step

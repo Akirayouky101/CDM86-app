@@ -2223,6 +2223,7 @@
                 <h3>Riscatta questa Promo?</h3>
                 <p>Genera un QR code valido <strong>5 minuti</strong>.<br>Mostralo al gestore per riscattare l'offerta.</p>
                 <div class="qr-promo-name-badge" id="qrModalPromoName">—</div>
+                <div id="qrModalUsesInfo" style="font-size:0.85rem;margin:-0.3rem 0 1rem;color:#64748b;"></div>
                 <div class="qr-modal-btns">
                     <button class="qr-btn cancel" onclick="closeQRModal()">Annulla</button>
                     <button class="qr-btn confirm" id="qrModalGenBtn" onclick="generateQRFromCard()">
@@ -2237,6 +2238,7 @@
                 <div class="qr-countdown" id="qrModalCountdown">5:00</div>
                 <div class="qr-progress"><div class="qr-progress-bar" id="qrModalProgressBar" style="width:100%"></div></div>
                 <div class="qr-status-msg" id="qrModalStatusMsg">In attesa di validazione dal gestore...</div>
+                <div id="qrModalDisplayUsesInfo" style="font-size:0.82rem;margin-top:0.3rem;"></div>
                 <div class="qr-success-msg" id="qrModalSuccessMsg">✅ Promo riscattata con successo!</div>
                 <div class="qr-expired-msg" id="qrModalExpiredMsg">⏱️ QR scaduto.</div>
                 <button class="qr-new-btn" id="qrModalNewBtn" onclick="generateQRFromCard()">
@@ -2265,10 +2267,51 @@
             document.getElementById('qrModalConfirm').style.display = 'block';
             document.getElementById('qrModalDisplay').style.display = 'none';
             document.getElementById('qrModalPromoName').textContent = promoTitle;
+            document.getElementById('qrModalUsesInfo').textContent = '';
             const genBtn = document.getElementById('qrModalGenBtn');
             genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
             genBtn.disabled = false;
             document.getElementById('qrModalOverlay').classList.add('show');
+
+            // Pre-load uses info
+            loadQRModalUsesInfo(promoId);
+        }
+
+        async function loadQRModalUsesInfo(promoId) {
+            if (!window.supabaseClient || !promoId) return;
+            try {
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                if (!session) return;
+
+                const [{ count: usedCount }, { data: promo }] = await Promise.all([
+                    window.supabaseClient
+                        .from('redemption_tokens')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('promo_id', promoId)
+                        .eq('user_id', session.user.id)
+                        .eq('status', 'used'),
+                    window.supabaseClient
+                        .from('promotions')
+                        .select('max_uses_per_user')
+                        .eq('id', promoId)
+                        .maybeSingle()
+                ]);
+
+                const maxUses = promo?.max_uses_per_user ?? 1;
+                const used = usedCount ?? 0;
+                const remaining = maxUses - used;
+                const el = document.getElementById('qrModalUsesInfo');
+                if (!el) return;
+
+                if (maxUses === 1) {
+                    el.textContent = used >= 1 ? '⚠️ Hai già usato questo codice.' : '🎟️ Utilizzabile 1 sola volta.';
+                } else {
+                    el.textContent = remaining <= 0
+                        ? '⚠️ Hai esaurito tutti gli utilizzi.'
+                        : `🎟️ Utilizzi rimanenti: ${remaining} di ${maxUses}`;
+                }
+                el.style.color = remaining <= 0 ? '#ef4444' : remaining === 1 ? '#f59e0b' : '#64748b';
+            } catch (e) { /* ignore */ }
         }
 
         function closeQRModal() {
@@ -2308,6 +2351,21 @@
                     genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
                     genBtn.disabled = false;
                     return;
+                }
+
+                // Badge utilizzi rimanenti nel display step
+                const remAfter = data.remaining_uses ?? (data.max_uses - data.used_count - 1);
+                const usesDispEl = document.getElementById('qrModalDisplayUsesInfo');
+                if (usesDispEl) {
+                    if (remAfter <= 0) {
+                        usesDispEl.textContent = '⚠️ Questo è il tuo ultimo utilizzo disponibile.';
+                        usesDispEl.style.color = '#f59e0b';
+                    } else {
+                        usesDispEl.textContent = remAfter === 1
+                            ? 'Dopo questo ti resterà ancora 1 utilizzo.'
+                            : `Dopo questo ti resteranno ancora ${remAfter} utilizzi.`;
+                        usesDispEl.style.color = '#64748b';
+                    }
                 }
 
                 // Show QR display step

@@ -1,14 +1,9 @@
 // POST /api/redeem-promo
 // Body: { promo_id, user_id }
-// Returns: { token, qr_data, expires_at } or { error }
+// Returns: { token, qr_data, expires_at, used_count, remaining_uses } or { error }
 
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY  // service role — bypasses RLS
-);
 
 export default async function handler(req, res) {
     // CORS
@@ -17,6 +12,17 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    // Verifica env vars
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+        console.error('[redeem-promo] Missing env vars: SUPABASE_URL or SUPABASE_SERVICE_KEY');
+        return res.status(500).json({ error: 'Configurazione server mancante. Contatta l\'amministratore.' });
+    }
+
+    const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_KEY
+    );
 
     try {
         const { promo_id, user_id } = req.body || {};
@@ -31,7 +37,11 @@ export default async function handler(req, res) {
             .eq('id', promo_id)
             .maybeSingle();
 
-        if (promoErr || !promo) {
+        if (promoErr) {
+            console.error('[redeem-promo] promo query error:', promoErr);
+            return res.status(500).json({ error: 'Errore lettura promozione: ' + promoErr.message });
+        }
+        if (!promo) {
             return res.status(404).json({ error: 'Promozione non trovata' });
         }
         if (!promo.is_active) {
@@ -41,16 +51,26 @@ export default async function handler(req, res) {
         const maxUses = promo.max_uses_per_user ?? 1;
 
         // 2️⃣ Conta quante volte l'utente ha già riscattato (token usati)
-        const { count: usedCount } = await supabase
+        const { count: usedCount, error: countErr } = await supabase
             .from('redemption_tokens')
             .select('id', { count: 'exact', head: true })
             .eq('promo_id', promo_id)
             .eq('user_id', user_id)
             .eq('status', 'used');
 
-        if ((usedCount ?? 0) >= maxUses) {
+        if (countErr) {
+            console.error('[redeem-promo] count error:', countErr);
+            return res.status(500).json({ error: 'Errore verifica utilizzi: ' + countErr.message });
+        }
+
+        const usedSoFar = usedCount ?? 0;
+        const remaining = maxUses - usedSoFar;
+
+        if (usedSoFar >= maxUses) {
             return res.status(403).json({
-                error: `Hai già riscattato questa promo il massimo di ${maxUses} volta/e consentita/e.`
+                error: maxUses === 1
+                    ? 'Hai già riscattato questa promozione. Non è più disponibile per te.'
+                    : `Hai esaurito tutti i ${maxUses} utilizzi disponibili per questa promo.`
             });
         }
 
@@ -77,9 +97,11 @@ export default async function handler(req, res) {
                 created_at: new Date().toISOString()
             });
 
-        if (insertErr) throw insertErr;
+        if (insertErr) {
+            console.error('[redeem-promo] insert error:', insertErr);
+            throw insertErr;
+        }
 
-        // Il QR code conterrà l'URL di validazione che il gestore scansiona
         const validateUrl = `${process.env.SITE_URL || 'https://cdm86.com'}/public/validate-qr.html?token=${token}`;
 
         return res.status(200).json({
@@ -88,11 +110,12 @@ export default async function handler(req, res) {
             expires_at: expiresAt,
             promo_title: promo.title,
             max_uses: maxUses,
-            used_count: usedCount ?? 0
+            used_count: usedSoFar,
+            remaining_uses: remaining   // ← nuovo campo
         });
 
     } catch (err) {
         console.error('[redeem-promo] error:', err);
-        return res.status(500).json({ error: err.message || 'Errore interno' });
+        return res.status(500).json({ error: err.message || 'Errore interno del server' });
     }
 }
