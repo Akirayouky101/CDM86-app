@@ -1103,21 +1103,21 @@
                     return;
                 }
 
-                // Get organization_id from users table
-                const { data: userData, error: userError } = await supabaseClient
-                    .from('users')
-                    .select('organization_id, is_organization')
-                    .eq('id', user.id)
-                    .single();
+                // Get organization from organizations table (not users)
+                const { data: orgData, error: userError } = await supabaseClient
+                    .from('organizations')
+                    .select('id, name, email')
+                    .eq('auth_user_id', user.id)
+                    .maybeSingle();
 
                 if (userError) {
                     console.warn('User lookup error:', userError.message);
                 }
 
-                // Use organization_id if available, otherwise use user.id as org identifier
-                const orgId = userData?.organization_id || null;
+                // Use organization id
+                const orgId = orgData?.id || null;
 
-                if (!orgId && !userData?.is_organization) {
+                if (!orgId) {
                     alert('❌ Devi essere registrato come azienda per pubblicare una landing page.');
                     return;
                 }

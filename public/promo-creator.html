@@ -601,12 +601,30 @@
                     return;
                 }
 
-                // Prendi info organizzazione dal profilo utente
-                const { data: userData } = await supabaseClient
-                    .from('users')
-                    .select('first_name, last_name, email')
-                    .eq('id', session.user.id)
-                    .single();
+                // Prendi info organizzazione dalla tabella organizations
+                const { data: orgData } = await supabaseClient
+                    .from('organizations')
+                    .select('name, email')
+                    .eq('auth_user_id', session.user.id)
+                    .maybeSingle();
+
+                // Fallback sulla tabella users se non è un'organizzazione
+                let partnerName = 'Partner';
+                let partnerEmail = session.user.email;
+                if (orgData) {
+                    partnerName = orgData.name || 'Partner';
+                    partnerEmail = orgData.email || session.user.email;
+                } else {
+                    const { data: userData } = await supabaseClient
+                        .from('users')
+                        .select('first_name, last_name, email')
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle();
+                    if (userData) {
+                        partnerName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Partner';
+                        partnerEmail = userData.email || session.user.email;
+                    }
+                }
 
                 const slug = title.toLowerCase()
                     .normalize('NFD')
@@ -618,8 +636,8 @@
                     title: title,
                     description: description,
                     slug: slug,
-                    partner_name: userData ? `${userData.first_name} ${userData.last_name}` : 'Partner',
-                    partner_email: userData?.email || session.user.email,
+                    partner_name: partnerName,
+                    partner_email: partnerEmail,
                     category: document.getElementById('categoryInput').value,
                     image_url: uploadedImageUrl,
                     original_price: document.getElementById('originalPriceInput').value ? 
@@ -628,8 +646,7 @@
                     points_cost: 0,
                     is_active: true,
                     landing_slug: slug,
-                    cta_text: document.getElementById('ctaInput').value,
-                    created_by_id: session.user.id
+                    cta_text: document.getElementById('ctaInput').value
                 };
 
                 const { data, error } = await supabaseClient
