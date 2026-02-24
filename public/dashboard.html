@@ -1003,10 +1003,10 @@
                             <p class="company-card-description">Crea promozioni professionali con landing page dedicata</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn-success" onclick="window.location.href='/public/promo-creator.html'">
+                            <button class="btn-success" id="btn-promo-editor" onclick="window.location.href='/public/promo-creator.html'">
                                 <i class="fas fa-magic"></i> Crea Promo Card
                             </button>
-                            <button class="btn-success" id="btn-landing-editor-2" onclick="window.location.href='/public/landing-builder.html'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <button class="btn-success" id="btn-landing-editor" onclick="window.location.href='/public/landing-builder.html'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                 <i class="fas fa-plus"></i> Crea Landing Page
                             </button>
                         </div>
@@ -1847,6 +1847,17 @@
                         </div>
                     </div>
                 `).join('');
+
+                // Se ci sono già promozioni → il pulsante diventa "Modifica Promozioni"
+                const btnPromo = document.getElementById('btn-promo-editor');
+                if (btnPromo) {
+                    btnPromo.innerHTML = '<i class="fas fa-edit"></i> Modifica Promozioni';
+                    // Porta al promo-creator con parametro edit
+                    const firstPromo = promotions[0];
+                    if (firstPromo && firstPromo.id) {
+                        btnPromo.onclick = () => window.location.href = `/public/promo-creator.html?edit=${firstPromo.id}`;
+                    }
+                }
             } catch (error) {
                 console.error('Error in loadOrganizationPromotions:', error);
             }
