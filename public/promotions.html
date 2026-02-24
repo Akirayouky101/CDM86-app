@@ -2344,10 +2344,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ promo_id: qrCardPromoId, user_id: session.user.id })
                 });
-                const data = await res.json();
+                const rawText = await res.text();
+                console.error('[redeem-promo] raw response:', res.status, rawText);
+                let data = {};
+                try { data = JSON.parse(rawText); } catch(e) { data = { error: rawText || 'Errore ' + res.status }; }
 
                 if (!res.ok) {
-                    alert('❌ ' + (data.error || 'Errore nella generazione del codice.'));
+                    alert('❌ Errore ' + res.status + ': ' + (data.error || rawText || 'Errore nella generazione del codice.'));
                     genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
                     genBtn.disabled = false;
                     return;

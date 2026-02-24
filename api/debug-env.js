@@ -1,7 +1,9 @@
 // Endpoint temporaneo di diagnostica — DA RIMUOVERE dopo il debug
-module.exports = async function handler(req, res) {
+import { createClient } from '@supabase/supabase-js';
+
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,7 +12,6 @@ module.exports = async function handler(req, res) {
     // Testa connessione Supabase
     let supabaseTest = 'not tested';
     try {
-        const { createClient } = require('@supabase/supabase-js');
         const key = serviceKey || serviceRoleKey;
         if (supabaseUrl && key) {
             const sb = createClient(supabaseUrl, key);
@@ -26,7 +27,6 @@ module.exports = async function handler(req, res) {
     // Testa tabella redemption_tokens
     let tokensTest = 'not tested';
     try {
-        const { createClient } = require('@supabase/supabase-js');
         const key = serviceKey || serviceRoleKey;
         if (supabaseUrl && key) {
             const sb = createClient(supabaseUrl, key);
@@ -50,4 +50,4 @@ module.exports = async function handler(req, res) {
         },
         node_version: process.version,
     });
-};
+}

@@ -2,24 +2,25 @@
 // Body: { promo_id, user_id }
 // Returns: { token, qr_data, expires_at, remaining_uses } or { error }
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
 
-module.exports = async function handler(req, res) {
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    if (!process.env.SUPABASE_URL || (!process.env.SUPABASE_SERVICE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY)) {
-        console.error('[redeem-promo] Missing env vars');
-        return res.status(500).json({ error: 'Configurazione server mancante. Aggiungi SUPABASE_URL e SUPABASE_SERVICE_KEY su Vercel.' });
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('[redeem-promo] Missing env vars: SUPABASE_URL or SERVICE_KEY');
+        return res.status(500).json({ error: 'Configurazione server mancante (env vars).' });
     }
 
-    const supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     try {
         const { promo_id, user_id } = req.body || {};
@@ -75,21 +76,19 @@ module.exports = async function handler(req, res) {
             .eq('user_id', user_id)
             .eq('status', 'pending');
 
-        // 4️⃣ Genera nuovo token (Supabase genera UUID via DEFAULT)
+        // 4️⃣ Genera token UUID e inserisci
+        const token = uuidv4();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-        const { data: inserted, error: insertErr } = await supabase
+        // Usiamo insert + select separati per massima compatibilità
+        const { error: insertErr } = await supabase
             .from('redemption_tokens')
-            .insert({ promo_id, user_id, status: 'pending', expires_at: expiresAt })
-            .select('token')
-            .single();
+            .insert({ token, promo_id, user_id, status: 'pending', expires_at: expiresAt });
 
         if (insertErr) {
-            console.error('[redeem-promo] insert error:', insertErr);
+            console.error('[redeem-promo] insert error:', JSON.stringify(insertErr));
             return res.status(500).json({ error: 'Errore salvataggio token: ' + insertErr.message });
         }
-
-        const token = inserted.token;
 
         const siteUrl = process.env.SITE_URL || 'https://www.cdm86.com';
         const validateUrl = `${siteUrl}/public/validate-qr.html?token=${token}`;
@@ -105,7 +104,7 @@ module.exports = async function handler(req, res) {
         });
 
     } catch (err) {
-        console.error('[redeem-promo] unhandled error:', err);
+        console.error('[redeem-promo] unhandled error:', err.message);
         return res.status(500).json({ error: err.message || 'Errore interno del server' });
     }
-};
+}
