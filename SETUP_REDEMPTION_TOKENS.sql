@@ -7,6 +7,10 @@
 ALTER TABLE promotions
     ADD COLUMN IF NOT EXISTS max_uses_per_user INTEGER NOT NULL DEFAULT 1;
 
+-- 1b️⃣ Aggiungi campo max_uses_per_user alla tabella organization_pages
+ALTER TABLE organization_pages
+    ADD COLUMN IF NOT EXISTS max_uses_per_user INTEGER NOT NULL DEFAULT 1;
+
 -- 2️⃣ Crea tabella redemption_tokens
 CREATE TABLE IF NOT EXISTS redemption_tokens (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
