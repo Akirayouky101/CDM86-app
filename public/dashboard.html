@@ -1700,6 +1700,8 @@
                     console.error('Error loading organization card:', error);
                     return;
                 }
+
+                console.log('📄 organization_pages data:', data);
                 
                 const cardStatusBadge = document.getElementById('card-status-badge');
                 const cardPreview = document.getElementById('card-preview');
@@ -1744,7 +1746,7 @@
                 const landingPreview = document.getElementById('landing-preview');
                 const btnLanding = document.getElementById('btn-landing-editor');
 
-                if (data && (data.page_data || data.status === 'published')) {
+                if (data && (data.page_data || data.status === 'published' || data.sections || data.title || data.is_active)) {
                     // Landing EXISTS → show "Modifica Landing"
                     if (landingStatusBadge) {
                         const published = data.status === 'published';
@@ -1798,7 +1800,7 @@
                 const { data: promotions, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
-                    .eq('created_by_id', orgData.auth_user_id)
+                    .eq('partner_email', orgData.email)
                     .order('created_at', { ascending: false });
                 
                 if (error) {
