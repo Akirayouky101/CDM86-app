@@ -646,6 +646,19 @@
                     <input type="url" id="ctaLinkInput" placeholder="https://wa.me/39..." oninput="updatePreview()">
                 </div>
 
+                <div class="control-group" style="background:#fef9ec;border:2px solid #fbbf24;border-radius:12px;padding:16px;">
+                    <label style="color:#92400e;font-weight:700;">
+                        <i class="fas fa-ticket-alt" style="color:#f59e0b;margin-right:6px;"></i>
+                        Max utilizzi per utente <span style="color:#ef4444;">*</span>
+                    </label>
+                    <input type="number" id="maxUsesInput" min="1" max="99" value="1" required
+                           style="font-size:1.1rem;font-weight:700;text-align:center;max-width:120px;"
+                           placeholder="es. 1">
+                    <small style="display:block;margin-top:6px;color:#92400e;">
+                        Quante volte ogni utente può riscattare questa promo con QR code
+                    </small>
+                </div>
+
                 <div class="control-group">
                     <label>Immagine (opzionale)</label>
                     <div class="image-upload" onclick="document.getElementById('imageUpload').click()">
@@ -916,6 +929,7 @@
                 if (pageData.description) document.getElementById('descriptionInput').value = pageData.description;
                 if (pageData.cta)         document.getElementById('ctaInput').value = pageData.cta;
                 if (pageData.ctaLinkHero) document.getElementById('ctaLinkInput').value = pageData.ctaLinkHero;
+                if (page.max_uses_per_user) document.getElementById('maxUsesInput').value = page.max_uses_per_user;
                 if (pageData.imageUrl) {
                     uploadedImageUrl = pageData.imageUrl;
                     const img = document.getElementById('previewImage');
@@ -1074,9 +1088,15 @@
             const description = document.getElementById('descriptionInput')?.value?.trim();
             const cta = document.getElementById('ctaInput')?.value?.trim() || 'SCOPRI DI PIÙ';
             const ctaLinkCustom = document.getElementById('ctaLinkInput')?.value?.trim() || '';
+            const maxUses = parseInt(document.getElementById('maxUsesInput')?.value || '1', 10);
 
             if (!title || !description) {
                 alert('⚠️ Compila almeno il Titolo e la Descrizione!');
+                return;
+            }
+            if (!maxUses || maxUses < 1) {
+                alert('⚠️ Inserisci il numero massimo di utilizzi per utente (minimo 1)!');
+                document.getElementById('maxUsesInput').focus();
                 return;
             }
 
@@ -1181,12 +1201,22 @@
                     sections: JSON.stringify(activeSections),
                     image_url: uploadedImageUrl,
                     cta_text: cta,
+                    max_uses_per_user: maxUses,
                     is_active: true,
                     card_published: true,
                     status: 'published',
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
+
+                // Also update max_uses_per_user on any linked promotion in the promotions table
+                if (orgData?.email) {
+                    await supabaseClient
+                        .from('promotions')
+                        .update({ max_uses_per_user: maxUses })
+                        .eq('partner_email', orgData.email)
+                        .eq('is_active', true);
+                }
 
                 let result;
                 if (existing?.id) {

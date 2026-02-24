@@ -23,6 +23,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- QR Code generator (pure JS, no canvas deps) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="/assets/js/config.js"></script>
     
     <style>
@@ -334,6 +336,103 @@
             .pl-hero-body, .of-body { padding: 1.5rem; }
         }
         #lpNav, #lpFooter { display: none; }
+
+        /* ── QR Modal ────────────────────────────── */
+        .qr-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.65);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .qr-overlay.show { display: flex; }
+
+        .qr-modal {
+            background: white; border-radius: 1.5rem;
+            padding: 2rem; max-width: 420px; width: 100%;
+            text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .qr-modal-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .qr-modal-title {
+            font-size: 1.3rem; font-weight: 800;
+            color: var(--dark); margin-bottom: 0.4rem;
+        }
+        .qr-modal-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+        /* confirm step */
+        .qr-confirm-warning {
+            background: #fef9ec; border: 1.5px solid #fbbf24;
+            border-radius: 0.75rem; padding: 0.8rem 1rem;
+            font-size: 0.85rem; color: #92400e;
+            margin-bottom: 1.5rem; text-align: left;
+        }
+        .qr-confirm-warning i { margin-right: 6px; }
+        .qr-btn-row { display: flex; gap: 0.75rem; }
+        .qr-btn {
+            flex: 1; padding: 0.9rem; border-radius: 0.75rem;
+            font-weight: 700; font-size: 1rem; border: none; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qr-btn.cancel { background: #f1f5f9; color: var(--muted); }
+        .qr-btn.cancel:hover { background: #e2e8f0; }
+        .qr-btn.confirm {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.35);
+        }
+        .qr-btn.confirm:hover { transform: translateY(-2px); }
+
+        /* qr display step */
+        .qr-display-step { display: none; }
+        #qrCanvas {
+            border-radius: 1rem; margin: 1rem auto;
+            border: 4px solid #f1f5f9;
+            display: block;
+        }
+        .qr-countdown {
+            font-size: 1.5rem; font-weight: 800;
+            color: var(--primary); margin: 0.5rem 0 1rem;
+        }
+        .qr-countdown.urgent { color: #ef4444; }
+        .qr-progress {
+            height: 6px; background: #f1f5f9; border-radius: 3px;
+            overflow: hidden; margin-bottom: 1rem;
+        }
+        .qr-progress-bar {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary), #764ba2);
+            transition: width 1s linear;
+        }
+        .qr-status-msg {
+            font-size: 0.9rem; color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+        .qr-expired-msg {
+            display: none; color: #ef4444;
+            font-weight: 700; font-size: 1rem; margin: 1rem 0;
+        }
+
+        /* riscatta button */
+        .riscatta-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+            width: 100%; padding: 1.1rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; border: none; border-radius: 1rem;
+            font-size: 1.05rem; font-weight: 800; cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.35);
+            text-decoration: none;
+        }
+        .riscatta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(16,185,129,0.45); }
+
     </style>
 </head>
 <body>
@@ -386,6 +485,10 @@
                 <div class="pl-pricing" id="plPricing"></div>
                 <div id="plSavings"></div>
                 <button class="pl-cta-btn" id="plCtaBtn"></button>
+                <!-- Riscatta Promo button (shown only for promos with landing_slug) -->
+                <button class="riscatta-btn" id="plRiscattaBtn" style="display:none;margin-bottom:1rem;" onclick="openRedeemModal()">
+                    <i class="fas fa-qrcode"></i> Riscatta Promo
+                </button>
                 <div class="pl-share">
                     <div class="pl-share-title">Condividi questa offerta</div>
                     <div class="pl-share-row">
@@ -394,6 +497,50 @@
                         <button class="pl-share-btn tw" onclick="shareTW()" title="Twitter / X"><i class="fab fa-x-twitter"></i></button>
                         <button class="pl-share-btn cp" onclick="copyLink()" title="Copia link"><i class="fas fa-link"></i></button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Redeem Modal -->
+    <div class="qr-overlay" id="qrOverlay">
+        <div class="qr-modal">
+            <!-- Step 1: Confirm -->
+            <div id="qrConfirmStep">
+                <div class="qr-modal-icon">🎟️</div>
+                <div class="qr-modal-title">Riscatta la Promo</div>
+                <div class="qr-modal-sub" id="qrPromoName"></div>
+                <div class="qr-confirm-warning">
+                    <i class="fas fa-clock"></i>
+                    Il codice QR ha validità di <strong>5 minuti</strong> e sarà scansionato dal gestore.<br>
+                    Dopo la validazione non potrà essere riutilizzato.
+                </div>
+                <div id="qrUsesInfo" style="font-size:0.85rem;color:#64748b;margin-bottom:1.2rem;"></div>
+                <div class="qr-btn-row">
+                    <button class="qr-btn cancel" onclick="closeRedeemModal()">Annulla</button>
+                    <button class="qr-btn confirm" onclick="generateQR()">
+                        <i class="fas fa-qrcode"></i> Genera QR
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: QR Display -->
+            <div id="qrDisplayStep" style="display:none;">
+                <div class="qr-modal-icon">📱</div>
+                <div class="qr-modal-title">Mostra al Gestore</div>
+                <div class="qr-modal-sub">Scansiona entro il tempo limite</div>
+                <canvas id="qrCanvas" width="220" height="220"></canvas>
+                <div class="qr-progress"><div class="qr-progress-bar" id="qrProgressBar" style="width:100%"></div></div>
+                <div class="qr-countdown" id="qrCountdown">5:00</div>
+                <div class="qr-status-msg" id="qrStatusMsg">In attesa di validazione dal gestore...</div>
+                <div class="qr-expired-msg" id="qrExpiredMsg">
+                    ⏰ Codice scaduto!<br><small>Genera un nuovo QR per riprovare.</small>
+                </div>
+                <div class="qr-btn-row">
+                    <button class="qr-btn cancel" onclick="closeRedeemModal()">Chiudi</button>
+                    <button class="qr-btn confirm" id="qrNewBtn" style="display:none;" onclick="generateQR()">
+                        <i class="fas fa-redo"></i> Nuovo QR
+                    </button>
                 </div>
             </div>
         </div>
@@ -467,7 +614,7 @@
         }
 
         // ── Render: Org Landing (landing builder) ────────────────────────────────
-        function renderOrgLanding(page) {
+        async function renderOrgLanding(page) {
             showNav();
             const pageData = page.page_data || {};
             const cardData = page.card_data || {};
@@ -478,6 +625,25 @@
             document.getElementById('ogTitle').setAttribute('content', title);
             document.getElementById('ogDescription').setAttribute('content', cardData.description || page.page_description || '');
             if (cardData.image) document.getElementById('ogImage').setAttribute('content', cardData.image);
+
+            // Try to load the linked promo for QR redemption
+            if (page.promo_id) {
+                currentPromoId = page.promo_id;
+                currentPromoTitle = title;
+            } else if (page.partner_email) {
+                try {
+                    const { data: linkedPromo } = await supabaseClient
+                        .from('promotions')
+                        .select('id, title')
+                        .eq('partner_email', page.partner_email)
+                        .eq('is_active', true)
+                        .maybeSingle();
+                    if (linkedPromo) {
+                        currentPromoId = linkedPromo.id;
+                        currentPromoTitle = linkedPromo.title || title;
+                    }
+                } catch (e) { console.warn('Could not load linked promo:', e); }
+            }
 
             if (page.content) {
                 // ── Full HTML snapshot from builder ───────────────────────────
@@ -491,6 +657,11 @@
                 if (!hasSocial) {
                     const socialHtml = buildSocialBarHtml(socialLinks);
                     if (socialHtml) sectionsDiv.insertAdjacentHTML('beforeend', socialHtml);
+                }
+
+                // Show riscatta button if we have a promo linked
+                if (currentPromoId) {
+                    document.getElementById('plRiscattaBtn').style.display = 'flex';
                 }
 
                 wrap.style.display = 'block';
@@ -533,6 +704,12 @@
             `;
 
             document.getElementById('orgFallbackWrap').style.display = 'block';
+
+            // Show riscatta button if we have a promo linked
+            if (currentPromoId) {
+                document.getElementById('plRiscattaBtn').style.display = 'flex';
+            }
+
             hideLoading();
         }
 
@@ -542,6 +719,10 @@
             document.getElementById('ogTitle').setAttribute('content', promo.title);
             document.getElementById('ogDescription').setAttribute('content', promo.description || '');
             if (promo.image_url) document.getElementById('ogImage').setAttribute('content', promo.image_url);
+
+            // Store for QR modal
+            currentPromoId = promo.id;
+            currentPromoTitle = promo.title;
 
             const savings = promo.original_price && promo.price
                 ? Math.round(((promo.original_price - promo.price) / promo.original_price) * 100) : 0;
@@ -573,10 +754,13 @@
                 savingsEl.innerHTML = `<div class="pl-savings">🎉 Risparmi il ${savings}%</div>`;
             }
 
-            // CTA
+            // CTA — hidden for org promos that go to landing (riscatta btn replaces it)
             const ctaBtn = document.getElementById('plCtaBtn');
-            ctaBtn.innerHTML = `<i class="fas fa-gift"></i> ${promo.cta_text || 'RISCATTA ORA'}`;
-            ctaBtn.onclick = () => redeemPromo(promo.id);
+            ctaBtn.style.display = 'none';
+
+            // Show riscatta button
+            const riscattaBtn = document.getElementById('plRiscattaBtn');
+            riscattaBtn.style.display = 'flex';
 
             showNav();
             document.getElementById('promoLandingWrap').style.display = 'block';
@@ -633,19 +817,143 @@
             return map[cat] || '🎁 Offerta Speciale';
         }
 
-        // ── Redeem ────────────────────────────────────────────────────────────────
-        async function redeemPromo(promoId) {
-            alert('🎉 Promo riscattata! Ti contatteremo presto.');
-            if (supabaseClient) {
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (session) {
-                        await supabaseClient.from('promotion_redemptions').insert({
-                            promotion_id: promoId,
-                            user_id: session.user.id
-                        });
+        // ── Redeem / QR system ────────────────────────────────────────────────────
+        let currentPromoId = null;
+        let currentPromoTitle = '';
+        let qrCountdownInterval = null;
+        let qrPollInterval = null;
+
+        // Called when "Riscatta Promo" button is clicked (from landing or card)
+        function openRedeemModal(promoId, promoTitle) {
+            if (promoId) currentPromoId = promoId;
+            if (promoTitle) currentPromoTitle = promoTitle;
+
+            // Reset to confirm step
+            document.getElementById('qrConfirmStep').style.display = 'block';
+            document.getElementById('qrDisplayStep').style.display = 'none';
+            document.getElementById('qrPromoName').textContent = currentPromoTitle || document.title.replace(' — CDM86','');
+            document.getElementById('qrOverlay').classList.add('show');
+        }
+
+        function closeRedeemModal() {
+            document.getElementById('qrOverlay').classList.remove('show');
+            clearInterval(qrCountdownInterval);
+            clearInterval(qrPollInterval);
+        }
+
+        async function generateQR() {
+            if (!supabaseClient) {
+                alert('Errore: sessione non disponibile. Ricarica la pagina.');
+                return;
+            }
+
+            // Check auth
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                alert('⚠️ Devi essere loggato per riscattare questa promo.');
+                closeRedeemModal();
+                window.location.href = '/public/index.html';
+                return;
+            }
+
+            const btn = document.querySelector('#qrConfirmStep .qr-btn.confirm');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generazione...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/redeem-promo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        promo_id: currentPromoId,
+                        user_id: session.user.id
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert('❌ ' + (data.error || 'Errore nella generazione del codice.'));
+                    btn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Show QR step
+                document.getElementById('qrConfirmStep').style.display = 'none';
+                document.getElementById('qrDisplayStep').style.display = 'block';
+                document.getElementById('qrExpiredMsg').style.display = 'none';
+                document.getElementById('qrNewBtn').style.display = 'none';
+                document.getElementById('qrStatusMsg').style.display = 'block';
+                document.getElementById('qrStatusMsg').textContent = 'In attesa di validazione dal gestore...';
+
+                // Draw QR on canvas
+                const canvas = document.getElementById('qrCanvas');
+                await QRCode.toCanvas(canvas, data.qr_data, {
+                    width: 220, margin: 2,
+                    color: { dark: '#1e293b', light: '#ffffff' }
+                });
+
+                // Countdown 5 min
+                const expiresAt = new Date(data.expires_at).getTime();
+                const totalMs = 5 * 60 * 1000;
+                const progressBar = document.getElementById('qrProgressBar');
+                const countdownEl = document.getElementById('qrCountdown');
+
+                clearInterval(qrCountdownInterval);
+                qrCountdownInterval = setInterval(() => {
+                    const remaining = expiresAt - Date.now();
+                    if (remaining <= 0) {
+                        clearInterval(qrCountdownInterval);
+                        clearInterval(qrPollInterval);
+                        countdownEl.textContent = '0:00';
+                        countdownEl.classList.add('urgent');
+                        progressBar.style.width = '0%';
+                        progressBar.style.background = '#ef4444';
+                        document.getElementById('qrStatusMsg').style.display = 'none';
+                        document.getElementById('qrExpiredMsg').style.display = 'block';
+                        document.getElementById('qrNewBtn').style.display = 'block';
+                        return;
                     }
-                } catch (e) { console.error('Redeem log error:', e); }
+                    const mins = Math.floor(remaining / 60000);
+                    const secs = Math.floor((remaining % 60000) / 1000);
+                    countdownEl.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+                    const pct = (remaining / totalMs) * 100;
+                    progressBar.style.width = pct + '%';
+                    if (remaining < 60000) {
+                        countdownEl.classList.add('urgent');
+                        progressBar.style.background = '#ef4444';
+                    }
+                }, 1000);
+
+                // Poll every 5s to check if validated
+                clearInterval(qrPollInterval);
+                qrPollInterval = setInterval(async () => {
+                    try {
+                        const { data: tokenRow } = await supabaseClient
+                            .from('redemption_tokens')
+                            .select('status')
+                            .eq('token', data.token)
+                            .maybeSingle();
+
+                        if (tokenRow?.status === 'used') {
+                            clearInterval(qrCountdownInterval);
+                            clearInterval(qrPollInterval);
+                            countdownEl.textContent = '✅';
+                            countdownEl.classList.remove('urgent');
+                            progressBar.style.width = '100%';
+                            progressBar.style.background = '#10b981';
+                            document.getElementById('qrStatusMsg').textContent = '✅ Promo validata con successo!';
+                            document.getElementById('qrStatusMsg').style.color = '#10b981';
+                        }
+                    } catch (_) { /* silently ignore polling errors */ }
+                }, 5000);
+
+            } catch (err) {
+                console.error('generateQR error:', err);
+                alert('❌ Errore di rete. Riprova.');
+                btn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
+                btn.disabled = false;
             }
         }
 
