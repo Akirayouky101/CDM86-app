@@ -1689,13 +1689,14 @@
                 
                 if (orgError || !orgData) return;
                 
-                const { data, error } = await window.supabaseClient
+                const { data: pages, error } = await window.supabaseClient
                     .from('organization_pages')
                     .select('*')
-                    .eq('organization_id', orgData.id)
-                    .single();
+                    .eq('organization_id', orgData.id);
                 
-                if (error && error.code !== 'PGRST116') {
+                const data = pages && pages.length > 0 ? pages[0] : null;
+                
+                if (error) {
                     console.error('Error loading organization card:', error);
                     return;
                 }
@@ -1797,7 +1798,7 @@
                 const { data: promotions, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
-                    .eq('organization_id', orgData.id)
+                    .eq('created_by_id', orgData.auth_user_id)
                     .order('created_at', { ascending: false });
                 
                 if (error) {

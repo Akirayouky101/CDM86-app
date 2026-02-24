@@ -628,7 +628,8 @@
                     points_cost: 0,
                     is_active: true,
                     landing_slug: slug,
-                    cta_text: document.getElementById('ctaInput').value
+                    cta_text: document.getElementById('ctaInput').value,
+                    created_by_id: session.user.id
                 };
 
                 const { data, error } = await supabaseClient
