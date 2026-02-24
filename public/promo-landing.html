@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Promozione - CDM86</title>
-    <meta name="description" id="pageDescription" content="Scopri questa incredibile offerta!">
+    <meta name="description" id="pageDescription" content="Scopri questa incredibile offerta su CDM86!">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -18,295 +18,427 @@
     <meta property="twitter:description" id="twitterDescription" content="Scopri questa incredibile offerta!">
     <meta property="twitter:image" id="twitterImage" content="">
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/assets/js/config.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd6;
+            --accent: #fbbf24;
+            --accent-dark: #f59e0b;
+            --dark: #0f172a;
+            --dark2: #1e293b;
+            --muted: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --radius: 1.25rem;
+            --shadow: 0 25px 60px rgba(0,0,0,0.15);
+            --shadow-sm: 0 4px 20px rgba(0,0,0,0.08);
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light);
+            color: var(--dark2);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
         }
 
-        .promo-card {
-            background: white;
-            border-radius: 2rem;
-            overflow: hidden;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-            position: relative;
+        /* ── Loading ─────────────────────────────── */
+        #loadingScreen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; color: white;
+            transition: opacity 0.4s;
         }
-
-        .promo-badge {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(251, 191, 36, 0.95);
-            color: #1e3a8a;
-            padding: 0.75rem 1.5rem;
-            border-radius: 3rem;
-            font-weight: 700;
-            font-size: 0.875rem;
-            z-index: 10;
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .promo-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-        }
-
-        .promo-content {
-            padding: 3rem;
-        }
-
-        .promo-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #1e293b;
+        #loadingScreen .spinner {
+            width: 56px; height: 56px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
             margin-bottom: 1.5rem;
-            line-height: 1.2;
+        }
+        #loadingScreen p { font-size: 1.1rem; font-weight: 600; opacity: 0.9; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Navbar ──────────────────────────────── */
+        .lp-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.95);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 1rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .lp-nav-logo {
+            display: flex; align-items: center; gap: 0.6rem;
+            text-decoration: none;
+            font-weight: 800; font-size: 1.2rem; color: var(--dark2);
+        }
+        .lp-nav-logo span {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .lp-nav-back {
+            display: flex; align-items: center; gap: 0.5rem;
+            text-decoration: none; color: var(--muted);
+            font-size: 0.9rem; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .lp-nav-back:hover { color: var(--primary); }
+
+        /* ── Org Landing (from landing builder) ─── */
+        #orgLandingWrap {
+            display: none;
+            font-family: 'Inter', sans-serif;
+        }
+        #orgLandingWrap * { font-family: inherit; }
+
+        /* Enhance existing section styles injected by builder */
+        #orgLandingWrap .section-hero {
+            position: relative; overflow: hidden;
+        }
+        #orgLandingWrap .section-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.15);
+            z-index: 1;
+        }
+        #orgLandingWrap .section-hero > * { position: relative; z-index: 2; }
+
+        #orgLandingWrap .landing-social-bar {
+            background: var(--dark2) !important;
+            padding: 3rem 2rem !important;
+        }
+        #orgLandingWrap .landing-social-icons {
+            display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+        }
+        #orgLandingWrap .landing-social-link {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: white;
+            text-decoration: none;
+            transition: transform 0.25s, box-shadow 0.25s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        #orgLandingWrap .landing-social-link:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .promo-description {
-            font-size: 1.25rem;
-            color: #475569;
+        /* ── Promo Landing (standard promo card) ── */
+        #promoLandingWrap {
+            display: none;
+            max-width: 720px;
+            margin: 2.5rem auto;
+            padding: 0 1rem 4rem;
+        }
+
+        .pl-hero {
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow);
             margin-bottom: 2rem;
-            line-height: 1.6;
         }
-
-        .promo-pricing {
-            display: flex;
-            align-items: baseline;
-            gap: 1rem;
-            margin-bottom: 2rem;
+        .pl-hero-image {
+            width: 100%; height: 420px;
+            object-fit: cover;
+            display: block;
         }
-
-        .promo-price {
-            font-size: 4rem;
-            font-weight: 900;
-            color: #667eea;
+        .pl-hero-image-placeholder {
+            width: 100%; height: 420px;
+            background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 50%, #818cf8 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 5rem;
         }
-
-        .promo-original-price {
-            font-size: 1.5rem;
-            color: #94a3b8;
+        .pl-hero-body { padding: 2.5rem; }
+        .pl-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: #1e3a8a;
+            padding: 0.45rem 1.1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+        }
+        .pl-title {
+            font-size: 2.2rem; font-weight: 900;
+            color: var(--dark); line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        .pl-desc {
+            font-size: 1.1rem; color: var(--muted);
+            line-height: 1.7; margin-bottom: 1.8rem;
+        }
+        .pl-pricing {
+            display: flex; align-items: baseline; gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .pl-price {
+            font-size: 3.2rem; font-weight: 900;
+            color: var(--primary); line-height: 1;
+        }
+        .pl-original {
+            font-size: 1.4rem; color: #cbd5e1;
             text-decoration: line-through;
         }
-
-        .promo-savings {
+        .pl-savings {
+            display: inline-block;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 2rem;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: inline-block;
-            margin-bottom: 2rem;
+            font-size: 0.85rem; font-weight: 700;
+            margin-bottom: 1.8rem;
         }
-
-        .promo-cta {
-            width: 100%;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        .pl-cta-btn {
+            display: block; width: 100%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
             color: #1e3a8a;
-            padding: 1.5rem;
-            border-radius: 1.5rem;
-            font-weight: 800;
-            font-size: 1.5rem;
-            border: none;
-            cursor: pointer;
+            padding: 1.2rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.15rem; font-weight: 800;
+            border: none; cursor: pointer;
+            text-align: center; text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.4);
+            box-shadow: 0 10px 30px rgba(251,191,36,0.35);
+            letter-spacing: 0.02em;
             margin-bottom: 1.5rem;
         }
-
-        .promo-cta:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 50px rgba(251, 191, 36, 0.5);
+        .pl-cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(251,191,36,0.45);
         }
+        .pl-cta-btn:active { transform: translateY(-1px); }
 
-        .promo-cta:active {
-            transform: translateY(-2px);
-        }
-
-        .share-section {
-            text-align: center;
+        .pl-share {
+            border-top: 1px solid #f1f5f9;
             padding-top: 2rem;
-            border-top: 2px solid #f1f5f9;
         }
-
-        .share-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #64748b;
+        .pl-share-title {
+            font-size: 0.85rem; font-weight: 600; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.08em;
             margin-bottom: 1rem;
         }
-
-        .share-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
+        .pl-share-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .pl-share-btn {
+            width: 46px; height: 46px;
+            border-radius: 50%; border: none; cursor: pointer;
+            font-size: 1.1rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
         }
+        .pl-share-btn:hover { transform: scale(1.12); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+        .pl-share-btn.wa  { background: #25D366; }
+        .pl-share-btn.fb  { background: #1877F2; }
+        .pl-share-btn.tw  { background: #000; }
+        .pl-share-btn.cp  { background: var(--muted); }
 
-        .share-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1.25rem;
+        /* ── Org Fallback Card (when no page.content) ─ */
+        #orgFallbackWrap {
+            display: none;
+            max-width: 720px;
+            margin: 2.5rem auto;
+            padding: 0 1rem 4rem;
+        }
+        .of-card {
+            background: white; border-radius: var(--radius);
+            overflow: hidden; box-shadow: var(--shadow);
+        }
+        .of-image {
+            width: 100%; height: 380px; object-fit: cover; display: block;
+        }
+        .of-body { padding: 2.5rem; }
+        .of-title { font-size: 2rem; font-weight: 900; color: var(--dark); margin-bottom: 1rem; }
+        .of-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+        .of-cta {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+            color: white; padding: 1rem 2.5rem;
+            border-radius: 3rem; text-decoration: none;
+            font-size: 1rem; font-weight: 700;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.35);
         }
+        .of-cta:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(102,126,234,0.45); }
 
-        .share-btn.whatsapp {
-            background: #25D366;
-            color: white;
+        .of-socials {
+            margin-top: 2rem; padding-top: 1.5rem;
+            border-top: 1px solid #f1f5f9;
         }
-
-        .share-btn.facebook {
-            background: #1877F2;
-            color: white;
+        .of-socials-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; }
+        .of-socials-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .of-social-link {
+            width: 46px; height: 46px;
+            border-radius: 50%; display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 1.1rem; color: white;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
         }
+        .of-social-link:hover { transform: scale(1.12); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
 
-        .share-btn.twitter {
-            background: #1DA1F2;
-            color: white;
-        }
-
-        .share-btn.copy {
-            background: #64748b;
-            color: white;
-        }
-
-        .share-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        /* ── Error Screen ────────────────────────── */
+        #errorScreen {
+            display: none;
+            min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
+            align-items: center; justify-content: center;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: white;
+            text-align: center; color: white; padding: 3rem;
         }
-
-        .loading-spinner {
-            font-size: 4rem;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1.5rem;
+        #errorScreen.show { display: flex; }
+        .err-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .err-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem; }
+        .err-msg { font-size: 1rem; opacity: 0.85; margin-bottom: 2.5rem; max-width: 400px; }
+        .err-btn {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            background: white; color: var(--primary);
+            padding: 1rem 2rem; border-radius: 3rem;
+            font-weight: 700; text-decoration: none;
+            transition: transform 0.2s;
         }
+        .err-btn:hover { transform: scale(1.05); }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* ── Footer ──────────────────────────────── */
+        .lp-footer {
+            background: var(--dark2); color: rgba(255,255,255,0.5);
+            text-align: center; padding: 1.5rem 2rem;
+            font-size: 0.85rem;
         }
+        .lp-footer a { color: var(--primary); text-decoration: none; }
 
-        .error-screen {
-            text-align: center;
-            color: white;
-            padding: 3rem;
+        /* ── Responsive ──────────────────────────── */
+        @media (max-width: 640px) {
+            .pl-title, .of-title { font-size: 1.6rem; }
+            .pl-price { font-size: 2.5rem; }
+            .pl-hero-image, .pl-hero-image-placeholder, .of-image { height: 260px; }
+            .pl-hero-body, .of-body { padding: 1.5rem; }
         }
-
-        .error-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .error-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .countdown-badge {
-            background: rgba(239, 68, 68, 0.95);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 3rem;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: inline-block;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .promo-title {
-                font-size: 2rem;
-            }
-
-            .promo-price {
-                font-size: 3rem;
-            }
-
-            .promo-content {
-                padding: 2rem;
-            }
-        }
+        #lpNav, #lpFooter { display: none; }
     </style>
 </head>
 <body>
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner"><i class="fas fa-circle-notch"></i></div>
-        <div style="font-size: 1.25rem; font-weight: 600;">Caricamento promo...</div>
+
+    <!-- Loading -->
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Caricamento in corso...</p>
     </div>
 
-    <div class="promo-card" id="promoCard" style="display: none;">
-        <!-- Content will be injected by JavaScript -->
+    <!-- Error -->
+    <div id="errorScreen">
+        <div class="err-icon">😢</div>
+        <div class="err-title" id="errTitle">Pagina non trovata</div>
+        <div class="err-msg" id="errMsg">Questa promozione non esiste o non è più disponibile.</div>
+        <a href="/public/promotions.html" class="err-btn">
+            <i class="fas fa-arrow-left"></i> Torna alle Promozioni
+        </a>
     </div>
+
+    <!-- Navbar (shown for all landing types) -->
+    <nav class="lp-nav" id="lpNav">
+        <a href="/public/index.html" class="lp-nav-logo">
+            <i class="fas fa-tag"></i> <span>CDM86</span>
+        </a>
+        <a href="/public/promotions.html" class="lp-nav-back">
+            <i class="fas fa-arrow-left"></i> Tutte le promozioni
+        </a>
+    </nav>
+
+    <!-- Org Landing (sections from landing builder) -->
+    <div id="orgLandingWrap">
+        <div id="orgLandingSections"></div>
+        <!-- Share bar injected here -->
+    </div>
+
+    <!-- Org Fallback (no page.content, render from card_data) -->
+    <div id="orgFallbackWrap">
+        <div class="of-card" id="orgFallbackCard"></div>
+    </div>
+
+    <!-- Standard Promo Landing (from promotions table) -->
+    <div id="promoLandingWrap">
+        <div class="pl-hero">
+            <div id="plHeroImageWrap"></div>
+            <div class="pl-hero-body">
+                <div class="pl-badge" id="plBadge"></div>
+                <h1 class="pl-title" id="plTitle"></h1>
+                <p class="pl-desc" id="plDesc"></p>
+                <div class="pl-pricing" id="plPricing"></div>
+                <div id="plSavings"></div>
+                <button class="pl-cta-btn" id="plCtaBtn"></button>
+                <div class="pl-share">
+                    <div class="pl-share-title">Condividi questa offerta</div>
+                    <div class="pl-share-row">
+                        <button class="pl-share-btn wa" onclick="shareWA()" title="WhatsApp"><i class="fab fa-whatsapp"></i></button>
+                        <button class="pl-share-btn fb" onclick="shareFB()" title="Facebook"><i class="fab fa-facebook-f"></i></button>
+                        <button class="pl-share-btn tw" onclick="shareTW()" title="Twitter / X"><i class="fab fa-x-twitter"></i></button>
+                        <button class="pl-share-btn cp" onclick="copyLink()" title="Copia link"><i class="fas fa-link"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="lp-footer" id="lpFooter">
+        &copy; 2024 <a href="/public/index.html">CDM86</a> — Promozioni esclusive per te
+    </footer>
 
     <script>
         let supabaseClient;
-
-        // Get slug from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const slug = window.location.pathname.split('/promo/')[1] || urlParams.get('slug');
+        const slug = (window.location.pathname.split('/promo/')[1] || '').replace(/\/$/, '') || urlParams.get('slug');
 
-        // Initialize Supabase
         if (typeof CDM86_CONFIG !== 'undefined' && CDM86_CONFIG.supabase) {
-            supabaseClient = supabase.createClient(
-                CDM86_CONFIG.supabase.url,
-                CDM86_CONFIG.supabase.anonKey
-            );
+            supabaseClient = supabase.createClient(CDM86_CONFIG.supabase.url, CDM86_CONFIG.supabase.anonKey);
         }
 
-        async function loadPromo() {
-            if (!slug) {
-                showError('Promo non trovata', 'URL non valido');
-                return;
-            }
+        // ── Utility ──────────────────────────────────────────────────────────────
+        function hideLoading() {
+            const ls = document.getElementById('loadingScreen');
+            ls.style.opacity = '0';
+            setTimeout(() => ls.style.display = 'none', 400);
+        }
 
-            if (!supabaseClient) {
-                showError('Errore di configurazione', 'Impossibile connettersi al database');
-                return;
-            }
+        function showNav() {
+            document.getElementById('lpNav').style.display = 'flex';
+            document.getElementById('lpFooter').style.display = 'block';
+        }
+
+        function showError(title, msg) {
+            hideLoading();
+            document.getElementById('errTitle').textContent = title;
+            document.getElementById('errMsg').textContent = msg;
+            document.getElementById('errorScreen').classList.add('show');
+        }
+
+        // ── Load ─────────────────────────────────────────────────────────────────
+        async function loadPromo() {
+            if (!slug) { showError('Promo non trovata', 'URL non valido.'); return; }
+            if (!supabaseClient) { showError('Errore configurazione', 'Database non raggiungibile.'); return; }
 
             try {
-                // 1️⃣ Prima cerca in organization_pages (landing builder)
+                // 1️⃣ organization_pages (landing builder)
                 const { data: orgPage } = await supabaseClient
                     .from('organization_pages')
                     .select('*')
@@ -314,106 +446,175 @@
                     .eq('card_published', true)
                     .maybeSingle();
 
-                if (orgPage) {
-                    renderOrgLanding(orgPage);
-                    return;
-                }
+                if (orgPage) { renderOrgLanding(orgPage); return; }
 
-                // 2️⃣ Fallback: cerca in promotions (promo-creator)
-                const { data, error } = await supabaseClient
+                // 2️⃣ promotions table (promo-creator)
+                const { data: promo, error } = await supabaseClient
                     .from('promotions')
                     .select('*')
                     .eq('landing_slug', slug)
                     .eq('is_active', true)
-                    .single();
+                    .maybeSingle();
 
-                if (error) throw error;
-                if (!data) throw new Error('Promo non trovata');
+                if (promo) { renderPromo(promo); return; }
 
-                renderPromo(data);
+                showError('Promozione non trovata', 'Questa offerta non è più disponibile o il link non è corretto.');
 
-            } catch (error) {
-                console.error('Error loading promo:', error);
-                showError('Promo non trovata', error.message);
+            } catch (err) {
+                console.error('loadPromo error:', err);
+                showError('Errore di caricamento', err.message || 'Riprova più tardi.');
             }
         }
 
-        // Render landing page from organization_pages (landing builder)
+        // ── Render: Org Landing (landing builder) ────────────────────────────────
         function renderOrgLanding(page) {
-            const card = document.getElementById('promoCard');
+            showNav();
             const pageData = page.page_data || {};
             const cardData = page.card_data || {};
+            const title = cardData.title || page.page_title || 'Offerta';
 
-            // If we have an HTML content snapshot, use it
+            // Update <title> and OG tags
+            document.getElementById('pageTitle').textContent = title + ' — CDM86';
+            document.getElementById('ogTitle').setAttribute('content', title);
+            document.getElementById('ogDescription').setAttribute('content', cardData.description || page.page_description || '');
+            if (cardData.image) document.getElementById('ogImage').setAttribute('content', cardData.image);
+
             if (page.content) {
-                // Full page render mode
-                document.body.innerHTML = page.content;
-                // Add Font Awesome for icons
-                const fa = document.createElement('link');
-                fa.rel = 'stylesheet';
-                fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-                document.head.appendChild(fa);
-                // Add base styles for social bar
-                const style = document.createElement('style');
-                style.textContent = `
-                    .landing-social-bar { background: #1e293b; padding: 30px 40px; text-align: center; }
-                    .landing-social-bar h3 { color: white; margin-bottom: 20px; font-size: 1.3rem; font-family: sans-serif; }
-                    .landing-social-icons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-                    .landing-social-link { width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; text-decoration: none; transition: all 0.3s; }
-                    .landing-social-link:hover { transform: translateY(-4px) scale(1.1); }
-                `;
-                document.head.appendChild(style);
-                document.getElementById('loadingScreen')?.remove();
-                return;
+                // ── Full HTML snapshot from builder ───────────────────────────
+                const wrap = document.getElementById('orgLandingWrap');
+                const sectionsDiv = document.getElementById('orgLandingSections');
+                sectionsDiv.innerHTML = page.content;
+
+                // Append social bar if not already in content
+                const socialLinks = page.social_links || cardData.socialLinks || {};
+                const hasSocial = sectionsDiv.querySelector('.landing-social-bar');
+                if (!hasSocial) {
+                    const socialHtml = buildSocialBarHtml(socialLinks);
+                    if (socialHtml) sectionsDiv.insertAdjacentHTML('beforeend', socialHtml);
+                }
+
+                wrap.style.display = 'block';
+                hideLoading();
+
+            } else {
+                // ── Fallback: render from card_data ───────────────────────────
+                renderOrgFallback(page, cardData, pageData);
             }
+        }
 
-            // Fallback: render card style from card_data
-            document.title = (cardData.title || page.page_title || 'CDM86') + ' - CDM86';
-            card.style.display = 'block';
-            document.getElementById('loadingScreen').style.display = 'none';
-
+        function renderOrgFallback(page, cardData, pageData) {
             const socialLinks = page.social_links || cardData.socialLinks || {};
+            const ctaLink = cardData.ctaLinkHero || pageData.ctaLinkHero || socialLinks.whatsapp || socialLinks.website || null;
+            const title = cardData.title || page.page_title || 'Offerta Speciale';
+            const desc = cardData.description || page.page_description || '';
+
             const socialHtml = buildSocialIconsHtml(socialLinks);
 
-            // ctaLinkHero = the button URL inside the landing page (e.g. WhatsApp, external site)
-            // NOT the same as cardData.ctaLink which points back to this landing (used by promotions.html)
-            const ctaLinkHero = cardData.ctaLinkHero || pageData.ctaLinkHero || socialLinks.whatsapp || socialLinks.website || null;
-
-            card.innerHTML = `
-                ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title || ''}" class="promo-image" style="width:100%;border-radius:1rem;margin-bottom:1.5rem;">` : ''}
-                <div class="promo-content">
-                    <h1 class="promo-title">${cardData.title || page.page_title || 'Offerta Speciale'}</h1>
-                    <p class="promo-description">${cardData.description || page.page_description || ''}</p>
-                    ${ctaLinkHero ? `
-                        <a href="${ctaLinkHero}" class="promo-cta" style="display:inline-block;text-decoration:none;" target="_blank" rel="noopener">
+            document.getElementById('orgFallbackCard').innerHTML = `
+                ${cardData.image ? `<img src="${cardData.image}" alt="${title}" class="of-image">` : `
+                    <div style="width:100%;height:240px;background:linear-gradient(135deg,#c7d2fe,#818cf8);display:flex;align-items:center;justify-content:center;font-size:4rem;">🏷️</div>
+                `}
+                <div class="of-body">
+                    <div class="pl-badge" style="display:inline-flex;margin-bottom:1.2rem;">${cardData.badge || '⭐ OFFERTA'}</div>
+                    <h1 class="of-title">${title}</h1>
+                    <p class="of-desc">${desc}</p>
+                    ${ctaLink ? `
+                        <a href="${ctaLink}" class="of-cta" target="_blank" rel="noopener">
                             <i class="fas fa-arrow-right"></i> ${cardData.ctaText || 'SCOPRI DI PIÙ'}
                         </a>
                     ` : ''}
-                    ${socialHtml}
+                    ${socialHtml ? `
+                        <div class="of-socials">
+                            <div class="of-socials-title">Seguici sui social</div>
+                            <div class="of-socials-row">${socialHtml}</div>
+                        </div>
+                    ` : ''}
                 </div>
             `;
+
+            document.getElementById('orgFallbackWrap').style.display = 'block';
+            hideLoading();
         }
 
+        // ── Render: Standard Promo ────────────────────────────────────────────────
+        function renderPromo(promo) {
+            document.getElementById('pageTitle').textContent = promo.title + ' — CDM86';
+            document.getElementById('ogTitle').setAttribute('content', promo.title);
+            document.getElementById('ogDescription').setAttribute('content', promo.description || '');
+            if (promo.image_url) document.getElementById('ogImage').setAttribute('content', promo.image_url);
+
+            const savings = promo.original_price && promo.price
+                ? Math.round(((promo.original_price - promo.price) / promo.original_price) * 100) : 0;
+
+            // Hero image
+            const imgWrap = document.getElementById('plHeroImageWrap');
+            imgWrap.innerHTML = promo.image_url
+                ? `<img src="${promo.image_url}" alt="${promo.title}" class="pl-hero-image" onerror="this.parentElement.innerHTML='<div class=\\'pl-hero-image-placeholder\\'>🏷️</div>'">`
+                : `<div class="pl-hero-image-placeholder">🏷️</div>`;
+
+            document.getElementById('plBadge').textContent = getCategoryLabel(promo.category);
+            document.getElementById('plTitle').textContent = promo.title;
+            document.getElementById('plDesc').textContent = promo.description || '';
+
+            // Pricing
+            const pricingEl = document.getElementById('plPricing');
+            if (promo.price != null) {
+                pricingEl.innerHTML = `
+                    <div class="pl-price">€${Number(promo.price).toFixed(2)}</div>
+                    ${promo.original_price ? `<div class="pl-original">€${Number(promo.original_price).toFixed(2)}</div>` : ''}
+                `;
+            } else {
+                pricingEl.style.display = 'none';
+            }
+
+            // Savings badge
+            const savingsEl = document.getElementById('plSavings');
+            if (savings > 0) {
+                savingsEl.innerHTML = `<div class="pl-savings">🎉 Risparmi il ${savings}%</div>`;
+            }
+
+            // CTA
+            const ctaBtn = document.getElementById('plCtaBtn');
+            ctaBtn.innerHTML = `<i class="fas fa-gift"></i> ${promo.cta_text || 'RISCATTA ORA'}`;
+            ctaBtn.onclick = () => redeemPromo(promo.id);
+
+            showNav();
+            document.getElementById('promoLandingWrap').style.display = 'block';
+            hideLoading();
+        }
+
+        // ── Social helpers ────────────────────────────────────────────────────────
+        const SOCIAL_DEFS = [
+            { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
+            { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
+            { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X / Twitter' },
+            { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
+            { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
+            { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
+            { key: 'website',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
+        ];
+
         function buildSocialIconsHtml(links) {
-            if (!links || Object.keys(links).every(k => !links[k])) return '';
-            const defs = [
-                { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
-                { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
-                { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X' },
-                { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
-                { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
-                { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
-                { key: 'website',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
-            ];
-            const active = defs.filter(d => links[d.key]);
+            if (!links) return '';
+            return SOCIAL_DEFS
+                .filter(d => links[d.key])
+                .map(d => `
+                    <a href="${links[d.key]}" target="_blank" rel="noopener" title="${d.label}" class="of-social-link" style="background:${d.color};">
+                        <i class="${d.icon}"></i>
+                    </a>
+                `).join('');
+        }
+
+        function buildSocialBarHtml(links) {
+            if (!links) return '';
+            const active = SOCIAL_DEFS.filter(d => links[d.key]);
             if (!active.length) return '';
             return `
-                <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.2);">
-                    <p style="font-size:0.9rem; margin-bottom:1rem; opacity:0.8;">Seguici sui social</p>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                <div class="landing-social-bar" style="background:#1e293b;padding:3rem 2rem;text-align:center;">
+                    <h3 style="color:white;margin-bottom:1.5rem;font-size:1.2rem;font-family:Inter,sans-serif;">Seguici sui Social</h3>
+                    <div class="landing-social-icons" style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
                         ${active.map(d => `
-                            <a href="${links[d.key]}" target="_blank" rel="noopener" title="${d.label}"
-                               style="width:44px;height:44px;border-radius:50%;background:${d.color};display:inline-flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:1.1rem;">
+                            <a href="${links[d.key]}" class="landing-social-link" style="background:${d.color};width:52px;height:52px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;text-decoration:none;" target="_blank" rel="noopener" title="${d.label}">
                                 <i class="${d.icon}"></i>
                             </a>
                         `).join('')}
@@ -422,83 +623,19 @@
             `;
         }
 
-        function renderPromo(promo) {
-            // Update meta tags
-            document.getElementById('pageTitle').textContent = promo.title + ' - CDM86';
-            document.getElementById('pageDescription').setAttribute('content', promo.description);
-            document.getElementById('ogTitle').setAttribute('content', promo.title);
-            document.getElementById('ogDescription').setAttribute('content', promo.description);
-            document.getElementById('ogImage').setAttribute('content', promo.image_url);
-            document.getElementById('twitterTitle').setAttribute('content', promo.title);
-            document.getElementById('twitterDescription').setAttribute('content', promo.description);
-            document.getElementById('twitterImage').setAttribute('content', promo.image_url);
-
-            // Calculate savings
-            const savings = promo.original_price ? 
-                Math.round(((promo.original_price - promo.price) / promo.original_price) * 100) : 0;
-
-            // Render card
-            const card = document.getElementById('promoCard');
-            card.innerHTML = `
-                <div class="promo-badge">${getCategoryIcon(promo.category)}</div>
-                <img src="${promo.image_url}" alt="${promo.title}" class="promo-image" onerror="this.src='https://via.placeholder.com/600x400/667eea/ffffff?text=CDM86'">
-                
-                <div class="promo-content">
-                    <h1 class="promo-title">${promo.title}</h1>
-                    <p class="promo-description">${promo.description}</p>
-                    
-                    <div class="promo-pricing">
-                        <div class="promo-price">€${promo.price.toFixed(2)}</div>
-                        ${promo.original_price ? `<div class="promo-original-price">€${promo.original_price.toFixed(2)}</div>` : ''}
-                    </div>
-                    
-                    ${savings > 0 ? `<div class="promo-savings">🎉 Risparmi ${savings}%</div>` : ''}
-                    
-                    <button class="promo-cta" onclick="redeemPromo('${promo.id}')">
-                        <i class="fas fa-gift"></i> ${promo.cta_text || 'RISCATTA ORA'}
-                    </button>
-                    
-                    <div class="share-section">
-                        <div class="share-title">Condividi con gli amici</div>
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareWhatsApp()" title="Condividi su WhatsApp">
-                                <i class="fab fa-whatsapp"></i>
-                            </button>
-                            <button class="share-btn facebook" onclick="shareFacebook()" title="Condividi su Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </button>
-                            <button class="share-btn twitter" onclick="shareTwitter()" title="Condividi su Twitter">
-                                <i class="fab fa-twitter"></i>
-                            </button>
-                            <button class="share-btn copy" onclick="copyLink()" title="Copia link">
-                                <i class="fas fa-link"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('loadingScreen').style.display = 'none';
-            card.style.display = 'block';
-        }
-
-        function getCategoryIcon(category) {
-            const icons = {
-                food: '🍕 CIBO & DRINK',
-                beauty: '💇 BELLEZZA',
-                wellness: '🧘 BENESSERE',
-                shopping: '🛍️ SHOPPING',
-                entertainment: '🎭 INTRATTENIMENTO',
-                travel: '✈️ VIAGGI'
+        // ── Category labels ───────────────────────────────────────────────────────
+        function getCategoryLabel(cat) {
+            const map = {
+                food: '🍕 Cibo & Drink', beauty: '💇 Bellezza',
+                wellness: '🧘 Benessere', shopping: '🛍️ Shopping',
+                entertainment: '🎭 Intrattenimento', travel: '✈️ Viaggi'
             };
-            return icons[category] || '🎁 OFFERTA SPECIALE';
+            return map[cat] || '🎁 Offerta Speciale';
         }
 
+        // ── Redeem ────────────────────────────────────────────────────────────────
         async function redeemPromo(promoId) {
-            // Qui puoi implementare la logica di riscatto
-            alert('🎉 Promo riscattata! Ti invieremo i dettagli via email.');
-            
-            // Log redemption in DB
+            alert('🎉 Promo riscattata! Ti contatteremo presto.');
             if (supabaseClient) {
                 try {
                     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -508,45 +645,29 @@
                             user_id: session.user.id
                         });
                     }
-                } catch (error) {
-                    console.error('Error logging redemption:', error);
-                }
+                } catch (e) { console.error('Redeem log error:', e); }
             }
         }
 
-        function shareWhatsApp() {
-            const text = encodeURIComponent(`Guarda questa offerta: ${document.getElementById('pageTitle').textContent} ${window.location.href}`);
-            window.open(`https://wa.me/?text=${text}`, '_blank');
+        // ── Share ─────────────────────────────────────────────────────────────────
+        function shareWA() {
+            const t = encodeURIComponent(`🎁 Guarda questa offerta su CDM86!\n${window.location.href}`);
+            window.open(`https://wa.me/?text=${t}`, '_blank');
         }
-
-        function shareFacebook() {
+        function shareFB() {
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
         }
-
-        function shareTwitter() {
-            const text = encodeURIComponent(document.getElementById('pageTitle').textContent);
-            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        function shareTW() {
+            const t = encodeURIComponent(document.title);
+            window.open(`https://twitter.com/intent/tweet?text=${t}&url=${encodeURIComponent(window.location.href)}`, '_blank');
         }
-
         function copyLink() {
-            navigator.clipboard.writeText(window.location.href);
-            alert('✅ Link copiato negli appunti!');
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btn = document.querySelector('.pl-share-btn.cp');
+                if (btn) { btn.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(() => btn.innerHTML = '<i class="fas fa-link"></i>', 2000); }
+            });
         }
 
-        function showError(title, message) {
-            document.getElementById('loadingScreen').innerHTML = `
-                <div class="error-screen">
-                    <div class="error-icon">😢</div>
-                    <div class="error-title">${title}</div>
-                    <p style="font-size: 1.125rem; margin-bottom: 2rem;">${message}</p>
-                    <button class="promo-cta" style="max-width: 300px;" onclick="window.location.href='/public/promotions.html'">
-                        Torna alle Promozioni
-                    </button>
-                </div>
-            `;
-        }
-
-        // Load promo on page load
         window.addEventListener('DOMContentLoaded', loadPromo);
     </script>
 </body>
