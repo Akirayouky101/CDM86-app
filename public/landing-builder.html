@@ -888,21 +888,20 @@
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) return;
 
-                // Get organization_id (may be null for some users)
-                const { data: userData } = await supabaseClient
-                    .from('users')
-                    .select('organization_id')
-                    .eq('id', user.id)
-                    .single();
+                // Get organization from organizations table
+                const { data: orgData } = await supabaseClient
+                    .from('organizations')
+                    .select('id')
+                    .eq('auth_user_id', user.id)
+                    .maybeSingle();
 
-                const orgId = userData?.organization_id;
+                const orgId = orgData?.id;
 
                 // Fetch existing landing page
                 let query = supabaseClient.from('organization_pages').select('*');
                 if (orgId) {
                     query = query.eq('organization_id', orgId);
                 } else {
-                    // Fallback: find by user auth id via users table join
                     return; // no org id, skip pre-fill
                 }
 
