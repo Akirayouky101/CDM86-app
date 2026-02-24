@@ -5,7 +5,7 @@
 // Risolve problemi di dati stantii dopo modifiche DB
 // =====================================================
 
-const VERSION = 'v3-nocache-referrer-org-' + Date.now();
+const VERSION = 'v4-fix-cdn-' + Date.now();
 
 console.log('🚀 CDM86 Service Worker loaded:', VERSION);
 
@@ -35,19 +35,11 @@ self.addEventListener('activate', (event) => {
     })
     .then(() => {
       console.log('✅ [SW] All caches deleted');
-      // Prendi controllo di tutti i client immediatamente
       return self.clients.claim();
     })
     .then(() => {
-      console.log('✅ [SW] Claimed all clients');
-      // Ricarica tutti i client per usare la nuova versione
-      return self.clients.matchAll({ type: 'window' });
-    })
-    .then((clients) => {
-      clients.forEach((client) => {
-        console.log('🔄 [SW] Reloading client:', client.url);
-        client.navigate(client.url);
-      });
+      console.log('✅ [SW] Claimed all clients - ready');
+      // NON ricaricare automaticamente per evitare loop
     })
   );
 });

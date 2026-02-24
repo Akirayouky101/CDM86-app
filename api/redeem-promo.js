@@ -1,28 +1,23 @@
 // POST /api/redeem-promo
 // Body: { promo_id, user_id }
-// Returns: { token, qr_data, expires_at, used_count, remaining_uses } or { error }
+// Returns: { token, qr_data, expires_at, remaining_uses } or { error }
 
-import { createClient } from '@supabase/supabase-js';
-import { randomUUID } from 'crypto';
+const { createClient } = require('@supabase/supabase-js');
+const { randomUUID } = require('crypto');
 
-export default async function handler(req, res) {
-    // CORS
+module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    // Verifica env vars
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-        console.error('[redeem-promo] Missing env vars: SUPABASE_URL or SUPABASE_SERVICE_KEY');
-        return res.status(500).json({ error: 'Configurazione server mancante. Contatta l\'amministratore.' });
+        console.error('[redeem-promo] Missing env vars');
+        return res.status(500).json({ error: 'Configurazione server mancante. Aggiungi SUPABASE_URL e SUPABASE_SERVICE_KEY su Vercel.' });
     }
 
-    const supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_KEY
-    );
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
     try {
         const { promo_id, user_id } = req.body || {};
@@ -33,7 +28,7 @@ export default async function handler(req, res) {
         // 1️⃣ Leggi la promozione e max_uses
         const { data: promo, error: promoErr } = await supabase
             .from('promotions')
-            .select('id, title, max_uses_per_user, is_active, landing_slug')
+            .select('id, title, max_uses_per_user, is_active')
             .eq('id', promo_id)
             .maybeSingle();
 
@@ -41,16 +36,12 @@ export default async function handler(req, res) {
             console.error('[redeem-promo] promo query error:', promoErr);
             return res.status(500).json({ error: 'Errore lettura promozione: ' + promoErr.message });
         }
-        if (!promo) {
-            return res.status(404).json({ error: 'Promozione non trovata' });
-        }
-        if (!promo.is_active) {
-            return res.status(403).json({ error: 'Promozione non attiva' });
-        }
+        if (!promo) return res.status(404).json({ error: 'Promozione non trovata' });
+        if (!promo.is_active) return res.status(403).json({ error: 'Promozione non attiva' });
 
-        const maxUses = promo.max_uses_per_user ?? 1;
+        const maxUses = promo.max_uses_per_user != null ? promo.max_uses_per_user : 1;
 
-        // 2️⃣ Conta quante volte l'utente ha già riscattato (token usati)
+        // 2️⃣ Conta utilizzi già completati
         const { count: usedCount, error: countErr } = await supabase
             .from('redemption_tokens')
             .select('id', { count: 'exact', head: true })
@@ -63,7 +54,7 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Errore verifica utilizzi: ' + countErr.message });
         }
 
-        const usedSoFar = usedCount ?? 0;
+        const usedSoFar = usedCount || 0;
         const remaining = maxUses - usedSoFar;
 
         if (usedSoFar >= maxUses) {
@@ -74,7 +65,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 3️⃣ Invalida eventuali token pending già esistenti per questo utente+promo
+        // 3️⃣ Invalida token pending esistenti
         await supabase
             .from('redemption_tokens')
             .update({ status: 'expired' })
@@ -84,25 +75,19 @@ export default async function handler(req, res) {
 
         // 4️⃣ Genera nuovo token
         const token = randomUUID();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // +5 min
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
         const { error: insertErr } = await supabase
             .from('redemption_tokens')
-            .insert({
-                token,
-                promo_id,
-                user_id,
-                status: 'pending',
-                expires_at: expiresAt,
-                created_at: new Date().toISOString()
-            });
+            .insert({ token, promo_id, user_id, status: 'pending', expires_at: expiresAt });
 
         if (insertErr) {
             console.error('[redeem-promo] insert error:', insertErr);
-            throw insertErr;
+            return res.status(500).json({ error: 'Errore salvataggio token: ' + insertErr.message });
         }
 
-        const validateUrl = `${process.env.SITE_URL || 'https://cdm86.com'}/public/validate-qr.html?token=${token}`;
+        const siteUrl = process.env.SITE_URL || 'https://www.cdm86.com';
+        const validateUrl = `${siteUrl}/public/validate-qr.html?token=${token}`;
 
         return res.status(200).json({
             token,
@@ -111,11 +96,11 @@ export default async function handler(req, res) {
             promo_title: promo.title,
             max_uses: maxUses,
             used_count: usedSoFar,
-            remaining_uses: remaining   // ← nuovo campo
+            remaining_uses: remaining - 1  // after this token is used
         });
 
     } catch (err) {
-        console.error('[redeem-promo] error:', err);
+        console.error('[redeem-promo] unhandled error:', err);
         return res.status(500).json({ error: err.message || 'Errore interno del server' });
     }
-}
+};

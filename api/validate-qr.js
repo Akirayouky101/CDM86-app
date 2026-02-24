@@ -1,21 +1,21 @@
 // POST /api/validate-qr
-// Body: { token }
+// Body: { token, validated_by }
 // Returns: { valid, promo_title, user_id, message } or { error }
-// Chiamato dal gestore che scansiona il QR
 
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-);
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+        return res.status(500).json({ error: 'Configurazione server mancante.' });
+    }
+
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
     try {
         const { token, validated_by } = req.body || {};
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             return res.status(410).json({ valid: false, message: 'Codice scaduto.' });
         }
 
-        // 3️⃣ Controlla scadenza (5 min)
+        // 3️⃣ Controlla scadenza temporale
         if (new Date(redemption.expires_at) < new Date()) {
             await supabase
                 .from('redemption_tokens')
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
         return res.status(200).json({
             valid: true,
             message: '✅ Codice valido! Promo riscattata con successo.',
-            promo_title: redemption.promotions?.title || '',
+            promo_title: redemption.promotions ? redemption.promotions.title : '',
             user_id: redemption.user_id,
             promo_id: redemption.promo_id,
             used_at: new Date().toISOString()
@@ -74,4 +74,5 @@ export default async function handler(req, res) {
         console.error('[validate-qr] error:', err);
         return res.status(500).json({ error: err.message || 'Errore interno' });
     }
-}
+};
+
