@@ -1044,6 +1044,9 @@
             }
         }
 
+        // Emails of orgs already shown as partner cards (set by loadOrganizationCards)
+        const orgCardEmails = new Set();
+
         // Load organization cards from database
         async function loadOrganizationCards() {
             console.log('🏢 Loading organization cards...');
@@ -1081,18 +1084,19 @@
                 const orgIds = [...new Set(orgPages.map(p => p.organization_id))];
                 const { data: orgs, error: orgError } = await window.supabaseClient
                     .from('organizations')
-                    .select('id, name, logo_url')
+                    .select('id, name, logo_url, email')
                     .in('id', orgIds);
 
                 if (orgError) {
                     console.error('❌ Error loading organizations:', orgError);
                 }
 
-                // Create org lookup map
+                // Create org lookup map and collect emails to exclude from promotions grid
                 const orgMap = {};
                 if (orgs) {
                     orgs.forEach(org => {
                         orgMap[org.id] = org;
+                        if (org.email) orgCardEmails.add(org.email.toLowerCase());
                     });
                 }
 
@@ -1484,8 +1488,11 @@
                 
                 if (error) throw error;
                 
-                // Store all promotions
-                allPromotions = promotions || [];
+                // Store all promotions — exclude those already shown as org partner cards
+                allPromotions = (promotions || []).filter(p => {
+                    if (!p.partner_email) return true;
+                    return !orgCardEmails.has(p.partner_email.toLowerCase());
+                });
                 
                 // Load favorites only if user is logged in
                 favoriteIds = new Set();
@@ -1571,7 +1578,7 @@
                                     <span class="price-original">€${originalPrice.toFixed(2)}</span>
                                     <span class="price-final">€${discountedPrice.toFixed(2)}</span>
                                 </div>
-                                <button class="btn-promo" onclick="viewPromotion('${promo.id}', event)">
+                                <button class="btn-promo" onclick="viewPromotion('${promo.id}', event, '${promo.landing_slug || ''}')">
                                     <span>Dettagli</span>
                                     <i class="fas fa-arrow-right"></i>
                                 </button>
@@ -1658,22 +1665,23 @@
             toggleFavorite(promotionId, event);
         };
         
-        window.viewPromotion = function(promotionId, event) {
+        window.viewPromotion = function(promotionId, event, landingSlug) {
+            // If the promo has a dedicated landing page, go there directly
+            const destination = landingSlug
+                ? `/promo/${landingSlug}`
+                : `/public/promotion-detail.html?id=${promotionId}`;
+
             // Get the card element
             const cardElement = event?.target?.closest('.promo-card') || 
                                document.querySelector(`.promo-card[data-id="${promotionId}"]`);
             
             if (cardElement) {
-                // Add flip animation
                 cardElement.classList.add('flipping');
-                
-                // Navigate after animation
                 setTimeout(() => {
-                    window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+                    window.location.href = destination;
                 }, 600);
             } else {
-                // Fallback if card not found
-                window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+                window.location.href = destination;
             }
         };
         
