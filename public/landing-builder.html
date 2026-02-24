@@ -1231,10 +1231,8 @@
                 urlBox.scrollIntoView({ behavior: 'smooth' });
 
                 setTimeout(() => {
-                    if (confirm(`✅ Landing Page pubblicata!\n\nURL: ${landingUrl}\n\nVuoi tornare alla dashboard?`)) {
-                        window.location.href = '/public/dashboard.html';
-                    }
-                }, 800);
+                    window.location.href = '/public/dashboard.html';
+                }, 1500);
 
             } catch (error) {
                 console.error('❌ Publish error:', error);
