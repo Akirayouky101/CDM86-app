@@ -209,21 +209,22 @@
     
     <script src="/assets/js/config.js"></script>
     
-    <!-- Supabase UMD Build -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Wait for Supabase UMD to load
         function initSupabase() {
             if (typeof supabase === 'undefined' || !supabase.createClient) {
-                console.warn('⚠️ Supabase not ready, retrying...');
                 setTimeout(initSupabase, 100);
                 return;
             }
-            
-            const { createClient } = supabase;
-            const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-            window.supabaseClient = supabaseClient;
-            
+            if (!CDM86_CONFIG?.supabase?.url) {
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            window.supabaseClient = supabase.createClient(
+                CDM86_CONFIG.supabase.url,
+                CDM86_CONFIG.supabase.anonKey
+            );
             console.log('✅ Promotion Detail: Supabase initialized');
             window.dispatchEvent(new Event('supabase-ready'));
         }
@@ -258,16 +259,28 @@
             }
             currentUser = session.user;
             
-            // Update navbar
-            const { data: userData } = await window.supabaseClient
-                .from('users')
-                .select('first_name')
-                .eq('id', currentUser.id)
-                .single();
-            
-            if (userData) {
-                document.getElementById('user-name-nav').textContent = userData.first_name;
-            }
+            // Update navbar name — try users table first, then organizations
+            try {
+                const { data: userData } = await window.supabaseClient
+                    .from('users')
+                    .select('first_name')
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+                
+                if (userData?.first_name) {
+                    document.getElementById('user-name-nav').textContent = userData.first_name;
+                } else {
+                    // org user
+                    const { data: orgData } = await window.supabaseClient
+                        .from('organizations')
+                        .select('name')
+                        .eq('auth_user_id', currentUser.id)
+                        .maybeSingle();
+                    if (orgData?.name) {
+                        document.getElementById('user-name-nav').textContent = orgData.name;
+                    }
+                }
+            } catch (_) { /* ignore nav name errors */ }
             
             return currentUser;
         }
@@ -282,7 +295,7 @@
             
             try {
                 // Get promotion details
-                const { data: promotion, error } = await supabase
+                const { data: promotion, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
                     .eq('id', promotionId)
@@ -307,10 +320,15 @@
         // Display promotion
         function displayPromotion(promo) {
             document.getElementById('promo-title').textContent = promo.title;
-            document.getElementById('promo-partner').textContent = promo.partner_name;
+            document.getElementById('promo-partner').textContent = promo.partner_name || '';
             document.getElementById('promo-description').textContent = promo.description || promo.short_description || '';
-            document.getElementById('price-original').textContent = `€${parseFloat(promo.original_price).toFixed(2)}`;
-            document.getElementById('price-final').textContent = `€${parseFloat(promo.discounted_price).toFixed(2)}`;
+
+            // Support both price field names
+            const finalPrice = promo.discounted_price ?? promo.price;
+            const origPrice  = promo.original_price ?? promo.original_value;
+
+            document.getElementById('price-original').textContent = origPrice  != null ? `€${parseFloat(origPrice).toFixed(2)}`  : '';
+            document.getElementById('price-final').textContent    = finalPrice != null ? `€${parseFloat(finalPrice).toFixed(2)}` : '';
             
             const img = document.getElementById('promo-image');
             if (promo.image_url) {
@@ -321,7 +339,7 @@
         // Check if favorited
         async function checkFavorite() {
             try {
-                const { data } = await supabase
+                const { data } = await window.supabaseClient
                     .from('favorites')
                     .select('*')
                     .eq('user_id', currentUser.id)
@@ -347,7 +365,7 @@
                 
                 if (isActive) {
                     // Remove favorite
-                    await supabase
+                    await window.supabaseClient
                         .from('favorites')
                         .delete()
                         .eq('user_id', currentUser.id)
@@ -356,7 +374,7 @@
                     btn.classList.remove('active');
                 } else {
                     // Add favorite
-                    await supabase
+                    await window.supabaseClient
                         .from('favorites')
                         .insert({
                             user_id: currentUser.id,
@@ -377,12 +395,12 @@
             
             try {
                 // Check if already redeemed
-                const { data: existing } = await supabase
+                const { data: existing } = await window.supabaseClient
                     .from('promotion_redemptions')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .eq('promotion_id', promotionId)
-                    .single();
+                    .maybeSingle();
                 
                 if (existing) {
                     alert('Hai già riscattato questa offerta!');
@@ -390,7 +408,7 @@
                 }
                 
                 // Add redemption
-                await supabase
+                await window.supabaseClient
                     .from('promotion_redemptions')
                     .insert({
                         user_id: currentUser.id,
