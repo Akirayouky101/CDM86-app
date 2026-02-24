@@ -3,7 +3,6 @@
 // Returns: { token, qr_data, expires_at, remaining_uses } or { error }
 
 const { createClient } = require('@supabase/supabase-js');
-const { randomUUID } = require('crypto');
 
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -76,18 +75,21 @@ module.exports = async function handler(req, res) {
             .eq('user_id', user_id)
             .eq('status', 'pending');
 
-        // 4️⃣ Genera nuovo token
-        const token = randomUUID();
+        // 4️⃣ Genera nuovo token (Supabase genera UUID via DEFAULT)
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-        const { error: insertErr } = await supabase
+        const { data: inserted, error: insertErr } = await supabase
             .from('redemption_tokens')
-            .insert({ token, promo_id, user_id, status: 'pending', expires_at: expiresAt });
+            .insert({ promo_id, user_id, status: 'pending', expires_at: expiresAt })
+            .select('token')
+            .single();
 
         if (insertErr) {
             console.error('[redeem-promo] insert error:', insertErr);
             return res.status(500).json({ error: 'Errore salvataggio token: ' + insertErr.message });
         }
+
+        const token = inserted.token;
 
         const siteUrl = process.env.SITE_URL || 'https://www.cdm86.com';
         const validateUrl = `${siteUrl}/public/validate-qr.html?token=${token}`;
