@@ -1006,8 +1006,25 @@
                     </div>
                     <div class="company-card-body">
                         <div id="card-preview"></div>
-                        <button class="btn-primary" onclick="openCardEditor()">
-                            <i class="fas fa-edit"></i> Crea/Modifica Card
+                        <button class="btn-primary" id="btn-card-editor" onclick="openCardEditor()">
+                            <i class="fas fa-plus"></i> Crea Card
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Landing Page -->
+                <div class="company-card">
+                    <div class="company-card-header">
+                        <div>
+                            <h4>� Landing Page</h4>
+                            <p class="company-card-description">Pagina pubblica dedicata alla tua azienda con sezioni personalizzabili</p>
+                        </div>
+                        <div id="landing-status-badge"></div>
+                    </div>
+                    <div class="company-card-body">
+                        <div id="landing-preview"></div>
+                        <button class="btn-success" id="btn-landing-editor" onclick="window.location.href='/public/landing-builder.html'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-plus"></i> Crea Landing Page
                         </button>
                     </div>
                 </div>
@@ -1023,24 +1040,10 @@
                             <button class="btn-success" onclick="window.location.href='/public/promo-creator.html'">
                                 <i class="fas fa-magic"></i> Crea Promo Card
                             </button>
-                            <button class="btn-success" onclick="window.location.href='/public/landing-builder.html'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <i class="fas fa-layer-group"></i> Crea Landing Page
-                            </button>
                         </div>
                     </div>
                     <div class="company-card-body">
                         <div id="promotions-grid"></div>
-                        <div class="info-box info-box-blue" style="margin-top: 20px;">
-                            <p class="info-text">
-                                <i class="fas fa-lightbulb icon-margin"></i>
-                                <strong>Nuovo!</strong><br>
-                                Crea landing page professionali con 3 template pronti: scegli il layout, clicca sulle sezioni per editare e pubblica in pochi minuti!
-                            </p>
-                        </div>
-                                <strong>Nuovo Editor Promo!</strong><br>
-                                Crea card professionali in pochi click con anteprima live, upload immagini automatico e landing page personalizzata per condivisione social.
-                            </p>
-                        </div>
                     </div>
                 </div>
 
@@ -1708,18 +1711,19 @@
         // Load organization card data
         async function loadOrganizationCard() {
             try {
-                const { data: userData, error: userError } = await window.supabaseClient
-                    .from('users')
+                // Organizations are stored in 'organizations' table (not 'users')
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
                     .select('*')
                     .eq('auth_user_id', currentUser.id)
                     .single();
                 
-                if (!userData || !userData.is_organization) return;
+                if (orgError || !orgData) return;
                 
                 const { data, error } = await window.supabaseClient
                     .from('organization_pages')
                     .select('*')
-                    .eq('organization_id', userData.id)
+                    .eq('organization_id', orgData.id)
                     .single();
                 
                 if (error && error.code !== 'PGRST116') {
@@ -1729,21 +1733,81 @@
                 
                 const cardStatusBadge = document.getElementById('card-status-badge');
                 const cardPreview = document.getElementById('card-preview');
+                const btnCard = document.getElementById('btn-card-editor');
                 
-                if (data && data.card_published) {
-                    cardStatusBadge.innerHTML = '<span style="background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">✅ Pubblicata</span>';
-                    
+                // ── Card status ────────────────────────────────────────────
+                if (data && (data.card_published || data.card_data)) {
+                    // Card EXISTS → show "Modifica Card"
+                    if (cardStatusBadge) {
+                        const published = data.card_published;
+                        cardStatusBadge.innerHTML = published
+                            ? '<span style="background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">✅ Pubblicata</span>'
+                            : '<span style="background: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">📝 Bozza</span>';
+                    }
                     const cardData = data.card_data || {};
-                    cardPreview.innerHTML = `
-                        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <h4 style="margin: 0 0 8px 0; color: #1e293b;">${cardData.title || 'Card Aziendale'}</h4>
-                            <p style="margin: 0; color: #64748b; font-size: 14px;">${cardData.description ? cardData.description.substring(0, 100) + '...' : 'Nessuna descrizione'}</p>
-                        </div>
-                    `;
+                    if (cardPreview) {
+                        cardPreview.innerHTML = `
+                            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+                                <h4 style="margin: 0 0 8px 0; color: #1e293b;">${cardData.title || 'Card Aziendale'}</h4>
+                                <p style="margin: 0; color: #64748b; font-size: 14px;">${cardData.description ? cardData.description.substring(0, 100) + '...' : 'Nessuna descrizione'}</p>
+                            </div>
+                        `;
+                    }
+                    if (btnCard) {
+                        btnCard.innerHTML = '<i class="fas fa-edit"></i> Modifica Card';
+                    }
                 } else {
-                    cardStatusBadge.innerHTML = '<span style="background: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">📝 Bozza</span>';
-                    cardPreview.innerHTML = '<div style="color: #9ca3af; text-align: center;">Nessuna card creata. Clicca sul pulsante per iniziare!</div>';
+                    // Card NOT EXISTS → show "Crea Card"
+                    if (cardStatusBadge) {
+                        cardStatusBadge.innerHTML = '<span style="background: #f1f5f9; color: #64748b; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">⬜ Non creata</span>';
+                    }
+                    if (cardPreview) {
+                        cardPreview.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 16px 0;">Nessuna card creata. Clicca sul pulsante per iniziare!</div>';
+                    }
+                    if (btnCard) {
+                        btnCard.innerHTML = '<i class="fas fa-plus"></i> Crea Card';
+                    }
                 }
+
+                // ── Landing status ─────────────────────────────────────────
+                const landingStatusBadge = document.getElementById('landing-status-badge');
+                const landingPreview = document.getElementById('landing-preview');
+                const btnLanding = document.getElementById('btn-landing-editor');
+
+                if (data && (data.page_data || data.status === 'published')) {
+                    // Landing EXISTS → show "Modifica Landing"
+                    if (landingStatusBadge) {
+                        const published = data.status === 'published';
+                        landingStatusBadge.innerHTML = published
+                            ? '<span style="background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">✅ Pubblicata</span>'
+                            : '<span style="background: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">📝 Bozza</span>';
+                    }
+                    const pageData = data.page_data || {};
+                    if (landingPreview) {
+                        const landingUrl = data.slug ? `${window.location.origin}/promo/${data.slug}` : null;
+                        landingPreview.innerHTML = `
+                            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+                                <h4 style="margin: 0 0 8px 0; color: #1e293b;">${pageData.title || 'Landing Page'}</h4>
+                                ${landingUrl ? `<a href="${landingUrl}" target="_blank" style="color: #667eea; font-size: 13px; text-decoration: none;"><i class="fas fa-external-link-alt"></i> ${landingUrl}</a>` : '<p style="margin: 0; color: #64748b; font-size: 14px;">Non ancora pubblicata</p>'}
+                            </div>
+                        `;
+                    }
+                    if (btnLanding) {
+                        btnLanding.innerHTML = '<i class="fas fa-edit"></i> Modifica Landing Page';
+                    }
+                } else {
+                    // Landing NOT EXISTS → show "Crea Landing Page"
+                    if (landingStatusBadge) {
+                        landingStatusBadge.innerHTML = '<span style="background: #f1f5f9; color: #64748b; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">⬜ Non creata</span>';
+                    }
+                    if (landingPreview) {
+                        landingPreview.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 16px 0;">Nessuna landing page creata. Clicca sul pulsante per iniziare!</div>';
+                    }
+                    if (btnLanding) {
+                        btnLanding.innerHTML = '<i class="fas fa-plus"></i> Crea Landing Page';
+                    }
+                }
+
             } catch (error) {
                 console.error('Error in loadOrganizationCard:', error);
             }
@@ -1752,18 +1816,19 @@
         // Load organization promotions
         async function loadOrganizationPromotions() {
             try {
-                const { data: userData, error: userError } = await window.supabaseClient
-                    .from('users')
+                // Organizations are stored in 'organizations' table (not 'users')
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
                     .select('*')
                     .eq('auth_user_id', currentUser.id)
                     .single();
                 
-                if (!userData || !userData.is_organization) return;
+                if (orgError || !orgData) return;
                 
                 const { data: promotions, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
-                    .eq('organization_id', userData.id)
+                    .eq('organization_id', orgData.id)
                     .order('created_at', { ascending: false });
                 
                 if (error) {
@@ -1840,18 +1905,19 @@
         // Load existing card data into editor
         async function loadExistingCardData() {
             try {
-                const { data: userData } = await window.supabaseClient
-                    .from('users')
+                // Organizations are stored in 'organizations' table (not 'users')
+                const { data: orgData } = await window.supabaseClient
+                    .from('organizations')
                     .select('*')
                     .eq('auth_user_id', currentUser.id)
                     .single();
                 
-                if (!userData || !userData.is_organization) return;
+                if (!orgData) return;
                 
                 const { data, error } = await window.supabaseClient
                     .from('organization_pages')
                     .select('*')
-                    .eq('organization_id', userData.id)
+                    .eq('organization_id', orgData.id)
                     .single();
                 
                 if (data && data.card_data) {
