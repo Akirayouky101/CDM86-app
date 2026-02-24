@@ -1059,84 +1059,102 @@
             }
 
             try {
-                // Query organization_pages for published cards with organization data
-                const { data: orgPages, error } = await window.supabaseClient
+                // 1️⃣ Fetch all published organization pages to get partner emails + slugs
+                const { data: orgPages, error: opError } = await window.supabaseClient
                     .from('organization_pages')
-                    .select('*')
-                    .eq('card_published', true)
-                    .order('updated_at', { ascending: false });
+                    .select('organization_id, slug, landing_slug, card_data, page_data')
+                    .eq('card_published', true);
 
-                if (error) {
-                    console.error('❌ Error loading organization cards:', error);
-                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+                if (opError) {
+                    console.error('❌ Error loading organization_pages:', opError);
+                    document.getElementById('organization-cards-section').style.display = 'none';
                     return;
                 }
 
-                console.log('✅ Loaded organization cards:', orgPages);
-
-                // If no cards, hide the section
                 if (!orgPages || orgPages.length === 0) {
                     document.getElementById('organization-cards-section').style.display = 'none';
                     return;
                 }
 
-                // Fetch organization data for each card
-                const orgIds = [...new Set(orgPages.map(p => p.organization_id))];
-                const { data: orgs, error: orgError } = await window.supabaseClient
+                // 2️⃣ Fetch org emails so we can match promotions
+                const orgIds = [...new Set(orgPages.map(p => p.organization_id).filter(Boolean))];
+                const { data: orgs } = await window.supabaseClient
                     .from('organizations')
-                    .select('id, name, logo_url, email')
+                    .select('id, name, email')
                     .in('id', orgIds);
 
-                if (orgError) {
-                    console.error('❌ Error loading organizations:', orgError);
-                }
-
-                // Create org lookup map and collect emails to exclude from promotions grid
-                const orgMap = {};
+                // Build map: orgId → { email, slug }
+                const orgEmailMap = {};   // orgId → email
+                const emailSlugMap = {};  // email → landing slug
                 if (orgs) {
                     orgs.forEach(org => {
-                        orgMap[org.id] = org;
+                        orgEmailMap[org.id] = org.email;
                         if (org.email) orgCardEmails.add(org.email.toLowerCase());
                     });
                 }
+                orgPages.forEach(page => {
+                    const email = orgEmailMap[page.organization_id];
+                    if (email) emailSlugMap[email.toLowerCase()] = page.slug || page.landing_slug || '';
+                });
 
-                // Render cards
-                container.innerHTML = orgPages.map(page => {
-                    const card = page.card_data || {};
-                    const org = orgMap[page.organization_id] || {};
-                    const badge = card.badge || '';
-                    const features = card.features || [];
-                    
+                // 3️⃣ Fetch promotions that belong to these orgs (by partner_email)
+                const partnerEmails = [...orgCardEmails];
+                if (partnerEmails.length === 0) {
+                    document.getElementById('organization-cards-section').style.display = 'none';
+                    return;
+                }
+
+                const { data: orgPromos } = await window.supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .in('partner_email', partnerEmails)
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                // De-duplicate: one card per org (latest promo)
+                const seenEmails = new Set();
+                const dedupedPromos = (orgPromos || []).filter(p => {
+                    const email = (p.partner_email || '').toLowerCase();
+                    if (seenEmails.has(email)) return false;
+                    seenEmails.add(email);
+                    return true;
+                });
+
+                if (dedupedPromos.length === 0) {
+                    document.getElementById('organization-cards-section').style.display = 'none';
+                    return;
+                }
+
+                // 4️⃣ Render — use the promo card visual, CTA → landing page
+                container.innerHTML = dedupedPromos.map(promo => {
+                    const email = (promo.partner_email || '').toLowerCase();
+                    const landingSlug = emailSlugMap[email] || promo.landing_slug || '';
+                    const ctaHref = landingSlug ? `/promo/${landingSlug}` : '#';
+
+                    const origPrice = parseFloat(promo.original_price) || 0;
+                    const finalPrice = parseFloat(promo.discounted_price ?? promo.price) || origPrice;
+                    const discount = origPrice > 0 ? Math.round(((origPrice - finalPrice) / origPrice) * 100) : 0;
+
                     return `
                         <div class="promo-card">
                             <div class="promo-image">
-                                ${card.image ? `<img src="${card.image}" alt="${card.title || org.name}">` : ''}
-                                ${badge ? `<div class="promo-badge">${badge}</div>` : ''}
+                                ${discount > 0 ? `<div class="promo-badge">-${discount}%</div>` : ''}
+                                ${promo.image_url ? `<img src="${promo.image_url}" alt="${promo.title}">` : ''}
                             </div>
                             <div class="promo-content">
-                                <h3>${card.title || org.name || 'Azienda Partner'}</h3>
-                                <p>${card.description || ''}</p>
-                                ${features.length > 0 ? `
-                                    <ul class="promo-features">
-                                        ${features.map(f => `
-                                            <li>
-                                                <i class="${f.icon || 'fas fa-check'}"></i>
-                                                <span>${f.text || ''}</span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                ` : ''}
+                                <h3>${promo.title || 'Azienda Partner'}</h3>
+                                <p>${promo.short_description || promo.description || ''}</p>
                             </div>
                             <div class="promo-cta">
-                                <a href="${card.ctaLink || '#'}" class="cta-btn">
-                                    ${card.ctaText || 'Scopri di più'}
+                                <a href="${ctaHref}" class="cta-btn">
+                                    ${promo.cta_text || 'Scopri di più'}
                                 </a>
                             </div>
                         </div>
                     `;
                 }).join('');
 
-                console.log('✅ Organization cards rendered');
+                console.log('✅ Organization cards rendered from promotions table');
 
             } catch (err) {
                 console.error('❌ Exception loading organization cards:', err);
