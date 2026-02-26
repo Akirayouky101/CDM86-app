@@ -3,7 +3,6 @@
 // Returns: { token, qr_data, expires_at, remaining_uses } or { error }
 
 import { createClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -76,8 +75,8 @@ export default async function handler(req, res) {
             .eq('user_id', user_id)
             .eq('status', 'pending');
 
-        // 4️⃣ Genera token UUID e inserisci
-        const token = uuidv4();
+        // 4️⃣ Genera token UUID e inserisci (crypto.randomUUID = Node 18 nativo, no import)
+        const token = crypto.randomUUID();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
         // Usiamo insert + select separati per massima compatibilità
