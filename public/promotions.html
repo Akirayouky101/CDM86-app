@@ -2260,6 +2260,13 @@
 
         function openQRModal(promoId, promoTitle, event) {
             if (event) event.preventDefault();
+
+            // Se non loggato → mostra modal login, non aprire QR
+            if (!currentUser) {
+                showLoginRequiredModal();
+                return;
+            }
+
             qrCardPromoId = promoId;
             qrCardPromoTitle = promoTitle;
 
