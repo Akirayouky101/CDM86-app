@@ -468,9 +468,10 @@
     <script>
         let supabaseClient;
         let uploadedImageUrl = null;
+        let editPromoId = null; // ID della promo da modificare (se in modalità edit)
 
         // Inizializza Supabase
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             if (typeof CDM86_CONFIG !== 'undefined' && CDM86_CONFIG.supabase) {
                 supabaseClient = supabase.createClient(
                     CDM86_CONFIG.supabase.url, 
@@ -479,8 +480,69 @@
                 console.log('✅ Supabase initialized');
             } else {
                 console.error('❌ Supabase config not found');
+                return;
+            }
+
+            // Controlla se siamo in modalità edit (?edit=ID)
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            if (editId) {
+                await loadPromoForEdit(editId);
             }
         });
+
+        // Carica i dati di una promo esistente nel form
+        async function loadPromoForEdit(promoId) {
+            try {
+                console.log('📝 Loading promo for edit:', promoId);
+                const { data: promo, error } = await supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .eq('id', promoId)
+                    .maybeSingle();
+
+                if (error || !promo) {
+                    console.error('❌ Promo non trovata:', error);
+                    return;
+                }
+
+                editPromoId = promoId;
+
+                // Aggiorna titolo pagina
+                const heading = document.querySelector('h1, .page-title');
+                if (heading) heading.textContent = 'Modifica Promozione';
+
+                // Cambia il pulsante
+                const publishBtn = document.querySelector('button[onclick="publishPromo()"]');
+                if (publishBtn) publishBtn.innerHTML = '<i class="fas fa-save"></i> Salva Modifiche';
+
+                // Popola i campi
+                document.getElementById('titleInput').value = promo.title || '';
+                document.getElementById('descriptionInput').value = promo.description || '';
+                document.getElementById('priceInput').value = promo.discounted_price || promo.price || '';
+                document.getElementById('originalPriceInput').value = promo.original_price || '';
+                if (document.getElementById('ctaInput')) {
+                    document.getElementById('ctaInput').value = promo.cta_text || 'RISCATTA ORA!';
+                }
+                if (document.getElementById('categoryInput') && promo.category) {
+                    document.getElementById('categoryInput').value = promo.category;
+                }
+
+                // Carica immagine esistente
+                if (promo.image_url) {
+                    uploadedImageUrl = promo.image_url;
+                    const zone = document.getElementById('uploadZone');
+                    zone.classList.add('has-image');
+                    zone.innerHTML = `<img src="${promo.image_url}" class="preview-image" alt="Promo">`;
+                }
+
+                updatePreview();
+                console.log('✅ Promo caricata nel form:', promo.title);
+
+            } catch (err) {
+                console.error('❌ Errore caricamento promo:', err);
+            }
+        }
 
         const categoryIcons = {
             food: '🍕 CIBO & DRINK',
@@ -635,33 +697,48 @@
                 const promoData = {
                     title: title,
                     description: description,
-                    slug: slug,
-                    partner_name: partnerName,
-                    partner_email: partnerEmail,
                     category: document.getElementById('categoryInput').value,
                     image_url: uploadedImageUrl,
                     original_price: document.getElementById('originalPriceInput').value ? 
                         parseFloat(document.getElementById('originalPriceInput').value.replace(/[^0-9.]/g, '')) : null,
                     discounted_price: parseFloat(price.replace(/[^0-9.]/g, '')) || 0,
-                    points_cost: 0,
                     is_active: true,
-                    landing_slug: slug,
                     cta_text: document.getElementById('ctaInput').value
                 };
 
-                const { data, error } = await supabaseClient
-                    .from('promotions')
-                    .insert(promoData)
-                    .select()
-                    .single();
+                let data, error;
+
+                if (editPromoId) {
+                    // MODALITÀ EDIT: aggiorna la promo esistente
+                    ({ data, error } = await supabaseClient
+                        .from('promotions')
+                        .update(promoData)
+                        .eq('id', editPromoId)
+                        .select()
+                        .single());
+                } else {
+                    // MODALITÀ CREAZIONE: inserisce nuova promo
+                    promoData.slug = slug;
+                    promoData.landing_slug = slug;
+                    promoData.partner_name = partnerName;
+                    promoData.partner_email = partnerEmail;
+                    promoData.points_cost = 0;
+                    ({ data, error } = await supabaseClient
+                        .from('promotions')
+                        .insert(promoData)
+                        .select()
+                        .single());
+                }
 
                 if (error) throw error;
 
-                const landingUrl = `${window.location.origin}/promo/${slug}`;
+                const landingUrl = editPromoId
+                    ? `${window.location.origin}/promo/${data.slug || data.landing_slug || slug}`
+                    : `${window.location.origin}/promo/${slug}`;
                 document.getElementById('successUrl').textContent = landingUrl;
                 document.getElementById('successModal').classList.add('active');
 
-                console.log('✅ Promo pubblicata:', data);
+                console.log(editPromoId ? '✅ Promo aggiornata:' : '✅ Promo pubblicata:', data);
 
             } catch (error) {
                 console.error('❌ Errore pubblicazione:', error);
