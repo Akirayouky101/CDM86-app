@@ -339,17 +339,13 @@
     clearInterval(progressTimer);
     overlay.style.animation = 'im-fade-out 0.35s ease forwards';
     setTimeout(() => overlay.remove(), 350);
-    // Salva nel localStorage per non mostrarlo di nuovo
-    try { localStorage.setItem(STORAGE_KEY, 'permanent'); } catch (e) { /* noop */ }
+    // NON salviamo nel localStorage — la modal è su richiesta, non automatica
   }
 
   // ─── Init ──────────────────────────────────────────────────────
 
   function init() {
-    // Non mostrare se già visto (solo dopo aver cliccato il bottone "Ho capito")
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === 'permanent') return;
-    } catch (e) { /* noop */ }
+    // La modal è sempre disponibile su richiesta — nessun blocco localStorage
 
     const overlay = buildModal();
     document.body.appendChild(overlay);
