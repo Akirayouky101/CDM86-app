@@ -1464,17 +1464,17 @@
                 // Get organization info - try both methods
                 let org = null;
                 
-                // First try: get by user_id
+                // First try: get by auth_user_id (correct column name)
                 const { data: orgByUser } = await supabaseClient
                     .from('organizations')
                     .select('id, name')
-                    .eq('user_id', session.user.id)
+                    .eq('auth_user_id', session.user.id)
                     .maybeSingle();
                 
                 if (orgByUser) {
                     org = orgByUser;
                 } else {
-                    // Second try: get by id (in case user is the organization)
+                    // Second try: get by id fallback
                     const { data: orgById } = await supabaseClient
                         .from('organizations')
                         .select('id, name')
@@ -1599,12 +1599,12 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (session) {
-                    // Get organization ID
+                    // Get organization ID - use auth_user_id (correct column)
                     const { data: org } = await supabaseClient
                         .from('organizations')
                         .select('id')
-                        .eq('user_id', session.user.id)
-                        .single();
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle();
 
                     if (org) {
                         // Load existing page
@@ -1614,13 +1614,12 @@
                             .eq('organization_id', org.id)
                             .maybeSingle();
 
-                        if (page && page.page_data) {
-                            if (confirm('📄 Trovata una pagina esistente. Vuoi caricarla?')) {
-                                sections = page.page_data.sections || [];
-                                currentStyle = page.page_data.style || 'modern';
-                                rerenderCanvas();
-                                return;
-                            }
+                        if (page && page.page_data && page.page_data.sections && page.page_data.sections.length > 0) {
+                            // Carica automaticamente senza chiedere conferma
+                            sections = page.page_data.sections || [];
+                            currentStyle = page.page_data.style || 'modern';
+                            rerenderCanvas();
+                            return;
                         }
                     }
                 }
@@ -1628,13 +1627,15 @@
                 console.error('Error loading page from database:', error);
             }
 
-            // Fallback: load from localStorage
+            // Fallback: load from localStorage silenziosamente
             const draft = localStorage.getItem('pageDraft');
-            if (draft && confirm('📄 Trovata una bozza salvata in locale. Vuoi caricarla?')) {
-                const data = JSON.parse(draft);
-                sections = data.sections;
-                currentStyle = data.style;
-                rerenderCanvas();
+            if (draft) {
+                try {
+                    const data = JSON.parse(draft);
+                    sections = data.sections || [];
+                    currentStyle = data.style || 'modern';
+                    rerenderCanvas();
+                } catch(e) {}
             }
         });
 

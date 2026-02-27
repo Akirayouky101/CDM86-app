@@ -879,17 +879,17 @@
                 // Get organization - try both methods
                 let org = null;
                 
-                // First try: get by user_id
+                // First try: get by auth_user_id (correct column name)
                 const { data: orgByUser } = await supabaseClient
                     .from('organizations')
                     .select('id')
-                    .eq('user_id', session.user.id)
+                    .eq('auth_user_id', session.user.id)
                     .maybeSingle();
                 
                 if (orgByUser) {
                     org = orgByUser;
                 } else {
-                    // Second try: get by id (in case user is the organization)
+                    // Second try: get by id fallback
                     const { data: orgById } = await supabaseClient
                         .from('organizations')
                         .select('id')
@@ -1121,17 +1121,17 @@
                 // Get organization - try both methods
                 let org = null;
                 
-                // First try: get by user_id
+                // First try: get by auth_user_id (correct column name)
                 const { data: orgByUser, error: userError } = await supabaseClient
                     .from('organizations')
                     .select('id, name')
-                    .eq('user_id', session.user.id)
+                    .eq('auth_user_id', session.user.id)
                     .maybeSingle();
                 
                 if (orgByUser) {
                     org = orgByUser;
                 } else {
-                    // Second try: get by id (in case user is the organization)
+                    // Second try: get by id fallback
                     const { data: orgById, error: idError } = await supabaseClient
                         .from('organizations')
                         .select('id, name')
