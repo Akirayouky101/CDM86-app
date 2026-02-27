@@ -198,7 +198,7 @@
         <!-- Footer CTA -->
         <div class="im-footer">
           <button class="im-cta-btn" id="im-cta-btn">
-            Inizia ora — è gratis! 🚀
+            Inizia ora 🚀
           </button>
           <p class="im-note">Puoi rivedere questa guida dal menu del tuo profilo</p>
         </div>
@@ -277,9 +277,9 @@
 
     // CTA button changes on last step
     if (currentStep === STEPS.length - 1) {
-      ctaBtn.textContent = '🚀 Inizia subito — è gratis!';
+      ctaBtn.textContent = '🚀 Inizia ora!';
     } else {
-      ctaBtn.textContent = 'Inizia ora — è gratis! 🚀';
+      ctaBtn.textContent = 'Inizia ora 🚀';
     }
   }
 
@@ -367,9 +367,12 @@
     document.getElementById('im-skip-btn')
       ?.addEventListener('click', closeModal);
 
-    // CTA button
+    // CTA button → chiude la modal e apre lapiattaforma.html
     document.getElementById('im-cta-btn')
-      ?.addEventListener('click', closeModal);
+      ?.addEventListener('click', () => {
+        closeModal();
+        window.location.href = '/public/lapiattaforma.html';
+      });
 
     // Keyboard: Esc to close, arrows to navigate
     document.addEventListener('keydown', handleKeydown);
@@ -414,11 +417,7 @@
   };
 
   // ─── Auto-launch on DOM ready ──────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    // Delay per non bloccare il render della pagina
-    setTimeout(init, 500);
-  }
+  // La modal NON si apre automaticamente — viene aperta solo tramite CDM86Intro.show()
+  // (es. dal link "Clicca Qui" in promotions.html)
 
 })();
