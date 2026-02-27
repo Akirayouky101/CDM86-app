@@ -6,1317 +6,809 @@
     <title>Landing Page Builder - CDM86</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 1400px; margin: 0 auto; }
         .header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: white; padding: 20px 30px; border-radius: 20px;
+            margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
         }
-
         .header h1 {
             font-size: 1.8rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
         .back-btn {
-            background: #f1f5f9;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #64748b;
-            transition: all 0.3s;
+            background: #f1f5f9; border: none; padding: 12px 24px;
+            border-radius: 12px; cursor: pointer; font-weight: 600; color: #64748b; transition: all 0.3s;
         }
-
-        .back-btn:hover {
-            background: #e2e8f0;
-            transform: translateY(-2px);
-        }
-
-        /* Step Indicator */
-        .steps {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
+        .back-btn:hover { background: #e2e8f0; transform: translateY(-2px); }
+        .steps { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
         .step {
-            background: rgba(255,255,255,0.2);
-            padding: 15px 30px;
-            border-radius: 50px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
+            background: rgba(255,255,255,0.2); padding: 15px 30px; border-radius: 50px;
+            color: white; display: flex; align-items: center; gap: 10px; font-weight: 600;
         }
-
-        .step.active {
-            background: white;
-            color: #667eea;
-        }
-
+        .step.active { background: white; color: #667eea; }
         .step-number {
-            width: 30px;
-            height: 30px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 30px; height: 30px; background: rgba(255,255,255,0.3);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
-
-        .step.active .step-number {
-            background: #667eea;
-            color: white;
-        }
-
-        /* Template Selection */
-        .template-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .template-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-        }
-
-        .template-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-        }
-
-        .template-card.selected {
-            border-color: #667eea;
-        }
-
-        .template-preview {
-            height: 400px;
-            background: #f8fafc;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .template-info {
-            padding: 20px;
-        }
-
-        .template-info h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #1e293b;
-        }
-
-        .template-info p {
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        .template-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-
-        /* Editor Section */
-        .editor-container {
-            display: none;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
-        }
-
-        .editor-container.active {
-            display: grid;
-        }
-
+        .step.active .step-number { background: #667eea; color: white; }
+        .editor-container { display: grid; grid-template-columns: 1fr 420px; gap: 30px; }
         .preview-panel {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            max-height: 80vh;
-            overflow-y: auto;
+            background: white; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-height: 82vh; overflow-y: auto;
         }
-
         .controls-panel {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            max-height: 80vh;
-            overflow-y: auto;
+            background: white; border-radius: 20px; padding: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-height: 82vh; overflow-y: auto;
         }
-
-        .section-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
+        .controls-panel h2 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 18px; }
+        .section-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .section-option {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
+            border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px 8px;
+            cursor: pointer; transition: all 0.2s; text-align: center;
         }
-
-        .section-option:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
+        .section-option:hover { border-color: #667eea; background: rgba(102,126,234,0.05); }
+        .section-option.selected { border-color: #667eea; background: rgba(102,126,234,0.1); }
+        .section-option.disabled { opacity: 0.4; pointer-events: none; }
+        .section-option i { font-size: 1.4rem; color: #667eea; display: block; margin-bottom: 6px; }
+        .section-option h4 { font-size: 0.78rem; color: #1e293b; margin: 0; }
+        .active-sections-box {
+            background: #f8fafc; border-radius: 14px; padding: 16px; margin-bottom: 20px;
         }
-
-        .section-option.selected {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+        .active-sections-box h3 { font-size: 0.9rem; font-weight: 700; color: #64748b; margin-bottom: 12px; }
+        .sections-list { display: flex; flex-direction: column; gap: 8px; }
+        .section-chip-row {
+            display: flex; align-items: center; gap: 8px;
+            background: white; border-radius: 12px; border: 2px solid #e2e8f0; transition: all 0.2s; overflow: hidden;
         }
-
-        .section-option.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .section-chip-row.selected-chip { border-color: #667eea; background: #f0f4ff; }
+        .chip-edit-btn {
+            flex: 1; display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; cursor: pointer; background: none; border: none;
+            font-family: inherit; text-align: left;
         }
-
-        .section-option i {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 10px;
+        .chip-edit-btn i.chip-icon { color: #667eea; font-size: 1rem; }
+        .chip-label { font-size: 0.85rem; font-weight: 600; color: #1e293b; flex: 1; }
+        .chip-edited-badge {
+            font-size: 0.7rem; background: #d1fae5; color: #065f46;
+            padding: 2px 7px; border-radius: 50px; font-weight: 600; display: none;
         }
-
-        .section-option h4 {
-            font-size: 0.9rem;
-            color: #1e293b;
-            margin: 0;
+        .chip-edited-badge.visible { display: inline-block; }
+        .chip-drag-btn { padding: 10px 8px; cursor: grab; color: #94a3b8; background: none; border: none; font-size: 0.9rem; }
+        .chip-remove-btn {
+            padding: 10px 12px; cursor: pointer; color: #ef4444;
+            background: none; border: none; font-size: 0.85rem; transition: background 0.2s;
         }
-
-        .active-sections {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
+        .chip-remove-btn:hover { background: #fee2e2; }
+        .chip-hero .chip-remove-btn { display: none; }
+        .section-editor {
+            background: #f0f4ff; border: 2px solid #667eea;
+            border-radius: 14px; padding: 20px; margin-bottom: 20px; display: none;
         }
-
-        .active-sections h3 {
-            font-size: 1rem;
-            margin-bottom: 15px;
-            color: #1e293b;
+        .section-editor.open { display: block; }
+        .section-editor-title {
+            font-size: 0.95rem; font-weight: 700; color: #667eea;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
         }
-
-        .section-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            padding: 8px 15px;
-            border-radius: 50px;
-            margin: 5px;
-            border: 2px solid #667eea;
-            color: #667eea;
-            font-size: 0.85rem;
-            font-weight: 600;
+        .section-editor-close {
+            margin-left: auto; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem;
         }
-
-        .section-chip i {
-            cursor: pointer;
-        }
-
-        .editable-section {
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s;
-            border: 2px dashed transparent;
-            padding: 10px;
-            border-radius: 12px;
-        }
-
-        .editable-section:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-        .editable-section.editing {
-            border-color: #764ba2;
-            background: rgba(118, 75, 162, 0.05);
-        }
-
-        .edit-indicator {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-        }
-
-        .editable-section:hover .edit-indicator {
-            display: flex;
-        }
-
-        .control-group {
-            margin-bottom: 25px;
-        }
-
-        .control-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1e293b;
-        }
-
+        .control-group { margin-bottom: 18px; }
+        .control-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 7px; color: #475569; }
         .control-group input,
         .control-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: all 0.3s;
+            width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+            font-family: inherit; font-size: 0.9rem; transition: all 0.2s; background: white;
         }
-
-        .control-group input:focus,
-        .control-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
+        .control-group input:focus, .control-group textarea:focus { outline: none; border-color: #667eea; }
+        .control-group textarea { resize: vertical; min-height: 80px; }
+        .services-item {
+            background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px;
         }
-
-        .control-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .services-item label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
+        .services-item input {
+            width: 100%; padding: 7px 10px; border: 1px solid #e2e8f0;
+            border-radius: 8px; font-size: 0.85rem; font-family: inherit; margin-bottom: 6px;
         }
-
+        .services-item input:last-child { margin-bottom: 0; }
+        .contact-fields label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
+        .contact-fields input {
+            width: 100%; padding: 7px 10px; border: 1px solid #e2e8f0;
+            border-radius: 8px; font-size: 0.85rem; font-family: inherit; margin-bottom: 8px;
+        }
         .image-upload {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s;
         }
-
-        .image-upload:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
+        .image-upload:hover { border-color: #667eea; background: rgba(102,126,234,0.04); }
+        .image-upload img { max-width: 100%; max-height: 160px; border-radius: 10px; margin-top: 12px; }
+        hr.divider { border: none; border-top: 1px solid #e2e8f0; margin: 22px 0; }
+        .social-links-section {
+            background: #f8fafc; border-radius: 14px; padding: 20px; margin-bottom: 20px; border: 2px solid #e2e8f0;
         }
-
-        .image-upload img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 12px;
-            margin-top: 15px;
+        .social-links-section h3 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .social-link-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .social-link-icon {
+            width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; color: white;
         }
-
+        .social-link-icon.facebook  { background: #1877f2; }
+        .social-link-icon.instagram { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+        .social-link-icon.twitter   { background: #000; }
+        .social-link-icon.linkedin  { background: #0a66c2; }
+        .social-link-icon.tiktok    { background: #010101; }
+        .social-link-icon.whatsapp  { background: #25d366; }
+        .social-link-icon.website   { background: #667eea; }
+        .social-link-row input {
+            flex: 1; padding: 9px 12px; border: 2px solid #e2e8f0;
+            border-radius: 9px; font-size: 0.85rem; transition: all 0.2s;
+        }
+        .social-link-row input:focus { outline: none; border-color: #667eea; }
+        .max-uses-box {
+            background: #fef9ec; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+        }
+        .max-uses-box label { display: block; font-weight: 700; color: #92400e; margin-bottom: 8px; font-size: 0.85rem; }
+        .max-uses-box input {
+            font-size: 1.1rem; font-weight: 700; text-align: center; width: 100px; padding: 9px 12px;
+            border: 2px solid #fbbf24; border-radius: 10px; font-family: inherit;
+        }
+        .max-uses-box small { display: block; margin-top: 6px; color: #92400e; font-size: 0.78rem; }
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            color: white; border: none; padding: 14px 30px; border-radius: 12px;
+            font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(102,126,234,0.3);
         }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(102,126,234,0.4); }
+        .btn-save-section {
+            background: #667eea; color: white; border: none; padding: 10px 20px;
+            border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; width: 100%; margin-top: 4px; transition: all 0.2s;
         }
-
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #64748b;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        /* Template Previews */
-        .template-modern {
-            padding: 40px;
-            text-align: center;
-        }
-
-        .template-modern h1 {
-            font-size: 2.5rem;
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-
-        .template-modern p {
-            color: #64748b;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 30px;
-        }
-
-        .template-modern .cta-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 700;
-            display: inline-block;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Social Links Section */
-        .social-links-section {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 25px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .social-links-section h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .social-link-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .social-link-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .social-link-icon.facebook { background: #1877f2; }
-        .social-link-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-        .social-link-icon.twitter { background: #000000; }
-        .social-link-icon.linkedin { background: #0a66c2; }
-        .social-link-icon.tiktok { background: #010101; }
-        .social-link-icon.whatsapp { background: #25d366; }
-        .social-link-icon.website { background: #667eea; }
-
-        .social-link-row input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .social-link-row input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        /* Social Section Preview in Landing */
-        .landing-social-bar {
-            background: #1e293b;
-            padding: 30px 40px;
-            text-align: center;
-        }
-
-        .landing-social-bar h3 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-
-        .landing-social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .landing-social-link {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .landing-social-link:hover {
-            transform: translateY(-4px) scale(1.1);
-        }
-
-        /* Published URL box */
+        .btn-save-section:hover { background: #5a6fd6; }
         .published-url-box {
-            background: #f0fdf4;
-            border: 2px solid #10b981;
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 15px;
-            display: none;
+            background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; padding: 16px; margin-top: 14px; display: none;
         }
-
-        .published-url-box.visible {
-            display: block;
+        .published-url-box.visible { display: block; }
+        .published-url-box p { color: #065f46; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+        .published-url-box .url-text { color: #0d9488; font-family: monospace; font-size: 0.82rem; word-break: break-all; }
+        .landing-social-bar { background: #1e293b; padding: 30px 40px; text-align: center; }
+        .landing-social-bar h3 { color: white; margin-bottom: 20px; font-size: 1.3rem; }
+        .landing-social-icons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .landing-social-link {
+            width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center;
+            justify-content: center; font-size: 1.3rem; color: white; text-decoration: none; transition: all 0.3s;
         }
-
-        .published-url-box p {
-            color: #065f46;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .landing-social-link:hover { transform: translateY(-4px) scale(1.1); }
+        .section-chip-row.dragging { opacity: 0.4; }
+        .section-chip-row.drag-over { border-color: #764ba2; background: #f5f0ff; }
+        .preview-empty {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 300px; color: #94a3b8; gap: 12px; padding: 40px;
         }
-
-        .published-url-box .url-text {
-            color: #0d9488;
-            font-family: monospace;
-            font-size: 0.85rem;
-            word-break: break-all;
-        }
+        .preview-empty i { font-size: 3rem; }
+        .preview-empty p { font-size: 1rem; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1><i class="fas fa-magic"></i> Landing Page Builder</h1>
-            <button class="back-btn" onclick="window.location.href='/public/dashboard.html'">
-                <i class="fas fa-arrow-left"></i> Torna alla Dashboard
-            </button>
-        </div>
-
-        <!-- Steps Indicator -->
-        <div class="steps">
-            <div class="step active" id="step1">
-                <span class="step-number">1</span>
-                <span>Aggiungi Sezioni</span>
-            </div>
-            <div class="step active" id="step2">
-                <span class="step-number">2</span>
-                <span>Personalizza</span>
-            </div>
-            <div class="step" id="step3">
-                <span class="step-number">3</span>
-                <span>Pubblica</span>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-magic"></i> Landing Page Builder</h1>
+        <button class="back-btn" onclick="window.location.href='/public/dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+        </button>
+    </div>
+    <div class="steps">
+        <div class="step active" id="step1"><span class="step-number">1</span><span>Sezioni</span></div>
+        <div class="step active" id="step2"><span class="step-number">2</span><span>Personalizza</span></div>
+        <div class="step" id="step3"><span class="step-number">3</span><span>Pubblica</span></div>
+    </div>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div id="livePreview">
+                <div class="preview-empty">
+                    <i class="fas fa-eye"></i>
+                    <p>L'anteprima apparira qui.<br>Aggiungi sezioni dal pannello a destra.</p>
+                </div>
             </div>
         </div>
-
-        <!-- Editor (no template selection) -->
-        <div class="editor-container active" id="editorContainer">
-            <div class="preview-panel" id="livePreview">
-                <!-- Anteprima live del template selezionato -->
+        <div class="controls-panel">
+            <h2><i class="fas fa-plus-circle" style="color:#667eea;margin-right:6px;"></i> Aggiungi Sezioni <small style="font-size:0.75rem;color:#94a3b8;">(max 6)</small></h2>
+            <div class="section-selector">
+                <div class="section-option" data-section="hero" onclick="addSection('hero')">
+                    <i class="fas fa-star"></i><h4>Hero</h4>
+                </div>
+                <div class="section-option" data-section="about" onclick="addSection('about')">
+                    <i class="fas fa-info-circle"></i><h4>Chi Siamo</h4>
+                </div>
+                <div class="section-option" data-section="services" onclick="addSection('services')">
+                    <i class="fas fa-th"></i><h4>Servizi</h4>
+                </div>
+                <div class="section-option" data-section="gallery" onclick="addSection('gallery')">
+                    <i class="fas fa-images"></i><h4>Galleria</h4>
+                </div>
+                <div class="section-option" data-section="contact" onclick="addSection('contact')">
+                    <i class="fas fa-phone"></i><h4>Contatti</h4>
+                </div>
+                <div class="section-option" data-section="social" onclick="addSection('social')">
+                    <i class="fas fa-share-alt"></i><h4>Social</h4>
+                </div>
             </div>
-
-            <div class="controls-panel">
-                <h2 style="margin-bottom: 20px;">Aggiungi Sezioni (max 6)</h2>
-                
-                <!-- Active Sections -->
-                <div class="active-sections">
-                    <h3>📋 Sezioni Attive (<span id="sectionCount">1</span>/6)</h3>
-                    <div id="activeSectionsList"></div>
+            <div class="active-sections-box">
+                <h3>Sezioni attive (<span id="sectionCount">0</span>/6) &mdash; clicca per modificare</h3>
+                <div class="sections-list" id="activeSectionsList"></div>
+            </div>
+            <div class="section-editor" id="sectionEditor">
+                <div class="section-editor-title">
+                    <i class="fas fa-pen" id="sectionEditorIcon"></i>
+                    <span id="sectionEditorTitle">Modifica Sezione</span>
+                    <button class="section-editor-close" onclick="closeSectionEditor()"><i class="fas fa-times"></i></button>
                 </div>
-
-                <!-- Section Selector -->
-                <div class="section-selector">
-                    <div class="section-option" data-section="hero" onclick="addSection('hero')">
-                        <i class="fas fa-star"></i>
-                        <h4>Hero</h4>
-                        <small>Titolo + CTA</small>
-                    </div>
-                    <div class="section-option" data-section="about" onclick="addSection('about')">
-                        <i class="fas fa-info-circle"></i>
-                        <h4>Chi Siamo</h4>
-                        <small>Descrizione</small>
-                    </div>
-                    <div class="section-option" data-section="services" onclick="addSection('services')">
-                        <i class="fas fa-th"></i>
-                        <h4>Servizi</h4>
-                        <small>3 card</small>
-                    </div>
-                    <div class="section-option" data-section="gallery" onclick="addSection('gallery')">
-                        <i class="fas fa-images"></i>
-                        <h4>Galleria</h4>
-                        <small>Grid foto</small>
-                    </div>
-                    <div class="section-option" data-section="contact" onclick="addSection('contact')">
-                        <i class="fas fa-phone"></i>
-                        <h4>Contatti</h4>
-                        <small>Info + form</small>
-                    </div>
-                    <div class="section-option" data-section="social" onclick="addSection('social')">
-                        <i class="fas fa-share-alt"></i>
-                        <h4>Social</h4>
-                        <small>Link social</small>
-                    </div>
-                </div>
-
-                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
-
-                <h2 style="margin-bottom: 20px;">Personalizza Sezioni</h2>
-                
-                <div class="control-group">
-                    <label>Titolo Principale</label>
-                    <input type="text" id="titleInput" placeholder="Il tuo titolo accattivante" oninput="updatePreview()">
-                </div>
-
-                <div class="control-group">
-                    <label>Descrizione</label>
-                    <textarea id="descriptionInput" placeholder="Descrivi la tua offerta..." oninput="updatePreview()"></textarea>
-                </div>
-
-                <div class="control-group">
-                    <label>Testo Bottone CTA</label>
-                    <input type="text" id="ctaInput" placeholder="es. SCOPRI DI PIÙ" oninput="updatePreview()">
-                </div>
-
-                <div class="control-group">
-                    <label>Link Bottone CTA <small style="color:#94a3b8;font-weight:400;">(es. link WhatsApp o pagina esterna)</small></label>
-                    <input type="url" id="ctaLinkInput" placeholder="https://wa.me/39..." oninput="updatePreview()">
-                </div>
-
-                <div class="control-group" style="background:#fef9ec;border:2px solid #fbbf24;border-radius:12px;padding:16px;">
-                    <label style="color:#92400e;font-weight:700;">
-                        <i class="fas fa-ticket-alt" style="color:#f59e0b;margin-right:6px;"></i>
-                        Max utilizzi per utente <span style="color:#ef4444;">*</span>
-                    </label>
-                    <input type="number" id="maxUsesInput" min="1" max="99" value="1" required
-                           style="font-size:1.1rem;font-weight:700;text-align:center;max-width:120px;"
-                           placeholder="es. 1">
-                    <small style="display:block;margin-top:6px;color:#92400e;">
-                        Quante volte ogni utente può riscattare questa promo con QR code
-                    </small>
-                </div>
-
-                <div class="control-group">
-                    <label>Immagine (opzionale)</label>
-                    <div class="image-upload" onclick="document.getElementById('imageUpload').click()">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #cbd5e1;"></i>
-                        <p style="color: #94a3b8; margin-top: 10px;">Click per caricare immagine</p>
-                        <img id="previewImage" style="display: none;">
-                    </div>
-                    <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                </div>
-
-                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
-
-                <!-- SOCIAL LINKS SECTION -->
-                <div class="social-links-section">
-                    <h3><i class="fas fa-share-alt" style="color: #667eea;"></i> Link Social Media</h3>
-                    
-                    <div class="social-link-row">
-                        <div class="social-link-icon facebook"><i class="fab fa-facebook-f"></i></div>
-                        <input type="url" id="socialFacebook" placeholder="https://facebook.com/tuapagina" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon instagram"><i class="fab fa-instagram"></i></div>
-                        <input type="url" id="socialInstagram" placeholder="https://instagram.com/tuoprofilo" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon twitter"><i class="fab fa-x-twitter"></i></div>
-                        <input type="url" id="socialTwitter" placeholder="https://x.com/tuoprofilo" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon linkedin"><i class="fab fa-linkedin-in"></i></div>
-                        <input type="url" id="socialLinkedin" placeholder="https://linkedin.com/company/tuaazienda" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon tiktok"><i class="fab fa-tiktok"></i></div>
-                        <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@tuoprofilo" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
-                        <input type="url" id="socialWhatsapp" placeholder="https://wa.me/39XXXXXXXXXX" oninput="updatePreview()">
-                    </div>
-                    <div class="social-link-row">
-                        <div class="social-link-icon website"><i class="fas fa-globe"></i></div>
-                        <input type="url" id="socialWebsite" placeholder="https://www.tuosito.it" oninput="updatePreview()">
-                    </div>
-                </div>
-
-                <button class="btn-primary" onclick="publishLanding()">
-                    <i class="fas fa-rocket"></i> Pubblica Landing Page
+                <div id="sectionEditorBody"></div>
+                <button class="btn-save-section" onclick="saveCurrentSection()">
+                    <i class="fas fa-check"></i> Salva Sezione
                 </button>
-
-                <!-- Published URL Box -->
-                <div class="published-url-box" id="publishedUrlBox">
-                    <p>✅ Landing Page Pubblicata!</p>
-                    <div class="url-text" id="publishedUrlText"></div>
+            </div>
+            <hr class="divider">
+            <div class="social-links-section">
+                <h3><i class="fas fa-share-alt" style="color:#667eea;"></i> Link Social Media</h3>
+                <div class="social-link-row">
+                    <div class="social-link-icon facebook"><i class="fab fa-facebook-f"></i></div>
+                    <input type="url" id="socialFacebook" placeholder="https://facebook.com/tuapagina" oninput="updatePreview()">
                 </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon instagram"><i class="fab fa-instagram"></i></div>
+                    <input type="url" id="socialInstagram" placeholder="https://instagram.com/tuoprofilo" oninput="updatePreview()">
+                </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon twitter"><i class="fab fa-x-twitter"></i></div>
+                    <input type="url" id="socialTwitter" placeholder="https://x.com/tuoprofilo" oninput="updatePreview()">
+                </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+                    <input type="url" id="socialLinkedin" placeholder="https://linkedin.com/company/tuaazienda" oninput="updatePreview()">
+                </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon tiktok"><i class="fab fa-tiktok"></i></div>
+                    <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@tuoprofilo" oninput="updatePreview()">
+                </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+                    <input type="url" id="socialWhatsapp" placeholder="https://wa.me/39XXXXXXXXXX" oninput="updatePreview()">
+                </div>
+                <div class="social-link-row">
+                    <div class="social-link-icon website"><i class="fas fa-globe"></i></div>
+                    <input type="url" id="socialWebsite" placeholder="https://www.tuosito.it" oninput="updatePreview()">
+                </div>
+            </div>
+            <div class="max-uses-box">
+                <label><i class="fas fa-ticket-alt" style="color:#f59e0b;margin-right:6px;"></i> Max utilizzi per utente *</label>
+                <input type="number" id="maxUsesInput" min="1" max="99" value="1">
+                <small>Quante volte ogni utente puo riscattare questa promo con QR</small>
+            </div>
+            <div class="control-group">
+                <label>Immagine Copertina (opzionale)</label>
+                <div class="image-upload" onclick="document.getElementById('imageUpload').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:1.8rem;color:#cbd5e1;"></i>
+                    <p style="color:#94a3b8;margin-top:8px;font-size:0.85rem;">Click per caricare</p>
+                    <img id="previewImage" style="display:none;">
+                </div>
+                <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+            </div>
+            <button class="btn-primary" onclick="publishLanding()">
+                <i class="fas fa-rocket"></i> Pubblica Landing Page
+            </button>
+            <div class="published-url-box" id="publishedUrlBox">
+                <p>Landing Page Pubblicata!</p>
+                <div class="url-text" id="publishedUrlText"></div>
             </div>
         </div>
     </div>
+</div>
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+<script src="/assets/js/config.js"></script>
+<script>
+var supabaseClient   = null;
+var uploadedImageUrl = null;
+var selectedChipId   = null;
+var MAX_SECTIONS     = 6;
+var activeSections   = [];
 
-    <script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
-    <script src="/assets/js/config.js"></script>
-    <script>
-        let selectedTemplate = null;
-        let uploadedImageUrl = null;
-        let activeSections = ['hero']; // Hero sempre presente
-        const MAX_SECTIONS = 6;
-        let supabaseClient = null;
+var SECTION_META = {
+    hero:     { name: 'Hero',      icon: 'fa-star' },
+    about:    { name: 'Chi Siamo', icon: 'fa-info-circle' },
+    services: { name: 'Servizi',   icon: 'fa-th' },
+    gallery:  { name: 'Galleria',  icon: 'fa-images' },
+    contact:  { name: 'Contatti',  icon: 'fa-phone' },
+    social:   { name: 'Social',    icon: 'fa-share-alt' }
+};
 
-        // Init Supabase
-        window.addEventListener('DOMContentLoaded', async () => {
-            if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
-                supabaseClient = supabase.createClient(
-                    CDM86_CONFIG.supabase.url,
-                    CDM86_CONFIG.supabase.anonKey
-                );
-            }
-            updateActiveSections();
-            updatePreview();
-            // Load existing data if user already has a landing page
-            await loadExistingLanding();
+function uid() {
+    return 'sec_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+}
+
+function defaultSection(type) {
+    var id = uid();
+    if (type === 'hero')     return { id: id, type: 'hero',     title: 'Il Tuo Titolo Fantastico', description: 'Scopri la nostra incredibile offerta esclusiva', cta: 'SCOPRI DI PIU', ctaLink: '' };
+    if (type === 'about')    return { id: id, type: 'about',    title: 'Chi Siamo', description: 'La nostra azienda si distingue per professionalita e qualita. Da oltre 10 anni offriamo servizi eccellenti ai nostri clienti.' };
+    if (type === 'services') return { id: id, type: 'services', title: 'I Nostri Servizi', services: [
+        { icon: 'fa-star',   name: 'Servizio 1', desc: 'Descrizione del primo servizio.' },
+        { icon: 'fa-heart',  name: 'Servizio 2', desc: 'Descrizione del secondo servizio.' },
+        { icon: 'fa-rocket', name: 'Servizio 3', desc: 'Descrizione del terzo servizio.' }
+    ]};
+    if (type === 'gallery')  return { id: id, type: 'gallery',  title: 'I Nostri Lavori' };
+    if (type === 'contact')  return { id: id, type: 'contact',  title: 'Contattaci', description: 'Siamo a tua disposizione per qualsiasi informazione', contact: { phone: '+39 123 456 7890', email: 'info@azienda.it', address: 'Via Roma 123, Milano' }, cta: 'RICHIEDI INFORMAZIONI', ctaLink: '' };
+    if (type === 'social')   return { id: id, type: 'social' };
+    return { id: id, type: type };
+}
+
+window.addEventListener('DOMContentLoaded', async function() {
+    if (typeof supabase !== 'undefined' && typeof CDM86_CONFIG !== 'undefined') {
+        supabaseClient = supabase.createClient(CDM86_CONFIG.supabase.url, CDM86_CONFIG.supabase.anonKey);
+    }
+    await loadExistingLanding();
+    if (activeSections.length === 0) {
+        activeSections.push(defaultSection('hero'));
+    }
+    renderSectionsList();
+    updatePreview();
+});
+
+function addSection(type) {
+    if (activeSections.length >= MAX_SECTIONS) { alert('Puoi aggiungere massimo ' + MAX_SECTIONS + ' sezioni!'); return; }
+    if (type !== 'gallery' && type !== 'services' && activeSections.some(function(s){ return s.type === type; })) {
+        alert('Questa sezione e gia stata aggiunta!'); return;
+    }
+    var sec = defaultSection(type);
+    activeSections.push(sec);
+    renderSectionsList();
+    updatePreview();
+    openSectionEditor(sec.id);
+}
+
+function removeSection(id) {
+    var sec = activeSections.find(function(s){ return s.id === id; });
+    if (!sec) return;
+    if (sec.type === 'hero') { alert('La sezione Hero e obbligatoria!'); return; }
+    activeSections = activeSections.filter(function(s){ return s.id !== id; });
+    if (selectedChipId === id) closeSectionEditor();
+    renderSectionsList();
+    updatePreview();
+}
+
+function renderSectionsList() {
+    var count = document.getElementById('sectionCount');
+    var list  = document.getElementById('activeSectionsList');
+    count.textContent = activeSections.length;
+    list.innerHTML = activeSections.map(function(sec) {
+        var meta   = SECTION_META[sec.type] || { name: sec.type, icon: 'fa-circle' };
+        var isHero = sec.type === 'hero';
+        var edited = isSectionEdited(sec);
+        var isSel  = sec.id === selectedChipId;
+        return '<div class="section-chip-row' + (isHero ? ' chip-hero' : '') + (isSel ? ' selected-chip' : '') + '" id="chip_' + sec.id + '" draggable="true" ondragstart="onDragStart(event,\'' + sec.id + '\')" ondragover="onDragOver(event,\'' + sec.id + '\')" ondrop="onDrop(event,\'' + sec.id + '\')" ondragleave="onDragLeave(event,\'' + sec.id + '\')">'
+            + '<button class="chip-edit-btn" onclick="openSectionEditor(\'' + sec.id + '\')">'
+            + '<i class="fas ' + meta.icon + ' chip-icon"></i>'
+            + '<span class="chip-label">' + meta.name + '</span>'
+            + '<span class="chip-edited-badge' + (edited ? ' visible' : '') + '">modificata</span>'
+            + '</button>'
+            + '<span class="chip-drag-btn"><i class="fas fa-grip-vertical"></i></span>'
+            + '<button class="chip-remove-btn" onclick="removeSection(\'' + sec.id + '\')"><i class="fas fa-times"></i></button>'
+            + '</div>';
+    }).join('');
+    document.querySelectorAll('.section-option').forEach(function(opt) {
+        var t = opt.dataset.section;
+        var maxReached = activeSections.length >= MAX_SECTIONS;
+        var alreadyIn  = t !== 'gallery' && t !== 'services' && activeSections.some(function(s){ return s.type === t; });
+        if (alreadyIn) {
+            opt.classList.add('selected', 'disabled');
+        } else if (maxReached) {
+            opt.classList.add('disabled');
+            opt.classList.remove('selected');
+        } else {
+            opt.classList.remove('disabled', 'selected');
+        }
+    });
+}
+
+function isSectionEdited(sec) {
+    if (sec.type === 'hero')    return (sec.title && sec.title !== 'Il Tuo Titolo Fantastico') || (sec.description && sec.description !== 'Scopri la nostra incredibile offerta esclusiva');
+    if (sec.type === 'about')   return sec.description && sec.description !== 'La nostra azienda si distingue per professionalita e qualita. Da oltre 10 anni offriamo servizi eccellenti ai nostri clienti.';
+    if (sec.type === 'contact') return sec.contact && (sec.contact.phone !== '+39 123 456 7890' || sec.contact.email !== 'info@azienda.it');
+    return false;
+}
+
+function openSectionEditor(id) {
+    var sec = activeSections.find(function(s){ return s.id === id; });
+    if (!sec) return;
+    selectedChipId = id;
+    var meta = SECTION_META[sec.type] || { name: sec.type, icon: 'fa-circle' };
+    document.getElementById('sectionEditorIcon').className  = 'fas ' + meta.icon;
+    document.getElementById('sectionEditorTitle').textContent = 'Modifica: ' + meta.name;
+    document.getElementById('sectionEditorBody').innerHTML = buildEditorFields(sec);
+    document.getElementById('sectionEditor').classList.add('open');
+    document.getElementById('sectionEditor').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.querySelectorAll('.section-chip-row').forEach(function(el){ el.classList.remove('selected-chip'); });
+    var chip = document.getElementById('chip_' + id);
+    if (chip) chip.classList.add('selected-chip');
+}
+
+function closeSectionEditor() {
+    selectedChipId = null;
+    document.getElementById('sectionEditor').classList.remove('open');
+    document.querySelectorAll('.section-chip-row').forEach(function(el){ el.classList.remove('selected-chip'); });
+}
+
+function esc(str) {
+    if (str === undefined || str === null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildEditorFields(sec) {
+    if (sec.type === 'hero') {
+        return '<div class="control-group"><label>Titolo</label><input type="text" id="ef_title" value="' + esc(sec.title) + '" placeholder="Il tuo titolo" oninput="liveEditSection()"></div>'
+             + '<div class="control-group"><label>Sottotitolo / Descrizione</label><textarea id="ef_desc" oninput="liveEditSection()">' + esc(sec.description) + '</textarea></div>'
+             + '<div class="control-group"><label>Testo Bottone CTA</label><input type="text" id="ef_cta" value="' + esc(sec.cta) + '" placeholder="SCOPRI DI PIU" oninput="liveEditSection()"></div>'
+             + '<div class="control-group"><label>Link Bottone CTA</label><input type="url" id="ef_ctaLink" value="' + esc(sec.ctaLink) + '" placeholder="https://wa.me/39..." oninput="liveEditSection()"></div>';
+    }
+    if (sec.type === 'about') {
+        return '<div class="control-group"><label>Titolo Sezione</label><input type="text" id="ef_title" value="' + esc(sec.title) + '" placeholder="Chi Siamo" oninput="liveEditSection()"></div>'
+             + '<div class="control-group"><label>Testo Descrizione</label><textarea id="ef_desc" rows="5" oninput="liveEditSection()">' + esc(sec.description) + '</textarea></div>';
+    }
+    if (sec.type === 'services') {
+        var html = '<div class="control-group"><label>Titolo Sezione</label><input type="text" id="ef_title" value="' + esc(sec.title) + '" placeholder="I Nostri Servizi" oninput="liveEditSection()"></div>';
+        (sec.services || []).forEach(function(sv, i) {
+            html += '<div class="services-item">'
+                  + '<label>Servizio ' + (i+1) + ' - Nome</label>'
+                  + '<input type="text" id="ef_sv_name_' + i + '" value="' + esc(sv.name) + '" placeholder="Nome servizio" oninput="liveEditSection()">'
+                  + '<label>Descrizione</label>'
+                  + '<input type="text" id="ef_sv_desc_' + i + '" value="' + esc(sv.desc) + '" placeholder="Breve descrizione" oninput="liveEditSection()">'
+                  + '</div>';
         });
+        return html;
+    }
+    if (sec.type === 'gallery') {
+        return '<div class="control-group"><label>Titolo Sezione</label><input type="text" id="ef_title" value="' + esc(sec.title) + '" placeholder="I Nostri Lavori" oninput="liveEditSection()"></div>'
+             + '<p style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">La galleria mostra un placeholder grafico.</p>';
+    }
+    if (sec.type === 'contact') {
+        var c = sec.contact || {};
+        return '<div class="control-group"><label>Titolo Sezione</label><input type="text" id="ef_title" value="' + esc(sec.title) + '" placeholder="Contattaci" oninput="liveEditSection()"></div>'
+             + '<div class="control-group"><label>Sottotitolo</label><input type="text" id="ef_desc" value="' + esc(sec.description) + '" placeholder="Siamo a tua disposizione..." oninput="liveEditSection()"></div>'
+             + '<div class="contact-fields">'
+             + '<label>Telefono</label><input type="text" id="ef_ct_phone" value="' + esc(c.phone) + '" placeholder="+39 123 456 7890" oninput="liveEditSection()">'
+             + '<label>Email</label><input type="email" id="ef_ct_email" value="' + esc(c.email) + '" placeholder="info@azienda.it" oninput="liveEditSection()">'
+             + '<label>Indirizzo</label><input type="text" id="ef_ct_address" value="' + esc(c.address) + '" placeholder="Via Roma 123, Milano" oninput="liveEditSection()">'
+             + '</div>'
+             + '<div class="control-group" style="margin-top:12px;"><label>Testo Bottone</label><input type="text" id="ef_cta" value="' + esc(sec.cta) + '" placeholder="RICHIEDI INFORMAZIONI" oninput="liveEditSection()"></div>'
+             + '<div class="control-group"><label>Link Bottone (opzionale)</label><input type="url" id="ef_ctaLink" value="' + esc(sec.ctaLink) + '" placeholder="https://wa.me/39..." oninput="liveEditSection()"></div>';
+    }
+    if (sec.type === 'social') {
+        return '<p style="font-size:0.85rem;color:#64748b;line-height:1.5;">I link social vengono presi dal pannello <strong>Link Social Media</strong> qui sotto. Compila i link desiderati e verranno mostrati automaticamente.</p>';
+    }
+    return '<p>Nessun campo modificabile per questa sezione.</p>';
+}
 
-        // ─── Section Templates ──────────────────────────────────────────────────
-        const sectionTemplates = {
-            hero: {
-                name: 'Hero',
-                icon: 'fa-star',
-                html: `
-                    <div class="section-hero" style="text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 900;">[[TITLE]]</h1>
-                        <p style="font-size: 1.5rem; margin-bottom: 40px; opacity: 0.95;">[[DESCRIPTION]]</p>
-                        <a href="[[CTA_LINK]]" style="background: white; color: #667eea; padding: 20px 60px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.2rem; cursor: pointer; text-decoration: none; display: inline-block;">[[CTA]]</a>
-                    </div>
-                `
-            },
-            about: {
-                name: 'Chi Siamo',
-                icon: 'fa-info-circle',
-                html: `
-                    <div class="section-about" style="padding: 80px 40px; background: white;">
-                        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-                            <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 30px;">Chi Siamo</h2>
-                            <p style="font-size: 1.2rem; line-height: 1.8; color: #64748b;">La nostra azienda si distingue per professionalità e qualità. Da oltre 10 anni offriamo servizi eccellenti ai nostri clienti, garantendo sempre il massimo della soddisfazione.</p>
-                        </div>
-                    </div>
-                `
-            },
-            services: {
-                name: 'Servizi',
-                icon: 'fa-th',
-                html: `
-                    <div class="section-services" style="padding: 80px 40px; background: #f8fafc;">
-                        <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 50px; text-align: center;">I Nostri Servizi</h2>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1200px; margin: 0 auto;">
-                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                <i class="fas fa-star" style="font-size: 3rem; color: #667eea; margin-bottom: 20px;"></i>
-                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 1</h3>
-                                <p style="color: #64748b;">Descrizione del primo servizio eccezionale che offriamo.</p>
-                            </div>
-                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                <i class="fas fa-heart" style="font-size: 3rem; color: #f43f5e; margin-bottom: 20px;"></i>
-                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 2</h3>
-                                <p style="color: #64748b;">Descrizione del secondo servizio di alta qualità.</p>
-                            </div>
-                            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                <i class="fas fa-rocket" style="font-size: 3rem; color: #10b981; margin-bottom: 20px;"></i>
-                                <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 15px;">Servizio 3</h3>
-                                <p style="color: #64748b;">Descrizione del terzo servizio innovativo.</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            gallery: {
-                name: 'Galleria',
-                icon: 'fa-images',
-                html: `
-                    <div class="section-gallery" style="padding: 80px 40px; background: white;">
-                        <h2 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 50px; text-align: center;">I Nostri Lavori</h2>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto;">
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                            <div style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%); height: 300px; border-radius: 15px;"></div>
-                        </div>
-                    </div>
-                `
-            },
-            contact: {
-                name: 'Contatti',
-                icon: 'fa-phone',
-                html: `
-                    <div class="section-contact" style="padding: 80px 40px; background: #1e293b; color: white;">
-                        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
-                            <h2 style="font-size: 2.5rem; margin-bottom: 30px;">Contattaci</h2>
-                            <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9;">Siamo a tua disposizione per qualsiasi informazione</p>
-                            <div style="text-align: left; margin-bottom: 30px;">
-                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-phone" style="margin-right: 15px; color: #667eea;"></i> +39 123 456 7890</p>
-                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-envelope" style="margin-right: 15px; color: #667eea;"></i> info@azienda.it</p>
-                                <p style="margin: 15px 0; font-size: 1.1rem;"><i class="fas fa-map-marker-alt" style="margin-right: 15px; color: #667eea;"></i> Via Roma 123, Milano</p>
-                            </div>
-                            <button style="background: #667eea; color: white; padding: 18px 50px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%;">RICHIEDI INFORMAZIONI</button>
-                        </div>
-                    </div>
-                `
-            },
-            social: {
-                name: 'Social',
-                icon: 'fa-share-alt',
-                html: `[[SOCIAL_HTML]]`
-            }
-        };
+function liveEditSection() {
+    if (!selectedChipId) return;
+    var sec = activeSections.find(function(s){ return s.id === selectedChipId; });
+    if (!sec) return;
+    readEditorIntoSection(sec);
+    updatePreview();
+}
 
-        // ─── Section Management ──────────────────────────────────────────────────
-        function addSection(sectionType) {
-            if (activeSections.length >= MAX_SECTIONS) {
-                alert('Puoi aggiungere massimo ' + MAX_SECTIONS + ' sezioni!');
-                return;
-            }
-            if (activeSections.includes(sectionType)) {
-                alert('Questa sezione è già stata aggiunta!');
-                return;
-            }
-            activeSections.push(sectionType);
-            updateActiveSections();
-            updatePreview();
-        }
+function saveCurrentSection() {
+    if (!selectedChipId) return;
+    var sec = activeSections.find(function(s){ return s.id === selectedChipId; });
+    if (!sec) return;
+    readEditorIntoSection(sec);
+    renderSectionsList();
+    updatePreview();
+    var btn = document.querySelector('.btn-save-section');
+    btn.innerHTML = 'Salvato!';
+    btn.style.background = '#10b981';
+    setTimeout(function() {
+        btn.innerHTML = '<i class="fas fa-check"></i> Salva Sezione';
+        btn.style.background = '';
+    }, 1200);
+}
 
-        function removeSection(sectionType) {
-            if (sectionType === 'hero') {
-                alert('La sezione Hero è obbligatoria!');
-                return;
-            }
-            activeSections = activeSections.filter(s => s !== sectionType);
-            updateActiveSections();
-            updatePreview();
-        }
+function gv(id) { var el = document.getElementById(id); return el ? el.value : undefined; }
 
-        function updateActiveSections() {
-            const count = document.getElementById('sectionCount');
-            const list = document.getElementById('activeSectionsList');
-            
-            count.textContent = activeSections.length;
+function readEditorIntoSection(sec) {
+    if (sec.type === 'hero') {
+        if (gv('ef_title')   !== undefined) sec.title       = gv('ef_title');
+        if (gv('ef_desc')    !== undefined) sec.description = gv('ef_desc');
+        if (gv('ef_cta')     !== undefined) sec.cta         = gv('ef_cta');
+        if (gv('ef_ctaLink') !== undefined) sec.ctaLink     = gv('ef_ctaLink');
+    } else if (sec.type === 'about') {
+        if (gv('ef_title') !== undefined) sec.title       = gv('ef_title');
+        if (gv('ef_desc')  !== undefined) sec.description = gv('ef_desc');
+    } else if (sec.type === 'services') {
+        if (gv('ef_title') !== undefined) sec.title = gv('ef_title');
+        (sec.services || []).forEach(function(sv, i) {
+            if (gv('ef_sv_name_' + i) !== undefined) sv.name = gv('ef_sv_name_' + i);
+            if (gv('ef_sv_desc_' + i) !== undefined) sv.desc = gv('ef_sv_desc_' + i);
+        });
+    } else if (sec.type === 'gallery') {
+        if (gv('ef_title') !== undefined) sec.title = gv('ef_title');
+    } else if (sec.type === 'contact') {
+        if (gv('ef_title')    !== undefined) sec.title       = gv('ef_title');
+        if (gv('ef_desc')     !== undefined) sec.description = gv('ef_desc');
+        if (gv('ef_cta')      !== undefined) sec.cta         = gv('ef_cta');
+        if (gv('ef_ctaLink')  !== undefined) sec.ctaLink     = gv('ef_ctaLink');
+        if (!sec.contact) sec.contact = {};
+        if (gv('ef_ct_phone')   !== undefined) sec.contact.phone   = gv('ef_ct_phone');
+        if (gv('ef_ct_email')   !== undefined) sec.contact.email   = gv('ef_ct_email');
+        if (gv('ef_ct_address') !== undefined) sec.contact.address = gv('ef_ct_address');
+    }
+}
 
-            list.innerHTML = activeSections.map(section => {
-                const template = sectionTemplates[section];
-                const canRemove = section !== 'hero';
-                return `
-                    <span class="section-chip">
-                        <i class="fas ${template.icon}"></i>
-                        ${template.name}
-                        ${canRemove ? `<i class="fas fa-times" onclick="removeSection('${section}')"></i>` : ''}
-                    </span>
-                `;
-            }).join('');
+var dragId = null;
+function onDragStart(e, id) { dragId = id; e.currentTarget.classList.add('dragging'); }
+function onDragOver(e, id) { e.preventDefault(); if (dragId !== id) { var el = document.getElementById('chip_' + id); if (el) el.classList.add('drag-over'); } }
+function onDragLeave(e, id) { var el = document.getElementById('chip_' + id); if (el) el.classList.remove('drag-over'); }
+function onDrop(e, targetId) {
+    e.preventDefault();
+    var tel = document.getElementById('chip_' + targetId); if (tel) tel.classList.remove('drag-over');
+    if (!dragId || dragId === targetId) return;
+    var fromIdx = activeSections.findIndex(function(s){ return s.id === dragId; });
+    var toIdx   = activeSections.findIndex(function(s){ return s.id === targetId; });
+    if (fromIdx === -1 || toIdx === -1) return;
+    if (activeSections[fromIdx].type === 'hero' || activeSections[toIdx].type === 'hero') { dragId = null; return; }
+    var moved = activeSections.splice(fromIdx, 1)[0];
+    activeSections.splice(toIdx, 0, moved);
+    renderSectionsList();
+    updatePreview();
+    dragId = null;
+}
 
-            document.querySelectorAll('.section-option').forEach(option => {
-                const type = option.dataset.section;
-                if (activeSections.includes(type)) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-                if (activeSections.length >= MAX_SECTIONS && !activeSections.includes(type)) {
-                    option.classList.add('disabled');
-                    option.style.pointerEvents = 'none';
-                } else if (!activeSections.includes(type)) {
-                    option.classList.remove('disabled');
-                    option.style.pointerEvents = 'auto';
-                }
-            });
-        }
+function updatePreview() {
+    var preview = document.getElementById('livePreview');
+    if (activeSections.length === 0) {
+        preview.innerHTML = '<div class="preview-empty"><i class="fas fa-eye"></i><p>Aggiungi sezioni dal pannello.</p></div>';
+        return;
+    }
+    var html = '';
+    activeSections.forEach(function(sec){ html += renderSectionHtml(sec); });
+    preview.innerHTML = html;
+}
 
-        // ─── Load Existing Landing (populate form if already published) ──────────
-        async function loadExistingLanding() {
-            if (!supabaseClient) return;
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) return;
+function renderSectionHtml(sec) {
+    if (sec.type === 'hero') {
+        return '<div style="text-align:center;padding:80px 40px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">'
+             + '<h1 style="font-size:2.8rem;margin-bottom:20px;font-weight:900;">' + esc(sec.title) + '</h1>'
+             + '<p style="font-size:1.3rem;margin-bottom:36px;opacity:0.95;">' + esc(sec.description) + '</p>'
+             + '<a href="' + esc(sec.ctaLink||'#') + '" style="background:white;color:#667eea;padding:18px 50px;border-radius:50px;font-weight:700;font-size:1.1rem;text-decoration:none;display:inline-block;">' + esc(sec.cta||'SCOPRI DI PIU') + '</a>'
+             + '</div>';
+    }
+    if (sec.type === 'about') {
+        return '<div style="padding:70px 40px;background:white;">'
+             + '<div style="max-width:800px;margin:0 auto;text-align:center;">'
+             + '<h2 style="font-size:2.2rem;color:#1e293b;margin-bottom:24px;">' + esc(sec.title) + '</h2>'
+             + '<p style="font-size:1.15rem;line-height:1.8;color:#64748b;white-space:pre-line;">' + esc(sec.description) + '</p>'
+             + '</div></div>';
+    }
+    if (sec.type === 'services') {
+        var colors = ['#667eea','#f43f5e','#10b981'];
+        var icons  = ['fa-star','fa-heart','fa-rocket'];
+        var svHtml = (sec.services || []).map(function(sv, i) {
+            return '<div style="background:white;padding:36px;border-radius:20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.08);">'
+                 + '<i class="fas ' + (sv.icon||icons[i]||'fa-star') + '" style="font-size:2.8rem;color:' + (colors[i]||'#667eea') + ';margin-bottom:18px;"></i>'
+                 + '<h3 style="font-size:1.3rem;color:#1e293b;margin-bottom:12px;">' + esc(sv.name) + '</h3>'
+                 + '<p style="color:#64748b;">' + esc(sv.desc) + '</p>'
+                 + '</div>';
+        }).join('');
+        return '<div style="padding:70px 40px;background:#f8fafc;">'
+             + '<h2 style="font-size:2.2rem;color:#1e293b;margin-bottom:44px;text-align:center;">' + esc(sec.title) + '</h2>'
+             + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:1100px;margin:0 auto;">' + svHtml + '</div>'
+             + '</div>';
+    }
+    if (sec.type === 'gallery') {
+        var cells = '';
+        for (var i=0;i<6;i++) cells += '<div style="background:linear-gradient(135deg,#cbd5e1 0%,#94a3b8 100%);height:260px;border-radius:14px;"></div>';
+        return '<div style="padding:70px 40px;background:white;">'
+             + '<h2 style="font-size:2.2rem;color:#1e293b;margin-bottom:44px;text-align:center;">' + esc(sec.title) + '</h2>'
+             + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1100px;margin:0 auto;">' + cells + '</div>'
+             + '</div>';
+    }
+    if (sec.type === 'contact') {
+        var c = sec.contact || {};
+        var ctaHref = sec.ctaLink || '#';
+        return '<div style="padding:70px 40px;background:#1e293b;color:white;">'
+             + '<div style="max-width:600px;margin:0 auto;text-align:center;">'
+             + '<h2 style="font-size:2.2rem;margin-bottom:24px;">' + esc(sec.title) + '</h2>'
+             + '<p style="font-size:1.1rem;margin-bottom:36px;opacity:0.85;">' + esc(sec.description) + '</p>'
+             + '<div style="text-align:left;margin-bottom:28px;">'
+             + (c.phone   ? '<p style="margin:13px 0;font-size:1rem;"><i class="fas fa-phone" style="margin-right:14px;color:#667eea;"></i>' + esc(c.phone) + '</p>' : '')
+             + (c.email   ? '<p style="margin:13px 0;font-size:1rem;"><i class="fas fa-envelope" style="margin-right:14px;color:#667eea;"></i>' + esc(c.email) + '</p>' : '')
+             + (c.address ? '<p style="margin:13px 0;font-size:1rem;"><i class="fas fa-map-marker-alt" style="margin-right:14px;color:#667eea;"></i>' + esc(c.address) + '</p>' : '')
+             + '</div>'
+             + '<a href="' + esc(ctaHref) + '" style="background:#667eea;color:white;padding:16px 44px;border-radius:50px;font-weight:700;font-size:1rem;display:inline-block;text-decoration:none;">' + esc(sec.cta||'RICHIEDI INFORMAZIONI') + '</a>'
+             + '</div></div>';
+    }
+    if (sec.type === 'social') { return buildSocialHtmlFromInputs(); }
+    return '';
+}
 
-                // Get organization from organizations table
-                const { data: orgData } = await supabaseClient
-                    .from('organizations')
-                    .select('id')
-                    .eq('auth_user_id', user.id)
-                    .maybeSingle();
+function collectSocialLinks() {
+    return {
+        facebook:  document.getElementById('socialFacebook')?.value.trim()  || null,
+        instagram: document.getElementById('socialInstagram')?.value.trim() || null,
+        twitter:   document.getElementById('socialTwitter')?.value.trim()   || null,
+        linkedin:  document.getElementById('socialLinkedin')?.value.trim()  || null,
+        tiktok:    document.getElementById('socialTiktok')?.value.trim()    || null,
+        whatsapp:  document.getElementById('socialWhatsapp')?.value.trim()  || null,
+        website:   document.getElementById('socialWebsite')?.value.trim()   || null
+    };
+}
 
-                const orgId = orgData?.id;
+function buildSocialHtmlFromInputs() { return buildSocialHtmlFromData(collectSocialLinks()); }
 
-                // Fetch existing landing page
-                let query = supabaseClient.from('organization_pages').select('*');
-                if (orgId) {
-                    query = query.eq('organization_id', orgId);
-                } else {
-                    return; // no org id, skip pre-fill
-                }
+function buildSocialHtmlFromData(socialLinks) {
+    var defs = [
+        { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2' },
+        { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c' },
+        { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000'    },
+        { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2' },
+        { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101' },
+        { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366' },
+        { key: 'website',   icon: 'fas fa-globe',       color: '#667eea' }
+    ];
+    var active = defs.filter(function(d){ return socialLinks && socialLinks[d.key]; });
+    if (active.length === 0) {
+        return '<div class="landing-social-bar"><h3>Seguici sui Social</h3><p style="color:#94a3b8;font-size:0.9rem;">Aggiungi i tuoi link social nel pannello laterale</p></div>';
+    }
+    var iconsHtml = active.map(function(d) {
+        return '<a href="' + socialLinks[d.key] + '" class="landing-social-link" style="background:' + d.color + ';" target="_blank" rel="noopener"><i class="' + d.icon + '"></i></a>';
+    }).join('');
+    return '<div class="landing-social-bar"><h3>Seguici sui Social</h3><div class="landing-social-icons">' + iconsHtml + '</div></div>';
+}
 
-                const { data: page } = await query.maybeSingle();
-                if (!page) return;
+async function handleImageUpload(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById('previewImage');
+        img.src = e.target.result; img.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    try {
+        var formData = new FormData();
+        formData.append('file', file);
+        var response = await fetch('/api/upload-org', { method: 'POST', body: formData });
+        var data = await response.json();
+        if (data.url) { uploadedImageUrl = data.url; }
+    } catch (error) { console.error('Upload error:', error); alert('Errore nel caricamento immagine'); }
+}
 
-                // Pre-fill form fields
-                const pageData = page.page_data || {};
-                const socialLinks = page.social_links || pageData.socialLinks || {};
-
-                if (pageData.title)       document.getElementById('titleInput').value = pageData.title;
-                if (pageData.description) document.getElementById('descriptionInput').value = pageData.description;
-                if (pageData.cta)         document.getElementById('ctaInput').value = pageData.cta;
-                if (pageData.ctaLinkHero) document.getElementById('ctaLinkInput').value = pageData.ctaLinkHero;
-                if (page.max_uses_per_user) document.getElementById('maxUsesInput').value = page.max_uses_per_user;
-                if (pageData.imageUrl) {
-                    uploadedImageUrl = pageData.imageUrl;
-                    const img = document.getElementById('previewImage');
-                    img.src = pageData.imageUrl;
-                    img.style.display = 'block';
-                }
-
-                // Social links
-                if (socialLinks.facebook)  document.getElementById('socialFacebook').value  = socialLinks.facebook;
-                if (socialLinks.instagram) document.getElementById('socialInstagram').value = socialLinks.instagram;
-                if (socialLinks.twitter)   document.getElementById('socialTwitter').value   = socialLinks.twitter;
-                if (socialLinks.linkedin)  document.getElementById('socialLinkedin').value  = socialLinks.linkedin;
-                if (socialLinks.tiktok)    document.getElementById('socialTiktok').value    = socialLinks.tiktok;
-                if (socialLinks.whatsapp)  document.getElementById('socialWhatsapp').value  = socialLinks.whatsapp;
-                if (socialLinks.website)   document.getElementById('socialWebsite').value   = socialLinks.website;
-
-                // Active sections
-                if (pageData.sections && Array.isArray(pageData.sections) && pageData.sections.length > 0) {
-                    activeSections = pageData.sections;
-                    updateActiveSections();
-                }
-
-                updatePreview();
-
-                // Show the published URL box if already published
-                if (page.status === 'published' && page.slug) {
-                    const landingUrl = `${window.location.origin}/promo/${page.slug}`;
-                    document.getElementById('publishedUrlText').textContent = landingUrl;
-                    document.getElementById('publishedUrlBox').classList.add('visible');
-                    document.getElementById('step3').classList.add('active');
-                }
-
-            } catch (err) {
-                console.warn('Could not load existing landing:', err.message);
-            }
-        }
-
-        // ─── Build Social Bar HTML ───────────────────────────────────────────────
-        function buildSocialHtml() {
-            const socials = [
-                { id: 'socialFacebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
-                { id: 'socialInstagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
-                { id: 'socialTwitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X / Twitter' },
-                { id: 'socialLinkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
-                { id: 'socialTiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
-                { id: 'socialWhatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
-                { id: 'socialWebsite',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
-            ];
-
-            const activeLinks = socials.filter(s => {
-                const el = document.getElementById(s.id);
-                return el && el.value.trim() !== '';
-            });
-
-            if (activeLinks.length === 0) {
-                return `
-                    <div class="landing-social-bar">
-                        <h3>Seguici sui Social</h3>
-                        <p style="color: #94a3b8; font-size: 0.9rem;">Aggiungi i tuoi link social nel pannello laterale</p>
-                    </div>
-                `;
-            }
-
-            const iconsHtml = activeLinks.map(s => {
-                const url = document.getElementById(s.id).value.trim();
-                return `<a href="${url}" class="landing-social-link" style="background: ${s.color};" target="_blank" rel="noopener" title="${s.label}">
-                    <i class="${s.icon}"></i>
-                </a>`;
-            }).join('');
-
-            return `
-                <div class="landing-social-bar">
-                    <h3>Seguici sui Social</h3>
-                    <div class="landing-social-icons">${iconsHtml}</div>
-                </div>
-            `;
-        }
-
-        // ─── Live Preview ────────────────────────────────────────────────────────
-        function updatePreview() {
-            const preview = document.getElementById('livePreview');
-            const title = document.getElementById('titleInput')?.value || 'Il Tuo Titolo Fantastico';
-            const description = document.getElementById('descriptionInput')?.value || 'Scopri la nostra incredibile offerta esclusiva';
-            const cta = document.getElementById('ctaInput')?.value || 'SCOPRI DI PIÙ';
-            const ctaLink = document.getElementById('ctaLinkInput')?.value?.trim() || '#contact';
-
-            let html = '';
-            activeSections.forEach(sectionType => {
-                let sectionHtml = sectionTemplates[sectionType].html;
-
-                if (sectionType === 'hero') {
-                    sectionHtml = sectionHtml
-                        .replace('[[TITLE]]', title)
-                        .replace('[[DESCRIPTION]]', description)
-                        .replace('[[CTA]]', cta)
-                        .replace('[[CTA_LINK]]', ctaLink);
-                } else if (sectionType === 'social') {
-                    sectionHtml = buildSocialHtml();
-                }
-
-                html += sectionHtml;
-            });
-
-            preview.innerHTML = html;
-        }
-
-        // ─── Image Upload ────────────────────────────────────────────────────────
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('previewImage');
-                img.src = e.target.result;
-                img.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('/api/upload-org', {
-                    method: 'POST',
-                    body: formData
+async function loadExistingLanding() {
+    if (!supabaseClient) return;
+    try {
+        var authRes = await supabaseClient.auth.getUser();
+        var user = authRes.data.user;
+        if (!user) return;
+        var orgRes = await supabaseClient.from('organizations').select('id').eq('auth_user_id', user.id).maybeSingle();
+        if (!orgRes.data?.id) return;
+        var pageRes = await supabaseClient.from('organization_pages').select('*').eq('organization_id', orgRes.data.id).maybeSingle();
+        var page = pageRes.data;
+        if (!page) return;
+        var pageData    = page.page_data    || {};
+        var socialLinks = page.social_links || pageData.socialLinks || {};
+        if (pageData.sections && Array.isArray(pageData.sections) && pageData.sections.length > 0) {
+            if (typeof pageData.sections[0] === 'string') {
+                activeSections = pageData.sections.map(function(type) {
+                    var sec = defaultSection(type);
+                    if (type === 'hero') {
+                        sec.title       = pageData.title       || sec.title;
+                        sec.description = pageData.description || sec.description;
+                        sec.cta         = pageData.cta         || sec.cta;
+                        sec.ctaLink     = pageData.ctaLinkHero || sec.ctaLink;
+                    }
+                    return sec;
                 });
-
-                const data = await response.json();
-                if (data.url) {
-                    uploadedImageUrl = data.url;
-                    console.log('✅ Image uploaded:', uploadedImageUrl);
-                }
-            } catch (error) {
-                console.error('❌ Upload error:', error);
-                alert('Errore nel caricamento immagine');
+            } else {
+                activeSections = pageData.sections;
+                activeSections.forEach(function(sec){ if (!sec.id) sec.id = uid(); });
             }
         }
-
-        // ─── Collect Social Links ─────────────────────────────────────────────────
-        function collectSocialLinks() {
-            return {
-                facebook:  document.getElementById('socialFacebook')?.value.trim()  || null,
-                instagram: document.getElementById('socialInstagram')?.value.trim() || null,
-                twitter:   document.getElementById('socialTwitter')?.value.trim()   || null,
-                linkedin:  document.getElementById('socialLinkedin')?.value.trim()  || null,
-                tiktok:    document.getElementById('socialTiktok')?.value.trim()    || null,
-                whatsapp:  document.getElementById('socialWhatsapp')?.value.trim()  || null,
-                website:   document.getElementById('socialWebsite')?.value.trim()   || null,
-            };
+        if (socialLinks.facebook)  document.getElementById('socialFacebook').value  = socialLinks.facebook;
+        if (socialLinks.instagram) document.getElementById('socialInstagram').value = socialLinks.instagram;
+        if (socialLinks.twitter)   document.getElementById('socialTwitter').value   = socialLinks.twitter;
+        if (socialLinks.linkedin)  document.getElementById('socialLinkedin').value  = socialLinks.linkedin;
+        if (socialLinks.tiktok)    document.getElementById('socialTiktok').value    = socialLinks.tiktok;
+        if (socialLinks.whatsapp)  document.getElementById('socialWhatsapp').value  = socialLinks.whatsapp;
+        if (socialLinks.website)   document.getElementById('socialWebsite').value   = socialLinks.website;
+        if (page.max_uses_per_user) document.getElementById('maxUsesInput').value = page.max_uses_per_user;
+        if (pageData.imageUrl) {
+            uploadedImageUrl = pageData.imageUrl;
+            var img = document.getElementById('previewImage');
+            img.src = pageData.imageUrl; img.style.display = 'block';
         }
-
-        // ─── Publish Landing ─────────────────────────────────────────────────────
-        async function publishLanding() {
-            const title = document.getElementById('titleInput')?.value?.trim();
-            const description = document.getElementById('descriptionInput')?.value?.trim();
-            const cta = document.getElementById('ctaInput')?.value?.trim() || 'SCOPRI DI PIÙ';
-            const ctaLinkCustom = document.getElementById('ctaLinkInput')?.value?.trim() || '';
-            const maxUses = parseInt(document.getElementById('maxUsesInput')?.value || '1', 10);
-
-            if (!title || !description) {
-                alert('⚠️ Compila almeno il Titolo e la Descrizione!');
-                return;
-            }
-            if (!maxUses || maxUses < 1) {
-                alert('⚠️ Inserisci il numero massimo di utilizzi per utente (minimo 1)!');
-                document.getElementById('maxUsesInput').focus();
-                return;
-            }
-
-            if (!supabaseClient) {
-                alert('❌ Errore: Supabase non inizializzato');
-                return;
-            }
-
-            // Generate slug
-            const slug = title.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-                .substring(0, 50);
-
-            const landingUrl = `${window.location.origin}/promo/${slug}`;
-
-            try {
-                // Get current user
-                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-                if (authError || !user) {
-                    alert('⚠️ Devi essere loggato!');
-                    window.location.href = '/public/login.html';
-                    return;
-                }
-
-                // Get organization from organizations table (not users)
-                const { data: orgData, error: userError } = await supabaseClient
-                    .from('organizations')
-                    .select('id, name, email')
-                    .eq('auth_user_id', user.id)
-                    .maybeSingle();
-
-                if (userError) {
-                    console.warn('User lookup error:', userError.message);
-                }
-
-                // Use organization id
-                const orgId = orgData?.id || null;
-
-                if (!orgId) {
-                    alert('❌ Devi essere registrato come azienda per pubblicare una landing page.');
-                    return;
-                }
-
-                const socialLinks = collectSocialLinks();
-
-                // Build the card_data payload (used by promotions.html to render the card)
-                // ctaLink on the card points to the landing page URL
-                // ctaLinkHero is the button inside the landing (e.g. WhatsApp, external site)
-                const ctaLinkHero = ctaLinkCustom || socialLinks.whatsapp || socialLinks.website || '#contact';
-                const cardData = {
-                    title: title,
-                    description: description,
-                    ctaText: cta,
-                    ctaLink: landingUrl,          // ← Used by promotions.html card button → opens this landing page
-                    ctaLinkHero: ctaLinkHero,     // ← Used by the CTA button INSIDE the landing page
-                    image: uploadedImageUrl || null,
-                    badge: 'OFFERTA',
-                    features: [],
-                    socialLinks: socialLinks
-                };
-
-                // Build the full landing page HTML snapshot
-                const htmlContent = buildLandingHtml(title, description, cta, slug, socialLinks, ctaLinkHero);
-
-                // Check if a landing page already exists for this organization
-                let existingQuery = supabaseClient
-                    .from('organization_pages')
-                    .select('id');
-
-                if (orgId) {
-                    existingQuery = existingQuery.eq('organization_id', orgId);
-                } else {
-                    // Fallback: search by slug matching user's previous submissions
-                    existingQuery = existingQuery.eq('slug', slug);
-                }
-
-                const { data: existing } = await existingQuery.maybeSingle();
-
-                // page_data: full page state (used by page.html to render the landing)
-                const pageData = {
-                    sections: activeSections,
-                    title: title,
-                    description: description,
-                    cta: cta,
-                    ctaLinkHero: ctaLinkHero,
-                    imageUrl: uploadedImageUrl || null,
-                    socialLinks: socialLinks,
-                    style: 'modern'
-                };
-
-                const payload = {
-                    page_title: title,
-                    page_description: description,
-                    slug: slug,
-                    landing_slug: slug,
-                    page_type: 'landing',
-                    page_data: pageData,
-                    content: htmlContent,
-                    card_data: cardData,
-                    social_links: socialLinks,
-                    sections: JSON.stringify(activeSections),
-                    image_url: uploadedImageUrl,
-                    cta_text: cta,
-                    max_uses_per_user: maxUses,
-                    is_active: true,
-                    card_published: true,
-                    status: 'published',
-                    published_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                };
-
-                // Also update max_uses_per_user on any linked promotion in the promotions table
-                if (orgData?.email) {
-                    await supabaseClient
-                        .from('promotions')
-                        .update({ max_uses_per_user: maxUses })
-                        .eq('partner_email', orgData.email)
-                        .eq('is_active', true);
-                }
-
-                let result;
-                if (existing?.id) {
-                    // UPDATE existing
-                    const { data, error } = await supabaseClient
-                        .from('organization_pages')
-                        .update(payload)
-                        .eq('id', existing.id)
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-                    result = data;
-                } else {
-                    // INSERT new
-                    const insertPayload = {
-                        ...payload,
-                        created_at: new Date().toISOString()
-                    };
-                    if (orgId) insertPayload.organization_id = orgId;
-
-                    const { data, error } = await supabaseClient
-                        .from('organization_pages')
-                        .insert([insertPayload])
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-                    result = data;
-                }
-
-                console.log('✅ Landing pubblicata:', result);
-
-                // Show success
-                document.getElementById('step3').classList.add('active');
-                const urlBox = document.getElementById('publishedUrlBox');
-                document.getElementById('publishedUrlText').textContent = landingUrl;
-                urlBox.classList.add('visible');
-
-                // Scroll to button
-                urlBox.scrollIntoView({ behavior: 'smooth' });
-
-                setTimeout(() => {
-                    window.location.href = '/public/dashboard.html';
-                }, 1500);
-
-            } catch (error) {
-                console.error('❌ Publish error:', error);
-                alert('❌ Errore nella pubblicazione: ' + error.message);
-            }
+        if (page.status === 'published' && page.slug) {
+            var url = window.location.origin + '/promo/' + page.slug;
+            document.getElementById('publishedUrlText').textContent = url;
+            document.getElementById('publishedUrlBox').classList.add('visible');
+            document.getElementById('step3').classList.add('active');
         }
+    } catch (err) { console.warn('Could not load existing landing:', err.message); }
+}
 
-        // ─── Build Full Landing HTML ──────────────────────────────────────────────
-        function buildLandingHtml(title, description, cta, slug, socialLinks, ctaLinkHero) {
-            // ctaLinkHero = the CTA button URL INSIDE the landing (WhatsApp, external, etc.)
-            const heroCtaLink = ctaLinkHero || '#contact';
-            let html = '';
-            activeSections.forEach(sectionType => {
-                let sectionHtml = sectionTemplates[sectionType].html;
-                if (sectionType === 'hero') {
-                    sectionHtml = sectionHtml
-                        .replace('[[TITLE]]', title)
-                        .replace('[[DESCRIPTION]]', description)
-                        .replace('[[CTA]]', cta)
-                        .replace('[[CTA_LINK]]', heroCtaLink);
-                } else if (sectionType === 'social') {
-                    sectionHtml = buildSocialHtmlFromData(socialLinks);
-                }
-                html += sectionHtml;
-            });
-            return html;
+async function publishLanding() {
+    var heroSec = activeSections.find(function(s){ return s.type === 'hero'; });
+    if (!heroSec || !heroSec.title?.trim() || !heroSec.description?.trim()) {
+        alert('La sezione Hero deve avere Titolo e Descrizione!');
+        if (heroSec) openSectionEditor(heroSec.id);
+        return;
+    }
+    var maxUses = parseInt(document.getElementById('maxUsesInput')?.value || '1', 10);
+    if (!maxUses || maxUses < 1) { alert('Inserisci il numero massimo di utilizzi per utente (minimo 1)!'); document.getElementById('maxUsesInput').focus(); return; }
+    if (!supabaseClient) { alert('Errore: Supabase non inizializzato'); return; }
+    var authRes = await supabaseClient.auth.getUser();
+    if (authRes.error || !authRes.data.user) { alert('Devi essere loggato!'); window.location.href = '/public/login.html'; return; }
+    var user = authRes.data.user;
+    var orgRes = await supabaseClient.from('organizations').select('id, name, email').eq('auth_user_id', user.id).maybeSingle();
+    if (!orgRes.data?.id) { alert('Devi essere registrato come azienda per pubblicare una landing page.'); return; }
+    var orgData = orgRes.data;
+    var slug = heroSec.title.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+        .substring(0, 50);
+    var landingUrl  = window.location.origin + '/promo/' + slug;
+    var socialLinks = collectSocialLinks();
+    var ctaLinkHero = heroSec.ctaLink || socialLinks.whatsapp || socialLinks.website || '#contact';
+    var cardData = {
+        title: heroSec.title, description: heroSec.description,
+        ctaText: heroSec.cta || 'SCOPRI DI PIU', ctaLink: landingUrl, ctaLinkHero: ctaLinkHero,
+        image: uploadedImageUrl || null, badge: 'OFFERTA', features: [], socialLinks: socialLinks
+    };
+    var pageData = {
+        sections: activeSections, title: heroSec.title, description: heroSec.description,
+        cta: heroSec.cta, ctaLinkHero: ctaLinkHero,
+        imageUrl: uploadedImageUrl || null, socialLinks: socialLinks, style: 'modern'
+    };
+    var htmlContent = '';
+    activeSections.forEach(function(sec){ htmlContent += (sec.type === 'social') ? buildSocialHtmlFromData(socialLinks) : renderSectionHtml(sec); });
+    var existingRes = await supabaseClient.from('organization_pages').select('id').eq('organization_id', orgData.id).maybeSingle();
+    var payload = {
+        page_title: heroSec.title, page_description: heroSec.description, slug: slug, landing_slug: slug,
+        page_type: 'landing', page_data: pageData, content: htmlContent, card_data: cardData,
+        social_links: socialLinks, sections: JSON.stringify(activeSections.map(function(s){ return s.type; })),
+        image_url: uploadedImageUrl, cta_text: heroSec.cta || 'SCOPRI DI PIU',
+        max_uses_per_user: maxUses, is_active: true, card_published: true,
+        status: 'published', published_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    if (orgData.email) {
+        await supabaseClient.from('promotions').update({ max_uses_per_user: maxUses }).eq('partner_email', orgData.email).eq('is_active', true);
+    }
+    try {
+        var result;
+        if (existingRes.data?.id) {
+            var upd = await supabaseClient.from('organization_pages').update(payload).eq('id', existingRes.data.id).select().single();
+            if (upd.error) throw upd.error;
+            result = upd.data;
+        } else {
+            var ins = await supabaseClient.from('organization_pages').insert([Object.assign({}, payload, { organization_id: orgData.id, created_at: new Date().toISOString() })]).select().single();
+            if (ins.error) throw ins.error;
+            result = ins.data;
         }
-
-        function buildSocialHtmlFromData(socialLinks) {
-            const defs = [
-                { key: 'facebook',  icon: 'fab fa-facebook-f',  color: '#1877f2', label: 'Facebook' },
-                { key: 'instagram', icon: 'fab fa-instagram',   color: '#e1306c', label: 'Instagram' },
-                { key: 'twitter',   icon: 'fab fa-x-twitter',   color: '#000',    label: 'X / Twitter' },
-                { key: 'linkedin',  icon: 'fab fa-linkedin-in', color: '#0a66c2', label: 'LinkedIn' },
-                { key: 'tiktok',    icon: 'fab fa-tiktok',      color: '#010101', label: 'TikTok' },
-                { key: 'whatsapp',  icon: 'fab fa-whatsapp',    color: '#25d366', label: 'WhatsApp' },
-                { key: 'website',   icon: 'fas fa-globe',       color: '#667eea', label: 'Sito Web' }
-            ];
-
-            const activeLinks = defs.filter(d => socialLinks && socialLinks[d.key]);
-
-            if (activeLinks.length === 0) return '';
-
-            const iconsHtml = activeLinks.map(d => `
-                <a href="${socialLinks[d.key]}" class="landing-social-link" style="background: ${d.color};" target="_blank" rel="noopener" title="${d.label}">
-                    <i class="${d.icon}"></i>
-                </a>`).join('');
-
-            return `
-                <div class="landing-social-bar">
-                    <h3>Seguici sui Social</h3>
-                    <div class="landing-social-icons">${iconsHtml}</div>
-                </div>
-            `;
-        }
-    </script>
+        console.log('Landing pubblicata:', result);
+        document.getElementById('step3').classList.add('active');
+        document.getElementById('publishedUrlText').textContent = landingUrl;
+        document.getElementById('publishedUrlBox').classList.add('visible');
+        document.getElementById('publishedUrlBox').scrollIntoView({ behavior: 'smooth' });
+        setTimeout(function(){ window.location.href = '/public/dashboard.html'; }, 1800);
+    } catch (error) {
+        console.error('Publish error:', error);
+        alert('Errore nella pubblicazione: ' + error.message);
+    }
+}
+</script>
 </body>
 </html>
