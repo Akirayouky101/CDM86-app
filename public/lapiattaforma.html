@@ -4,806 +4,486 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Piattaforma - CDM86</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #fbbf24;
-            --bg-gradient: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --yellow: #fbbf24;
+            --yellow-dark: #f59e0b;
+            --green: #10b981;
+            --purple: #8b5cf6;
+            --bg: #0f172a;
+            --card-bg: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.1);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #0f172a;
+            background: var(--bg);
             color: #fff;
             overflow-x: hidden;
         }
 
-        /* Full screen storytelling sections */
-        .story-section {
+        /* ── TOPBAR ── */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+        .topbar-logo { font-size: 1.4rem; font-weight: 900; color: var(--yellow); letter-spacing: -0.5px; }
+        .topbar-back {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            color: rgba(255,255,255,0.7); padding: 9px 18px; border-radius: 50px;
+            text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .topbar-back:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        /* ── HERO ── */
+        .hero {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 2rem;
-            position: relative;
-            background: var(--bg-gradient);
-            opacity: 0.3;
-            transform: translateY(50px);
-            transition: all 0.8s ease;
-        }
-
-        .story-section.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .story-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .text-content h2 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to right, #fff, var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .text-content p {
-            font-size: clamp(1.125rem, 2vw, 1.375rem);
-            line-height: 1.8;
-            opacity: 0.95;
-            margin-bottom: 1rem;
-        }
-
-        .text-content .highlight {
-            color: var(--secondary);
-            font-weight: 700;
-        }
-
-        /* Animation Canvas */
-        .animation-canvas {
-            position: relative;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Stick Figure - Stile omino bianco professionale */
-        .stick-figure {
-            position: absolute;
-            width: 80px;
-            height: 120px;
-            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stick-head {
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 15px rgba(255,255,255,0.3);
-        }
-
-        .stick-body {
-            width: 4px;
-            height: 50px;
-            background: #fff;
-            position: absolute;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        .stick-arm {
-            width: 35px;
-            height: 4px;
-            background: #fff;
-            position: absolute;
-            top: 55px;
-            border-radius: 2px;
-            transform-origin: left center;
-        }
-
-        .stick-arm.left {
-            left: 18px;
-            transform: rotate(-30deg);
-        }
-
-        .stick-arm.right {
-            right: 18px;
-            transform: rotate(30deg);
-            transform-origin: right center;
-        }
-
-        .stick-leg {
-            width: 4px;
-            height: 40px;
-            background: #fff;
-            position: absolute;
-            top: 88px;
-            border-radius: 2px;
-        }
-
-        .stick-leg.left {
-            left: 30px;
-        }
-
-        .stick-leg.right {
-            right: 30px;
-        }
-
-        /* Walking animation */
-        .stick-figure.walking .stick-arm.left {
-            animation: armSwingLeft 0.6s ease-in-out infinite;
-        }
-
-        .stick-figure.walking .stick-arm.right {
-            animation: armSwingRight 0.6s ease-in-out infinite;
-        }
-
-        .stick-figure.walking .stick-leg.left {
-            animation: legSwingLeft 0.6s ease-in-out infinite;
-        }
-
-        .stick-figure.walking .stick-leg.right {
-            animation: legSwingRight 0.6s ease-in-out infinite;
-        }
-
-        @keyframes armSwingLeft {
-            0%, 100% { transform: rotate(-30deg); }
-            50% { transform: rotate(20deg); }
-        }
-
-        @keyframes armSwingRight {
-            0%, 100% { transform: rotate(30deg); }
-            50% { transform: rotate(-20deg); }
-        }
-
-        @keyframes legSwingLeft {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(-25deg); }
-        }
-
-        @keyframes legSwingRight {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(25deg); }
-        }
-
-        /* Thinking animation */
-        .stick-figure.thinking .stick-arm.right {
-            animation: thinking 2s ease-in-out infinite;
-        }
-
-        @keyframes thinking {
-            0%, 100% { transform: rotate(30deg); }
-            50% { transform: rotate(-80deg) translateY(-20px); }
-        }
-
-        /* Money/Euro icons */
-        .euro-icon {
-            position: absolute;
-            font-size: 2rem;
-            color: var(--secondary);
-            opacity: 0;
-            animation: floatUp 2s ease-in-out infinite;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 0; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-30px); }
-            100% { opacity: 0; transform: translateY(-60px); }
-        }
-
-        /* Brand logos animation */
-        .brand-logos {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .brand-logo {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            font-size: 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
-            opacity: 0;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .brand-logo:nth-child(1) { animation-delay: 0.1s; }
-        .brand-logo:nth-child(2) { animation-delay: 0.2s; }
-        .brand-logo:nth-child(3) { animation-delay: 0.3s; }
-        .brand-logo:nth-child(4) { animation-delay: 0.4s; }
-        .brand-logo:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        /* Stats cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             text-align: center;
-            border: 2px solid rgba(251,191,36,0.3);
-            transform: scale(0.8);
-            opacity: 0;
-            animation: popIn 0.6s ease forwards;
+            padding: 120px 24px 80px;
+            background: radial-gradient(ellipse 120% 80% at 50% 0%, rgba(37,99,235,0.35) 0%, transparent 70%),
+                        radial-gradient(ellipse 80% 60% at 80% 80%, rgba(139,92,246,0.2) 0%, transparent 60%),
+                        var(--bg);
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4);
+            color: var(--yellow); padding: 8px 20px; border-radius: 50px;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
+            animation: fadeDown 0.6s ease both;
+        }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            font-weight: 900; line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            animation: fadeDown 0.6s 0.1s ease both;
+        }
+        .hero h1 .accent { color: var(--yellow); }
+        .hero p {
+            font-size: clamp(1.05rem, 2vw, 1.3rem);
+            color: rgba(255,255,255,0.7); max-width: 640px;
+            line-height: 1.7; margin-bottom: 48px;
+            animation: fadeDown 0.6s 0.2s ease both;
+        }
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+            color: #1e3a8a; font-weight: 800; font-size: 1.1rem;
+            padding: 18px 44px; border-radius: 50px;
+            text-decoration: none; border: none; cursor: pointer;
+            box-shadow: 0 8px 32px rgba(251,191,36,0.35);
+            transition: all 0.3s; animation: fadeDown 0.6s 0.3s ease both;
+        }
+        .hero-cta:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 40px rgba(251,191,36,0.5); }
+        .hero-numbers {
+            display: flex; gap: 48px; justify-content: center;
+            margin-top: 64px; flex-wrap: wrap;
+            animation: fadeDown 0.6s 0.4s ease both;
+        }
+        .hero-number { text-align: center; }
+        .hero-number-val { font-size: 2.4rem; font-weight: 900; color: var(--yellow); display: block; line-height: 1; margin-bottom: 6px; }
+        .hero-number-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .hero-divider { width: 1px; background: var(--border); height: 60px; align-self: center; }
+
+        /* ── SEZIONI ── */
+        .section {
+            padding: 100px 24px;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--yellow); margin-bottom: 16px; opacity: 0;
+            transform: translateY(20px); transition: all 0.6s ease;
+        }
+        .section-title {
+            font-size: clamp(1.9rem, 4vw, 3rem);
+            font-weight: 900; line-height: 1.15; letter-spacing: -0.8px;
+            margin-bottom: 16px; opacity: 0;
+            transform: translateY(20px); transition: all 0.6s 0.1s ease;
+        }
+        .section-sub {
+            font-size: 1.1rem; color: rgba(255,255,255,0.6);
+            max-width: 600px; line-height: 1.7; margin-bottom: 56px;
+            opacity: 0; transform: translateY(20px); transition: all 0.6s 0.15s ease;
+        }
+        .section.visible .section-label,
+        .section.visible .section-title,
+        .section.visible .section-sub { opacity: 1; transform: none; }
+
+        /* ── HOW IT WORKS STEPS ── */
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;
+        }
+        .step-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 32px 28px;
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.5s ease; position: relative; overflow: hidden;
+        }
+        .step-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--card-color, rgba(37,99,235,0.08)) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .step-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+        .section.visible .step-card { opacity: 1; transform: none; }
+        .step-card:nth-child(1) { transition-delay: 0.1s; }
+        .step-card:nth-child(2) { transition-delay: 0.2s; }
+        .step-card:nth-child(3) { transition-delay: 0.3s; }
+        .step-card:nth-child(4) { transition-delay: 0.4s; }
+        .step-num {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; margin-bottom: 20px;
+            background: var(--step-bg, rgba(37,99,235,0.2));
+        }
+        .step-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .step-card p { font-size: 0.92rem; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+        /* ── COMPENSI TABLE ── */
+        .compensi-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
+        }
+        .comp-card {
+            border-radius: 20px; padding: 32px; text-align: center;
+            opacity: 0; transform: scale(0.95);
+            transition: all 0.5s ease;
+        }
+        .section.visible .comp-card { opacity: 1; transform: scale(1); }
+        .comp-card:nth-child(1) { transition-delay: 0.1s; background: linear-gradient(135deg, rgba(37,99,235,0.25), rgba(37,99,235,0.08)); border: 1px solid rgba(37,99,235,0.4); }
+        .comp-card:nth-child(2) { transition-delay: 0.2s; background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(139,92,246,0.08)); border: 1px solid rgba(139,92,246,0.4); }
+        .comp-card:nth-child(3) { transition-delay: 0.3s; background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(16,185,129,0.08)); border: 1px solid rgba(16,185,129,0.4); }
+        .comp-icon { font-size: 2.4rem; margin-bottom: 16px; display: block; }
+        .comp-amount {
+            font-size: 2.6rem; font-weight: 900; display: block;
+            margin-bottom: 8px; line-height: 1;
+        }
+        .comp-card:nth-child(1) .comp-amount { color: #60a5fa; }
+        .comp-card:nth-child(2) .comp-amount { color: #a78bfa; }
+        .comp-card:nth-child(3) .comp-amount { color: #34d399; }
+        .comp-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+        .comp-card p { font-size: 0.88rem; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+        /* ── WHO CAN JOIN ── */
+        .who-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;
+        }
+        .who-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px 20px; text-align: center;
+            opacity: 0; transform: translateY(24px);
+            transition: all 0.5s ease;
+        }
+        .who-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-4px); border-color: rgba(251,191,36,0.3); }
+        .section.visible .who-card { opacity: 1; transform: none; }
+        .who-card:nth-child(1) { transition-delay: 0.05s; }
+        .who-card:nth-child(2) { transition-delay: 0.1s; }
+        .who-card:nth-child(3) { transition-delay: 0.15s; }
+        .who-card:nth-child(4) { transition-delay: 0.2s; }
+        .who-card:nth-child(5) { transition-delay: 0.25s; }
+        .who-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+        .who-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+        .who-card p { font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+        /* ── TIMELINE / MLM ── */
+        .mlm-row {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px 24px; margin-bottom: 12px;
+            opacity: 0; transform: translateX(-20px); transition: all 0.5s ease;
+        }
+        .section.visible .mlm-row { opacity: 1; transform: none; }
+        .mlm-row:nth-child(1) { transition-delay: 0.05s; }
+        .mlm-row:nth-child(2) { transition-delay: 0.12s; }
+        .mlm-row:nth-child(3) { transition-delay: 0.19s; }
+        .mlm-row:nth-child(4) { transition-delay: 0.26s; }
+        .mlm-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .mlm-level { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.45); width: 70px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .mlm-desc { font-size: 0.95rem; flex: 1; }
+        .mlm-badge {
+            font-size: 0.8rem; font-weight: 700; padding: 5px 14px;
+            border-radius: 50px; flex-shrink: 0;
         }
 
-        .stat-card:nth-child(1) { animation-delay: 0.2s; }
-        .stat-card:nth-child(2) { animation-delay: 0.4s; }
-        .stat-card:nth-child(3) { animation-delay: 0.6s; }
-
-        @keyframes popIn {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        /* ── CTA FINALE ── */
+        .final-cta {
+            text-align: center; padding: 100px 24px 80px;
+            background: radial-gradient(ellipse 100% 80% at 50% 100%, rgba(37,99,235,0.25) 0%, transparent 70%);
         }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--secondary);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 1.125rem;
-            opacity: 0.9;
-        }
-
-        /* CTA Button */
-        .cta-button {
-            display: inline-block;
-            background: var(--secondary);
-            color: #1e3a8a;
-            font-size: 1.5rem;
-            font-weight: 700;
-            padding: 1.5rem 4rem;
-            border-radius: 3rem;
-            text-decoration: none;
-            margin-top: 3rem;
+        .final-cta h2 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 20px; }
+        .final-cta p { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 40px; }
+        .final-btn {
+            display: inline-flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+            color: #1e3a8a; font-weight: 800; font-size: 1.15rem;
+            padding: 20px 52px; border-radius: 50px; text-decoration: none;
             box-shadow: 0 10px 40px rgba(251,191,36,0.4);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
+            transition: all 0.3s; border: none; cursor: pointer;
+        }
+        .final-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 18px 50px rgba(251,191,36,0.55); }
+
+        /* ── DIVIDER ── */
+        .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: none; }
+        }
+        @keyframes pulse-ring {
+            0%   { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(2.2); opacity: 0; }
         }
 
-        .cta-button:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 50px rgba(251,191,36,0.6);
-        }
-
-        /* Scroll indicator */
-        .scroll-indicator {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--secondary);
-            font-size: 2rem;
-            animation: bounce 2s infinite;
-            z-index: 100;
-            cursor: pointer;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-15px); }
-        }
-
-        /* Progress dots */
-        .progress-dots {
-            position: fixed;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .progress-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .progress-dot.active {
-            background: var(--secondary);
-            transform: scale(1.5);
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .story-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .animation-canvas {
-                height: 300px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .progress-dots {
-                display: none;
-            }
-
-            .stick-figure {
-                transform: scale(0.8);
-            }
-        }
-
-        /* Network visualization */
-        .network-viz {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        .network-node {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: var(--secondary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            opacity: 0;
-            animation: nodeAppear 0.5s ease forwards;
-            transition: opacity 1s ease;
-        }
-
-        .network-line {
-            position: absolute;
-            height: 2px;
-            background: rgba(251,191,36,0.5);
-            transform-origin: left center;
-            opacity: 0;
-            animation: lineGrow 0.8s ease forwards;
-            transition: opacity 1s ease;
-        }
-
-        @keyframes nodeAppear {
-            to { opacity: 1; }
-        }
-
-        @keyframes lineGrow {
-            to { opacity: 1; }
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .topbar { padding: 14px 18px; }
+            .hero h1 { letter-spacing: -0.8px; }
+            .hero-numbers { gap: 24px; }
+            .hero-divider { display: none; }
+            .section { padding: 70px 18px; }
         }
     </style>
 </head>
 <body>
-    <!-- Section 1: Introduction -->
-    <section class="story-section active" data-section="0">
-        <div class="story-content">
-            <div class="text-content">
-                <h2>La Piattaforma del <span class="highlight">Risparmio</span></h2>
-                <p>
-                    <span class="highlight">CDM86 nasce da un'idea semplice ma potente:</span> 
-                    rendere il risparmio e le opportunità accessibili a tutti.
-                </p>
-                <p>
-                    Non più solo per categorie privilegiate o gruppi selezionati. 
-                    Un mondo di vantaggi reali, concreti, quotidiani.
-                </p>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar-logo">CDM86</div>
+        <a href="/public/promotions.html" class="topbar-back">
+            <i class="fas fa-arrow-left"></i> Torna alle Promozioni
+        </a>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="fas fa-rocket"></i> Come funziona la piattaforma
+        </div>
+        <h1>Risparmia, Guadagna,<br><span class="accent">Fai Crescere la Rete</span></h1>
+        <p>CDM86 è la piattaforma che premia chi porta valore. Condividi, porta nuovi utenti e aziende, e ricevi compensi reali in euro.</p>
+        <a href="#come-funziona" class="hero-cta">
+            <i class="fas fa-play-circle"></i> Scopri come fare
+        </a>
+        <div class="hero-numbers">
+            <div class="hero-number">
+                <span class="hero-number-val">+2.000</span>
+                <span class="hero-number-label">Utenti Attivi</span>
             </div>
-            <div class="animation-canvas">
-                <div class="stick-figure thinking" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                    <div class="stick-head"></div>
-                    <div class="stick-body"></div>
-                    <div class="stick-arm left"></div>
-                    <div class="stick-arm right"></div>
-                    <div class="stick-leg left"></div>
-                    <div class="stick-leg right"></div>
-                </div>
-                <div class="euro-icon" style="left: 60%; top: 20%; animation-delay: 0s;">💡</div>
-                <div class="euro-icon" style="left: 65%; top: 25%; animation-delay: 0.5s;">✨</div>
-                <div class="euro-icon" style="left: 70%; top: 30%; animation-delay: 1s;">⭐</div>
+            <div class="hero-divider"></div>
+            <div class="hero-number">
+                <span class="hero-number-val">30€</span>
+                <span class="hero-number-label">Compenso Max</span>
+            </div>
+            <div class="hero-divider"></div>
+            <div class="hero-number">
+                <span class="hero-number-val">3 livelli</span>
+                <span class="hero-number-label">di Referral</span>
             </div>
         </div>
     </section>
 
-    <!-- Section 2: Strategy -->
-    <section class="story-section" data-section="1">
-        <div class="story-content">
-            <div class="animation-canvas">
-                <div class="stick-figure walking" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                    <div class="stick-head"></div>
-                    <div class="stick-body"></div>
-                    <div class="stick-arm left"></div>
-                    <div class="stick-arm right"></div>
-                    <div class="stick-leg left"></div>
-                    <div class="stick-leg right"></div>
-                </div>
+    <hr class="divider">
+
+    <!-- COME FUNZIONA -->
+    <div class="section" id="come-funziona">
+        <div class="section-label"><i class="fas fa-map"></i> Il percorso</div>
+        <h2 class="section-title">Come funziona CDM86</h2>
+        <p class="section-sub">4 passi semplici per iniziare a guadagnare con il passaparola.</p>
+        <div class="steps-grid">
+            <div class="step-card" style="--card-color: rgba(37,99,235,0.12);">
+                <div class="step-num" style="--step-bg: rgba(37,99,235,0.2);">📣</div>
+                <h3>Parla con chi conosci</h3>
+                <p>Condividi il tuo link referral personale con amici, familiari e colleghi. Loro si registrano e risparmiano sulle promozioni locali.</p>
             </div>
-            <div class="text-content">
-                <h2>La <span class="highlight">Strategia</span></h2>
-                <p>
-                    Abbiamo osservato da vicino i giganti che hanno rivoluzionato il mercato.
-                </p>
-                <p>
-                    Abbiamo trasformato ciò che li rende vincenti in qualcosa di ancora più grande: 
-                    <span class="highlight">un modello pensato per le persone, non per le élite.</span>
-                </p>
+            <div class="step-card" style="--card-color: rgba(139,92,246,0.12);">
+                <div class="step-num" style="--step-bg: rgba(139,92,246,0.2);">🔗</div>
+                <h3>Il tuo link fa il lavoro</h3>
+                <p>Ogni registrazione tramite il tuo codice ti fa guadagnare bonus diretti in Euro. Più persone porti, più crescono i tuoi premi.</p>
+            </div>
+            <div class="step-card" style="--card-color: rgba(16,185,129,0.12);">
+                <div class="step-num" style="--step-bg: rgba(16,185,129,0.2);">🏪</div>
+                <h3>Porta le aziende locali</h3>
+                <p>Presenta CDM86 ai commercianti. Si fanno pubblicità, ricevono nuovi clienti e risparmiano — tu vieni premiato per ogni azienda che porti.</p>
+            </div>
+            <div class="step-card" style="--card-color: rgba(251,191,36,0.12);">
+                <div class="step-num" style="--step-bg: rgba(251,191,36,0.2);">💶</div>
+                <h3>Incassa i compensi</h3>
+                <p>I bonus si accumulano nel tuo profilo. Più la tua rete cresce, più il tuo guadagno cresce in modo continuativo e automatico.</p>
             </div>
         </div>
-    </section>
-
-    <!-- Section 3: Referral Network -->
-    <section class="story-section" data-section="2" id="compensi">
-        <div class="story-content">
-            <div class="text-content">
-                <h2>I <span class="highlight">Compensi</span></h2>
-                <p><span class="highlight">Referral Diretti:</span> per ogni persona che si iscrive tramite il tuo codice</p>
-                <p><span class="highlight">Referral Indiretti:</span> guadagni anche dai referral del tuo network</p>
-                <p><span class="highlight">Aziende Partner:</span> porta un'azienda e ricevi compensi esclusivi</p>
-            </div>
-            <div class="animation-canvas">
-                <div class="network-viz" id="networkViz">
-                    <!-- Animated network will be created here -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section 4: Results -->
-    <section class="story-section" data-section="3">
-        <div class="story-content" style="grid-template-columns: 1fr;">
-            <div class="text-content" style="text-align: center;">
-                <h2>Il <span class="highlight">Risultato</span></h2>
-                <p>Un modello di business unico che genera valore vero</p>
-                
-                <p style="margin-top: 3rem; font-size: 1.5rem;">
-                    <span class="highlight">CDM86 non è solo un'opportunità.</span><br>
-                    È un nuovo modo di vivere il risparmio.
-                </p>
-                
-                <button class="cta-button" onclick="openRegistration()">
-                    Registrati
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Progress Dots -->
-    <div class="progress-dots">
-        <div class="progress-dot active" data-section="0"></div>
-        <div class="progress-dot" data-section="1"></div>
-        <div class="progress-dot" data-section="2"></div>
-        <div class="progress-dot" data-section="3"></div>
     </div>
 
-    <!-- Scroll Indicator -->
-    <div class="scroll-indicator" id="scrollIndicator">
-        <i class="fas fa-chevron-down"></i>
+    <hr class="divider">
+
+    <!-- COMPENSI -->
+    <div class="section" id="compensi">
+        <div class="section-label"><i class="fas fa-euro-sign"></i> I guadagni</div>
+        <h2 class="section-title">Quanto puoi guadagnare</h2>
+        <p class="section-sub">Tre tipi di compenso che si sommano tra loro ogni volta che la tua rete si allarga.</p>
+        <div class="compensi-grid">
+            <div class="comp-card">
+                <span class="comp-icon">👤</span>
+                <span class="comp-amount">+5€</span>
+                <h3>Referral Diretto</h3>
+                <p>Ogni nuovo utente che si registra tramite il tuo link ti vale un bonus immediato in Euro.</p>
+            </div>
+            <div class="comp-card">
+                <span class="comp-icon">👥</span>
+                <span class="comp-amount">+2€</span>
+                <h3>Referral Indiretto</h3>
+                <p>Guadagni anche quando i tuoi referral portano a loro volta nuovi utenti. La rete lavora per te.</p>
+            </div>
+            <div class="comp-card">
+                <span class="comp-icon">🏢</span>
+                <span class="comp-amount">+30€</span>
+                <h3>Azienda Partner</h3>
+                <p>Porta un'azienda o un'associazione su CDM86 e ricevi il compenso più alto disponibile sulla piattaforma.</p>
+            </div>
+        </div>
     </div>
+
+    <hr class="divider">
+
+    <!-- SISTEMA MLM / LIVELLI -->
+    <div class="section" id="livelli">
+        <div class="section-label"><i class="fas fa-layer-group"></i> I livelli</div>
+        <h2 class="section-title">Il sistema a 3 livelli</h2>
+        <p class="section-sub">I tuoi guadagni non si fermano ai referral diretti. CDM86 premia anche la tua rete di secondo e terzo livello.</p>
+        <div>
+            <div class="mlm-row">
+                <div class="mlm-dot" style="background:#60a5fa;"></div>
+                <div class="mlm-level">Livello 1</div>
+                <div class="mlm-desc"><strong>Referral diretti</strong> — persone invitate da te direttamente</div>
+                <div class="mlm-badge" style="background:rgba(37,99,235,0.2);color:#60a5fa;">+5€ / iscrizione</div>
+            </div>
+            <div class="mlm-row">
+                <div class="mlm-dot" style="background:#a78bfa;"></div>
+                <div class="mlm-level">Livello 2</div>
+                <div class="mlm-desc"><strong>Referral indiretti</strong> — persone invitate dai tuoi referral</div>
+                <div class="mlm-badge" style="background:rgba(139,92,246,0.2);color:#a78bfa;">+2€ / iscrizione</div>
+            </div>
+            <div class="mlm-row">
+                <div class="mlm-dot" style="background:#34d399;"></div>
+                <div class="mlm-level">Livello 3</div>
+                <div class="mlm-desc"><strong>Rete estesa</strong> — la rete dei tuoi referral indiretti</div>
+                <div class="mlm-badge" style="background:rgba(16,185,129,0.2);color:#34d399;">Bonus punti</div>
+            </div>
+            <div class="mlm-row">
+                <div class="mlm-dot" style="background:#fbbf24;"></div>
+                <div class="mlm-level">Business</div>
+                <div class="mlm-desc"><strong>Aziende e associazioni</strong> — ogni struttura che porti direttamente</div>
+                <div class="mlm-badge" style="background:rgba(251,191,36,0.2);color:#fbbf24;">+30€ / azienda</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- CHI PUÒ PARTECIPARE -->
+    <div class="section" id="chi">
+        <div class="section-label"><i class="fas fa-users"></i> Per tutti</div>
+        <h2 class="section-title">Chi può partecipare</h2>
+        <p class="section-sub">CDM86 è aperta a chiunque voglia risparmiare e guadagnare. Non servono competenze particolari.</p>
+        <div class="who-grid">
+            <div class="who-card">
+                <span class="who-icon">🏠</span>
+                <h4>Privati</h4>
+                <p>Risparmia sulle promozioni locali e guadagna invitando amici e famiglia.</p>
+            </div>
+            <div class="who-card">
+                <span class="who-icon">🧑‍💼</span>
+                <h4>Professionisti</h4>
+                <p>Usa la tua rete professionale per moltiplicare i referral e i guadagni.</p>
+            </div>
+            <div class="who-card">
+                <span class="who-icon">🏪</span>
+                <h4>Commercianti</h4>
+                <p>Raggiungi nuovi clienti grazie alla piattaforma e fai pubblicità efficace.</p>
+            </div>
+            <div class="who-card">
+                <span class="who-icon">🤝</span>
+                <h4>Associazioni</h4>
+                <p>Offri un servizio reale ai tuoi soci e genera entrate per l'associazione.</p>
+            </div>
+            <div class="who-card">
+                <span class="who-icon">🎓</span>
+                <h4>Studenti</h4>
+                <p>Inizia subito con zero investimento. Il tuo link fa tutto il lavoro per te.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA FINALE -->
+    <section class="final-cta">
+        <h2>Pronto a iniziare?</h2>
+        <p>Registrati gratis in 60 secondi e ricevi subito il tuo link referral personale.</p>
+        <a href="/public/promotions.html" class="final-btn" onclick="event.preventDefault(); window.location.href='/public/promotions.html'; setTimeout(function(){ if(window.showAuthModal) window.showAuthModal('register'); }, 500);">
+            <i class="fas fa-user-plus"></i> Registrati ora — è gratis
+        </a>
+    </section>
 
     <script>
-        let currentSection = 0;
-        const sections = document.querySelectorAll('.story-section');
-        const dots = document.querySelectorAll('.progress-dot');
-        const scrollIndicator = document.getElementById('scrollIndicator');
-        let isScrolling = false;
-
-        // Auto scroll to next section
-        function scrollToSection(index) {
-            if (index < 0 || index >= sections.length || isScrolling) return;
-            
-            isScrolling = true;
-            currentSection = index;
-            
-            sections.forEach((section, i) => {
-                section.classList.toggle('active', i === index);
+        // Intersection Observer per animazioni scroll
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
             });
-            
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-            
-            sections[index].scrollIntoView({ behavior: 'smooth' });
-            
-            // Hide scroll indicator on last section
-            scrollIndicator.style.opacity = index === sections.length - 1 ? '0' : '1';
-            
-            // Trigger animations for current section
-            triggerSectionAnimation(index);
-            
-            setTimeout(() => {
-                isScrolling = false;
-            }, 600);
-        }
+        }, { threshold: 0.12 });
 
-        // Wheel event
-        let scrollTimeout;
-        window.addEventListener('wheel', (e) => {
-            if (isScrolling) return;
-            
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (e.deltaY > 0) {
-                    scrollToSection(currentSection + 1);
-                } else {
-                    scrollToSection(currentSection - 1);
-                }
-            }, 50);
-        }, { passive: true });
-
-        // Dot click navigation
-        dots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                const section = parseInt(dot.dataset.section);
-                scrollToSection(section);
-            });
+        document.querySelectorAll('.section').forEach(function(el) {
+            observer.observe(el);
         });
 
-        // Scroll indicator click
-        scrollIndicator.addEventListener('click', () => {
-            scrollToSection(currentSection + 1);
-        });
-
-        // Touch events for mobile
-        let touchStartY = 0;
-        document.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        });
-
-        document.addEventListener('touchend', (e) => {
-            if (isScrolling) return;
-            
-            const touchEndY = e.changedTouches[0].clientY;
-            const diff = touchStartY - touchEndY;
-            
-            if (Math.abs(diff) > 50) {
-                if (diff > 0) {
-                    scrollToSection(currentSection + 1);
-                } else {
-                    scrollToSection(currentSection - 1);
-                }
+        // Counter animato per i numeri hero
+        function animateCounter(el, target, suffix) {
+            var start = 0;
+            var duration = 1600;
+            var startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                var progress = Math.min((timestamp - startTime) / duration, 1);
+                var ease = 1 - Math.pow(1 - progress, 3);
+                var value = Math.floor(ease * target);
+                el.textContent = (value >= 1000 ? '+' + value.toLocaleString('it') : value) + (suffix || '');
+                if (progress < 1) requestAnimationFrame(step);
             }
-        });
-
-        // Section-specific animations
-        let walkingInterval = null;
-        let networkInterval = null;
-        
-        function triggerSectionAnimation(index) {
-            if (index === 1) {
-                // Walking animation for strategy section - loop avanti e indietro
-                const walkingFigure = sections[1].querySelector('.stick-figure');
-                let goingRight = true;
-                
-                // Clear previous interval if exists
-                if (walkingInterval) clearInterval(walkingInterval);
-                
-                // Start walking loop
-                setTimeout(() => {
-                    walkingFigure.style.left = '80%';
-                    goingRight = false;
-                    
-                    walkingInterval = setInterval(() => {
-                        if (goingRight) {
-                            // Flip to walk right
-                            walkingFigure.style.transform = 'translate(-50%, -50%) scaleX(1)';
-                            walkingFigure.style.left = '80%';
-                            goingRight = false;
-                        } else {
-                            // Flip to walk left
-                            walkingFigure.style.transform = 'translate(-50%, -50%) scaleX(-1)';
-                            walkingFigure.style.left = '20%';
-                            goingRight = true;
-                        }
-                    }, 3000); // Change direction every 3 seconds
-                }, 500);
-            } else {
-                // Stop walking when leaving section 1
-                if (walkingInterval) {
-                    clearInterval(walkingInterval);
-                    walkingInterval = null;
-                }
-            }
-            
-            if (index === 2) {
-                // Create network visualization
-                createNetworkVisualization();
-                
-                // Start network loop animation
-                if (networkInterval) clearInterval(networkInterval);
-                
-                setTimeout(() => {
-                    const container = document.getElementById('networkViz');
-                    const euroNodes = container.querySelectorAll('.network-node:not(:first-child)');
-                    const lines = container.querySelectorAll('.network-line');
-                    
-                    // Make everything visible first time
-                    euroNodes.forEach(node => node.style.opacity = '1');
-                    lines.forEach(line => line.style.opacity = '1');
-                    
-                    // Start loop: hide and show again
-                    networkInterval = setInterval(() => {
-                        // Fade out
-                        euroNodes.forEach(node => node.style.opacity = '0');
-                        lines.forEach(line => line.style.opacity = '0');
-                        
-                        // Fade in after delay
-                        setTimeout(() => {
-                            euroNodes.forEach(node => node.style.opacity = '1');
-                            lines.forEach(line => line.style.opacity = '1');
-                        }, 1000);
-                    }, 4000); // Loop every 4 seconds
-                }, 1000);
-            } else {
-                // Stop network animation when leaving section 2
-                if (networkInterval) {
-                    clearInterval(networkInterval);
-                    networkInterval = null;
-                }
-            }
+            requestAnimationFrame(step);
         }
 
-        // Create network visualization
-        function createNetworkVisualization() {
-            const container = document.getElementById('networkViz');
-            if (container.children.length > 0) return; // Already created
-            
-            // Center node (you)
-            const centerNode = document.createElement('div');
-            centerNode.className = 'network-node';
-            centerNode.innerHTML = '👤';
-            centerNode.style.left = '50%';
-            centerNode.style.top = '50%';
-            centerNode.style.transform = 'translate(-50%, -50%)';
-            centerNode.style.background = '#fff';
-            centerNode.style.color = '#2563eb';
-            centerNode.style.animationDelay = '0s';
-            container.appendChild(centerNode);
-            
-            // Direct referrals
-            const positions = [
-                { left: '20%', top: '30%', delay: '0.3s' },
-                { left: '80%', top: '30%', delay: '0.4s' },
-                { left: '20%', top: '70%', delay: '0.5s' },
-                { left: '80%', top: '70%', delay: '0.6s' }
-            ];
-            
-            positions.forEach((pos, i) => {
-                // Node
-                const node = document.createElement('div');
-                node.className = 'network-node';
-                node.innerHTML = '€';
-                node.style.left = pos.left;
-                node.style.top = pos.top;
-                node.style.transform = 'translate(-50%, -50%)';
-                node.style.animationDelay = pos.delay;
-                container.appendChild(node);
-                
-                // Line connecting to center
-                setTimeout(() => {
-                    const line = document.createElement('div');
-                    line.className = 'network-line';
-                    
-                    const centerX = container.offsetWidth / 2;
-                    const centerY = container.offsetHeight / 2;
-                    const nodeX = (parseInt(pos.left) / 100) * container.offsetWidth;
-                    const nodeY = (parseInt(pos.top) / 100) * container.offsetHeight;
-                    
-                    const length = Math.sqrt(Math.pow(nodeX - centerX, 2) + Math.pow(nodeY - centerY, 2));
-                    const angle = Math.atan2(nodeY - centerY, nodeX - centerX) * (180 / Math.PI);
-                    
-                    line.style.width = length + 'px';
-                    line.style.left = centerX + 'px';
-                    line.style.top = centerY + 'px';
-                    line.style.transform = `rotate(${angle}deg)`;
-                    line.style.animationDelay = pos.delay;
-                    
-                    container.appendChild(line);
-                }, parseFloat(pos.delay) * 1000);
-            });
-        }
-
-        // Open registration modal
-        function openRegistration() {
-            // Check if we're already on index.html
-            if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-                // Trigger auth modal
-                if (window.showAuthModal) {
-                    window.showAuthModal('register');
-                } else {
-                    // Fallback: try to click register button
-                    const registerBtn = document.querySelector('[data-action="register"]');
-                    if (registerBtn) registerBtn.click();
-                }
-            } else {
-                // Redirect to index with hash
-                window.location.href = '../index.html#register';
+        var countersStarted = false;
+        var heroObserver = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting && !countersStarted) {
+                countersStarted = true;
+                setTimeout(function() {
+                    animateCounter(document.querySelector('.hero-numbers .hero-number:nth-child(1) .hero-number-val'), 2000, '');
+                }, 600);
             }
-        }
-
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-                e.preventDefault();
-                scrollToSection(currentSection + 1);
-            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-                e.preventDefault();
-                scrollToSection(currentSection - 1);
-            }
-        });
-
-        // Initialize
-        function init() {
-            // Check if there's an anchor in the URL (e.g., #compensi)
-            const hash = window.location.hash.substring(1);
-            let targetSection = 0;
-            
-            if (hash) {
-                // Find section with matching ID
-                const targetElement = document.getElementById(hash);
-                if (targetElement) {
-                    const sectionElement = targetElement.closest('.story-section');
-                    if (sectionElement) {
-                        targetSection = parseInt(sectionElement.dataset.section) || 0;
-                    }
-                }
-            }
-            
-            // Scroll to target section (0 if no anchor found)
-            scrollToSection(targetSection);
-        }
-        
-        init();
+        }, { threshold: 0.5 });
+        heroObserver.observe(document.querySelector('.hero-numbers'));
     </script>
 </body>
 </html>
