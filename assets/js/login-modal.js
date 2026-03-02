@@ -543,7 +543,7 @@ async function handleRegister(event) {
     const cap = document.getElementById('registerCAP').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
-    const referralCode = document.getElementById('registerReferral').value.toUpperCase().trim();
+    const referralCode = (document.getElementById('registerReferral')?.value || '').toUpperCase().trim();
 
     // VALIDAZIONE 1: Maggiorenne
     const dataNascita = new Date(birthdate);

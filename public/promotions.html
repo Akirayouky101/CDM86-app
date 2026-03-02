@@ -1073,15 +1073,22 @@
             const refCode = params.get('ref');
             if (!refCode) return;
 
-            function tryOpenWithRef() {
-                // Aspetta che LoginModal sia pronto
-                if (!window.LoginModal || !window.LoginModal.selectUser) {
+            async function tryOpenWithRef() {
+                // Aspetta che LoginModal e Supabase siano pronti
+                if (!window.LoginModal || !window.LoginModal.selectUser || !window.supabaseClient) {
                     setTimeout(tryOpenWithRef, 200);
                     return;
                 }
-                // 1. Apri la modal utente (salta la domanda referral, vai diretto al form)
+
+                // Se l'utente è già loggato, non aprire la modal di registrazione
+                try {
+                    const { data: { session } } = await window.supabaseClient.auth.getSession();
+                    if (session) return; // già autenticato, non fare nulla
+                } catch(e) { /* ignora errori, tenta comunque */ }
+
+                // 1. Apri la modal "sei un utente?" → salta a "Sì, ho un codice"
                 LoginModal.selectUser();
-                // 2. Dopo un tick, simula "Sì, ho un codice" e pre-compila il campo
+                // 2. Simula "Sì, ho un codice" e pre-compila il campo referral
                 setTimeout(function() {
                     if (window.LoginModal && LoginModal.handleHasCode) {
                         LoginModal.handleHasCode();
