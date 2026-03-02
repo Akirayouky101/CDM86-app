@@ -782,6 +782,30 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="registerBirthdate">Data di nascita *</label>
+                            <input type="date" id="registerBirthdate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerSex">Sesso *</label>
+                            <select id="registerSex" required>
+                                <option value="">Seleziona...</option>
+                                <option value="M">Maschio</option>
+                                <option value="F">Femmina</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerCodiceFiscale">Codice Fiscale *</label>
+                            <input type="text" id="registerCodiceFiscale" required placeholder="RSSMRA80A01H501U" maxlength="16" class="uppercase-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerCAP">CAP *</label>
+                            <input type="text" id="registerCAP" required placeholder="00100" maxlength="5" pattern="[0-9]{5}">
+                        </div>
+
+                        <div class="form-group">
                             <label for="registerEmail">Email *</label>
                             <input type="email" id="registerEmail" required placeholder="mario.rossi@test.com">
                         </div>
