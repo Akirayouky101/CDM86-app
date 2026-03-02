@@ -304,9 +304,20 @@ body {
     margin-top: 14px;
     font-size: clamp(1.3rem, 3.5vw, 2rem);
     font-weight: 900;
-    color: #f97316;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+}
+
+.cta-promo-highlight {
+    color: #fbbf24;
+}
+
+.cta-promo-sub {
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: lowercase;
+    font-size: 0.85em;
+    letter-spacing: 0.01em;
 }
 
 .cta-block {
