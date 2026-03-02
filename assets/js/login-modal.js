@@ -532,32 +532,47 @@ async function handleLogin(event) {
 async function handleRegister(event) {
     event.preventDefault();
     
-    // Ensure Supabase is ready
-    const sb = await ensureSupabase();
-
-    const firstName = document.getElementById('registerFirstname').value.trim();
-    const lastName = document.getElementById('registerLastname').value.trim();
-    const birthdate = document.getElementById('registerBirthdate').value;
-    const sesso = document.getElementById('registerSex').value;
-    const codiceFiscale = document.getElementById('registerCodiceFiscale').value.toUpperCase().trim();
-    const cap = document.getElementById('registerCAP').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const referralCode = (document.getElementById('registerReferral')?.value || '').toUpperCase().trim();
-
-    // VALIDAZIONE 1: Maggiorenne
-    const dataNascita = new Date(birthdate);
-    if (!CodiceFiscale.isMaggiorenne(dataNascita)) {
-        showAlert('⚠️ Devi essere maggiorenne per registrarti alla piattaforma', 'error');
+    // 1. Validazione campi con messaggi inline
+    if (!validateRegisterForm()) {
+        // Scrolla al primo errore
+        const firstErr = document.querySelector('#registerForm .input-err');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return false;
     }
 
-    // VALIDAZIONE 2: Codice Fiscale
+    // Leggi valori
+    const firstName     = document.getElementById('registerFirstname').value.trim();
+    const lastName      = document.getElementById('registerLastname').value.trim();
+    const birthdate     = document.getElementById('registerBirthdate').value;
+    const sesso         = document.getElementById('registerSex').value;
+    const codiceFiscale = document.getElementById('registerCodiceFiscale').value.toUpperCase().trim();
+    const cap           = document.getElementById('registerCAP').value.trim();
+    const email         = document.getElementById('registerEmail').value.trim();
+    const password      = document.getElementById('registerPassword').value;
+    const referralCode  = (document.getElementById('registerReferral')?.value || '').toUpperCase().trim();
+
+    const dataNascita = new Date(birthdate);
+
+    // 2. Validazione CF incrociata con nome/cognome/data/sesso
     const cfValidation = CodiceFiscale.valida(codiceFiscale, firstName, lastName, dataNascita, sesso);
     if (!cfValidation.valid) {
-        showAlert(`❌ Codice Fiscale non valido: ${cfValidation.error}`, 'error');
+        const errEl = document.getElementById('err-cf');
+        const inputEl = document.getElementById('registerCodiceFiscale');
+        setFieldState(inputEl, errEl, cfValidation.error || 'Il codice fiscale non corrisponde ai dati inseriti');
+        inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return false;
     }
+
+    // 3. Mostra modale di conferma CF (se non già confermato)
+    if (!_cfConfirmed) {
+        showCFConfirmModal(codiceFiscale, firstName, lastName, birthdate, sesso);
+        return false;
+    }
+    // Reset flag per prossime registrazioni
+    _cfConfirmed = false;
+
+    // Ensure Supabase is ready
+    const sb = await ensureSupabase();
 
     const loading = document.getElementById('registerLoading');
     const form = document.getElementById('registerForm');
@@ -905,6 +920,196 @@ async function handleForgotPassword(event) {
     return false;
 }
 
+// ==========================================
+// VALIDAZIONE FORM REGISTRAZIONE
+// ==========================================
+
+function setFieldState(inputEl, errorEl, msg) {
+    if (!inputEl) return;
+    if (msg) {
+        inputEl.classList.remove('input-ok');
+        inputEl.classList.add('input-err');
+        if (errorEl) errorEl.textContent = msg;
+    } else {
+        inputEl.classList.remove('input-err');
+        inputEl.classList.add('input-ok');
+        if (errorEl) errorEl.textContent = '';
+    }
+}
+
+function clearFieldState(inputEl, errorEl) {
+    if (!inputEl) return;
+    inputEl.classList.remove('input-ok', 'input-err');
+    if (errorEl) errorEl.textContent = '';
+}
+
+function checkCFLive(input) {
+    const cf = input.value.toUpperCase().trim();
+    const statusEl = document.getElementById('cfStatus');
+    const errEl = document.getElementById('err-cf');
+    
+    input.value = cf; // forza maiuscolo
+
+    if (cf.length === 0) {
+        if (statusEl) statusEl.textContent = '';
+        input.classList.remove('input-ok', 'input-err');
+        if (errEl) errEl.textContent = '';
+        return;
+    }
+
+    if (cf.length < 16) {
+        if (statusEl) statusEl.textContent = '';
+        input.classList.remove('input-ok', 'input-err');
+        if (errEl) errEl.textContent = `${cf.length}/16 caratteri`;
+        return;
+    }
+
+    // CF completo: valida formato base (regex)
+    const cfRegex = /^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}$/;
+    if (!cfRegex.test(cf)) {
+        if (statusEl) statusEl.textContent = '❌';
+        setFieldState(input, errEl, 'Formato codice fiscale non valido');
+        return;
+    }
+
+    // Formato ok — valida completamente solo se abbiamo anche nome/cognome/data/sesso
+    const firstName = document.getElementById('registerFirstname')?.value.trim() || '';
+    const lastName = document.getElementById('registerLastname')?.value.trim() || '';
+    const birthdate = document.getElementById('registerBirthdate')?.value || '';
+    const sesso = document.getElementById('registerSex')?.value || '';
+
+    if (firstName && lastName && birthdate && sesso) {
+        const dataNascita = new Date(birthdate);
+        const validation = CodiceFiscale.valida(cf, firstName, lastName, dataNascita, sesso);
+        if (validation.valid) {
+            if (statusEl) statusEl.textContent = '✅';
+            setFieldState(input, errEl, null);
+        } else {
+            if (statusEl) statusEl.textContent = '❌';
+            setFieldState(input, errEl, validation.error || 'CF non corrisponde ai dati inseriti');
+        }
+    } else {
+        // Formato ok, dati incompleti per validazione incrociata
+        if (statusEl) statusEl.textContent = '✅';
+        setFieldState(input, errEl, null);
+    }
+}
+
+// Flag che indica che la modale CF è stata confermata
+let _cfConfirmed = false;
+
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
+
+function cfConfirmOk() {
+    _cfConfirmed = true;
+    const overlay = document.getElementById('cfConfirmOverlay');
+    if (overlay) overlay.classList.remove('active');
+    // Ri-sottometti il form
+    document.getElementById('registerForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
+function cfConfirmCancel() {
+    _cfConfirmed = false;
+    const overlay = document.getElementById('cfConfirmOverlay');
+    if (overlay) overlay.classList.remove('active');
+    document.getElementById('registerCodiceFiscale')?.focus();
+}
+
+function showCFConfirmModal(cf, firstName, lastName, birthdate, sesso) {
+    const overlay = document.getElementById('cfConfirmOverlay');
+    const dataEl = document.getElementById('cfConfirmData');
+    if (!overlay || !dataEl) return;
+
+    const sessoLabel = sesso === 'M' ? 'Maschio' : 'Femmina';
+    const dataFormatted = new Date(birthdate).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    dataEl.innerHTML = `
+        <div><strong>Nome:</strong> ${firstName} ${lastName}</div>
+        <div><strong>Data di nascita:</strong> ${dataFormatted}</div>
+        <div><strong>Sesso:</strong> ${sessoLabel}</div>
+        <div style="margin-top:10px"><strong>Codice Fiscale:</strong></div>
+        <div class="cf-code">${cf}</div>
+    `;
+    overlay.classList.add('active');
+}
+
+function validateRegisterForm() {
+    let valid = true;
+
+    const fields = [
+        { id: 'registerFirstname', err: 'err-firstname', msg: 'Inserisci il nome' },
+        { id: 'registerLastname',  err: 'err-lastname',  msg: 'Inserisci il cognome' },
+        { id: 'registerBirthdate', err: 'err-birthdate', msg: 'Inserisci la data di nascita' },
+        { id: 'registerSex',       err: 'err-sex',       msg: 'Seleziona il sesso' },
+        { id: 'registerCodiceFiscale', err: 'err-cf',    msg: 'Inserisci il codice fiscale' },
+        { id: 'registerCAP',       err: 'err-cap',       msg: 'Inserisci il CAP (5 cifre)' },
+        { id: 'registerEmail',     err: 'err-email',     msg: 'Inserisci un\'email valida' },
+        { id: 'registerPassword',  err: 'err-password',  msg: 'La password deve avere almeno 8 caratteri' },
+        { id: 'registerReferral',  err: 'err-referral',  msg: 'Inserisci il codice referral' },
+    ];
+
+    fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        const errEl = document.getElementById(f.err);
+        if (!el) return;
+
+        const val = el.value.trim();
+
+        if (!val) {
+            setFieldState(el, errEl, f.msg);
+            valid = false;
+            return;
+        }
+
+        // Validazioni specifiche
+        if (f.id === 'registerBirthdate') {
+            const dt = new Date(val);
+            if (!CodiceFiscale.isMaggiorenne(dt)) {
+                setFieldState(el, errEl, 'Devi essere maggiorenne per registrarti');
+                valid = false;
+                return;
+            }
+        }
+        if (f.id === 'registerCAP' && !/^\d{5}$/.test(val)) {
+            setFieldState(el, errEl, 'Il CAP deve essere di 5 cifre numeriche');
+            valid = false;
+            return;
+        }
+        if (f.id === 'registerEmail' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+            setFieldState(el, errEl, 'Inserisci un\'email valida (es. mario@esempio.it)');
+            valid = false;
+            return;
+        }
+        if (f.id === 'registerPassword' && val.length < 8) {
+            setFieldState(el, errEl, 'La password deve avere almeno 8 caratteri');
+            valid = false;
+            return;
+        }
+        if (f.id === 'registerCodiceFiscale') {
+            const cfRegex = /^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}$/;
+            if (!cfRegex.test(val)) {
+                setFieldState(el, errEl, 'Formato codice fiscale non valido');
+                valid = false;
+                return;
+            }
+        }
+
+        setFieldState(el, errEl, null);
+    });
+
+    return valid;
+}
+
 // Export per uso globale
 window.LoginModal = {
     // Alias per compatibilità
@@ -939,7 +1144,13 @@ window.LoginModal = {
     handleRegister,
     showForgotPassword,
     closeForgotPassword,
-    handleForgotPassword
+    handleForgotPassword,
+
+    // Registrazione
+    checkCFLive,
+    togglePwd,
+    cfConfirmOk,
+    cfConfirmCancel,
 };
 
 // ==========================================
