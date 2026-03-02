@@ -294,6 +294,21 @@ body {
     margin-bottom: var(--space-6);
 }
 
+.hero-section-unified .hero-subtitle--large {
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 700;
+    opacity: 1;
+}
+
+.cta-promo-badge {
+    margin-top: 12px;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-weight: 800;
+    color: #f97316;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
 .cta-block {
     margin-bottom: var(--space-12);
     padding: var(--space-8) 0;
