@@ -964,7 +964,7 @@ function checkCFLive(input) {
         return;
     }
 
-    // CF completo: valida formato base (regex)
+    // CF a 16 caratteri: valida formato base con regex
     const cfRegex = /^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}$/;
     if (!cfRegex.test(cf)) {
         if (statusEl) statusEl.textContent = '❌';
@@ -972,11 +972,11 @@ function checkCFLive(input) {
         return;
     }
 
-    // Formato ok — valida completamente solo se abbiamo anche nome/cognome/data/sesso
+    // Formato ok — valida incrociato con nome/cognome/data/sesso se disponibili
     const firstName = document.getElementById('registerFirstname')?.value.trim() || '';
-    const lastName = document.getElementById('registerLastname')?.value.trim() || '';
+    const lastName  = document.getElementById('registerLastname')?.value.trim() || '';
     const birthdate = document.getElementById('registerBirthdate')?.value || '';
-    const sesso = document.getElementById('registerSex')?.value || '';
+    const sesso     = document.getElementById('registerSex')?.value || '';
 
     if (firstName && lastName && birthdate && sesso) {
         const dataNascita = new Date(birthdate);
@@ -984,12 +984,14 @@ function checkCFLive(input) {
         if (validation.valid) {
             if (statusEl) statusEl.textContent = '✅';
             setFieldState(input, errEl, null);
+            // Apri automaticamente la modale di conferma
+            showCFConfirmModal(cf, firstName, lastName, birthdate, sesso);
         } else {
             if (statusEl) statusEl.textContent = '❌';
             setFieldState(input, errEl, validation.error || 'CF non corrisponde ai dati inseriti');
         }
     } else {
-        // Formato ok, dati incompleti per validazione incrociata
+        // Formato ok ma dati incompleti — indica OK e basta
         if (statusEl) statusEl.textContent = '✅';
         setFieldState(input, errEl, null);
     }
@@ -1473,74 +1475,32 @@ if (document.readyState === 'loading') {
 
 // Inizializza validazioni real-time del form
 function initFormValidations() {
-    // Validazione CF real-time
-    const cfInput = document.getElementById('registerCodiceFiscale');
+    const cfInput        = document.getElementById('registerCodiceFiscale');
     const birthdateInput = document.getElementById('registerBirthdate');
-    const sexInput = document.getElementById('registerSex');
+    const sexInput       = document.getElementById('registerSex');
     const firstNameInput = document.getElementById('registerFirstname');
-    const lastNameInput = document.getElementById('registerLastname');
-    const submitBtn = document.getElementById('registerSubmitBtn');
-    
-    if (cfInput) {
-        // Validazione quando cambiano i campi
-        const validateCF = () => {
-            const cf = cfInput.value.toUpperCase().trim();
-            const firstName = firstNameInput?.value.trim();
-            const lastName = lastNameInput?.value.trim();
-            const birthdate = birthdateInput?.value;
-            const sex = sexInput?.value;
-            
-            const cfError = document.getElementById('cfError');
-            const cfSuccess = document.getElementById('cfSuccess');
-            
-            if (!cf || cf.length < 16) {
-                cfError.style.display = 'none';
-                cfSuccess.style.display = 'none';
-                return;
-            }
-            
-            if (!firstName || !lastName || !birthdate || !sex) {
-                cfError.textContent = 'Compila prima nome, cognome, data di nascita e sesso';
-                cfError.style.display = 'block';
-                cfSuccess.style.display = 'none';
-                return;
-            }
-            
-            const dataNascita = new Date(birthdate);
-            const validation = CodiceFiscale.valida(cf, firstName, lastName, dataNascita, sex);
-            
-            if (validation.valid) {
-                cfError.style.display = 'none';
-                cfSuccess.style.display = 'block';
-                if (submitBtn) submitBtn.disabled = false;
-            } else {
-                cfError.textContent = validation.error;
-                cfError.style.display = 'block';
-                cfSuccess.style.display = 'none';
-                if (submitBtn) submitBtn.disabled = true;
-            }
-        };
-        
-        cfInput.addEventListener('input', validateCF);
-        birthdateInput?.addEventListener('change', validateCF);
-        sexInput?.addEventListener('change', validateCF);
-        firstNameInput?.addEventListener('input', validateCF);
-        lastNameInput?.addEventListener('input', validateCF);
-    }
-    
-    // Validazione maggiorenne
+    const lastNameInput  = document.getElementById('registerLastname');
+
+    if (!cfInput) return; // form non presente in questa pagina
+
+    // Aggiorna validazione CF ogni volta che cambiano i campi correlati
+    const triggerCFCheck = () => checkCFLive(cfInput);
+
+    cfInput.addEventListener('input', triggerCFCheck);
+    birthdateInput?.addEventListener('change', triggerCFCheck);
+    sexInput?.addEventListener('change', triggerCFCheck);
+    firstNameInput?.addEventListener('input', triggerCFCheck);
+    lastNameInput?.addEventListener('input', triggerCFCheck);
+
+    // Validazione maggiorenne in tempo reale sulla data
     if (birthdateInput) {
         birthdateInput.addEventListener('change', function() {
-            const dataNascita = new Date(this.value);
-            const birthdateError = document.getElementById('birthdateError');
-            
-            if (!CodiceFiscale.isMaggiorenne(dataNascita)) {
-                birthdateError.textContent = '⚠️ Devi essere maggiorenne (18+) per registrarti';
-                birthdateError.style.display = 'block';
-                if (submitBtn) submitBtn.disabled = true;
-            } else {
-                birthdateError.style.display = 'none';
-                if (submitBtn) submitBtn.disabled = false;
+            const errEl  = document.getElementById('err-birthdate');
+            const dt     = new Date(this.value);
+            if (this.value && !CodiceFiscale.isMaggiorenne(dt)) {
+                setFieldState(birthdateInput, errEl, 'Devi essere maggiorenne (18+) per registrarti');
+            } else if (this.value) {
+                setFieldState(birthdateInput, errEl, null);
             }
         });
     }
