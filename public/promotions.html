@@ -1065,7 +1065,45 @@
             initSupabase();
         }
     </script>
-    
+
+    <!-- AUTO-APRI REGISTRAZIONE SE URL CONTIENE ?ref= -->
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const refCode = params.get('ref');
+            if (!refCode) return;
+
+            function tryOpenWithRef() {
+                // Aspetta che LoginModal sia pronto
+                if (!window.LoginModal || !window.LoginModal.selectUser) {
+                    setTimeout(tryOpenWithRef, 200);
+                    return;
+                }
+                // 1. Apri la modal utente (salta la domanda referral, vai diretto al form)
+                LoginModal.selectUser();
+                // 2. Dopo un tick, simula "Sì, ho un codice" e pre-compila il campo
+                setTimeout(function() {
+                    if (window.LoginModal && LoginModal.handleHasCode) {
+                        LoginModal.handleHasCode();
+                    }
+                    setTimeout(function() {
+                        const input = document.getElementById('registerReferral');
+                        if (input) {
+                            input.value = refCode.toUpperCase();
+                            input.dispatchEvent(new Event('input'));
+                        }
+                    }, 150);
+                }, 150);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryOpenWithRef);
+            } else {
+                tryOpenWithRef();
+            }
+        })();
+    </script>
+
     <script>
         let currentUser = null;
         let favoriteIds = new Set(); // Global favorites cache

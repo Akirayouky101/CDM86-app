@@ -35,7 +35,7 @@ serve(async (req) => {
     console.log('✅ RESEND_API_KEY is configured');
 
     // Genera URL registrazione con codice referral
-    const registrationUrl = `https://cdm86-new.vercel.app/register.html?ref=${referralCode}`
+    const registrationUrl = `https://www.cdm86.com/public/promotions.html?ref=${referralCode}`
 
     // Template email
     const emailHtml = `
@@ -248,10 +248,11 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'User-Agent': 'CDM86-EdgeFunction/1.0'
       },
       body: JSON.stringify({
-        from: 'CDM86 <onboarding@resend.dev>',
+        from: 'CDM86 <noreply@cdm86.com>',
         to: [companyEmail],
         subject: `${referrerName} ti segnala CDM86! 🎯`,
         html: emailHtml
@@ -260,11 +261,12 @@ serve(async (req) => {
 
     const resendData = await resendResponse.json()
     
-    console.log('📨 Resend response:', resendData);
+    console.log('📨 Resend response status:', resendResponse.status);
+    console.log('📨 Resend response body:', JSON.stringify(resendData));
 
     if (!resendResponse.ok) {
-      console.error('❌ Resend API error:', resendData);
-      throw new Error(`Resend API error: ${JSON.stringify(resendData)}`)
+      console.error('❌ Resend API error:', JSON.stringify(resendData));
+      throw new Error(`Resend API error ${resendResponse.status}: ${JSON.stringify(resendData)}`)
     }
 
     console.log('✅ Email sent successfully! ID:', resendData.id);
