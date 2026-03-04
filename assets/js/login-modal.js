@@ -91,14 +91,12 @@ function showExistingUserLogin() {
 // ==========================================
 
 function showCompanyRequestModal() {
-    const overlay = document.getElementById('companyRequestModalOverlay');
-    if (overlay) {
-        overlay.classList.add('active');
-        companyHasReferral = false;
-        // Reset form
-        document.getElementById('companyReferralQuestion').style.display = 'block';
-        document.getElementById('companyFormWithReferral').classList.remove('active');
-        document.getElementById('companyFormWithoutReferral').classList.remove('active');
+    if (typeof CompanyWizard !== 'undefined') {
+        CompanyWizard.open();
+    } else {
+        // Fallback se CompanyWizard non è ancora disponibile
+        const overlay = document.getElementById('companyRequestModalOverlay');
+        if (overlay) overlay.classList.add('active');
     }
 }
 
