@@ -8,6 +8,18 @@
       "source": "/public/organization-dashboard.html",
       "destination": "/public/dashboard.html",
       "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cdm86.com" }],
+      "destination": "https://cdm86.it/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.cdm86.com" }],
+      "destination": "https://www.cdm86.it/:path*",
+      "permanent": true
     }
   ],
   "rewrites": [

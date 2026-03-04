@@ -86,7 +86,7 @@ serve(async (req) => {
                       </div>
 
                       <div style="text-align: center; margin: 40px 0 24px;">
-                        <a href="https://www.cdm86.com" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-size: 18px; font-weight: 700; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+                        <a href="https://www.cdm86.it" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-size: 18px; font-weight: 700; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
                           🚀 Inizia subito!
                         </a>
                       </div>

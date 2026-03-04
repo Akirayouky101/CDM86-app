@@ -202,17 +202,57 @@ serve(async (req) => {
           throw new Error(`Database error: ${dbError.message}`)
         }
       } else if (orgRecord) {
-        // È un'organizzazione - cancella dalla tabella organizations
-        console.log('🏢 Cancellazione organizzazione...')
+        // È un'organizzazione - cancella tutto in cascata
+        console.log('🏢 Cancellazione organizzazione e tutti i dati collegati...')
+        const orgId = orgRecord.id
+
+        // 1. Cancella organization_pages (card + landing)
+        const { error: pagesError } = await supabaseAdmin
+          .from('organization_pages')
+          .delete()
+          .eq('organization_id', orgId)
+        if (pagesError) console.error('⚠️ Errore cancellazione organization_pages:', pagesError)
+        else console.log('✅ organization_pages cancellate')
+
+        // 2. Cancella promotions collegate
+        const { error: promoError } = await supabaseAdmin
+          .from('promotions')
+          .delete()
+          .eq('organization_id', orgId)
+        if (promoError) console.error('⚠️ Errore cancellazione promotions:', promoError)
+        else console.log('✅ promotions cancellate')
+
+        // 3. Cancella commissioni collegate all'organizzazione
+        const { error: commOrgError } = await supabaseAdmin
+          .from('commissions')
+          .delete()
+          .eq('organization_id', orgId)
+        if (commOrgError) console.error('⚠️ Errore cancellazione commissioni org:', commOrgError)
+
+        // 4. Cancella referrals collegati
+        const { error: refError } = await supabaseAdmin
+          .from('referrals')
+          .delete()
+          .eq('referred_organization_id', orgId)
+        if (refError) console.error('⚠️ Errore cancellazione referrals org:', refError)
+
+        // 5. Cancella favorites collegati
+        const { error: favError } = await supabaseAdmin
+          .from('favorites')
+          .delete()
+          .eq('organization_id', orgId)
+        if (favError) console.error('⚠️ Errore cancellazione favorites org:', favError)
+
+        // 6. Infine cancella l'organizzazione
         const { error: orgError } = await supabaseAdmin
           .from('organizations')
           .delete()
-          .eq('auth_user_id', userId)
-        
+          .eq('id', orgId)
         if (orgError) {
           console.error('⚠️ Errore cancellazione organization:', orgError)
           throw new Error(`Database error: ${orgError.message}`)
         }
+        console.log('✅ Organizzazione e tutti i dati collegati cancellati')
       } else {
         console.log('⚠️ Nessun record trovato nel database, procedo solo con auth')
       }

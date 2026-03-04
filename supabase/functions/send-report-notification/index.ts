@@ -194,7 +194,7 @@ serve(async (req) => {
             <p style="margin-top: 30px;">Un nostro consulente vi contatterà a breve per maggiori informazioni.</p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://cdm86.com" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              <a href="https://cdm86.it" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                 Scopri CDM86
               </a>
             </div>

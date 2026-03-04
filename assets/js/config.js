@@ -20,7 +20,7 @@ const CDM86_CONFIG = {
     // Branding
     branding: {
         siteName: "CDM86",
-        domain: "cdm86.com",
+        domain: "cdm86.it",
         logoIcon: "fas fa-cube",
         tagline: "Dashboard Professionale"
     },

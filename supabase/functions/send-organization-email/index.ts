@@ -119,7 +119,7 @@ serve(async (req) => {
               <div class="referral-code">${orgData.referral_code_employees || 'N/A'}</div>
               <p style="margin: 10px 0; font-size: 14px; opacity: 0.9;">Condividi con i tuoi dipendenti e collaboratori</p>
               <div class="qr-code">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.com/register.html?ref=' + (orgData.referral_code_employees || ''))}" alt="QR Dipendenti" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.it/register.html?ref=' + (orgData.referral_code_employees || ''))}" alt="QR Dipendenti" />
               </div>
             </div>
             
@@ -128,7 +128,7 @@ serve(async (req) => {
               <div class="referral-code">${orgData.referral_code_external || 'N/A'}</div>
               <p style="margin: 10px 0; font-size: 14px; opacity: 0.9;">Condividi con clienti e partner esterni</p>
               <div class="qr-code">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.com/register.html?ref=' + (orgData.referral_code_external || ''))}" alt="QR Esterni" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://www.cdm86.it/register.html?ref=' + (orgData.referral_code_external || ''))}" alt="QR Esterni" />
               </div>
             </div>
             
@@ -140,7 +140,7 @@ serve(async (req) => {
             
             <p>⚠️ <strong>Importante:</strong> Al primo accesso ti consigliamo di cambiare la password temporanea con una tua personale.</p>
             
-            <a href="https://www.cdm86.com/login" class="button" style="color: white;">Accedi ora →</a>
+            <a href="https://www.cdm86.it/login" class="button" style="color: white;">Accedi ora →</a>
             
             <h3>📋 Prossimi passi:</h3>
             <ol>

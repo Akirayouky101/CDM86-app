@@ -36,8 +36,8 @@ serve(async (req) => {
 
     // Genera URL registrazione (con o senza codice referral)
     const registrationUrl = referralCode
-      ? `https://www.cdm86.com/register.html?ref=${referralCode}`
-      : `https://www.cdm86.com/register.html`
+      ? `https://www.cdm86.it/register.html?ref=${referralCode}`
+      : `https://www.cdm86.it/register.html`
 
     // Template email
     const emailHtml = `
@@ -233,7 +233,7 @@ serve(async (req) => {
           <div class="footer">
             <p>
               <strong>CDM86</strong> - La piattaforma di promozioni geolocalizzate<br>
-              <a href="https://cdm86-new.vercel.app">www.cdm86.com</a>
+              <a href="https://cdm86.it">www.cdm86.it</a>
             </p>
             <p style="margin-top: 20px; font-size: 12px;">
               Hai ricevuto questa email perché ${referrerName} ti ha segnalato su CDM86.<br>

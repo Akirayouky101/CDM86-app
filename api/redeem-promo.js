@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: 'Errore salvataggio token: ' + insertErr.message });
         }
 
-        const siteUrl = process.env.SITE_URL || 'https://www.cdm86.com';
+        const siteUrl = process.env.SITE_URL || 'https://www.cdm86.it';
         const validateUrl = `${siteUrl}/public/validate-qr.html?token=${token}`;
 
         return res.status(200).json({

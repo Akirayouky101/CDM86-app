@@ -117,7 +117,7 @@ serve(async (req) => {
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
               <h3 style="margin-top: 0; color: #667eea;">📞 I Nostri Contatti</h3>
               <p style="margin: 8px 0;"><strong>Email:</strong> info@cdm86.com</p>
-              <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.com</p>
+              <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.it</p>
             </div>
             
             <p>Restiamo a disposizione per qualsiasi informazione.</p>
@@ -242,7 +242,7 @@ serve(async (req) => {
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
                 <h3 style="margin-top: 0; color: #667eea;">📞 I Nostri Contatti</h3>
                 <p style="margin: 8px 0;"><strong>Email:</strong> info@cdm86.com</p>
-                <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.com</p>
+                <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.it</p>
               </div>
               
               <p>Non esitate a contattarci per qualsiasi informazione.</p>

@@ -1367,7 +1367,7 @@
                 // Update referral link (punta alla registrazione con codice precompilato)
                 const referralLinkEl = document.getElementById('referral-link');
                 if (referralLinkEl && user.referral_code) {
-                    const link = `https://cdm86.com?ref=${user.referral_code}`;
+                    const link = `https://cdm86.it?ref=${user.referral_code}`;
                     console.log('🔗 Setting referral link to:', link);
                     referralLinkEl.textContent = link;
                 } else {
@@ -2252,7 +2252,7 @@
             }
             
             // URL che punta direttamente alla registrazione con codice precompilato
-            const referralUrl = `https://www.cdm86.com/register.html?ref=${referralCode}`;
+            const referralUrl = `https://www.cdm86.it/register.html?ref=${referralCode}`;
             console.log('🔗 QR URL:', referralUrl);
             
             // Clear previous QR code
