@@ -93,8 +93,8 @@ serve(async (req) => {
 
                       <p style="margin: 32px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6; text-align: center;">
                         Hai domande? Contattaci a 
-                        <a href="mailto:support@cdm86.com" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                          support@cdm86.com
+                        <a href="mailto:web@cdm86.it" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                          web@cdm86.it
                         </a>
                       </p>
                     </td>
@@ -127,7 +127,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'CDM86 <noreply@cdm86.com>',
+        from: 'CDM86 <web@cdm86.it>',
         to: [email],
         subject: '🎉 Benvenuto su CDM86!',
         html,

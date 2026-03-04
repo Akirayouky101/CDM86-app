@@ -256,7 +256,7 @@ serve(async (req) => {
         'User-Agent': 'CDM86-EdgeFunction/1.0'
       },
       body: JSON.stringify({
-        from: 'CDM86 <noreply@cdm86.com>',
+        from: 'CDM86 <web@cdm86.it>',
         to: [companyEmail],
         subject: `${referrerName} ti segnala CDM86! 🎯`,
         html: emailHtml

@@ -167,7 +167,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'CDM86 <noreply@cdm86.com>',
+        from: 'CDM86 <web@cdm86.it>',
         to: [request.email],
         subject: '✅ Richiesta Codice Referral Ricevuta - CDM86',
         html: emailHtml,

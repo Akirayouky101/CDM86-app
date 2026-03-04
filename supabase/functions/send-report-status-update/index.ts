@@ -116,7 +116,7 @@ serve(async (req) => {
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
               <h3 style="margin-top: 0; color: #667eea;">📞 I Nostri Contatti</h3>
-              <p style="margin: 8px 0;"><strong>Email:</strong> info@cdm86.com</p>
+              <p style="margin: 8px 0;"><strong>Email:</strong> web@cdm86.it</p>
               <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.it</p>
             </div>
             
@@ -241,7 +241,7 @@ serve(async (req) => {
               
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
                 <h3 style="margin-top: 0; color: #667eea;">📞 I Nostri Contatti</h3>
-                <p style="margin: 8px 0;"><strong>Email:</strong> info@cdm86.com</p>
+                <p style="margin: 8px 0;"><strong>Email:</strong> web@cdm86.it</p>
                 <p style="margin: 8px 0;"><strong>Sito:</strong> www.cdm86.it</p>
               </div>
               
@@ -268,7 +268,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`
       },
       body: JSON.stringify({
-        from: 'CDM86 <noreply@cdm86.com>',
+        from: 'CDM86 <web@cdm86.it>',
         to: [userEmail],
         subject: userSubject,
         html: userEmailHtml
@@ -296,11 +296,11 @@ serve(async (req) => {
           'Authorization': `Bearer ${RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'CDM86 <noreply@cdm86.com>',
+          from: 'CDM86 <web@cdm86.it>',
           to: [report.email],
           subject: companySubject,
           html: companyEmailHtml,
-          reply_to: 'info@cdm86.com'
+          reply_to: 'web@cdm86.it'
         })
       })
 

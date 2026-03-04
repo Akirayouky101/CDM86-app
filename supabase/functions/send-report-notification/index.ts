@@ -129,7 +129,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`
       },
       body: JSON.stringify({
-        from: 'CDM86 <noreply@cdm86.com>',
+        from: 'CDM86 <web@cdm86.it>',
         to: [userEmail],
         subject: `✅ Segnalazione ricevuta - ${report.company_name}`,
         html: userEmailHtml
@@ -224,11 +224,11 @@ serve(async (req) => {
           'Authorization': `Bearer ${RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'CDM86 <noreply@cdm86.com>',
+          from: 'CDM86 <web@cdm86.it>',
           to: [report.email],
           subject: `🎯 ${report.company_name} - Nuova opportunità CDM86`,
           html: companyEmailHtml,
-          reply_to: 'info@cdm86.com'
+          reply_to: 'web@cdm86.it'
         })
       })
 
