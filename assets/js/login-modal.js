@@ -346,10 +346,13 @@ function updateWizardStep() {
         }
     }
 
-    // Update step content
-    document.querySelectorAll('.wizard-step-content').forEach(step => {
-        step.classList.remove('active');
-    });
+    // Update step content — solo quelli del referral wizard
+    const refWizard = document.getElementById('referralModalWizard');
+    if (refWizard) {
+        refWizard.querySelectorAll('.wizard-step-content').forEach(step => {
+            step.classList.remove('active');
+        });
+    }
 
     if (currentWizardStep === 4) {
         document.getElementById('refWizardStepSuccess').classList.add('active');
@@ -380,26 +383,26 @@ function wizardNext() {
 
     // Validazione
     if (currentWizardStep === 1) {
-        const firstname = document.getElementById('wizardFirstname').value.trim();
-        const lastname = document.getElementById('wizardLastname').value.trim();
+        const firstname = document.getElementById('refWizardFirstname').value.trim();
+        const lastname = document.getElementById('refWizardLastname').value.trim();
         if (!firstname || !lastname) {
             alert('Inserisci nome e cognome');
             return;
         }
     } else if (currentWizardStep === 2) {
-        const email = document.getElementById('wizardEmail').value.trim();
+        const email = document.getElementById('refWizardEmail').value.trim();
         if (!email || !email.includes('@')) {
             alert('Inserisci una email valida');
             return;
         }
     } else if (currentWizardStep === 3) {
         // Conferma e invia
-        const firstname = document.getElementById('wizardFirstname').value.trim();
-        const lastname = document.getElementById('wizardLastname').value.trim();
-        const email = document.getElementById('wizardEmail').value.trim();
+        const firstname = document.getElementById('refWizardFirstname').value.trim();
+        const lastname = document.getElementById('refWizardLastname').value.trim();
+        const email = document.getElementById('refWizardEmail').value.trim();
 
-        document.getElementById('wizardConfirmName').textContent = `${firstname} ${lastname}`;
-        document.getElementById('wizardConfirmEmail').textContent = email;
+        document.getElementById('refWizardConfirmName').textContent = `${firstname} ${lastname}`;
+        document.getElementById('refWizardConfirmEmail').textContent = email;
 
         // Invia richiesta
         sendReferralRequest(firstname, lastname, email);
@@ -413,11 +416,11 @@ function wizardNext() {
 
     // Se siamo allo step 3, popola i dati di conferma
     if (currentWizardStep === 3) {
-        const firstname = document.getElementById('wizardFirstname').value.trim();
-        const lastname = document.getElementById('wizardLastname').value.trim();
-        const email = document.getElementById('wizardEmail').value.trim();
-        document.getElementById('wizardConfirmName').textContent = `${firstname} ${lastname}`;
-        document.getElementById('wizardConfirmEmail').textContent = email;
+        const firstname = document.getElementById('refWizardFirstname').value.trim();
+        const lastname = document.getElementById('refWizardLastname').value.trim();
+        const email = document.getElementById('refWizardEmail').value.trim();
+        document.getElementById('refWizardConfirmName').textContent = `${firstname} ${lastname}`;
+        document.getElementById('refWizardConfirmEmail').textContent = email;
     }
 }
 
