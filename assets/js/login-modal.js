@@ -336,7 +336,7 @@ function showWizard() {
 function updateWizardStep() {
     // Update progress bar
     for (let i = 1; i <= 3; i++) {
-        const progress = document.getElementById(`wizardProgress${i}`);
+        const progress = document.getElementById(`refWizardProgress${i}`);
         if (progress) {
             if (i <= currentWizardStep) {
                 progress.classList.add('active');
@@ -352,16 +352,16 @@ function updateWizardStep() {
     });
 
     if (currentWizardStep === 4) {
-        document.getElementById('wizardStepSuccess').classList.add('active');
-        document.getElementById('wizardBtnBack').style.display = 'none';
-        document.getElementById('wizardBtnNext').textContent = 'Chiudi';
+        document.getElementById('refWizardStepSuccess').classList.add('active');
+        document.getElementById('refWizardBtnBack').style.display = 'none';
+        document.getElementById('refWizardBtnNext').textContent = 'Chiudi';
     } else {
-        const currentStep = document.getElementById(`wizardStep${currentWizardStep}`);
+        const currentStep = document.getElementById(`refWizardStep${currentWizardStep}`);
         if (currentStep) {
             currentStep.classList.add('active');
         }
-        document.getElementById('wizardBtnBack').style.display = currentWizardStep === 1 ? 'none' : 'block';
-        document.getElementById('wizardBtnNext').textContent = currentWizardStep === 3 ? 'Invia' : 'Avanti';
+        document.getElementById('refWizardBtnBack').style.display = currentWizardStep === 1 ? 'none' : 'block';
+        document.getElementById('refWizardBtnNext').textContent = currentWizardStep === 3 ? 'Invia' : 'Avanti';
     }
 }
 
