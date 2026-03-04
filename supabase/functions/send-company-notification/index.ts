@@ -23,8 +23,8 @@ serve(async (req) => {
 
     console.log('📧 Received notification request:', { companyEmail, companyName, referrerName, referralCode });
 
-    if (!companyEmail || !companyName || !referrerName || !referralCode) {
-      throw new Error('Missing required parameters')
+    if (!companyEmail || !companyName || !referrerName) {
+      throw new Error('Missing required parameters: companyEmail, companyName and referrerName are required')
     }
 
     if (!RESEND_API_KEY) {
@@ -34,8 +34,10 @@ serve(async (req) => {
 
     console.log('✅ RESEND_API_KEY is configured');
 
-    // Genera URL registrazione con codice referral
-    const registrationUrl = `https://www.cdm86.com/public/promotions.html?ref=${referralCode}`
+    // Genera URL registrazione (con o senza codice referral)
+    const registrationUrl = referralCode
+      ? `https://www.cdm86.com/register.html?ref=${referralCode}`
+      : `https://www.cdm86.com/register.html`
 
     // Template email
     const emailHtml = `
@@ -209,11 +211,11 @@ serve(async (req) => {
             </div>
             
             <div class="referral-info">
-              <div>Codice referral di <strong>${referrerName}</strong>:</div>
-              <div class="referral-code">${referralCode}</div>
+              <div>Segnalato da: <strong>${referrerName}</strong></div>
+              ${referralCode ? `<div class="referral-code">${referralCode}</div>
               <div style="font-size: 13px; color: #92400e; margin-top: 10px;">
                 Usa questo codice per associare il tuo account
-              </div>
+              </div>` : ''}
             </div>
             
             <a href="${registrationUrl}" class="cta-button">
@@ -221,8 +223,10 @@ serve(async (req) => {
             </a>
             
             <div class="message" style="margin-top: 30px; font-size: 14px; color: #6b7280; text-align: center;">
-              Registrandoti con questo codice, contribuirai al successo di ${referrerName} 
-              e entrerai a far parte della community CDM86!
+              ${referralCode
+                ? `Registrandoti con il codice di <strong>${referrerName}</strong>, contribuirai al suo successo e entrerai a far parte della community CDM86!`
+                : `Registrandoti su CDM86, entrerai a far parte della nostra community e potrai scoprire tutte le promozioni disponibili!`
+              }
             </div>
           </div>
           
