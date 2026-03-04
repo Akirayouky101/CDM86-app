@@ -323,6 +323,9 @@ function handleHasCode() {
         panel.classList.remove('active');
     });
     document.getElementById('registerPanel').classList.add('active');
+    // Inizializza/resetta wizard al primo step
+    _rwStep = 1;
+    rwUpdateUI('next');
 }
 
 function showWizard() {
@@ -526,275 +529,12 @@ async function handleLogin(event) {
 }
 
 // ==========================================
-// REGISTER HANDLER
+// REGISTER HANDLER (legacy — ora gestito da rwSubmit)
 // ==========================================
 
 async function handleRegister(event) {
-    event.preventDefault();
-    
-    // 1. Validazione campi con messaggi inline
-    if (!validateRegisterForm()) {
-        // Scrolla al primo errore
-        const firstErr = document.querySelector('#registerForm .input-err');
-        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return false;
-    }
-
-    // Leggi valori
-    const firstName     = document.getElementById('registerFirstname').value.trim();
-    const lastName      = document.getElementById('registerLastname').value.trim();
-    const birthdate     = document.getElementById('registerBirthdate').value;
-    const sesso         = document.getElementById('registerSex').value;
-    const codiceFiscale = document.getElementById('registerCodiceFiscale').value.toUpperCase().trim();
-    const cap           = document.getElementById('registerCAP').value.trim();
-    const email         = document.getElementById('registerEmail').value.trim();
-    const password      = document.getElementById('registerPassword').value;
-    const referralCode  = (document.getElementById('registerReferral')?.value || '').toUpperCase().trim();
-
-    const dataNascita = new Date(birthdate);
-
-    // 2. Validazione CF incrociata con nome/cognome/data/sesso
-    const cfValidation = CodiceFiscale.valida(codiceFiscale, firstName, lastName, dataNascita, sesso);
-    if (!cfValidation.valid) {
-        const errEl = document.getElementById('err-cf');
-        const inputEl = document.getElementById('registerCodiceFiscale');
-        setFieldState(inputEl, errEl, cfValidation.error || 'Il codice fiscale non corrisponde ai dati inseriti');
-        inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return false;
-    }
-
-    // 3. Mostra modale di conferma CF (se non già confermato)
-    if (!_cfConfirmed) {
-        showCFConfirmModal(codiceFiscale, firstName, lastName, birthdate, sesso);
-        return false;
-    }
-    // Reset flag per prossime registrazioni
-    _cfConfirmed = false;
-
-    // Ensure Supabase is ready
-    const sb = await ensureSupabase();
-
-    const loading = document.getElementById('registerLoading');
-    const form = document.getElementById('registerForm');
-
-    if (form && loading) {
-        form.style.display = 'none';
-        loading.classList.add('show');
-    }
-
-    try {
-        // Valida referral code PRIMA della registrazione
-        let referrer = null;
-        let referrerOrgId = null;
-        let referrerOrgName = null;
-        let referralType = null; // 👈 AGGIUNTO per tracciare il tipo
-
-        if (referralCode) {
-            console.log('🔍 Validazione codice referral:', referralCode);
-            
-            // STEP 1: Cerca in users
-            const { data: userData, error: userError } = await sb
-                .from('users')
-                .select('id, referral_code, first_name, last_name')
-                .eq('referral_code', referralCode)
-                .maybeSingle();
-
-            if (userError) {
-                console.error('❌ Errore query users:', userError);
-                throw new Error('ERRORE DATABASE: ' + userError.message);
-            }
-
-            if (userData) {
-                console.log('✅ Trovato in users:', userData);
-                referrer = userData;
-                referralType = 'user';
-            } else {
-                // STEP 2: Non trovato in users, cerca in organizations
-                console.log('🔍 Non trovato in users, cerco in organizations...');
-                
-                const { data: orgData, error: orgError } = await sb
-                    .from('organizations')
-                    .select('id, name, referral_code, referral_code_employees, referral_code_external')
-                    .or(`referral_code.eq.${referralCode},referral_code_employees.eq.${referralCode},referral_code_external.eq.${referralCode}`)
-                    .maybeSingle();
-
-                if (orgError) {
-                    console.error('❌ Errore query organizations:', orgError);
-                    throw new Error('ERRORE DATABASE: ' + orgError.message);
-                }
-
-                if (orgData) {
-                    console.log('✅ Trovato in organizations:', orgData);
-                    referrerOrgId = orgData.id;
-                    referrerOrgName = orgData.name;
-                    
-                    // Determina il tipo in base a quale codice è stato usato
-                    if (orgData.referral_code_employees === referralCode) {
-                        referralType = 'org_employee';
-                        console.log('� Tipo: Dipendente aziendale');
-                    } else if (orgData.referral_code_external === referralCode) {
-                        referralType = 'org_external';
-                        console.log('📋 Tipo: Membro esterno');
-                    } else {
-                        // referral_code generico (non usato per utenti, solo per org-to-org)
-                        referralType = 'org_employee'; // default
-                        console.log('📋 Tipo: Default employee');
-                    }
-                } else {
-                    console.error('❌ Codice non trovato in nessuna tabella');
-                    throw new Error('CODICE REFERRAL NON VALIDO!');
-                }
-            }
-        }
-
-        // Registra l'utente su Supabase Auth
-        const { data: authData, error: authError } = await sb.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    first_name: firstName,
-                    last_name: lastName,
-                    data_nascita: birthdate,
-                    sesso: sesso,
-                    codice_fiscale: codiceFiscale,
-                    cap_residenza: cap,
-                    referral_code_used: referralCode  // 👈 AGGIUNTO!
-                }
-            }
-        });
-
-        if (authError) throw authError;
-
-        // Aggiorna referred_by_id o organization_id tramite API (bypassa RLS)
-        if ((referrer || referrerOrgId) && authData.user) {
-            console.log('🔄 Inizio aggiornamento referral tramite API...');
-            console.log('👤 User ID:', authData.user.id);
-            console.log('🎯 Referrer:', referrer);
-            console.log('🏢 Org ID:', referrerOrgId);
-            
-            // Aspetta che il trigger crei l'entry in users
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Controlla se c'è una sessione (conferma email disabilitata)
-            const accessToken = authData.session?.access_token;
-            
-            if (!accessToken) {
-                console.warn('⚠️ Nessun access token - conferma email probabilmente richiesta');
-                console.log('📧 Referral verrà impostato dopo la conferma email');
-                // TODO: Salvare il referral in un campo temporaneo o in localStorage
-                // e applicarlo dopo la conferma email
-                showAlert('✅ Registrazione completata! Controlla la tua email per confermare e completare il referral.', 'success');
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/set-user-referral',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${accessToken}`
-                        },
-                        body: JSON.stringify({
-                            userId: authData.user.id,
-                            referrerId: referrer?.id || null,
-                            organizationId: referrerOrgId || null,
-                            referralType: referralType // 👈 AGGIUNTO
-                        })
-                    }
-                );
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    console.error('❌ ERRORE API set-referral:', result);
-                    throw new Error(result.error || 'Failed to set referral');
-                }
-
-                console.log('✅ Referral impostato via API:', result.data);
-                
-                // Aspetta un po' prima di verificare (il trigger potrebbe essere lento)
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Verifica finale (usa maybeSingle per evitare errori se non esiste ancora)
-                const { data: verifyUser, error: verifyError } = await sb
-                    .from('users')
-                    .select('id, referred_by_id, referred_by_organization_id')
-                    .eq('id', authData.user.id)
-                    .maybeSingle();
-                
-                if (verifyError) {
-                    console.error('❌ ERRORE verifica utente:', verifyError);
-                } else if (verifyUser) {
-                    console.log('🔍 VERIFICA utente dopo update:', verifyUser);
-                    if (referrer && !verifyUser.referred_by_id) {
-                        console.error('⚠️ PROBLEMA: referred_by_id è ancora NULL dopo UPDATE API!');
-                    } else if (referrer && verifyUser.referred_by_id) {
-                        console.log('🎉 SUCCESS! referred_by_id impostato correttamente!');
-                    }
-                    if (referrerOrgId && !verifyUser.referred_by_organization_id) {
-                        console.error('⚠️ PROBLEMA: referred_by_organization_id è ancora NULL dopo UPDATE API!');
-                    } else if (referrerOrgId && verifyUser.referred_by_organization_id) {
-                        console.log('🎉 SUCCESS! referred_by_organization_id impostato correttamente!');
-                    }
-                }
-
-            } catch (error) {
-                console.error('❌ Errore chiamata API set-referral:', error);
-            }
-        }
-
-        // Invia email di benvenuto personalizzata
-        try {
-            const referredByName = referrer 
-                ? `${referrer.first_name} ${referrer.last_name}` 
-                : (referrerOrgId ? referrerOrgName : null); // 👈 USATO referrerOrgName
-
-            await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-welcome-email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    firstName: firstName,
-                    lastName: lastName,
-                    referredBy: referredByName
-                })
-            });
-            console.log('✅ Email di benvenuto inviata');
-        } catch (error) {
-            console.error('⚠️ Errore invio email benvenuto (non critico):', error);
-        }
-
-        showAlert('✅ Registrazione completata! Benvenuto su CDM86!', 'success');
-
-        // Nascondi loading e mostra form
-        if (form && loading) {
-            loading.classList.remove('show');
-            form.style.display = 'block';
-        }
-
-        // Chiudi la modal e reindirizza
-        setTimeout(() => {
-            const modal = document.getElementById('loginModal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
-            
-            // Login automatico già fatto da signUp, vai a dashboard
-            window.location.href = '/public/promotions.html';
-        }, 1500);
-    } catch (error) {
-        console.error('Register error:', error);
-        showAlert(error.message || 'Errore durante la registrazione');
-        if (form && loading) {
-            form.style.display = 'block';
-            loading.classList.remove('show');
-        }
-    }
+    if (event) event.preventDefault();
+    return rwSubmit();
 }
 
 // ==========================================
@@ -947,8 +687,13 @@ function checkCFLive(input) {
     const cf = input.value.toUpperCase().trim();
     const statusEl = document.getElementById('cfStatus');
     const errEl = document.getElementById('err-cf');
-    
+    const nextBtn = document.getElementById('rwNextFromCF');
+    const cfOkBox = document.getElementById('rwCFOk');
+    const cfOkSummary = document.getElementById('rwCFOkSummary');
+
     input.value = cf; // forza maiuscolo
+    if (cfOkBox) cfOkBox.style.display = 'none';
+    if (nextBtn) nextBtn.disabled = true;
 
     if (cf.length === 0) {
         if (statusEl) statusEl.textContent = '';
@@ -984,17 +729,437 @@ function checkCFLive(input) {
         if (validation.valid) {
             if (statusEl) statusEl.textContent = '✅';
             setFieldState(input, errEl, null);
-            // Apri automaticamente la modale di conferma
-            showCFConfirmModal(cf, firstName, lastName, birthdate, sesso);
+            // Mostra box inline "verificato" e abilita Avanti
+            const sessoLabel = sesso === 'M' ? 'Maschio' : 'Femmina';
+            const dataFmt = new Date(birthdate).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+            if (cfOkSummary) cfOkSummary.textContent = `${firstName} ${lastName} · ${dataFmt} · ${sessoLabel}`;
+            if (cfOkBox) cfOkBox.style.display = 'flex';
+            if (nextBtn) nextBtn.disabled = false;
         } else {
             if (statusEl) statusEl.textContent = '❌';
             setFieldState(input, errEl, validation.error || 'CF non corrisponde ai dati inseriti');
         }
     } else {
-        // Formato ok ma dati incompleti — indica OK e basta
+        // Dati incompleti (non dovrebbe succedere nello step 3) — permetti avanzamento
         if (statusEl) statusEl.textContent = '✅';
         setFieldState(input, errEl, null);
+        if (nextBtn) nextBtn.disabled = false;
     }
+}
+
+// ==========================================
+// REGISTRATION WIZARD — 4 STEP
+// ==========================================
+
+let _rwStep = 1; // step corrente (1-4)
+const RW_TOTAL = 4;
+
+function rwUpdateUI(direction) {
+    // Aggiorna classi step
+    for (let i = 1; i <= RW_TOTAL; i++) {
+        const el = document.getElementById(`rwStep${i}`);
+        if (!el) continue;
+        el.classList.remove('active', 'slide-back');
+        if (i === _rwStep) {
+            el.classList.add('active');
+            if (direction === 'back') el.classList.add('slide-back');
+        }
+    }
+
+    // Aggiorna dot
+    for (let i = 1; i <= RW_TOTAL; i++) {
+        const dot = document.getElementById(`rwDot${i}`);
+        if (!dot) continue;
+        dot.classList.remove('active', 'done');
+        if (i < _rwStep)  dot.classList.add('done');
+        if (i === _rwStep) dot.classList.add('active');
+    }
+
+    // Aggiorna barra progresso (0% su step1, 33% su 2, 66% su 3, 100% su 4)
+    const fill = document.getElementById('rwProgressFill');
+    if (fill) fill.style.width = `${((_rwStep - 1) / (RW_TOTAL - 1)) * 100}%`;
+
+    // Aggiorna recap CF quando si arriva allo step 3
+    if (_rwStep === 3) {
+        rwUpdateCFRecap();
+        // Reset stato CF e bottone
+        const nextBtn = document.getElementById('rwNextFromCF');
+        if (nextBtn) nextBtn.disabled = true;
+        const cfOkBox = document.getElementById('rwCFOk');
+        if (cfOkBox) cfOkBox.style.display = 'none';
+        const statusEl = document.getElementById('cfStatus');
+        if (statusEl) statusEl.textContent = '';
+        const cfInput = document.getElementById('registerCodiceFiscale');
+        if (cfInput) {
+            cfInput.classList.remove('input-ok', 'input-err');
+        }
+        const errCF = document.getElementById('err-cf');
+        if (errCF) errCF.textContent = '';
+    }
+
+    // Aggiorna riepilogo allo step 4
+    if (_rwStep === 4) rwBuildSummary();
+}
+
+function rwUpdateCFRecap() {
+    const recap = document.getElementById('rwCFRecap');
+    if (!recap) return;
+    const fn  = document.getElementById('registerFirstname')?.value.trim() || '—';
+    const ln  = document.getElementById('registerLastname')?.value.trim() || '—';
+    const bd  = document.getElementById('registerBirthdate')?.value || '';
+    const sx  = document.getElementById('registerSex')?.value || '';
+    const com = document.getElementById('registerComune')?.value.trim() || '—';
+    const bdFmt = bd ? new Date(bd).toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' }) : '—';
+    const sxLabel = sx === 'M' ? 'Maschio' : sx === 'F' ? 'Femmina' : '—';
+    recap.innerHTML = `
+        <strong>Dati usati per il calcolo:</strong><br>
+        👤 ${fn} ${ln} &nbsp;·&nbsp; 📅 ${bdFmt} &nbsp;·&nbsp; ${sxLabel} &nbsp;·&nbsp; 📍 ${com}
+    `;
+}
+
+function rwBuildSummary() {
+    const summary = document.getElementById('rwSummary');
+    if (!summary) return;
+    const fn  = document.getElementById('registerFirstname')?.value.trim() || '';
+    const ln  = document.getElementById('registerLastname')?.value.trim() || '';
+    const bd  = document.getElementById('registerBirthdate')?.value || '';
+    const sx  = document.getElementById('registerSex')?.value || '';
+    const com = document.getElementById('registerComune')?.value.trim() || '';
+    const prov= document.getElementById('registerProvincia')?.value.trim() || '';
+    const cap = document.getElementById('registerCAP')?.value.trim() || '';
+    const cf  = document.getElementById('registerCodiceFiscale')?.value.trim() || '';
+    const ref = document.getElementById('registerReferral')?.value.trim() || '';
+    const bdFmt = bd ? new Date(bd).toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' }) : '';
+    const sxLabel = sx === 'M' ? 'Maschio' : sx === 'F' ? 'Femmina' : '';
+
+    const row = (label, value) => value
+        ? `<div class="rw-summary-row"><span>${label}</span><span>${value}</span></div>`
+        : '';
+
+    summary.innerHTML = `
+        ${row('Nome', `${fn} ${ln}`)}
+        ${row('Data nascita', bdFmt)}
+        ${row('Sesso', sxLabel)}
+        ${row('Residenza', `${com} (${prov}) ${cap}`)}
+        ${row('Codice fiscale', cf)}
+        ${row('Referral', ref)}
+    `;
+}
+
+function validateRwStep(step) {
+    let valid = true;
+
+    const setErr = (id, errId, msg) => {
+        const el  = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!el) return;
+        if (!el.value.trim()) {
+            setFieldState(el, err, msg);
+            valid = false;
+        } else {
+            setFieldState(el, err, null);
+        }
+    };
+
+    if (step === 1) {
+        setErr('registerFirstname', 'err-firstname', 'Inserisci il nome');
+        setErr('registerLastname',  'err-lastname',  'Inserisci il cognome');
+        setErr('registerSex',       'err-sex',       'Seleziona il sesso');
+
+        // Birthdate: obbligatoria + maggiorenne
+        const bdEl  = document.getElementById('registerBirthdate');
+        const bdErr = document.getElementById('err-birthdate');
+        if (!bdEl?.value) {
+            setFieldState(bdEl, bdErr, 'Inserisci la data di nascita');
+            valid = false;
+        } else {
+            const dt = new Date(bdEl.value);
+            if (!CodiceFiscale.isMaggiorenne(dt)) {
+                setFieldState(bdEl, bdErr, 'Devi essere maggiorenne per registrarti');
+                valid = false;
+            } else {
+                setFieldState(bdEl, bdErr, null);
+            }
+        }
+    }
+
+    if (step === 2) {
+        setErr('registerComune',    'err-comune',    'Inserisci il comune di residenza');
+        setErr('registerProvincia', 'err-provincia', 'Inserisci la provincia (2 lettere)');
+
+        // CAP: 5 cifre
+        const capEl  = document.getElementById('registerCAP');
+        const capErr = document.getElementById('err-cap');
+        if (!capEl?.value.trim()) {
+            setFieldState(capEl, capErr, 'Inserisci il CAP (5 cifre)');
+            valid = false;
+        } else if (!/^\d{5}$/.test(capEl.value.trim())) {
+            setFieldState(capEl, capErr, 'Il CAP deve essere di 5 cifre numeriche');
+            valid = false;
+        } else {
+            setFieldState(capEl, capErr, null);
+        }
+
+        // Provincia: 2 lettere
+        const provEl  = document.getElementById('registerProvincia');
+        const provErr = document.getElementById('err-provincia');
+        if (provEl && provEl.value.trim() && provEl.value.trim().length !== 2) {
+            setFieldState(provEl, provErr, 'La provincia deve avere 2 lettere (es. RM)');
+            valid = false;
+        }
+    }
+
+    if (step === 3) {
+        // CF già validato in tempo reale — controlla solo che sia presente e valido
+        const cfEl  = document.getElementById('registerCodiceFiscale');
+        const cfErr = document.getElementById('err-cf');
+        const cf = cfEl?.value.trim() || '';
+        const cfRegex = /^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}$/;
+        if (!cf) {
+            setFieldState(cfEl, cfErr, 'Inserisci il codice fiscale');
+            valid = false;
+        } else if (!cfRegex.test(cf)) {
+            setFieldState(cfEl, cfErr, 'Formato codice fiscale non valido');
+            valid = false;
+        } else {
+            // Valida incrociato
+            const fn = document.getElementById('registerFirstname')?.value.trim() || '';
+            const ln = document.getElementById('registerLastname')?.value.trim() || '';
+            const bd = document.getElementById('registerBirthdate')?.value || '';
+            const sx = document.getElementById('registerSex')?.value || '';
+            if (fn && ln && bd && sx) {
+                const res = CodiceFiscale.valida(cf, fn, ln, new Date(bd), sx);
+                if (!res.valid) {
+                    setFieldState(cfEl, cfErr, res.error || 'CF non corrisponde ai dati inseriti');
+                    valid = false;
+                } else {
+                    setFieldState(cfEl, cfErr, null);
+                }
+            }
+        }
+    }
+
+    if (step === 4) {
+        // Email
+        const emailEl  = document.getElementById('registerEmail');
+        const emailErr = document.getElementById('err-email');
+        if (!emailEl?.value.trim()) {
+            setFieldState(emailEl, emailErr, 'Inserisci la tua email');
+            valid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+            setFieldState(emailEl, emailErr, 'Inserisci un\'email valida (es. mario@esempio.it)');
+            valid = false;
+        } else {
+            setFieldState(emailEl, emailErr, null);
+        }
+
+        // Password
+        const pwEl  = document.getElementById('registerPassword');
+        const pwErr = document.getElementById('err-password');
+        if (!pwEl?.value) {
+            setFieldState(pwEl, pwErr, 'Inserisci una password');
+            valid = false;
+        } else if (pwEl.value.length < 8) {
+            setFieldState(pwEl, pwErr, 'La password deve avere almeno 8 caratteri');
+            valid = false;
+        } else {
+            setFieldState(pwEl, pwErr, null);
+        }
+
+        // Referral
+        setErr('registerReferral', 'err-referral', 'Inserisci il codice referral');
+    }
+
+    return valid;
+}
+
+function rwNext() {
+    if (!validateRwStep(_rwStep)) {
+        // Scrolla al primo errore nel step corrente
+        const firstErr = document.querySelector(`#rwStep${_rwStep} .input-err`);
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    if (_rwStep < RW_TOTAL) {
+        _rwStep++;
+        rwUpdateUI('next');
+    }
+}
+
+function rwBack() {
+    if (_rwStep > 1) {
+        _rwStep--;
+        rwUpdateUI('back');
+    }
+}
+
+async function rwSubmit() {
+    if (!validateRwStep(4)) return;
+
+    // Leggi tutti i valori
+    const firstName     = document.getElementById('registerFirstname').value.trim();
+    const lastName      = document.getElementById('registerLastname').value.trim();
+    const birthdate     = document.getElementById('registerBirthdate').value;
+    const sesso         = document.getElementById('registerSex').value;
+    const codiceFiscale = document.getElementById('registerCodiceFiscale').value.toUpperCase().trim();
+    const comune        = document.getElementById('registerComune').value.trim();
+    const provincia     = document.getElementById('registerProvincia').value.toUpperCase().trim();
+    const cap           = document.getElementById('registerCAP').value.trim();
+    const telefono      = document.getElementById('registerTelefono')?.value.trim() || '';
+    const email         = document.getElementById('registerEmail').value.trim();
+    const password      = document.getElementById('registerPassword').value;
+    const referralCode  = (document.getElementById('registerReferral')?.value || '').toUpperCase().trim();
+
+    const dataNascita = new Date(birthdate);
+
+    // Valida CF incrociato
+    const cfValidation = CodiceFiscale.valida(codiceFiscale, firstName, lastName, dataNascita, sesso);
+    if (!cfValidation.valid) {
+        // Rimanda allo step 3
+        _rwStep = 3;
+        rwUpdateUI('back');
+        const cfEl  = document.getElementById('registerCodiceFiscale');
+        const cfErr = document.getElementById('err-cf');
+        setFieldState(cfEl, cfErr, cfValidation.error || 'CF non corrisponde ai dati inseriti');
+        return;
+    }
+
+    // Mostra loading
+    const loading = document.getElementById('registerLoading');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    if (loading) loading.classList.add('show');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const sb = await ensureSupabase();
+
+    try {
+        // Valida referral code
+        let referrer = null;
+        let referrerOrgId = null;
+        let referrerOrgName = null;
+        let referralType = null;
+
+        if (referralCode) {
+            // Cerca in users
+            const { data: userData, error: userError } = await sb
+                .from('users')
+                .select('id, referral_code, first_name, last_name')
+                .eq('referral_code', referralCode)
+                .maybeSingle();
+            if (userError) throw new Error('ERRORE DATABASE: ' + userError.message);
+
+            if (userData) {
+                referrer = userData;
+                referralType = 'user';
+            } else {
+                // Cerca in organizations
+                const { data: orgData, error: orgError } = await sb
+                    .from('organizations')
+                    .select('id, name, referral_code, referral_code_employees, referral_code_external')
+                    .or(`referral_code.eq.${referralCode},referral_code_employees.eq.${referralCode},referral_code_external.eq.${referralCode}`)
+                    .maybeSingle();
+                if (orgError) throw new Error('ERRORE DATABASE: ' + orgError.message);
+
+                if (orgData) {
+                    referrerOrgId = orgData.id;
+                    referrerOrgName = orgData.name;
+                    referralType = orgData.referral_code_employees === referralCode ? 'org_employee'
+                                 : orgData.referral_code_external  === referralCode ? 'org_external'
+                                 : 'org_employee';
+                } else {
+                    throw new Error('CODICE REFERRAL NON VALIDO!');
+                }
+            }
+        }
+
+        // Registra su Supabase Auth
+        const { data: authData, error: authError } = await sb.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    first_name:          firstName,
+                    last_name:           lastName,
+                    data_nascita:        birthdate,
+                    sesso,
+                    codice_fiscale:      codiceFiscale,
+                    cap_residenza:       cap,
+                    comune_residenza:    comune,
+                    provincia_residenza: provincia,
+                    telefono:            telefono,
+                    referral_code_used:  referralCode,
+                }
+            }
+        });
+        if (authError) throw authError;
+
+        // Imposta referral via API
+        if ((referrer || referrerOrgId) && authData.user) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const accessToken = authData.session?.access_token;
+            if (accessToken) {
+                try {
+                    const response = await fetch(
+                        'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/set-user-referral',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${accessToken}`
+                            },
+                            body: JSON.stringify({
+                                userId:         authData.user.id,
+                                referrerId:     referrer?.id || null,
+                                organizationId: referrerOrgId || null,
+                                referralType
+                            })
+                        }
+                    );
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Failed to set referral');
+                    console.log('✅ Referral impostato:', result.data);
+                } catch (err) {
+                    console.error('⚠️ Errore set-referral (non critico):', err);
+                }
+            } else {
+                console.warn('⚠️ Nessun access token — conferma email richiesta');
+            }
+        }
+
+        // Invia email di benvenuto
+        try {
+            const referredByName = referrer
+                ? `${referrer.first_name} ${referrer.last_name}`
+                : (referrerOrgName || null);
+            await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-welcome-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, firstName, lastName, referredBy: referredByName })
+            });
+        } catch (err) {
+            console.error('⚠️ Email benvenuto non inviata (non critico):', err);
+        }
+
+        showAlert('✅ Registrazione completata! Benvenuto su CDM86!', 'success');
+
+        setTimeout(() => {
+            const modal = document.getElementById('loginModal');
+            if (modal) modal.classList.remove('show');
+            window.location.href = '/public/promotions.html';
+        }, 1500);
+
+    } catch (error) {
+        console.error('❌ Errore registrazione:', error);
+        showAlert(error.message || 'Errore durante la registrazione');
+        if (loading) loading.classList.remove('show');
+        if (submitBtn) submitBtn.disabled = false;
+    }
+}
+
+// Chiamato quando il tab "Registrati" diventa visibile: resetta wizard allo step 1
+function rwReset() {
+    _rwStep = 1;
+    rwUpdateUI('next');
 }
 
 // Flag che indica che la modale CF è stata confermata
@@ -1153,6 +1318,12 @@ window.LoginModal = {
     togglePwd,
     cfConfirmOk,
     cfConfirmCancel,
+
+    // Wizard registrazione
+    rwNext,
+    rwBack,
+    rwSubmit,
+    rwReset,
 };
 
 // ==========================================

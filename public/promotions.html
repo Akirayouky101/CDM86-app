@@ -762,40 +762,56 @@
                     </div>
                 </div>
 
-                <!-- REGISTER PANEL -->
+                <!-- REGISTER PANEL — WIZARD 4 STEP -->
                 <div id="registerPanel" class="login-form-panel">
-                    <div class="referral-note">
-                        <strong>⚠️ Codice Referral Obbligatorio</strong>
-                        Devi avere un codice referral per registrarti!<br>
-                        <small>Usa <code>ADMIN001</code> per testare</small>
+
+                    <!-- Progress bar -->
+                    <div class="rw-progress">
+                        <div class="rw-progress-track">
+                            <div class="rw-progress-fill" id="rwProgressFill"></div>
+                        </div>
+                        <div class="rw-steps-dots">
+                            <div class="rw-dot active" id="rwDot1"><span>1</span></div>
+                            <div class="rw-dot" id="rwDot2"><span>2</span></div>
+                            <div class="rw-dot" id="rwDot3"><span>3</span></div>
+                            <div class="rw-dot" id="rwDot4"><span>4</span></div>
+                        </div>
+                        <div class="rw-step-labels">
+                            <span>Chi sei</span>
+                            <span>Residenza</span>
+                            <span>Cod. Fiscale</span>
+                            <span>Account</span>
+                        </div>
                     </div>
 
-                    <form id="registerForm" onsubmit="return LoginModal.handleRegister(event)" novalidate>
-
-                        <!-- Riga 1: Nome + Cognome -->
+                    <!-- STEP 1: Chi sei -->
+                    <div class="rw-step active" id="rwStep1">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">👤</div>
+                            <h3>Chi sei?</h3>
+                            <p>Dati anagrafici di base</p>
+                        </div>
                         <div class="reg-row">
                             <div class="form-group">
                                 <label for="registerFirstname">Nome <span class="req">*</span></label>
-                                <input type="text" id="registerFirstname" required placeholder="Mario" autocomplete="given-name">
+                                <input type="text" id="registerFirstname" placeholder="Mario" autocomplete="given-name">
                                 <span class="field-error" id="err-firstname"></span>
                             </div>
                             <div class="form-group">
                                 <label for="registerLastname">Cognome <span class="req">*</span></label>
-                                <input type="text" id="registerLastname" required placeholder="Rossi" autocomplete="family-name">
+                                <input type="text" id="registerLastname" placeholder="Rossi" autocomplete="family-name">
                                 <span class="field-error" id="err-lastname"></span>
                             </div>
                         </div>
-
-                        <!-- Riga 2: Data nascita + Sesso -->
                         <div class="reg-row">
                             <div class="form-group">
                                 <label for="registerBirthdate">Data di nascita <span class="req">*</span></label>
-                                <input type="date" id="registerBirthdate" required autocomplete="bday">
+                                <input type="date" id="registerBirthdate" autocomplete="bday">
                                 <span class="field-error" id="err-birthdate"></span>
                             </div>
                             <div class="form-group">
                                 <label for="registerSex">Sesso <span class="req">*</span></label>
-                                <select id="registerSex" required class="reg-select">
+                                <select id="registerSex" class="reg-select">
                                     <option value="">Seleziona...</option>
                                     <option value="M">Maschio</option>
                                     <option value="F">Femmina</option>
@@ -803,64 +819,106 @@
                                 <span class="field-error" id="err-sex"></span>
                             </div>
                         </div>
+                        <div class="rw-actions">
+                            <button type="button" class="rw-btn-next" onclick="LoginModal.rwNext()">Avanti →</button>
+                        </div>
+                    </div>
 
-                        <!-- Codice Fiscale -->
+                    <!-- STEP 2: Residenza -->
+                    <div class="rw-step" id="rwStep2">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">📍</div>
+                            <h3>Dove abiti?</h3>
+                            <p>Dati di residenza</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerComune">Comune di residenza <span class="req">*</span></label>
+                            <input type="text" id="registerComune" placeholder="Roma" autocomplete="address-level2">
+                            <span class="field-error" id="err-comune"></span>
+                        </div>
+                        <div class="reg-row">
+                            <div class="form-group">
+                                <label for="registerProvincia">Provincia <span class="req">*</span></label>
+                                <input type="text" id="registerProvincia" placeholder="RM" maxlength="2" class="uppercase-input" autocomplete="address-level1">
+                                <span class="field-error" id="err-provincia"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerCAP">CAP <span class="req">*</span></label>
+                                <input type="text" id="registerCAP" placeholder="00100" maxlength="5" inputmode="numeric" autocomplete="postal-code">
+                                <span class="field-error" id="err-cap"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerTelefono">Telefono <span class="req-opt">(opzionale)</span></label>
+                            <input type="tel" id="registerTelefono" placeholder="+39 333 1234567" autocomplete="tel">
+                        </div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-next" onclick="LoginModal.rwNext()">Avanti →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Codice Fiscale -->
+                    <div class="rw-step" id="rwStep3">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">🪪</div>
+                            <h3>Codice Fiscale</h3>
+                            <p>Necessario per verificare la tua identità</p>
+                        </div>
                         <div class="form-group">
                             <label for="registerCodiceFiscale">Codice Fiscale <span class="req">*</span></label>
                             <div class="cf-input-wrap">
-                                <input type="text" id="registerCodiceFiscale" required placeholder="RSSMRA80A01H501U" maxlength="16" class="uppercase-input" autocomplete="off" oninput="LoginModal.checkCFLive(this)">
+                                <input type="text" id="registerCodiceFiscale" placeholder="RSSMRA80A01H501U" maxlength="16" class="uppercase-input" autocomplete="off" oninput="LoginModal.checkCFLive(this)">
                                 <span class="cf-status" id="cfStatus"></span>
                             </div>
                             <span class="field-error" id="err-cf"></span>
                         </div>
-
-                        <!-- CAP -->
-                        <div class="form-group">
-                            <label for="registerCAP">CAP di residenza <span class="req">*</span></label>
-                            <input type="text" id="registerCAP" required placeholder="00100" maxlength="5" inputmode="numeric" pattern="[0-9]{5}" autocomplete="postal-code">
-                            <span class="field-error" id="err-cap"></span>
+                        <!-- Riepilogo dati usati per calcolo CF -->
+                        <div class="rw-cf-recap" id="rwCFRecap"></div>
+                        <!-- Box conferma CF (appare inline quando valido) -->
+                        <div class="rw-cf-ok" id="rwCFOk" style="display:none">
+                            <div class="rw-cf-ok-icon">✅</div>
+                            <div class="rw-cf-ok-text">
+                                <strong>Codice fiscale verificato!</strong>
+                                <span id="rwCFOkSummary"></span>
+                            </div>
                         </div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-next" id="rwNextFromCF" onclick="LoginModal.rwNext()" disabled>Avanti →</button>
+                        </div>
+                    </div>
 
-                        <!-- Email -->
+                    <!-- STEP 4: Account -->
+                    <div class="rw-step" id="rwStep4">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">🔐</div>
+                            <h3>Crea il tuo account</h3>
+                            <p>Credenziali di accesso</p>
+                        </div>
                         <div class="form-group">
                             <label for="registerEmail">Email <span class="req">*</span></label>
-                            <input type="email" id="registerEmail" required placeholder="mario.rossi@test.com" autocomplete="email">
+                            <input type="email" id="registerEmail" placeholder="mario.rossi@example.com" autocomplete="email">
                             <span class="field-error" id="err-email"></span>
                         </div>
-
-                        <!-- Password -->
                         <div class="form-group reg-password-wrap">
                             <label for="registerPassword">Password <span class="req">*</span></label>
-                            <input type="password" id="registerPassword" required placeholder="Minimo 8 caratteri" minlength="8" autocomplete="new-password">
-                            <button type="button" class="reg-eye-btn" onclick="LoginModal.togglePwd('registerPassword', this)" aria-label="Mostra/nascondi password">👁️</button>
+                            <input type="password" id="registerPassword" placeholder="Minimo 8 caratteri" minlength="8" autocomplete="new-password">
+                            <button type="button" class="reg-eye-btn" onclick="LoginModal.togglePwd('registerPassword', this)" aria-label="Mostra password">👁️</button>
                             <span class="field-error" id="err-password"></span>
                         </div>
-
-                        <!-- Codice Referral -->
                         <div class="form-group">
                             <label for="registerReferral">Codice Referral <span class="req">*</span> 🎫</label>
-                            <input type="text" id="registerReferral" required placeholder="MARIO123" class="uppercase-input" autocomplete="off">
+                            <input type="text" id="registerReferral" placeholder="MARIO123" class="uppercase-input" autocomplete="off">
                             <span class="field-error" id="err-referral"></span>
                         </div>
-
-                        <button type="submit" class="form-btn form-btn-primary" id="registerSubmitBtn">
-                            Crea account
-                        </button>
-
-                    </form>
-
-                    <!-- Modale conferma Codice Fiscale -->
-                    <div class="cf-confirm-overlay" id="cfConfirmOverlay">
-                        <div class="cf-confirm-modal">
-                            <div class="cf-confirm-icon">🪪</div>
-                            <h3>Conferma Codice Fiscale</h3>
-                            <p>Il tuo codice fiscale è valido e corrisponde ai dati inseriti:</p>
-                            <div class="cf-confirm-data" id="cfConfirmData"></div>
-                            <p class="cf-confirm-note">Assicurati che i dati siano corretti prima di procedere.</p>
-                            <div class="cf-confirm-actions">
-                                <button class="cf-btn-cancel" onclick="LoginModal.cfConfirmCancel()">✏️ Modifica</button>
-                                <button class="cf-btn-ok" onclick="LoginModal.cfConfirmOk()">✅ Conferma e Registrati</button>
-                            </div>
+                        <!-- Riepilogo finale prima di inviare -->
+                        <div class="rw-summary" id="rwSummary"></div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-submit" id="registerSubmitBtn" onclick="LoginModal.rwSubmit()">
+                                🚀 Crea Account
+                            </button>
                         </div>
                     </div>
 
@@ -868,6 +926,7 @@
                         <div class="form-spinner"></div>
                         <p>Registrazione in corso...</p>
                     </div>
+
                 </div>
             </div>
         </div>
