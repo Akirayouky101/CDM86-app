@@ -137,6 +137,15 @@ serve(async (req) => {
         // È un utente normale - cancella prima i dati collegati, poi l'utente
         console.log('👤 Cancellazione utente normale...')
 
+        // Azzera referred_by_id su utenti che hanno questo utente come referrer
+        // (evita violazione foreign key users_referred_by_id_fkey)
+        const { error: refByErr } = await supabaseAdmin
+          .from('users')
+          .update({ referred_by_id: null })
+          .eq('referred_by_id', userRecord.id)
+        if (refByErr) console.error('⚠️ referred_by_id nullify:', refByErr.message)
+        else console.log('✅ referred_by_id azzerati')
+
         // Cancella referrals collegati (non bloccante)
         const { error: refErr1 } = await supabaseAdmin.from('referrals').delete().eq('referred_user_id', userRecord.id)
         if (refErr1) console.error('⚠️ referrals referred_user_id:', refErr1.message)
