@@ -33,6 +33,12 @@ serve(async (req) => {
       throw new Error('userId è richiesto')
     }
 
+    // Validazione UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(userId)) {
+      throw new Error(`userId non è un UUID valido: "${userId}"`)
+    }
+
     console.log(`🗑️ Eliminazione utente: ${userId}`)
 
     // Verifica che l'utente richiedente sia admin
@@ -64,9 +70,14 @@ serve(async (req) => {
     
     const { data: userRecord } = await supabaseAdmin
       .from('users')
-      .select('id, auth_user_id')
+      .select('id, auth_user_id, role')
       .eq('auth_user_id', userId)
       .single()
+
+    // Blocca cancellazione admin
+    if (userRecord?.role === 'admin') {
+      throw new Error('Non è possibile eliminare un account admin')
+    }
     
     const { data: orgRecord } = await supabaseAdmin
       .from('organizations')

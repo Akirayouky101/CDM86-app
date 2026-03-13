@@ -3352,8 +3352,8 @@
         };
 
         // Delete User
-        window.openDeleteUserModal = function(userId, email) {
-            pendingDeleteUser = { id: userId, email: email };
+        window.openDeleteUserModal = function(authUserId, email) {
+            pendingDeleteUser = { authUserId: authUserId, email: email };
             document.getElementById('deleteUserEmail').textContent = email;
             openModal('deleteUserModal');
         };
@@ -3374,7 +3374,7 @@
                             'Authorization': `Bearer ${session.access_token}`
                         },
                         body: JSON.stringify({
-                            userId: pendingDeleteUser.id
+                            userId: pendingDeleteUser.authUserId
                         })
                     }
                 );
