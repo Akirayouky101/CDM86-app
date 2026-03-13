@@ -3568,7 +3568,15 @@
                 // Generate codes
                 const referralCode = generateReferralCode();
                 const referralCodeExternal = `${referralCode}_EXT`;
-                const contractCode = await getNextContractCode();
+
+                // Usa la RPC del DB per il codice contratto progressivo (es. CTR-2026-0001)
+                let contractCode;
+                try {
+                    const { data: rpcCode } = await window.supabaseClient.rpc('generate_contract_code');
+                    contractCode = rpcCode || `ORG${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+                } catch (e) {
+                    contractCode = await getNextContractCode();
+                }
                 const generatedPassword = generatePassword();
 
                 // STEP 1: Crea utente auth via Edge Function (service role)
@@ -3629,6 +3637,27 @@
                 }
 
                 console.log('✅ Organizzazione creata e linkata:', org.id);
+
+                // Salva contratto automaticamente nella tabella contracts
+                const contractStartDate = new Date().toISOString().split('T')[0];
+                const contractEndDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
+                const { error: contractError } = await window.supabaseClient
+                    .from('contracts')
+                    .insert({
+                        organization_name: name,
+                        contract_code: contractCode,
+                        start_date: contractStartDate,
+                        end_date: contractEndDate,
+                        contract_type: 'standard',
+                        status: 'active',
+                        contact_email: email,
+                        notes: `Creato automaticamente al momento della registrazione`
+                    });
+                if (contractError) {
+                    console.warn('⚠️ Errore salvataggio contratto (non bloccante):', contractError.message);
+                } else {
+                    console.log('✅ Contratto salvato:', contractCode);
+                }
 
                 // If from referral, update request status to completed
                 if (requestId) {
