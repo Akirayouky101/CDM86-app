@@ -499,7 +499,7 @@ async function handleLogin(event) {
             const { data: userData } = await sb
                 .from('users')
                 .select('role')
-                .eq('id', data.user.id)
+                .eq('auth_user_id', data.user.id)
                 .maybeSingle();
 
             // Redirect based on user type
