@@ -230,8 +230,8 @@
         if (!session) { window.location.href = '/collaboratori/login.html'; return; }
         currentUser = session.user;
 
-        const { data: user } = await supabase_client.from('users').select('*').eq('auth_user_id', currentUser.id).single();
-        if (!user?.is_collaborator || user.collaborator_status !== 'active') {
+        const { data: user } = await supabase_client.from('collaborators').select('*').eq('auth_user_id', currentUser.id).single();
+        if (!user || user.status !== 'active') {
             window.location.href = '/collaboratori/login.html'; return;
         }
         userData = user;
@@ -253,13 +253,13 @@
         document.getElementById('fieldLastName').value     = u.last_name;
         document.getElementById('fieldEmail').value        = u.email;
         document.getElementById('fieldPhone').value        = u.phone || '';
-        if (u.collaborator_registered_at) {
-            const d = new Date(u.collaborator_registered_at).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+        if (u.registered_at) {
+            const d = new Date(u.registered_at).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('memberSince').textContent = `🗓 Collaboratore dal ${d}`;
         }
         const badge = document.getElementById('statusBadge');
         const statusMap = { active: ['status-active', '✅ Attivo'], pending: ['status-pending', '⏳ In attesa'], suspended: ['status-suspended', '🚫 Sospeso'] };
-        const [cls, label] = statusMap[u.collaborator_status] || ['status-active', u.collaborator_status];
+        const [cls, label] = statusMap[u.status] || ['status-active', u.status];
         badge.className = `status-badge ${cls}`;
         badge.textContent = label;
     }
@@ -284,7 +284,7 @@
         if (!firstName || !lastName) { showAlert('Nome e cognome sono obbligatori.', 'error'); return; }
         btn.disabled = true; btn.textContent = 'Salvataggio...';
 
-        const { error } = await supabase_client.from('users')
+        const { error } = await supabase_client.from('collaborators')
             .update({ first_name: firstName, last_name: lastName, phone })
             .eq('auth_user_id', currentUser.id);
 

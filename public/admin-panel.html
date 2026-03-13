@@ -6913,14 +6913,14 @@
             const { data, error } = await window.supabaseClient
                 .from('admin_collaborators_view')
                 .select('*')
-                .order('collaborator_registered_at', { ascending: false });
+                .order('registered_at', { ascending: false });
 
             if (error) { console.error('loadCollaboratori:', error); return; }
             allCollaboratori = data || [];
 
             // Stats
-            const pending   = allCollaboratori.filter(c => c.collaborator_status === 'pending').length;
-            const active    = allCollaboratori.filter(c => c.collaborator_status === 'active').length;
+            const pending   = allCollaboratori.filter(c => c.status === 'pending').length;
+            const active    = allCollaboratori.filter(c => c.status === 'active').length;
             const earned    = allCollaboratori.reduce((s, c) => s + parseFloat(c.total_earned || 0), 0);
             const toPay     = allCollaboratori.reduce((s, c) => s + parseFloat(c.total_pending || 0), 0);
             document.getElementById('collabStatPending').textContent = pending;
@@ -6943,7 +6943,7 @@
         window.renderCollaboratoriTable = function() {
             const search = (document.getElementById('collabSearch')?.value || '').toLowerCase();
             let rows = allCollaboratori;
-            if (collabFilter !== 'all') rows = rows.filter(c => c.collaborator_status === collabFilter);
+            if (collabFilter !== 'all') rows = rows.filter(c => c.status === collabFilter);
             if (search) rows = rows.filter(c =>
                 (c.first_name + ' ' + c.last_name + ' ' + c.email).toLowerCase().includes(search)
             );
@@ -6964,7 +6964,7 @@
 
             tbody.innerHTML = rows.map(c => {
                 const name    = `${c.first_name} ${c.last_name}`;
-                const date    = c.collaborator_registered_at ? new Date(c.collaborator_registered_at).toLocaleDateString('it-IT') : '—';
+                const date    = c.registered_at ? new Date(c.registered_at).toLocaleDateString('it-IT') : '—';
                 const network = (c.users_count || 0) + (c.aziende_count || 0);
                 const pending = parseFloat(c.total_pending || 0);
                 const actions = buildCollabActions(c);
@@ -6974,7 +6974,7 @@
                         <div style="font-size:0.75rem;color:#94a3b8;">${c.email}</div>
                         <div style="font-size:0.72rem;color:#cbd5e1;margin-top:2px;">Ref: ${c.referral_code || '—'}</div>
                     </td>
-                    <td>${statusHtml[c.collaborator_status] || c.collaborator_status}</td>
+                    <td>${statusHtml[c.status] || c.status}</td>
                     <td style="font-weight:600;">${network} <span style="font-size:0.75rem;color:#94a3b8;">(${c.users_count || 0} utenti, ${c.aziende_count || 0} az.)</span></td>
                     <td style="font-weight:700;color:#16a34a;">€${parseFloat(c.total_earned || 0).toFixed(2)}</td>
                     <td style="font-weight:700;color:${pending > 0 ? '#d97706' : '#94a3b8'};">€${pending.toFixed(2)}</td>
@@ -6986,17 +6986,17 @@
 
         function buildCollabActions(c) {
             const btns = [];
-            if (c.collaborator_status === 'pending') {
+            if (c.status === 'pending') {
                 btns.push(`<button class="btn btn-primary btn-sm" onclick="approveCollab('${c.id}')"><i class="fas fa-check"></i> Approva</button>`);
                 btns.push(`<button class="btn btn-secondary btn-sm" onclick="rejectCollab('${c.id}')"><i class="fas fa-times"></i> Rifiuta</button>`);
             }
-            if (c.collaborator_status === 'active') {
+            if (c.status === 'active') {
                 btns.push(`<button class="btn btn-secondary btn-sm" onclick="suspendCollab('${c.id}')"><i class="fas fa-pause"></i></button>`);
             }
-            if (c.collaborator_status === 'suspended') {
+            if (c.status === 'suspended') {
                 btns.push(`<button class="btn btn-primary btn-sm" onclick="reactivateCollab('${c.id}')"><i class="fas fa-play"></i> Riattiva</button>`);
             }
-            if (c.collaborator_status !== 'banned' && c.collaborator_status !== 'pending') {
+            if (c.status !== 'banned' && c.status !== 'pending') {
                 btns.push(`<button class="btn btn-secondary btn-sm" onclick="banCollab('${c.id}')"><i class="fas fa-ban"></i></button>`);
             }
             const pending = parseFloat(c.total_pending || 0);
@@ -7007,12 +7007,12 @@
         }
 
         async function setCollabStatus(id, status, notes) {
-            const update = { collaborator_status: status };
+            const update = { status: status };
             if (status === 'active') {
-                update.collaborator_approved_at = new Date().toISOString();
+                update.approved_at = new Date().toISOString();
             }
-            if (notes) update.collaborator_notes = notes;
-            const { error } = await window.supabaseClient.from('users').update(update).eq('id', id);
+            if (notes) update.notes = notes;
+            const { error } = await window.supabaseClient.from('collaborators').update(update).eq('id', id);
             if (error) { alert('Errore: ' + error.message); return false; }
             return true;
         }
@@ -7201,10 +7201,9 @@
         // ── Badge pending al caricamento ─────────────────────────────────
         async function loadPendingCollabBadge() {
             const { count } = await window.supabaseClient
-                .from('users')
+                .from('collaborators')
                 .select('id', { count: 'exact', head: true })
-                .eq('is_collaborator', true)
-                .eq('collaborator_status', 'pending');
+                .eq('status', 'pending');
             const badge = document.getElementById('collabPendingBadge');
             if (!badge) return;
             if (count && count > 0) {

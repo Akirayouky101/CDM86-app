@@ -279,16 +279,14 @@
             hideAlert();
             const btn = document.getElementById('submitBtn');
 
-            const firstName      = document.getElementById('firstName').value.trim();
-            const lastName       = document.getElementById('lastName').value.trim();
-            const email          = document.getElementById('email').value.trim();
-            const phone          = document.getElementById('phone').value.trim();
-            const password       = document.getElementById('password').value;
+            const firstName       = document.getElementById('firstName').value.trim();
+            const lastName        = document.getElementById('lastName').value.trim();
+            const email           = document.getElementById('email').value.trim();
+            const phone           = document.getElementById('phone').value.trim();
+            const password        = document.getElementById('password').value;
             const passwordConfirm = document.getElementById('passwordConfirm').value;
-            const referralCode   = document.getElementById('referralCode').value.trim().toUpperCase();
-            const motivation     = document.getElementById('motivation').value.trim();
+            const referredByCode  = document.getElementById('referralCode').value.trim().toUpperCase();
 
-            // Validazioni
             if (!firstName || !lastName || !email || !phone || !password) {
                 showAlert('Compila tutti i campi obbligatori.');
                 return;
@@ -305,88 +303,40 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Invio in corso...';
 
-            if (!supabase_client) {
-                showAlert('Errore di configurazione. Riprova più tardi.');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
-                return;
-            }
-
             try {
-                // Verifica referral code se inserito
-                let referredById = null;
-                if (referralCode) {
-                    const { data: referrer } = await supabase_client
-                        .from('users')
-                        .select('id')
-                        .eq('referral_code', referralCode)
-                        .single();
-                    if (!referrer) {
-                        showAlert('Codice referral non valido. Lascialo vuoto se non ne hai uno.');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
-                        return;
+                const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+
+                const resp = await fetch(
+                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/create-collaborator',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${ANON_KEY}`
+                        },
+                        body: JSON.stringify({ email, password, firstName, lastName, phone, referredByCode: referredByCode || null })
                     }
-                    referredById = referrer.id;
+                );
+
+                const result = await resp.json();
+
+                if (!resp.ok) {
+                    let msg = result.error || 'Errore durante la registrazione';
+                    if (msg.includes('already registered') || msg.includes('già registrata')) {
+                        msg = 'Questa email è già registrata. <a href="/collaboratori/login.html">Accedi</a>';
+                    }
+                    showAlert(msg);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
+                    return;
                 }
 
-                // Genera codice referral unico
-                const newReferralCode = generateReferralCode(firstName, lastName);
-
-                // Registra su Supabase Auth
-                const { data: authData, error: authError } = await supabase_client.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            first_name: firstName,
-                            last_name:  lastName
-                        }
-                    }
-                });
-
-                if (authError) throw authError;
-
-                // Crea profilo utente nella tabella users
-                const { error: profileError } = await supabase_client
-                    .from('users')
-                    .insert([{
-                        id:                          authData.user.id,
-                        email:                       email,
-                        first_name:                  firstName,
-                        last_name:                   lastName,
-                        phone:                       phone,
-                        referral_code:               newReferralCode,
-                        referred_by_id:              referredById,
-                        role:                        'user',
-                        is_verified:                 false,
-                        is_active:                   true,
-                        is_collaborator:             true,
-                        collaborator_status:         'pending',
-                        collaborator_registered_at:  new Date().toISOString(),
-                        collaborator_notes:          motivation ? `Motivazione: ${motivation}` : null,
-                        password_hash:               'managed_by_supabase_auth'
-                    }]);
-
-                if (profileError) {
-                    // Se il profilo fallisce, cancella l'auth user
-                    console.error('Profile error:', profileError);
-                    throw new Error('Errore nella creazione del profilo: ' + profileError.message);
-                }
-
-                // Logout immediato (deve aspettare approvazione)
-                await supabase_client.auth.signOut();
-
-                // Mostra schermata successo
+                // Successo
                 document.getElementById('registerForm').style.display  = 'none';
                 document.getElementById('successScreen').style.display = 'block';
 
             } catch (err) {
-                let msg = err.message;
-                if (msg.includes('already registered') || msg.includes('already been registered')) {
-                    msg = 'Questa email è già registrata. <a href="/collaboratori/login.html">Accedi</a>';
-                }
-                showAlert(msg);
+                showAlert(err.message || 'Errore di connessione. Riprova.');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia richiesta';
             }

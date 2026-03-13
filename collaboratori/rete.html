@@ -189,8 +189,8 @@
         const { data: { session } } = await supabase_client.auth.getSession();
         if (!session) { window.location.href = '/collaboratori/login.html'; return; }
 
-        const { data: user } = await supabase_client.from('users').select('*').eq('auth_user_id', session.user.id).single();
-        if (!user?.is_collaborator || user.collaborator_status !== 'active') {
+        const { data: user } = await supabase_client.from('collaborators').select('*').eq('auth_user_id', session.user.id).single();
+        if (!user || user.status !== 'active') {
             window.location.href = '/collaboratori/login.html'; return;
         }
 

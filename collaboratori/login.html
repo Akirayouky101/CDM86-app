@@ -218,21 +218,19 @@
                 const { data, error } = await supabase_client.auth.signInWithPassword({ email, password });
                 if (error) throw error;
 
-                // Verifica che sia un collaboratore
-                const { data: userData, error: userErr } = await supabase_client
-                    .from('users')
-                    .select('is_collaborator, collaborator_status, first_name')
+                // Verifica che sia un collaboratore nella tabella dedicata
+                const { data: collabData, error: collabErr } = await supabase_client
+                    .from('collaborators')
+                    .select('id, status, first_name')
                     .eq('auth_user_id', data.user.id)
                     .single();
 
-                if (userErr || !userData) throw new Error('Profilo non trovato.');
-
-                if (!userData.is_collaborator) {
+                if (collabErr || !collabData) {
                     await supabase_client.auth.signOut();
-                    throw new Error('Questo account non è registrato come collaboratore.');
+                    throw new Error('Account non trovato nel pannello collaboratori. Registrati su questa pagina.');
                 }
 
-                switch (userData.collaborator_status) {
+                switch (collabData.status) {
                     case 'pending':
                         await supabase_client.auth.signOut();
                         throw new Error('⏳ La tua registrazione è in attesa di approvazione. Riceverai conferma a breve.');

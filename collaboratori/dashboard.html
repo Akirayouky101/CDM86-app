@@ -376,15 +376,15 @@
 
             // Carica dati profilo
             const { data: user } = await supabase_client
-                .from('users')
+                .from('collaborators')
                 .select('*')
                 .eq('auth_user_id', currentUser.id)
                 .single();
 
-            if (!user || !user.is_collaborator) {
+            if (!user) {
                 window.location.href = '/collaboratori/login.html'; return;
             }
-            if (user.collaborator_status !== 'active') {
+            if (user.status !== 'active') {
                 window.location.href = '/collaboratori/login.html'; return;
             }
 
