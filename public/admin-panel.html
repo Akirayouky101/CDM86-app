@@ -3671,6 +3671,35 @@
                 
                 openModal('organizationSuccessModal');
 
+                // Invia email di benvenuto all'azienda con credenziali e codici referral
+                try {
+                    const { data: emailSession } = await window.supabaseClient.auth.getSession();
+                    const emailToken = emailSession?.session?.access_token;
+                    const emailResp = await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-welcome-organization', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${emailToken}`
+                        },
+                        body: JSON.stringify({
+                            organizationName: name,
+                            organizationEmail: email,
+                            password: generatedPassword,
+                            referralCode: referralCode,
+                            referralCodeExternal: referralCodeExternal,
+                            contractCode: contractCode
+                        })
+                    });
+                    const emailData = await emailResp.json();
+                    if (emailData.success) {
+                        console.log('✅ Email di benvenuto inviata all\'azienda:', email);
+                    } else {
+                        console.warn('⚠️ Email non inviata:', emailData.error);
+                    }
+                } catch (emailErr) {
+                    console.warn('⚠️ Errore invio email (non bloccante):', emailErr);
+                }
+
                 // Reset form
                 event.target.reset();
                 document.getElementById('fromReferral').checked = false;
