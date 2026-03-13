@@ -117,9 +117,12 @@ serve(async (req) => {
     // STEP 2: Cancella commissioni collegate (non bloccante)
     if (userRecord) {
       try {
-        await supabaseAdmin.from('commissions').delete().eq('organization_id', userRecord.id)
-        await supabaseAdmin.from('commissions').delete().eq('referred_user_id', userRecord.id)
-        await supabaseAdmin.from('commissions').delete().eq('referred_organization_id', userRecord.id)
+        const { error: c1 } = await supabaseAdmin.from('commissions').delete().eq('organization_id', userRecord.id)
+        if (c1) console.error('⚠️ commissions organization_id:', c1.message)
+        const { error: c2 } = await supabaseAdmin.from('commissions').delete().eq('referred_user_id', userRecord.id)
+        if (c2) console.error('⚠️ commissions referred_user_id:', c2.message)
+        const { error: c3 } = await supabaseAdmin.from('commissions').delete().eq('referred_organization_id', userRecord.id)
+        if (c3) console.error('⚠️ commissions referred_organization_id:', c3.message)
         console.log('✅ Commissioni cancellate')
       } catch (commErr) {
         console.error('⚠️ Errore cancellazione commissioni (non bloccante):', commErr)
@@ -135,9 +138,12 @@ serve(async (req) => {
         console.log('👤 Cancellazione utente normale...')
 
         // Cancella referrals collegati (non bloccante)
-        await supabaseAdmin.from('referrals').delete().eq('referred_user_id', userRecord.id).catch(e => console.error('⚠️ referrals:', e))
-        await supabaseAdmin.from('referrals').delete().eq('referrer_id', userRecord.id).catch(e => console.error('⚠️ referrals referrer:', e))
-        await supabaseAdmin.from('favorites').delete().eq('user_id', userRecord.id).catch(e => console.error('⚠️ favorites:', e))
+        const { error: refErr1 } = await supabaseAdmin.from('referrals').delete().eq('referred_user_id', userRecord.id)
+        if (refErr1) console.error('⚠️ referrals referred_user_id:', refErr1.message)
+        const { error: refErr2 } = await supabaseAdmin.from('referrals').delete().eq('referrer_id', userRecord.id)
+        if (refErr2) console.error('⚠️ referrals referrer_id:', refErr2.message)
+        const { error: favErr } = await supabaseAdmin.from('favorites').delete().eq('user_id', userRecord.id)
+        if (favErr) console.error('⚠️ favorites user_id:', favErr.message)
 
         const { error: dbError } = await supabaseAdmin
           .from('users')
