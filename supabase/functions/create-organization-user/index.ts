@@ -52,7 +52,7 @@ serve(async (req) => {
     const { data: userData, error: roleError } = await supabaseAdmin
       .from('users')
       .select('role')
-      .eq('id', user.id)
+      .eq('auth_user_id', user.id)
       .single()
 
     if (roleError || userData?.role !== 'admin') {
