@@ -230,7 +230,7 @@
         if (!session) { window.location.href = '/collaboratori/login.html'; return; }
         currentUser = session.user;
 
-        const { data: user } = await supabase_client.from('users').select('*').eq('id', currentUser.id).single();
+        const { data: user } = await supabase_client.from('users').select('*').eq('auth_user_id', currentUser.id).single();
         if (!user?.is_collaborator || user.collaborator_status !== 'active') {
             window.location.href = '/collaboratori/login.html'; return;
         }
@@ -286,7 +286,7 @@
 
         const { error } = await supabase_client.from('users')
             .update({ first_name: firstName, last_name: lastName, phone })
-            .eq('id', currentUser.id);
+            .eq('auth_user_id', currentUser.id);
 
         if (error) { showAlert('Errore: ' + error.message, 'error'); }
         else {

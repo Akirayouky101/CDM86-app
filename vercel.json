@@ -28,6 +28,16 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cdm86.io" }],
+      "destination": "/collaboratori/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.cdm86.io" }],
+      "destination": "/collaboratori/:path*"
+    },
+    {
       "source": "/collaboratori",
       "destination": "/collaboratori/login.html"
     },

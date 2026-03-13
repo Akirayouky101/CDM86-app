@@ -378,7 +378,7 @@
             const { data: user } = await supabase_client
                 .from('users')
                 .select('*')
-                .eq('id', currentUser.id)
+                .eq('auth_user_id', currentUser.id)
                 .single();
 
             if (!user || !user.is_collaborator) {

@@ -222,7 +222,7 @@
                 const { data: userData, error: userErr } = await supabase_client
                     .from('users')
                     .select('is_collaborator, collaborator_status, first_name')
-                    .eq('id', data.user.id)
+                    .eq('auth_user_id', data.user.id)
                     .single();
 
                 if (userErr || !userData) throw new Error('Profilo non trovato.');
