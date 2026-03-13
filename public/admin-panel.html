@@ -3107,6 +3107,14 @@
                     roleBadge = '<span class="badge badge-info">👤 USER</span>';
                 }
 
+                // Pulsante verifica (solo utenti normali, non organizzazioni, non admin)
+                const verifyBtn = (!user.isOrganization && user.role !== 'admin') ? `
+                    <button class="btn btn-sm ${user.is_verified ? 'btn-warning' : 'btn-success'}"
+                            onclick="toggleVerifyUser('${user.id}', ${user.is_verified})"
+                            title="${user.is_verified ? 'Rimuovi verifica' : 'Verifica utente'}">
+                        <i class="fas ${user.is_verified ? 'fa-user-times' : 'fa-user-check'}"></i>
+                    </button>` : '';
+
                 return `
                 <tr>
                     <td>${user.email}</td>
@@ -3114,12 +3122,13 @@
                     <td>${roleBadge}</td>
                     <td>
                         <span class="badge ${user.is_verified ? 'badge-success' : 'badge-warning'}">
-                            ${user.is_verified ? '✓ VERIFICATO' : '⏳ NON VERIFICATO'}
+                            ${user.is_verified ? '✅ VERIFICATO' : '⏳ IN ATTESA'}
                         </span>
                     </td>
                     <td><strong>${user.points || 0}</strong> pt</td>
                     <td>
                         <div class="actions">
+                            ${verifyBtn}
                             <button class="btn btn-primary btn-sm" onclick="openResetPasswordModal('${user.id}', '${user.email}')" title="Reset Password">
                                 <i class="fas fa-key"></i>
                             </button>
@@ -3283,45 +3292,28 @@
                     }
                 }
 
-                const { data: authData, error: authError } = await window.supabaseClient.auth.admin.createUser({
-                    email: email,
-                    password: password,
-                    email_confirm: true
-                });
-
-                if (authError) throw authError;
-
-                const { error: userError } = await window.supabaseClient
-                    .from('users')
-                    .insert({
-                        id: authData.user.id,
-                        email: email,
-                        first_name: firstName,
-                        last_name: lastName,
+                // Crea utente via Edge Function (service role)
+                const { data: session } = await window.supabaseClient.auth.getSession();
+                const token = session?.session?.access_token;
+                const createResp = await fetch('https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/create-admin-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        firstName,
+                        lastName,
                         phone: phone || null,
-                        role: 'user',
-                        points: 100,
-                        referred_by_id: referrerId
-                    });
+                        referralCode: referralCode || null
+                    })
+                });
+                const createData = await createResp.json();
+                if (!createData.success) throw new Error(createData.error || 'Errore creazione utente');
 
-                if (userError) throw userError;
-
-                // If referral was valid, award points to referrer
-                if (referrerId) {
-                    const { error: pointsError } = await window.supabaseClient.rpc('add_points_to_user', {
-                        p_user_id: referrerId,
-                        p_points: 50,
-                        p_description: `Bonus referral per invito di ${email}`
-                    });
-                    
-                    if (pointsError) {
-                        console.error('Error awarding referral points:', pointsError);
-                    } else {
-                        console.log('✅ Assegnati 50 punti al referrer');
-                    }
-                }
-
-                alert('✅ Utente creato con successo!' + (referrerId ? ' Referral applicato!' : ''));
+                alert('✅ Utente creato con successo!' + (createData.referralApplied ? ' Referral applicato!' : ''));
                 closeModal('createUserModal');
                 document.getElementById('createUserForm').reset();
                 loadUsers();
@@ -3408,6 +3400,33 @@
         // ========================================
         // ADD ORGANIZATION FUNCTIONS
         // ========================================
+
+        // Verify / Unverify User
+        window.toggleVerifyUser = async function(userId, currentStatus) {
+            const newStatus = !currentStatus;
+            const label = newStatus ? 'verificare' : 'rimuovere la verifica di';
+            if (!confirm(`Vuoi ${label} questo utente?`)) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('users')
+                    .update({ is_verified: newStatus })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                showSuccessModal(
+                    newStatus ? '✅ Utente Verificato!' : '⚠️ Verifica Rimossa',
+                    newStatus
+                        ? 'L\'utente è stato verificato con successo.'
+                        : 'La verifica dell\'utente è stata rimossa.'
+                );
+                loadUsers();
+            } catch (error) {
+                console.error('Error toggling verify:', error);
+                alert('❌ Errore: ' + error.message);
+            }
+        };
 
         window.openAddOrganizationModal = async function() {
             openModal('addOrganizationModal');
@@ -3551,24 +3570,33 @@
                 const contractCode = await getNextContractCode();
                 const generatedPassword = generatePassword();
 
-                // STEP 1: Crea utente auth PRIMA di creare l'organizzazione
+                // STEP 1: Crea utente auth via Edge Function (service role)
                 let authUserId = null;
                 try {
-                    const { data: authData, error: authError } = await window.supabaseClient.auth.admin.createUser({
-                        email: email,
-                        password: generatedPassword,
-                        email_confirm: true
+                    const { data: session } = await window.supabaseClient.auth.getSession();
+                    const token = session?.session?.access_token;
+                    const createResp = await fetch(`https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/create-organization-user`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: generatedPassword,
+                            organizationId: 'pending',
+                            organizationName: name,
+                            organizationType: type
+                        })
                     });
-
-                    if (authError) throw authError;
-                    authUserId = authData.user.id;
+                    const createData = await createResp.json();
+                    if (!createData.success) throw new Error(createData.error || 'Errore creazione utente');
+                    authUserId = createData.user.id;
                     console.log('✅ Utente auth creato:', authUserId);
                 } catch (authError) {
                     console.error('❌ Errore creazione utente auth:', authError);
                     throw new Error('Impossibile creare l\'utente auth: ' + authError.message);
-                }
-
-                // STEP 2: Crea organizzazione e linkala all'utente auth tramite auth_user_id
+                }                // STEP 2: Crea organizzazione e linkala all'utente auth tramite auth_user_id
                 const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .insert({
