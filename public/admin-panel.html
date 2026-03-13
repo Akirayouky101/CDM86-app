@@ -2408,6 +2408,25 @@
         </div>
     </div>
 
+    <!-- VERIFY USER MODAL -->
+    <div id="verifyUserModal" class="modal">
+        <div class="modal-dialog" style="max-width: 420px;">
+            <div class="modal-content" style="border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px 25px; position: relative;">
+                    <h3 style="margin: 0; font-size: 1.2rem;"><i class="fas fa-user-check"></i> Conferma Verifica</h3>
+                    <button class="modal-close" onclick="closeModal('verifyUserModal')" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; cursor: pointer;">×</button>
+                </div>
+                <div class="modal-body" style="padding: 25px; text-align: center;">
+                    <p id="verifyUserMessage" style="font-size: 1.1rem; color: #374151; margin: 0;"></p>
+                </div>
+                <div class="modal-footer" style="padding: 15px 25px; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #e5e7eb;">
+                    <button onclick="closeModal('verifyUserModal')" class="btn btn-secondary">Annulla</button>
+                    <button id="verifyUserConfirmBtn" onclick="confirmVerifyUser()" class="btn btn-success">Conferma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- DELETE USER MODAL -->
     <div id="deleteUserModal" class="modal">
         <div class="modal-dialog" style="max-width: 500px;">
@@ -3403,18 +3422,43 @@
         // ========================================
 
         // Verify / Unverify User
-        window.toggleVerifyUser = async function(userId, currentStatus) {
+        let pendingVerifyUser = null;
+
+        window.toggleVerifyUser = function(userId, currentStatus) {
             const newStatus = !currentStatus;
+            pendingVerifyUser = { userId, newStatus };
             const label = newStatus ? 'verificare' : 'rimuovere la verifica di';
-            if (!confirm(`Vuoi ${label} questo utente?`)) return;
+            document.getElementById('verifyUserMessage').textContent =
+                `Vuoi ${label} questo utente?`;
+            document.getElementById('verifyUserConfirmBtn').textContent =
+                newStatus ? '✅ Verifica' : '⚠️ Rimuovi verifica';
+            document.getElementById('verifyUserConfirmBtn').className =
+                newStatus ? 'btn btn-success' : 'btn btn-warning';
+            openModal('verifyUserModal');
+        };
+
+        window.confirmVerifyUser = async function() {
+            if (!pendingVerifyUser) return;
+            const { userId, newStatus } = pendingVerifyUser;
+            closeModal('verifyUserModal');
 
             try {
-                const { error } = await window.supabaseClient
-                    .from('users')
-                    .update({ is_verified: newStatus })
-                    .eq('id', userId);
+                const { data: session } = await window.supabaseClient.auth.getSession();
+                const token = session?.session?.access_token;
 
-                if (error) throw error;
+                const response = await fetch(
+                    'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/update-user-verified',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ userId, isVerified: newStatus })
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Errore');
 
                 showSuccessModal(
                     newStatus ? '✅ Utente Verificato!' : '⚠️ Verifica Rimossa',
@@ -3422,6 +3466,7 @@
                         ? 'L\'utente è stato verificato con successo.'
                         : 'La verifica dell\'utente è stata rimossa.'
                 );
+                pendingVerifyUser = null;
                 loadUsers();
             } catch (error) {
                 console.error('Error toggling verify:', error);
