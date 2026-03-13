@@ -3000,7 +3000,7 @@
                 const { data: userData } = await window.supabaseClient
                     .from('users')
                     .select('role, email')
-                    .eq('id', user.id)
+                    .eq('auth_user_id', user.id)
                     .single();
 
                 console.log('👤 User data:', userData);
