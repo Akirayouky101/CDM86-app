@@ -86,103 +86,44 @@ serve(async (req) => {
         .maybeSingle()
 
       if (referralData && referralData.points_earned_referrer > 0) {
-        console.log(`💰 Trovato referral con ${referralData.points_earned_referrer} punti guadagnati`)
-        console.log(`👤 Referrer: ${referralData.referrer_id}`)
+        // Avvolto in try/catch: se fallisce non blocca la cancellazione
+        try {
+          console.log(`💰 Trovato referral con ${referralData.points_earned_referrer} punti guadagnati`)
+          const pointsToRemove = -Math.abs(referralData.points_earned_referrer)
 
-        // Ottieni info dell'utente eliminato per il messaggio
-        const { data: deletedUserInfo } = await supabaseAdmin
-          .from('users')
-          .select('email, first_name, last_name')
-          .eq('auth_user_id', userId)
-          .maybeSingle()
-
-        const deletedUserName = deletedUserInfo 
-          ? `${deletedUserInfo.first_name || ''} ${deletedUserInfo.last_name || ''}`.trim() || deletedUserInfo.email
-          : 'Utente eliminato'
-
-        // Rimuovi i punti dal referrer
-        const pointsToRemove = -Math.abs(referralData.points_earned_referrer)
-        
-        console.log(`⚖️ Rimozione ${Math.abs(pointsToRemove)} punti da referrer...`)
-        
-        // Crea transazione di rimozione punti
-        const { error: transactionError } = await supabaseAdmin
-          .from('points_transactions')
-          .insert({
-            user_id: referralData.referrer_id,
-            points: pointsToRemove,
-            transaction_type: 'admin_adjustment',
-            reference_id: referralData.id,
-            description: `Rimossi punti per eliminazione utente invitato: ${deletedUserName}`
-          })
-
-        if (transactionError) {
-          console.error('⚠️ Errore creazione transazione rimozione punti:', transactionError)
-        } else {
-          console.log('✅ Transazione di rimozione punti creata')
-        }
-
-        // Aggiorna il saldo punti del referrer
-        const { data: currentBalance } = await supabaseAdmin
-          .from('users')
-          .select('total_points')
-          .eq('id', referralData.referrer_id)
-          .maybeSingle()
-
-        if (currentBalance) {
-          const newBalance = Math.max(0, currentBalance.total_points + pointsToRemove)
-          
-          const { error: updateError } = await supabaseAdmin
+          // Aggiorna il saldo punti del referrer (colonna 'points')
+          const { data: currentBalance } = await supabaseAdmin
             .from('users')
-            .update({ total_points: newBalance })
+            .select('points')
             .eq('id', referralData.referrer_id)
+            .maybeSingle()
 
-          if (updateError) {
-            console.error('⚠️ Errore aggiornamento saldo:', updateError)
-          } else {
-            console.log(`✅ Saldo aggiornato: ${currentBalance.total_points} → ${newBalance}`)
+          if (currentBalance) {
+            const newBalance = Math.max(0, (currentBalance.points || 0) + pointsToRemove)
+            await supabaseAdmin
+              .from('users')
+              .update({ points: newBalance })
+              .eq('id', referralData.referrer_id)
+            console.log(`✅ Punti referrer aggiornati: ${currentBalance.points} → ${newBalance}`)
           }
+        } catch (pointsErr) {
+          console.error('⚠️ Errore gestione punti referral (non bloccante):', pointsErr)
         }
       } else {
         console.log('ℹ️ Nessun referral con punti trovato per questo utente')
       }
     }
 
-    // STEP 2: Cancella commissioni collegate
+    // STEP 2: Cancella commissioni collegate (non bloccante)
     if (userRecord) {
-      console.log('💰 Cancellazione commissioni collegate...')
-      
-      // Cancella commissioni dove l'utente è organization_id
-      const { error: commError1 } = await supabaseAdmin
-        .from('commissions')
-        .delete()
-        .eq('organization_id', userRecord.id)
-      
-      if (commError1) {
-        console.error('⚠️ Errore cancellazione commissioni (organization_id):', commError1)
+      try {
+        await supabaseAdmin.from('commissions').delete().eq('organization_id', userRecord.id)
+        await supabaseAdmin.from('commissions').delete().eq('referred_user_id', userRecord.id)
+        await supabaseAdmin.from('commissions').delete().eq('referred_organization_id', userRecord.id)
+        console.log('✅ Commissioni cancellate')
+      } catch (commErr) {
+        console.error('⚠️ Errore cancellazione commissioni (non bloccante):', commErr)
       }
-      
-      // Cancella commissioni dove l'utente è referred_user_id
-      const { error: commError2 } = await supabaseAdmin
-        .from('commissions')
-        .delete()
-        .eq('referred_user_id', userRecord.id)
-      
-      if (commError2) {
-        console.error('⚠️ Errore cancellazione commissioni (referred_user_id):', commError2)
-      }
-      
-      // Cancella commissioni dove l'utente è referred_organization_id
-      const { error: commError3 } = await supabaseAdmin
-        .from('commissions')
-        .delete()
-        .eq('referred_organization_id', userRecord.id)
-      
-      if (commError3) {
-        console.error('⚠️ Errore cancellazione commissioni (referred_organization_id):', commError3)
-      }
-      
-      console.log('✅ Commissioni cancellate')
     }
 
     // STEP 3: Cancella i dati del database
@@ -190,8 +131,14 @@ serve(async (req) => {
     
     try {
       if (userRecord) {
-        // È un utente normale - cancella dalla tabella users
+        // È un utente normale - cancella prima i dati collegati, poi l'utente
         console.log('👤 Cancellazione utente normale...')
+
+        // Cancella referrals collegati (non bloccante)
+        await supabaseAdmin.from('referrals').delete().eq('referred_user_id', userRecord.id).catch(e => console.error('⚠️ referrals:', e))
+        await supabaseAdmin.from('referrals').delete().eq('referrer_id', userRecord.id).catch(e => console.error('⚠️ referrals referrer:', e))
+        await supabaseAdmin.from('favorites').delete().eq('user_id', userRecord.id).catch(e => console.error('⚠️ favorites:', e))
+
         const { error: dbError } = await supabaseAdmin
           .from('users')
           .delete()
