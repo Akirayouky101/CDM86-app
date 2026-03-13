@@ -554,7 +554,7 @@ async function checkAuthStatus() {
         const { data: userData } = await sb
             .from('users')
             .select('first_name, last_name')
-            .eq('id', session.user.id)
+            .eq('auth_user_id', session.user.id)
             .single();
 
         const firstName = userData?.first_name || 'User';
@@ -1427,7 +1427,7 @@ const CompanyWizard = {
             const { data: userData } = await supabase
                 .from('users')
                 .select('referral_code')
-                .eq('id', user.id)
+                .eq('auth_user_id', user.id)
                 .single();
             
             const displayElement = document.getElementById('userReferralCodeDisplay');
@@ -1489,18 +1489,19 @@ const CompanyWizard = {
         try {
             const supabase = await ensureSupabase();
             
-            // Get current user
+            // Get current user (optional - wizard works also without login)
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Devi essere loggato per segnalare un\'azienda');
             
-            // Get user data to find referral code
-            const { data: userData, error: userError } = await supabase
-                .from('users')
-                .select('referral_code, first_name, last_name')
-                .eq('id', user.id)
-                .single();
-            
-            if (userError) throw userError;
+            // Get user data to find referral code (only if logged in)
+            let userData = null;
+            if (user) {
+                const { data: ud } = await supabase
+                    .from('users')
+                    .select('referral_code, first_name, last_name')
+                    .eq('auth_user_id', user.id)
+                    .single();
+                userData = ud;
+            }
             
             // Collect all form data
             const companyName = document.getElementById('companyName').value.trim();
@@ -1530,45 +1531,57 @@ const CompanyWizard = {
                 throw new Error('Seleziona il tipo di azienda/associazione');
             }
             
-            // Save to database
-            const { data: insertedReport, error: insertError } = await supabase
-                .from('company_reports')
-                .insert({
-                    reported_by_user_id: user.id,
-                    reported_by_referral_code: userData.referral_code,
-                    company_name: companyName,
-                    contact_name: contactName,
-                    email: email,
-                    phone: phone,
-                    address: address,
-                    sector: finalSector,
-                    company_aware: companyAware === 'si',
-                    who_knows: finalWhoKnows,
-                    preferred_call_time: callTime,
-                    referral_given: referralGiven === 'si',
-                    email_consent: emailConsent === 'si',
-                    company_type: companyType,
-                    status: 'pending'
-                })
-                .select()
-                .single();
+            // Save to database via Edge Function (bypasses RLS, works for anonymous users too)
+            const { data: { session } } = await supabase.auth.getSession();
+            const authHeader = session?.access_token 
+                ? `Bearer ${session.access_token}`
+                : `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM`;
+
+            const submitResponse = await fetch(
+                'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/submit-company-report',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': authHeader
+                    },
+                    body: JSON.stringify({
+                        companyName,
+                        contactName,
+                        email,
+                        phone,
+                        address,
+                        sector: finalSector,
+                        companyAware: companyAware === 'si',
+                        whoKnows: finalWhoKnows,
+                        callTime,
+                        referralGiven: referralGiven === 'si',
+                        emailConsent: emailConsent === 'si',
+                        companyType,
+                        reportedByUserId: user ? user.id : null,
+                        reportedByReferralCode: userData?.referral_code || null
+                    })
+                }
+            );
+
+            const submitResult = await submitResponse.json();
+            if (!submitResponse.ok) throw new Error(submitResult.error || 'Errore durante il salvataggio');
             
-            if (insertError) throw insertError;
+            const insertedReportId = submitResult.reportId;
             
             // 📧 Invia email di notifica (utente + azienda)
-            console.log('📧 Invio email di notifica per segnalazione ID:', insertedReport.id);
+            console.log('📧 Invio email di notifica per segnalazione ID:', insertedReportId);
             
             try {
-                const { data: { session } } = await supabase.auth.getSession();
                 const emailResponse = await fetch(
                     'https://uchrjlngfzfibcpdxtky.supabase.co/functions/v1/send-report-notification',
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${session.access_token}`
+                            'Authorization': authHeader
                         },
-                        body: JSON.stringify({ reportId: insertedReport.id })
+                        body: JSON.stringify({ reportId: insertedReportId })
                     }
                 );
                 
@@ -1580,13 +1593,13 @@ const CompanyWizard = {
                 // Non blocchiamo il flusso se l'email fallisce
             }
             
-            const userName = userData ? `${userData.first_name} ${userData.last_name}` : 'Utente';
+            const userName = userData ? `${userData.first_name} ${userData.last_name}` : '';
             
             // Messaggio email
             const emailMessage = emailConsent === 'si' 
-                ? `<p style="color: #10b981; margin-top: 16px; font-weight: 600;">📧 Email inviate a te e all'azienda (${email})</p>
-                   <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Segnalazione da: <strong>${userData.referral_code}</strong> - ${userName}</p>`
-                : '<p style="color: #f59e0b; margin-top: 16px;">📧 Email di conferma inviata a te<br>⚠️ Email all\'azienda non inviata (consenso non dato)</p>';
+                ? `<p style="color: #10b981; margin-top: 16px; font-weight: 600;">📧 Ti contatteremo all'indirizzo ${email}</p>
+                   ${userData?.referral_code ? `<p style="color: #64748b; font-size: 14px; margin-top: 8px;">Segnalazione da: <strong>${userData.referral_code}</strong>${userName ? ' - ' + userName : ''}</p>` : ''}`
+                : '<p style="color: #f59e0b; margin-top: 16px;">📧 Riceverai una conferma a breve</p>';
             
             // Show success message
             if (loading) {
