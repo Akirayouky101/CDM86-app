@@ -3051,7 +3051,8 @@
                         displayName: `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'User Unknown'
                     })),
                     ...(orgs || []).map(org => ({
-                        id: org.auth_user_id || org.id,
+                        id: org.id,
+                        auth_user_id: org.auth_user_id,
                         email: org.email,
                         first_name: org.name,
                         last_name: '',
