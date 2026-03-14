@@ -1239,125 +1239,305 @@
     </script>
 
     <!-- GESTIONE RITORNO DA STRIPE -->
+    <!-- ═══════════════════════════════════════════════════
+         MODALE PAGAMENTO CDM86
+         ═══════════════════════════════════════════════════ -->
+    <div id="cdm86-payment-modal" style="display:none; position:fixed; inset:0; z-index:99999; font-family:'Segoe UI',system-ui,sans-serif;">
+        <!-- Overlay -->
+        <div id="cdm86-modal-overlay" style="position:absolute; inset:0; background:rgba(10,10,30,0.75); backdrop-filter:blur(6px);"></div>
+        <!-- Box -->
+        <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:center; min-height:100%; padding:1rem;">
+            <div id="cdm86-modal-box" style="
+                background:#fff;
+                border-radius:24px;
+                max-width:480px;
+                width:100%;
+                overflow:hidden;
+                box-shadow:0 32px 80px rgba(0,0,0,0.35);
+                animation: cdm86ModalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            ">
+                <!-- Header gradient -->
+                <div style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 2.5rem 2rem 2rem;
+                    text-align:center;
+                    position:relative;
+                ">
+                    <div style="font-size:3.5rem; margin-bottom:0.5rem;">🔐</div>
+                    <h2 id="cdm86-modal-title" style="color:#fff; font-size:1.6rem; font-weight:800; margin:0 0 0.5rem; line-height:1.2;">
+                        Accedi alle Promozioni Esclusive
+                    </h2>
+                    <p id="cdm86-modal-subtitle" style="color:rgba(255,255,255,0.85); font-size:0.95rem; margin:0;">
+                        Attiva il tuo abbonamento annuale CDM86
+                    </p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:1.75rem 2rem;">
+                    <!-- Prezzo -->
+                    <div style="
+                        background:linear-gradient(135deg,#f0f4ff,#f5f0ff);
+                        border-radius:16px;
+                        padding:1.25rem;
+                        text-align:center;
+                        margin-bottom:1.5rem;
+                        border:1px solid #e0e7ff;
+                    ">
+                        <div style="font-size:0.85rem; color:#6366f1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">Abbonamento Annuale</div>
+                        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.25rem;">
+                            <span style="font-size:2.5rem; font-weight:900; color:#4f46e5;">€29</span>
+                            <span style="font-size:1rem; color:#94a3b8;">/anno</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:#64748b; margin-top:0.25rem;">meno di <strong style="color:#4f46e5;">€2,50 al mese</strong></div>
+                    </div>
+
+                    <!-- Benefici -->
+                    <ul style="list-style:none; padding:0; margin:0 0 1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Accesso illimitato a <strong>&nbsp;tutte le promozioni</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Sconti esclusivi presso <strong>&nbsp;aziende partner</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Salva i preferiti e ricevi <strong>&nbsp;notifiche offerte</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Rinnovo automatico — <strong>&nbsp;annulla quando vuoi</strong>
+                        </li>
+                    </ul>
+
+                    <!-- CTA -->
+                    <a id="cdm86-modal-cta" href="https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00" target="_blank" style="
+                        display:block;
+                        background:linear-gradient(135deg,#667eea,#764ba2);
+                        color:#fff;
+                        text-decoration:none;
+                        text-align:center;
+                        padding:1rem;
+                        border-radius:14px;
+                        font-size:1.05rem;
+                        font-weight:800;
+                        letter-spacing:0.02em;
+                        box-shadow:0 8px 24px rgba(102,126,234,0.4);
+                        transition:transform 0.15s, box-shadow 0.15s;
+                        margin-bottom:0.75rem;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(102,126,234,0.5)'"
+                    onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(102,126,234,0.4)'"
+                    >
+                        💳 Attiva Abbonamento — €29/anno
+                    </a>
+
+                    <!-- Link chiudi (solo se non è modale bloccante) -->
+                    <button id="cdm86-modal-close-btn" onclick="window.cdm86PaymentModal.close()" style="
+                        display:block;
+                        width:100%;
+                        background:none;
+                        border:none;
+                        color:#94a3b8;
+                        font-size:0.85rem;
+                        cursor:pointer;
+                        padding:0.5rem;
+                        text-align:center;
+                    ">Non adesso — continua senza accesso completo</button>
+                </div>
+
+                <!-- Footer sicurezza -->
+                <div style="
+                    background:#f8fafc;
+                    border-top:1px solid #f1f5f9;
+                    padding:0.9rem 2rem;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    gap:0.5rem;
+                ">
+                    <span style="font-size:0.8rem; color:#94a3b8;">🔒 Pagamento sicuro via</span>
+                    <span style="font-size:0.8rem; font-weight:700; color:#635bff;">Stripe</span>
+                    <span style="font-size:0.8rem; color:#94a3b8;">· Disdici in qualsiasi momento</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale successo pagamento -->
+    <div id="cdm86-success-modal" style="display:none; position:fixed; inset:0; z-index:99999; font-family:'Segoe UI',system-ui,sans-serif;">
+        <div style="position:absolute; inset:0; background:rgba(10,10,30,0.7); backdrop-filter:blur(6px);"></div>
+        <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:center; min-height:100%; padding:1rem;">
+            <div style="
+                background:#fff;
+                border-radius:24px;
+                max-width:400px;
+                width:100%;
+                overflow:hidden;
+                box-shadow:0 32px 80px rgba(0,0,0,0.3);
+                animation: cdm86ModalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+                text-align:center;
+                padding:3rem 2rem;
+            ">
+                <div style="font-size:4rem; margin-bottom:1rem;">🎊</div>
+                <h2 style="font-size:1.5rem; font-weight:800; color:#1e293b; margin:0 0 0.75rem;">Benvenuto in CDM86!</h2>
+                <p style="color:#64748b; font-size:0.95rem; margin:0 0 0.5rem;">Il tuo abbonamento annuale è attivo.</p>
+                <p id="cdm86-success-expires" style="color:#4f46e5; font-size:0.9rem; font-weight:600; margin:0 0 2rem;"></p>
+                <button onclick="document.getElementById('cdm86-success-modal').style.display='none'" style="
+                    background:linear-gradient(135deg,#667eea,#764ba2);
+                    color:#fff;
+                    border:none;
+                    padding:0.9rem 2.5rem;
+                    border-radius:14px;
+                    font-size:1rem;
+                    font-weight:700;
+                    cursor:pointer;
+                    box-shadow:0 8px 24px rgba(102,126,234,0.4);
+                ">🚀 Esplora le Promozioni</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    @keyframes cdm86ModalIn {
+        from { opacity:0; transform:scale(0.85) translateY(20px); }
+        to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+    </style>
+
     <script>
     (function() {
         const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00';
-        const PAYMENT_STATUS_KEY  = 'cdm86_payment_status';
 
-        // Crea il banner HTML e lo inietta nel DOM
-        function createBanner(type, message, action) {
-            const existing = document.getElementById('stripe-payment-banner');
-            if (existing) existing.remove();
-
-            const banner = document.createElement('div');
-            banner.id = 'stripe-payment-banner';
-            const colors = {
-                success: { bg: '#f0fdf4', border: '#86efac', color: '#16a34a', icon: '🎉' },
-                warning: { bg: '#fefce8', border: '#fde047', color: '#ca8a04', icon: '⚠️' },
-                error:   { bg: '#fef2f2', border: '#fca5a5', color: '#dc2626', icon: '❌' },
-            };
-            const c = colors[type] || colors.warning;
-            banner.style.cssText = `
-                position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-                background: ${c.bg}; border-bottom: 3px solid ${c.border};
-                padding: 14px 20px; display: flex; align-items: center;
-                justify-content: space-between; gap: 12px;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.1); animation: slideDown 0.3s ease;
-            `;
-            banner.innerHTML = `
-                <span style="color:${c.color}; font-weight:700; font-size:0.95rem;">
-                    ${c.icon} ${message}
-                </span>
-                <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
-                    ${action || ''}
-                    <button onclick="this.closest('#stripe-payment-banner').remove()"
-                        style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:${c.color};line-height:1;">✕</button>
-                </div>
-            `;
-            document.body.insertBefore(banner, document.body.firstChild);
-            // Auto-rimuovi i banner di successo dopo 8s
-            if (type === 'success') setTimeout(() => banner?.remove(), 8000);
-        }
-
-        // Controlla se l'utente ha già pagato (flag in localStorage)
-        function hasPaid() {
-            return localStorage.getItem(PAYMENT_STATUS_KEY) === 'paid';
-        }
-
-        // Segna utente come pagante
-        function markAsPaid() {
-            localStorage.setItem(PAYMENT_STATUS_KEY, 'paid');
-        }
-
-        // Gestisce i parametri URL al ritorno da Stripe
-        function handleStripeReturn() {
-            const params = new URLSearchParams(window.location.search);
-            const paymentResult = params.get('payment');
-
-            if (paymentResult === 'success') {
-                markAsPaid();
-                window.history.replaceState({}, '', window.location.pathname);
-                createBanner('success',
-                    'Pagamento completato! Benvenuto su CDM86 🎊 Accedi ora alle promozioni esclusive.',
-                    ''
-                );
-                return;
+        /* ─── API pubblica ─── */
+        window.cdm86PaymentModal = {
+            open:  function(mode) {
+                const modal = document.getElementById('cdm86-payment-modal');
+                const closeBtn = document.getElementById('cdm86-modal-close-btn');
+                if (mode === 'expired') {
+                    document.getElementById('cdm86-modal-title').textContent = 'Abbonamento Scaduto';
+                    document.getElementById('cdm86-modal-subtitle').textContent = 'Rinnova per continuare ad accedere alle promozioni esclusive';
+                    document.querySelector('#cdm86-modal-box div[style*="font-size:3.5rem"]').textContent = '⏰';
+                    document.getElementById('cdm86-modal-cta').textContent = '🔄 Rinnova Abbonamento — €29/anno';
+                    if (closeBtn) closeBtn.textContent = 'Continua senza accesso completo';
+                }
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            },
+            close: function() {
+                document.getElementById('cdm86-payment-modal').style.display = 'none';
+                document.body.style.overflow = '';
             }
+        };
+
+        /* ─── Gestione ritorno da Stripe (?payment=success) ─── */
+        async function handleStripeReturn() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('payment') !== 'success') return;
+
+            window.history.replaceState({}, '', window.location.pathname);
+
+            // Aspetta Supabase e aggiorna il DB
+            function doUpdate() {
+                if (!window.supabaseClient) { setTimeout(doUpdate, 300); return; }
+                window.supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+                    if (!session) return;
+
+                    const now = new Date();
+                    const expiresAt = new Date(now);
+                    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+                    await window.supabaseClient
+                        .from('users')
+                        .update({
+                            subscription_status: 'active',
+                            subscription_started_at: now.toISOString(),
+                            subscription_expires_at: expiresAt.toISOString()
+                        })
+                        .eq('auth_user_id', session.user.id);
+
+                    // Mostra modale successo
+                    const successModal = document.getElementById('cdm86-success-modal');
+                    const expiresEl = document.getElementById('cdm86-success-expires');
+                    if (expiresEl) {
+                        expiresEl.textContent = 'Abbonamento valido fino al ' +
+                            expiresAt.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+                    }
+                    if (successModal) {
+                        successModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                        setTimeout(() => {
+                            successModal.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }, 6000);
+                    }
+                });
+            }
+            doUpdate();
         }
 
-        // Controlla se l'utente loggato non ha pagato (banner persistente)
-        async function checkUnpaidUser() {
-            if (hasPaid()) return; // ha già pagato, niente banner
-
-            // Aspetta che supabase sia pronto
+        /* ─── Verifica abbonamento utente dal DB ─── */
+        async function checkSubscription() {
             function waitAndCheck() {
                 if (!window.supabaseClient) { setTimeout(waitAndCheck, 300); return; }
-                window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                    if (!session) return; // non loggato — niente banner
 
-                    // Controlla se è un'organizzazione (non paga)
-                    window.supabaseClient
+                window.supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+                    if (!session) return; // non loggato — niente modale
+
+                    // Controlla se è organizzazione (non paga)
+                    const { data: org } = await window.supabaseClient
                         .from('organizations')
                         .select('id')
                         .eq('auth_user_id', session.user.id)
-                        .maybeSingle()
-                        .then(({ data: org }) => {
-                            if (org) return; // è azienda — non paga
+                        .maybeSingle();
+                    if (org) return;
 
-                            // Controlla se è admin
-                            window.supabaseClient
-                                .from('users')
-                                .select('role')
-                                .eq('auth_user_id', session.user.id)
-                                .maybeSingle()
-                                .then(({ data: user }) => {
-                                    if (user?.role === 'admin') return; // admin — non paga
+                    // Leggi dati abbonamento + ruolo
+                    const { data: user } = await window.supabaseClient
+                        .from('users')
+                        .select('role, subscription_status, subscription_expires_at')
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle();
 
-                                    // Utente normale non pagante → banner
-                                    createBanner('warning',
-                                        'Completa l\'iscrizione per accedere a tutte le promozioni.',
-                                        `<a href="${STRIPE_PAYMENT_LINK}" target="_blank"
-                                            style="background:#ca8a04;color:white;padding:7px 16px;border-radius:8px;
-                                                   text-decoration:none;font-weight:700;font-size:0.85rem;white-space:nowrap;">
-                                            💳 Completa iscrizione
-                                        </a>`
-                                    );
-                                });
-                        });
+                    if (!user) return;
+                    if (user.role === 'admin') return; // admin libero
+
+                    const status  = user.subscription_status || 'none';
+                    const expires = user.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
+                    const now     = new Date();
+
+                    if (status === 'active' && expires && expires > now) {
+                        // ✅ Abbonamento valido — tutto ok
+                        return;
+                    }
+
+                    if ((status === 'active' && expires && expires <= now) || status === 'expired') {
+                        // ⏰ Abbonamento scaduto
+                        await window.supabaseClient
+                            .from('users')
+                            .update({ subscription_status: 'expired' })
+                            .eq('auth_user_id', session.user.id);
+                        window.cdm86PaymentModal.open('expired');
+                        return;
+                    }
+
+                    // ❌ Non ha mai pagato
+                    window.cdm86PaymentModal.open('new');
                 });
             }
             waitAndCheck();
         }
 
-        // Esegui al caricamento pagina
+        // Esegui al caricamento
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 handleStripeReturn();
-                checkUnpaidUser();
+                checkSubscription();
             });
         } else {
             handleStripeReturn();
-            checkUnpaidUser();
+            checkSubscription();
         }
     })();
     </script>
