@@ -1158,9 +1158,9 @@ async function rwSubmit() {
             const modal = document.getElementById('loginModal');
             if (modal) modal.classList.remove('show');
             // Redirect a pagamento Stripe
-            // success_url e cancel_url sono configurati nel Payment Link su Stripe Dashboard:
-            //   success: https://www.cdm86.it/public/promotions.html?payment=success
-            //   cancel:  https://www.cdm86.it/public/promotions.html?payment=cancelled
+            // Su Stripe Dashboard → Payment Link → Edit → After payment:
+            //   success URL: https://www.cdm86.it/public/promotions.html?payment=success
+            // Se l'utente torna indietro senza pagare → vedrà il banner "Completa iscrizione"
             window.location.href = 'https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00';
         }, 1500);
 

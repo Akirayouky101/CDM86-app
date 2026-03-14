@@ -1296,24 +1296,10 @@
 
             if (paymentResult === 'success') {
                 markAsPaid();
-                // Pulisci URL senza reload
                 window.history.replaceState({}, '', window.location.pathname);
                 createBanner('success',
                     'Pagamento completato! Benvenuto su CDM86 🎊 Accedi ora alle promozioni esclusive.',
                     ''
-                );
-                return;
-            }
-
-            if (paymentResult === 'cancelled') {
-                window.history.replaceState({}, '', window.location.pathname);
-                createBanner('warning',
-                    'Pagamento non completato. Puoi riprovare quando vuoi.',
-                    `<a href="${STRIPE_PAYMENT_LINK}" target="_blank"
-                        style="background:#ca8a04;color:white;padding:7px 16px;border-radius:8px;
-                               text-decoration:none;font-weight:700;font-size:0.85rem;white-space:nowrap;">
-                        💳 Riprova il pagamento
-                    </a>`
                 );
                 return;
             }
