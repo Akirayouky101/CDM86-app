@@ -268,13 +268,16 @@
     }
 
     async function loadSettings() {
-        const { data: s } = await supabase_client.from('collaborator_settings').select('*').single();
-        if (!s) return;
-        const fmt = n => '€' + parseFloat(n).toFixed(2).replace('.', ',');
-        document.getElementById('c_l1u').textContent = fmt(s.l1_user_amount || 2);
-        document.getElementById('c_l2u').textContent = fmt(s.l2_user_amount || 1);
-        document.getElementById('c_l3u').textContent = fmt(s.l3_user_amount || 0.5);
-        document.getElementById('c_l1a').textContent = fmt(s.l1_azienda_amount || 50);
+        // La tabella usa struttura key/value: leggiamo tutte le righe
+        const { data: rows } = await supabase_client.from('collaborator_settings').select('setting_key, setting_value');
+        const fmt = n => '€' + parseFloat(n || 0).toFixed(2).replace('.', ',');
+        if (!rows || rows.length === 0) return; // usa valori di default già nel DOM
+        const s = {};
+        rows.forEach(r => { s[r.setting_key] = r.setting_value; });
+        document.getElementById('c_l1u').textContent = fmt(s.l1_user_amount   || s.rate_user_default    || 2);
+        document.getElementById('c_l2u').textContent = fmt(s.l2_user_amount   || 1);
+        document.getElementById('c_l3u').textContent = fmt(s.l3_user_amount   || 0.5);
+        document.getElementById('c_l1a').textContent = fmt(s.l1_azienda_amount || s.rate_azienda_default || 50);
         document.getElementById('c_l2a').textContent = fmt(s.l2_azienda_amount || 20);
         document.getElementById('c_l3a').textContent = fmt(s.l3_azienda_amount || 5);
     }
