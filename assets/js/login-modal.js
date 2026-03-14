@@ -1157,7 +1157,8 @@ async function rwSubmit() {
         setTimeout(() => {
             const modal = document.getElementById('loginModal');
             if (modal) modal.classList.remove('show');
-            window.location.href = '/public/promotions.html';
+            // Redirect a pagamento Stripe — l'utente paga l'iscrizione
+            window.location.href = 'https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00';
         }, 1500);
 
     } catch (error) {
@@ -1620,6 +1621,16 @@ const CompanyWizard = {
                         <h3 style="color: #10b981; margin-bottom: 10px;">Segnalazione Inviata!</h3>
                         <p style="color: #64748b;">L'amministratore riceverà la tua segnalazione a breve.</p>
                         ${emailMessage}
+                        <div style="margin-top: 28px; padding: 20px; background: linear-gradient(135deg, #f8faff, #eff6ff); border: 2px solid #6366f1; border-radius: 16px;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">🚀</div>
+                            <h4 style="color: #0f172a; margin-bottom: 6px; font-size: 1rem;">Vuoi attivare subito il profilo aziendale?</h4>
+                            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 14px;">Completa l'abbonamento e la tua azienda apparirà su CDM86 con promozioni, pagina dedicata e molto altro.</p>
+                            <a href="https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00" target="_blank"
+                               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: opacity 0.2s;">
+                                💳 Attiva ora l'abbonamento
+                            </a>
+                            <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 10px;">Puoi farlo anche in seguito dal tuo pannello aziendale</p>
+                        </div>
                     </div>
                 `;
             }
