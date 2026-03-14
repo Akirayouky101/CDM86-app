@@ -1331,6 +1331,10 @@
             <button class="tab" onclick="switchTab('zones')">
                 <i class="fas fa-map-marked-alt"></i> Zone CAP
             </button>
+            <button class="tab" onclick="switchTab('collaboratori')" id="tabCollaboratori">
+                <i class="fas fa-handshake"></i> Collaboratori
+                <span id="cfCountPending" style="background:#dc2626;color:white;border-radius:50%;width:18px;height:18px;font-size:0.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span>
+            </button>
 
         </div>
 
@@ -2800,6 +2804,79 @@
                 <button class="btn btn-danger" onclick="confirmDeletePromo()">
                     <i class="fas fa-trash"></i> Elimina
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLLABORATORI TAB -->
+    <div id="collaboratoriTab" class="tab-content">
+        <div class="section-header">
+            <div>
+                <h2><i class="fas fa-handshake"></i> Collaboratori</h2>
+                <p>Gestisci le richieste e i collaboratori attivi</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="margin-bottom:1.5rem;">
+            <div class="stat-card">
+                <div class="stat-header"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-hourglass-half"></i></div></div>
+                <div class="stat-value" id="collabStatPending">0</div>
+                <div class="stat-label">In attesa</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-check-circle"></i></div></div>
+                <div class="stat-value" id="collabStatActive">0</div>
+                <div class="stat-label">Attivi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><div class="stat-icon" style="background:#eff6ff;color:#3b82f6;"><i class="fas fa-users"></i></div></div>
+                <div class="stat-value" id="collabStatTotal">0</div>
+                <div class="stat-label">Totale</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><div class="stat-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fas fa-euro-sign"></i></div></div>
+                <div class="stat-value" id="collabStatEarned">€0</div>
+                <div class="stat-label">Guadagnato</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><div class="stat-icon" style="background:#fefce8;color:#ca8a04;"><i class="fas fa-wallet"></i></div></div>
+                <div class="stat-value" id="collabStatToPay">€0</div>
+                <div class="stat-label">Da pagare</div>
+            </div>
+        </div>
+
+        <!-- Filters + Search -->
+        <div class="card">
+            <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+                <h3><i class="fas fa-list"></i> Lista Collaboratori</h3>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-primary btn-sm" onclick="filterCollaboratori('all')">Tutti</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('pending')" style="background:#fef3c7;color:#d97706;border-color:#fde68a;">⏳ In attesa</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('active')" style="background:#dcfce7;color:#16a34a;border-color:#bbf7d0;">✅ Attivi</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('suspended')" style="background:#fef2f2;color:#dc2626;border-color:#fecaca;">🚫 Sospesi</button>
+                    <input type="text" id="collabSearch" placeholder="🔍 Cerca per nome o email..."
+                        style="padding:7px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.875rem;outline:none;min-width:220px;"
+                        oninput="renderCollaboratoriTable()">
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Collaboratore</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Stato</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Rete</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Guadagnato</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Da pagare</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Registrato</th>
+                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="collaboratoriTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:48px;color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Caricamento...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
