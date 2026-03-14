@@ -22,11 +22,13 @@ ALTER TABLE public.users
 -- 4. Crea la funzione RPC per incrementare users_count del collaboratore
 CREATE OR REPLACE FUNCTION public.increment_collaborator_users_count(collab_id UUID)
 RETURNS void
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $func$
+BEGIN
     UPDATE public.collaborators
     SET users_count = users_count + 1,
         updated_at  = NOW()
     WHERE id = collab_id;
-$$;
+END;
+$func$;
