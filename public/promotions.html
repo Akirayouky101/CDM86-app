@@ -1401,13 +1401,32 @@
                         text-align:center;
                         margin-bottom:1.5rem;
                         border:1px solid #e0e7ff;
+                        position:relative;
+                        overflow:hidden;
                     ">
-                        <div style="font-size:0.85rem; color:#6366f1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">Abbonamento Annuale</div>
-                        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.25rem;">
-                            <span style="font-size:2.5rem; font-weight:900; color:#4f46e5;">€10</span>
+                        <!-- Badge promo -->
+                        <div style="
+                            position:absolute; top:0; right:0;
+                            background:linear-gradient(135deg,#f43f5e,#e11d48);
+                            color:#fff; font-size:0.7rem; font-weight:800;
+                            padding:4px 12px; border-radius:0 16px 0 12px;
+                            letter-spacing:0.04em; text-transform:uppercase;
+                        ">🎉 Promo 2026</div>
+
+                        <div style="font-size:0.85rem; color:#6366f1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Abbonamento Annuale</div>
+
+                        <!-- Prezzo barrato -->
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-bottom:0.2rem;">
+                            Prezzo dal 2027: <span style="text-decoration:line-through; font-weight:700; color:#cbd5e1;">€20/anno</span>
+                        </div>
+
+                        <!-- Prezzo attuale -->
+                        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.25rem; margin-bottom:0.15rem;">
+                            <span style="font-size:2.8rem; font-weight:900; color:#4f46e5;">€10</span>
                             <span style="font-size:1rem; color:#94a3b8;">/anno</span>
                         </div>
-                        <div style="font-size:0.8rem; color:#64748b; margin-top:0.25rem;">meno di <strong style="color:#4f46e5;">€0,84 al mese</strong></div>
+                        <div style="font-size:0.8rem; color:#64748b;">meno di <strong style="color:#4f46e5;">€0,84 al mese</strong></div>
+                        <div style="font-size:0.75rem; color:#f43f5e; font-weight:700; margin-top:0.4rem;">⏰ Solo per tutto il 2026 — poi passa a €20</div>
                     </div>
 
                     <!-- Benefici -->
