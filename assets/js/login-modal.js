@@ -513,8 +513,8 @@ async function handleLogin(event) {
             setTimeout(() => {
                 if (collabData) {
                     // It's a collaborator — send to dedicated portal
-                    console.log('✅ Collaborator login — redirecting to cdm86.io');
-                    window.location.href = 'https://cdm86.io';
+                    console.log('✅ Collaborator login — redirecting to collaborator dashboard');
+                    window.location.href = '/public/collaborator-dashboard.html';
                 } else if (orgData) {
                     // It's an organization
                     console.log('✅ Organization login:', orgData.name);

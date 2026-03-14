@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDM86 · Dashboard Collaboratori</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background:#f0f4f8; color:#1e293b; min-height:100vh; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color:white; padding:0 24px;
+            display:flex; align-items:center; justify-content:space-between;
+            height:64px; position:sticky; top:0; z-index:100;
+            box-shadow:0 2px 12px rgba(0,0,0,0.2);
+        }
+        .topbar-logo { font-size:1.4rem; font-weight:900; letter-spacing:-0.5px; }
+        .topbar-logo span { color:#818cf8; }
+        .topbar-user { display:flex; align-items:center; gap:12px; font-size:0.875rem; }
+        .topbar-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; font-size:0.9rem; color:white;
+        }
+        .topbar-logout {
+            background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+            color:white; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:0.8rem;
+            transition:all 0.2s;
+        }
+        .topbar-logout:hover { background:rgba(255,255,255,0.2); }
+
+        /* ── LAYOUT ── */
+        .container { max-width:1200px; margin:0 auto; padding:24px 20px; }
+
+        /* ── TABS ── */
+        .tabs {
+            display:flex; gap:4px; background:white; padding:6px;
+            border-radius:14px; margin-bottom:24px;
+            box-shadow:0 1px 4px rgba(0,0,0,0.08);
+        }
+        .tab-btn {
+            flex:1; padding:10px 16px; border:none; background:transparent;
+            border-radius:10px; cursor:pointer; font-size:0.875rem; font-weight:600;
+            color:#64748b; transition:all 0.2s; display:flex; align-items:center;
+            justify-content:center; gap:8px;
+        }
+        .tab-btn.active {
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            color:white; box-shadow:0 4px 12px rgba(99,102,241,0.3);
+        }
+        .tab-btn .badge {
+            background:rgba(255,255,255,0.3); color:white;
+            border-radius:20px; padding:1px 7px; font-size:0.7rem; font-weight:800;
+        }
+        .tab-btn:not(.active) .badge {
+            background:#ef4444; color:white;
+        }
+
+        /* ── PANELS ── */
+        .panel { display:none; }
+        .panel.active { display:block; }
+
+        /* ── CARD ── */
+        .card {
+            background:white; border-radius:16px; padding:20px;
+            box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:16px;
+        }
+        .card-header {
+            display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:16px; padding-bottom:12px;
+            border-bottom:1px solid #f1f5f9;
+        }
+        .card-header h3 { font-size:1rem; font-weight:700; color:#0f172a; }
+
+        /* ── BTN ── */
+        .btn {
+            padding:8px 16px; border-radius:8px; border:none; cursor:pointer;
+            font-weight:600; font-size:0.85rem; transition:all 0.15s;
+            display:inline-flex; align-items:center; gap:6px;
+        }
+        .btn-primary { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
+        .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
+        .btn-secondary { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+        .btn-secondary:hover { background:#e2e8f0; }
+        .btn-danger { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+        .btn-danger:hover { background:#fee2e2; }
+        .btn-success { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+        .btn-success:hover { background:#dcfce7; }
+        .btn-sm { padding:5px 10px; font-size:0.78rem; }
+
+        /* ── FORM ── */
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width:100%; padding:9px 12px; border:1.5px solid #e5e7eb; border-radius:8px;
+            font-size:0.875rem; color:#1e293b; background:white;
+            transition:border-color 0.15s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline:none; border-color:#6366f1;
+        }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+        /* ── TABLE ── */
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+        th { background:#f8fafc; padding:10px 12px; text-align:left; font-size:0.75rem;
+             font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;
+             border-bottom:1px solid #e2e8f0; }
+        td { padding:12px 12px; border-bottom:1px solid #f1f5f9; color:#374151; vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:#fafafa; }
+
+        /* ── BADGE STATUS ── */
+        .badge-status {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:700;
+        }
+        .badge-todo      { background:#f1f5f9; color:#64748b; }
+        .badge-progress  { background:#dbeafe; color:#2563eb; }
+        .badge-done      { background:#dcfce7; color:#16a34a; }
+        .badge-pending   { background:#fef3c7; color:#d97706; }
+        .badge-answered  { background:#dcfce7; color:#16a34a; }
+        .badge-callback  { background:#ede9fe; color:#7c3aed; }
+        .badge-noanswer  { background:#fee2e2; color:#dc2626; }
+        .badge-converted { background:#d1fae5; color:#059669; }
+        .badge-notint    { background:#f1f5f9; color:#94a3b8; }
+
+        /* ── PRIORITY ── */
+        .prio-high   { color:#dc2626; font-weight:700; }
+        .prio-normal { color:#d97706; }
+        .prio-low    { color:#94a3b8; }
+
+        /* ── NOTE GRID ── */
+        .notes-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
+        .note-card {
+            border-radius:14px; padding:18px; position:relative;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:pointer;
+            transition:transform 0.15s, box-shadow 0.15s;
+        }
+        .note-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+        .note-card.pinned::before {
+            content:'📌'; position:absolute; top:10px; right:12px; font-size:1rem;
+        }
+        .note-title { font-weight:700; font-size:0.95rem; margin-bottom:8px; color:#0f172a; }
+        .note-content { font-size:0.85rem; color:#475569; line-height:1.5; white-space:pre-wrap; }
+        .note-date { font-size:0.72rem; color:#94a3b8; margin-top:10px; }
+        .note-actions { display:flex; gap:6px; margin-top:10px; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+            z-index:1000; align-items:center; justify-content:center;
+        }
+        .modal-overlay.active { display:flex; }
+        .modal-box {
+            background:white; border-radius:20px; padding:28px;
+            width:90%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-title { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px;
+                       display:flex; align-items:center; gap:10px; }
+        .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+        /* ── EMPTY STATE ── */
+        .empty { text-align:center; padding:40px 20px; color:#94a3b8; }
+        .empty i { font-size:2.5rem; margin-bottom:12px; display:block; opacity:0.4; }
+
+        /* ── TOAST ── */
+        #toast {
+            position:fixed; bottom:24px; right:24px; background:#1e293b; color:white;
+            padding:12px 20px; border-radius:12px; font-size:0.875rem; font-weight:600;
+            transform:translateY(100px); opacity:0; transition:all 0.3s; z-index:9999;
+        }
+        #toast.show { transform:translateY(0); opacity:1; }
+
+        /* ── COLLAB PANEL (solo admin) ── */
+        .collab-request-card {
+            border:1.5px solid #e2e8f0; border-radius:12px; padding:16px;
+            display:flex; align-items:center; justify-content:space-between;
+            gap:12px; margin-bottom:10px;
+        }
+        .collab-info h4 { font-weight:700; font-size:0.95rem; color:#0f172a; }
+        .collab-info p  { font-size:0.8rem; color:#64748b; margin-top:2px; }
+
+        @media(max-width:640px) {
+            .form-row { grid-template-columns:1fr; }
+            .tabs { flex-direction:column; }
+            .tab-btn { justify-content:flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-logo">CDM<span>86</span> · Collaboratori</div>
+    <div class="topbar-user">
+        <div class="topbar-avatar" id="avatarInitials">?</div>
+        <span id="topbarName">Caricamento...</span>
+        <button class="topbar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Esci</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tasks')" id="tab-tasks">
+            <i class="fas fa-tasks"></i> Task
+            <span class="badge" id="badge-tasks" style="display:none;">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('calls')" id="tab-calls">
+            <i class="fas fa-phone"></i> Chiamate
+            <span class="badge" id="badge-calls" style="display:none;">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('notes')" id="tab-notes">
+            <i class="fas fa-sticky-note"></i> Note
+        </button>
+        <button class="tab-btn" onclick="switchTab('collaborators')" id="tab-collaborators" style="display:none;">
+            <i class="fas fa-handshake"></i> Gestione
+            <span class="badge" id="badge-pending" style="display:none;">0</span>
+        </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL: TASK
+    ══════════════════════════════════════════ -->
+    <div class="panel active" id="panel-tasks">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-tasks" style="color:#6366f1;margin-right:6px;"></i> Le mie Task</h3>
+                <button class="btn btn-primary btn-sm" onclick="openTaskModal()">
+                    <i class="fas fa-plus"></i> Nuova Task
+                </button>
+            </div>
+            <!-- Filtri -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="filterTasks('all')" id="tf-all">Tutte</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterTasks('todo')" id="tf-todo">📋 Da fare</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterTasks('in_progress')" id="tf-progress">🔄 In corso</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterTasks('done')" id="tf-done">✅ Completate</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Task</th>
+                        <th>Priorità</th>
+                        <th>Stato</th>
+                        <th>Scadenza</th>
+                        <th>Azioni</th>
+                    </tr></thead>
+                    <tbody id="tasks-tbody">
+                        <tr><td colspan="5" class="empty"><i class="fas fa-spinner fa-spin"></i> Caricamento...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL: CHIAMATE
+    ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-calls">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-phone" style="color:#6366f1;margin-right:6px;"></i> Chiamate</h3>
+                <button class="btn btn-primary btn-sm" onclick="openCallModal()">
+                    <i class="fas fa-plus"></i> Nuova Chiamata
+                </button>
+            </div>
+            <!-- Filtri -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="filterCalls('all')" id="cf-all">Tutte</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCalls('pending')" id="cf-pending">⏳ Da chiamare</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCalls('callback')" id="cf-callback">🔄 Da richiamare</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCalls('converted')" id="cf-converted">✅ Convertite</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Contatto</th>
+                        <th>Programmata</th>
+                        <th>Esito</th>
+                        <th>Richiamare il</th>
+                        <th>Note</th>
+                        <th>Azioni</th>
+                    </tr></thead>
+                    <tbody id="calls-tbody">
+                        <tr><td colspan="6" class="empty"><i class="fas fa-spinner fa-spin"></i> Caricamento...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL: NOTE
+    ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-notes">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-sticky-note" style="color:#6366f1;margin-right:6px;"></i> Note</h3>
+                <button class="btn btn-primary btn-sm" onclick="openNoteModal()">
+                    <i class="fas fa-plus"></i> Nuova Nota
+                </button>
+            </div>
+            <div class="notes-grid" id="notes-grid">
+                <div class="empty"><i class="fas fa-spinner fa-spin"></i><br>Caricamento...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL: GESTIONE COLLABORATORI (solo admin)
+    ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-collaborators">
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;">
+            <div class="card" style="text-align:center;padding:16px;">
+                <div style="font-size:1.8rem;font-weight:900;color:#d97706;" id="cs-pending">0</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">⏳ In attesa</div>
+            </div>
+            <div class="card" style="text-align:center;padding:16px;">
+                <div style="font-size:1.8rem;font-weight:900;color:#16a34a;" id="cs-active">0</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">✅ Attivi</div>
+            </div>
+            <div class="card" style="text-align:center;padding:16px;">
+                <div style="font-size:1.8rem;font-weight:900;color:#6366f1;" id="cs-total">0</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">👥 Totale</div>
+            </div>
+            <div class="card" style="text-align:center;padding:16px;">
+                <div style="font-size:1.8rem;font-weight:900;color:#9333ea;" id="cs-topay">€0</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">💰 Da pagare</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-handshake" style="color:#6366f1;margin-right:6px;"></i> Collaboratori</h3>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="collab-search" placeholder="🔍 Cerca..." oninput="renderCollabTable()"
+                        style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.85rem;width:200px;">
+                </div>
+            </div>
+            <!-- Filtri stato -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="setCollabFilter('all')">Tutti</button>
+                <button class="btn btn-secondary btn-sm" onclick="setCollabFilter('pending')" style="background:#fef3c7;color:#d97706;">⏳ In attesa</button>
+                <button class="btn btn-secondary btn-sm" onclick="setCollabFilter('active')">✅ Attivi</button>
+                <button class="btn btn-secondary btn-sm" onclick="setCollabFilter('suspended')">🚫 Sospesi</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Collaboratore</th>
+                        <th>Stato</th>
+                        <th>Rete</th>
+                        <th>Guadagnato</th>
+                        <th>Da pagare</th>
+                        <th>Iscritto</th>
+                        <th>Azioni</th>
+                    </tr></thead>
+                    <tbody id="collab-tbody">
+                        <tr><td colspan="7" class="empty"><i class="fas fa-spinner fa-spin"></i> Caricamento...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+
+<!-- MODAL TASK -->
+<div class="modal-overlay" id="modal-task">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-tasks" style="color:#6366f1;"></i> <span id="task-modal-title">Nuova Task</span></div>
+        <input type="hidden" id="task-id">
+        <div class="form-group"><label>Titolo *</label><input type="text" id="task-title" placeholder="es. Contattare Rossi Srl"></div>
+        <div class="form-group"><label>Descrizione</label><textarea id="task-desc" rows="3" placeholder="Dettagli..."></textarea></div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Priorità</label>
+                <select id="task-priority">
+                    <option value="low">🟢 Bassa</option>
+                    <option value="normal" selected>🟡 Normale</option>
+                    <option value="high">🔴 Alta</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Stato</label>
+                <select id="task-status">
+                    <option value="todo">📋 Da fare</option>
+                    <option value="in_progress">🔄 In corso</option>
+                    <option value="done">✅ Completata</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label>Scadenza</label><input type="datetime-local" id="task-due"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-task')">Annulla</button>
+            <button class="btn btn-primary" onclick="saveTask()"><i class="fas fa-save"></i> Salva</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CHIAMATA -->
+<div class="modal-overlay" id="modal-call">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-phone" style="color:#6366f1;"></i> <span id="call-modal-title">Nuova Chiamata</span></div>
+        <input type="hidden" id="call-id">
+        <div class="form-row">
+            <div class="form-group"><label>Nome contatto</label><input type="text" id="call-name" placeholder="es. Mario Rossi"></div>
+            <div class="form-group"><label>Telefono</label><input type="tel" id="call-phone" placeholder="+39..."></div>
+        </div>
+        <div class="form-group"><label>Email contatto</label><input type="email" id="call-email" placeholder="email@esempio.it"></div>
+        <div class="form-row">
+            <div class="form-group"><label>Data/ora programmata</label><input type="datetime-local" id="call-scheduled"></div>
+            <div class="form-group">
+                <label>Esito</label>
+                <select id="call-outcome">
+                    <option value="pending">⏳ Da chiamare</option>
+                    <option value="answered">📞 Risposto</option>
+                    <option value="no_answer">📵 Non risponde</option>
+                    <option value="callback">🔄 Da richiamare</option>
+                    <option value="not_interested">❌ Non interessato</option>
+                    <option value="converted">✅ Convertito</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label>Richiamare il</label><input type="datetime-local" id="call-callback"></div>
+        <div class="form-group"><label>Note chiamata</label><textarea id="call-notes" rows="3" placeholder="Cosa ha detto, prossimi passi..."></textarea></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-call')">Annulla</button>
+            <button class="btn btn-primary" onclick="saveCall()"><i class="fas fa-save"></i> Salva</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NOTA -->
+<div class="modal-overlay" id="modal-note">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-sticky-note" style="color:#6366f1;"></i> <span id="note-modal-title">Nuova Nota</span></div>
+        <input type="hidden" id="note-id">
+        <div class="form-group"><label>Titolo (opzionale)</label><input type="text" id="note-title" placeholder="Titolo nota..."></div>
+        <div class="form-group"><label>Testo *</label><textarea id="note-content" rows="5" placeholder="Scrivi qui..."></textarea></div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Colore sfondo</label>
+                <select id="note-color">
+                    <option value="#ffffff">⬜ Bianco</option>
+                    <option value="#fef9c3">🟡 Giallo</option>
+                    <option value="#dbeafe">🔵 Azzurro</option>
+                    <option value="#dcfce7">🟢 Verde</option>
+                    <option value="#fce7f3">🩷 Rosa</option>
+                    <option value="#ede9fe">🟣 Viola</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fissa in cima</label>
+                <select id="note-pinned">
+                    <option value="false">No</option>
+                    <option value="true">📌 Sì</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-note')">Annulla</button>
+            <button class="btn btn-primary" onclick="saveNote()"><i class="fas fa-save"></i> Salva</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// SUPABASE INIT
+// ══════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.UrduOFx1sTLRLzFjM4xmVCDmqCB7rqZlvRhopJ3v0Oc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser   = null;
+let collabRecord  = null;  // record nella tabella collaborators
+let isAdmin       = false;
+let allTasks      = [];
+let allCalls      = [];
+let allCollabs    = [];
+let taskFilter    = 'all';
+let callFilter    = 'all';
+let collabFilter  = 'all';
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '/index.html'; return; }
+    currentUser = session.user;
+
+    // Aggiorna topbar
+    const meta = session.user.user_metadata || {};
+    const name = (meta.first_name || '') + ' ' + (meta.last_name || '');
+    document.getElementById('topbarName').textContent = name.trim() || session.user.email;
+    document.getElementById('avatarInitials').textContent =
+        ((meta.first_name||'?')[0] + (meta.last_name||'')[0]).toUpperCase();
+
+    // Controlla se è admin
+    const { data: userRow } = await sb.from('users')
+        .select('role').eq('auth_user_id', currentUser.id).maybeSingle();
+    isAdmin = userRow?.role === 'admin';
+
+    if (isAdmin) {
+        document.getElementById('tab-collaborators').style.display = 'flex';
+    } else {
+        // Cerca record collaborator
+        const { data: collab } = await sb.from('collaborators')
+            .select('*').eq('auth_user_id', currentUser.id).maybeSingle();
+        if (!collab) { window.location.href = '/index.html'; return; }
+        collabRecord = collab;
+        if (collab.status === 'pending') {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#64748b;text-align:center;padding:20px;">
+                    <div style="font-size:4rem;margin-bottom:16px;">⏳</div>
+                    <h2 style="font-size:1.4rem;color:#0f172a;margin-bottom:8px;">Candidatura in attesa di approvazione</h2>
+                    <p>Il tuo account collaboratore è in fase di revisione.<br>Riceverai una notifica quando verrà approvato.</p>
+                </div>`;
+            return;
+        }
+    }
+
+    loadTasks();
+    loadCalls();
+    loadNotes();
+    if (isAdmin) loadCollabs();
+}
+
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function toast(msg, color='#1e293b') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.background = color;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+function openModal(id)  { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function collabId() { return isAdmin ? null : collabRecord?.id; }
+
+// ══════════════════════════════════════════════════════════
+// TASKS
+// ══════════════════════════════════════════════════════════
+async function loadTasks() {
+    let q = sb.from('collaborator_tasks').select('*').order('created_at', { ascending: false });
+    if (!isAdmin) q = q.eq('collaborator_id', collabRecord.id);
+    const { data, error } = await q;
+    if (error) { console.error(error); return; }
+    allTasks = data || [];
+    // Badge todo/in_progress
+    const open = allTasks.filter(t => t.status !== 'done').length;
+    const badge = document.getElementById('badge-tasks');
+    if (open > 0) { badge.textContent = open; badge.style.display = 'inline-flex'; }
+    else badge.style.display = 'none';
+    renderTasks();
+}
+
+function filterTasks(f) { taskFilter = f; renderTasks(); }
+
+function renderTasks() {
+    let rows = taskFilter === 'all' ? allTasks : allTasks.filter(t => t.status === taskFilter);
+    const statusBadge = {
+        todo:        '<span class="badge-status badge-todo">📋 Da fare</span>',
+        in_progress: '<span class="badge-status badge-progress">🔄 In corso</span>',
+        done:        '<span class="badge-status badge-done">✅ Fatto</span>'
+    };
+    const prioBadge = { high:'<span class="prio-high">🔴 Alta</span>', normal:'<span class="prio-normal">🟡 Normale</span>', low:'<span class="prio-low">🟢 Bassa</span>' };
+    const tbody = document.getElementById('tasks-tbody');
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-check-circle"></i><br>Nessuna task</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = rows.map(t => `
+        <tr>
+            <td>
+                <div style="font-weight:600;color:#0f172a;">${t.title}</div>
+                ${t.description ? `<div style="font-size:0.78rem;color:#94a3b8;margin-top:2px;">${t.description}</div>` : ''}
+            </td>
+            <td>${prioBadge[t.priority] || t.priority}</td>
+            <td>${statusBadge[t.status] || t.status}</td>
+            <td style="font-size:0.8rem;color:#64748b;">${fmtDate(t.due_date)}</td>
+            <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    ${t.status !== 'done' ? `<button class="btn btn-success btn-sm" onclick="markTaskDone('${t.id}')"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="btn btn-secondary btn-sm" onclick="editTask('${t.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+}
+
+function openTaskModal(id=null) {
+    document.getElementById('task-id').value = id || '';
+    document.getElementById('task-modal-title').textContent = id ? 'Modifica Task' : 'Nuova Task';
+    document.getElementById('task-title').value = '';
+    document.getElementById('task-desc').value = '';
+    document.getElementById('task-priority').value = 'normal';
+    document.getElementById('task-status').value = 'todo';
+    document.getElementById('task-due').value = '';
+    if (id) {
+        const t = allTasks.find(x => x.id === id);
+        if (t) {
+            document.getElementById('task-title').value = t.title || '';
+            document.getElementById('task-desc').value = t.description || '';
+            document.getElementById('task-priority').value = t.priority || 'normal';
+            document.getElementById('task-status').value = t.status || 'todo';
+            document.getElementById('task-due').value = t.due_date ? t.due_date.slice(0,16) : '';
+        }
+    }
+    openModal('modal-task');
+}
+
+function editTask(id) { openTaskModal(id); }
+
+async function saveTask() {
+    const title = document.getElementById('task-title').value.trim();
+    if (!title) { toast('❌ Il titolo è obbligatorio'); return; }
+    const id = document.getElementById('task-id').value;
+    const payload = {
+        title,
+        description: document.getElementById('task-desc').value.trim() || null,
+        priority:    document.getElementById('task-priority').value,
+        status:      document.getElementById('task-status').value,
+        due_date:    document.getElementById('task-due').value || null,
+        updated_at:  new Date().toISOString()
+    };
+    if (!id) payload.collaborator_id = isAdmin ? null : collabRecord.id;
+    const { error } = id
+        ? await sb.from('collaborator_tasks').update(payload).eq('id', id)
+        : await sb.from('collaborator_tasks').insert(payload);
+    if (error) { toast('❌ Errore: ' + error.message, '#dc2626'); return; }
+    toast('✅ Task salvata!', '#16a34a');
+    closeModal('modal-task');
+    loadTasks();
+}
+
+async function markTaskDone(id) {
+    await sb.from('collaborator_tasks').update({ status:'done', completed_at: new Date().toISOString() }).eq('id', id);
+    toast('✅ Task completata!', '#16a34a');
+    loadTasks();
+}
+
+async function deleteTask(id) {
+    if (!confirm('Eliminare questa task?')) return;
+    await sb.from('collaborator_tasks').delete().eq('id', id);
+    toast('🗑️ Task eliminata');
+    loadTasks();
+}
+
+// ══════════════════════════════════════════════════════════
+// CHIAMATE
+// ══════════════════════════════════════════════════════════
+async function loadCalls() {
+    let q = sb.from('collaborator_calls').select('*').order('scheduled_at', { ascending: true });
+    if (!isAdmin) q = q.eq('collaborator_id', collabRecord.id);
+    const { data } = await q;
+    allCalls = data || [];
+    // Badge callback/pending
+    const urgent = allCalls.filter(c => c.outcome === 'callback' || c.outcome === 'pending').length;
+    const badge = document.getElementById('badge-calls');
+    if (urgent > 0) { badge.textContent = urgent; badge.style.display = 'inline-flex'; }
+    else badge.style.display = 'none';
+    renderCalls();
+}
+
+function filterCalls(f) { callFilter = f; renderCalls(); }
+
+function renderCalls() {
+    let rows = callFilter === 'all' ? allCalls : allCalls.filter(c => c.outcome === callFilter);
+    const outcomeBadge = {
+        pending:      '<span class="badge-status badge-pending">⏳ Da chiamare</span>',
+        answered:     '<span class="badge-status badge-answered">📞 Risposto</span>',
+        no_answer:    '<span class="badge-status badge-noanswer">📵 Non risponde</span>',
+        callback:     '<span class="badge-status badge-callback">🔄 Richiamare</span>',
+        not_interested:'<span class="badge-status badge-notint">❌ Non interessato</span>',
+        converted:    '<span class="badge-status badge-converted">✅ Convertito</span>'
+    };
+    const tbody = document.getElementById('calls-tbody');
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="fas fa-phone-slash"></i><br>Nessuna chiamata</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = rows.map(c => `
+        <tr>
+            <td>
+                <div style="font-weight:600;color:#0f172a;">${c.contact_name || '—'}</div>
+                <div style="font-size:0.78rem;color:#94a3b8;">${c.contact_phone || ''} ${c.contact_email || ''}</div>
+            </td>
+            <td style="font-size:0.8rem;color:#64748b;">${fmtDate(c.scheduled_at)}</td>
+            <td>${outcomeBadge[c.outcome] || c.outcome}</td>
+            <td style="font-size:0.8rem;color:${c.callback_at ? '#7c3aed' : '#94a3b8'};">${fmtDate(c.callback_at)}</td>
+            <td style="font-size:0.8rem;color:#64748b;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.notes || '—'}</td>
+            <td>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-secondary btn-sm" onclick="editCall('${c.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCall('${c.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+}
+
+function openCallModal(id=null) {
+    document.getElementById('call-id').value = id || '';
+    document.getElementById('call-modal-title').textContent = id ? 'Modifica Chiamata' : 'Nuova Chiamata';
+    ['call-name','call-phone','call-email','call-notes'].forEach(f => document.getElementById(f).value = '');
+    document.getElementById('call-scheduled').value = '';
+    document.getElementById('call-callback').value = '';
+    document.getElementById('call-outcome').value = 'pending';
+    if (id) {
+        const c = allCalls.find(x => x.id === id);
+        if (c) {
+            document.getElementById('call-name').value      = c.contact_name  || '';
+            document.getElementById('call-phone').value     = c.contact_phone || '';
+            document.getElementById('call-email').value     = c.contact_email || '';
+            document.getElementById('call-notes').value     = c.notes         || '';
+            document.getElementById('call-outcome').value   = c.outcome       || 'pending';
+            document.getElementById('call-scheduled').value = c.scheduled_at  ? c.scheduled_at.slice(0,16) : '';
+            document.getElementById('call-callback').value  = c.callback_at   ? c.callback_at.slice(0,16) : '';
+        }
+    }
+    openModal('modal-call');
+}
+
+function editCall(id) { openCallModal(id); }
+
+async function saveCall() {
+    const id = document.getElementById('call-id').value;
+    const payload = {
+        contact_name:  document.getElementById('call-name').value.trim() || null,
+        contact_phone: document.getElementById('call-phone').value.trim() || null,
+        contact_email: document.getElementById('call-email').value.trim() || null,
+        scheduled_at:  document.getElementById('call-scheduled').value || null,
+        outcome:       document.getElementById('call-outcome').value,
+        callback_at:   document.getElementById('call-callback').value || null,
+        notes:         document.getElementById('call-notes').value.trim() || null,
+        updated_at:    new Date().toISOString()
+    };
+    if (!id) payload.collaborator_id = isAdmin ? null : collabRecord.id;
+    const { error } = id
+        ? await sb.from('collaborator_calls').update(payload).eq('id', id)
+        : await sb.from('collaborator_calls').insert(payload);
+    if (error) { toast('❌ Errore: ' + error.message, '#dc2626'); return; }
+    toast('✅ Chiamata salvata!', '#16a34a');
+    closeModal('modal-call');
+    loadCalls();
+}
+
+async function deleteCall(id) {
+    if (!confirm('Eliminare questa chiamata?')) return;
+    await sb.from('collaborator_calls').delete().eq('id', id);
+    toast('🗑️ Chiamata eliminata');
+    loadCalls();
+}
+
+// ══════════════════════════════════════════════════════════
+// NOTE
+// ══════════════════════════════════════════════════════════
+async function loadNotes() {
+    let q = sb.from('collaborator_notes').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false });
+    if (!isAdmin) q = q.eq('collaborator_id', collabRecord.id);
+    const { data } = await q;
+    renderNotes(data || []);
+}
+
+function renderNotes(notes) {
+    const grid = document.getElementById('notes-grid');
+    if (!notes.length) {
+        grid.innerHTML = `<div class="empty"><i class="fas fa-sticky-note"></i><br>Nessuna nota. Clicca "Nuova Nota" per iniziare.</div>`;
+        return;
+    }
+    grid.innerHTML = notes.map(n => `
+        <div class="note-card ${n.pinned ? 'pinned' : ''}" style="background:${n.color || '#ffffff'};">
+            ${n.title ? `<div class="note-title">${n.title}</div>` : ''}
+            <div class="note-content">${n.content}</div>
+            <div class="note-date">${fmtDate(n.created_at)}</div>
+            <div class="note-actions">
+                <button class="btn btn-secondary btn-sm" onclick="editNote('${n.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-secondary btn-sm" onclick="togglePin('${n.id}', ${!n.pinned})">${n.pinned ? '📌 Sposta' : '📌 Fissa'}</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`).join('');
+}
+
+function openNoteModal(id=null) {
+    document.getElementById('note-id').value = id || '';
+    document.getElementById('note-modal-title').textContent = id ? 'Modifica Nota' : 'Nuova Nota';
+    document.getElementById('note-title').value = '';
+    document.getElementById('note-content').value = '';
+    document.getElementById('note-color').value = '#ffffff';
+    document.getElementById('note-pinned').value = 'false';
+    if (id) {
+        // carica dati dalla lista locale
+        sb.from('collaborator_notes').select('*').eq('id', id).maybeSingle().then(({ data: n }) => {
+            if (!n) return;
+            document.getElementById('note-title').value   = n.title   || '';
+            document.getElementById('note-content').value = n.content || '';
+            document.getElementById('note-color').value   = n.color   || '#ffffff';
+            document.getElementById('note-pinned').value  = n.pinned ? 'true' : 'false';
+        });
+    }
+    openModal('modal-note');
+}
+
+function editNote(id) { openNoteModal(id); }
+
+async function saveNote() {
+    const content = document.getElementById('note-content').value.trim();
+    if (!content) { toast('❌ Il testo è obbligatorio'); return; }
+    const id = document.getElementById('note-id').value;
+    const payload = {
+        title:      document.getElementById('note-title').value.trim() || null,
+        content,
+        color:      document.getElementById('note-color').value,
+        pinned:     document.getElementById('note-pinned').value === 'true',
+        updated_at: new Date().toISOString()
+    };
+    if (!id) payload.collaborator_id = isAdmin ? null : collabRecord.id;
+    const { error } = id
+        ? await sb.from('collaborator_notes').update(payload).eq('id', id)
+        : await sb.from('collaborator_notes').insert(payload);
+    if (error) { toast('❌ Errore: ' + error.message, '#dc2626'); return; }
+    toast('✅ Nota salvata!', '#16a34a');
+    closeModal('modal-note');
+    loadNotes();
+}
+
+async function togglePin(id, pinned) {
+    await sb.from('collaborator_notes').update({ pinned }).eq('id', id);
+    loadNotes();
+}
+
+async function deleteNote(id) {
+    if (!confirm('Eliminare questa nota?')) return;
+    await sb.from('collaborator_notes').delete().eq('id', id);
+    toast('🗑️ Nota eliminata');
+    loadNotes();
+}
+
+// ══════════════════════════════════════════════════════════
+// GESTIONE COLLABORATORI (solo admin)
+// ══════════════════════════════════════════════════════════
+async function loadCollabs() {
+    const { data } = await sb.from('admin_collaborators_view').select('*').order('registered_at', { ascending: false });
+    allCollabs = data || [];
+    const pending = allCollabs.filter(c => c.status === 'pending').length;
+    const badge = document.getElementById('badge-pending');
+    if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-flex'; }
+    else badge.style.display = 'none';
+    document.getElementById('cs-pending').textContent = pending;
+    document.getElementById('cs-active').textContent  = allCollabs.filter(c => c.status === 'active').length;
+    document.getElementById('cs-total').textContent   = allCollabs.length;
+    const toPay = allCollabs.reduce((s, c) => s + parseFloat(c.total_pending || 0), 0);
+    document.getElementById('cs-topay').textContent = '€' + toPay.toFixed(2);
+    renderCollabTable();
+}
+
+function setCollabFilter(f) { collabFilter = f; renderCollabTable(); }
+
+function renderCollabTable() {
+    const search = (document.getElementById('collab-search')?.value || '').toLowerCase();
+    let rows = collabFilter === 'all' ? allCollabs : allCollabs.filter(c => c.status === collabFilter);
+    if (search) rows = rows.filter(c =>
+        (c.first_name + ' ' + c.last_name + ' ' + c.email).toLowerCase().includes(search));
+    const statusBadge = {
+        pending:   '<span class="badge-status badge-pending">⏳ In attesa</span>',
+        active:    '<span class="badge-status badge-answered">✅ Attivo</span>',
+        suspended: '<span class="badge-status badge-noanswer">🚫 Sospeso</span>',
+        banned:    '<span class="badge-status" style="background:#1f2937;color:#f87171;">⛔ Bannato</span>'
+    };
+    const tbody = document.getElementById('collab-tbody');
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><i class="fas fa-users"></i><br>Nessun collaboratore</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = rows.map(c => {
+        const net  = (c.users_count || 0) + (c.aziende_count || 0);
+        const pend = parseFloat(c.total_pending || 0);
+        const date = c.registered_at ? new Date(c.registered_at).toLocaleDateString('it-IT') : '—';
+        return `<tr>
+            <td>
+                <div style="font-weight:600;color:#0f172a;">${c.first_name} ${c.last_name}</div>
+                <div style="font-size:0.75rem;color:#94a3b8;">${c.email}</div>
+                <div style="font-size:0.72rem;color:#cbd5e1;">Ref: ${c.referral_code || '—'}</div>
+            </td>
+            <td>${statusBadge[c.status] || c.status}</td>
+            <td style="font-weight:600;">${net}</td>
+            <td style="font-weight:700;color:#16a34a;">€${parseFloat(c.total_earned||0).toFixed(2)}</td>
+            <td style="font-weight:700;color:${pend>0?'#d97706':'#94a3b8'};">€${pend.toFixed(2)}</td>
+            <td style="font-size:0.8rem;color:#94a3b8;">${date}</td>
+            <td>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                    ${c.status==='pending'   ? `<button class="btn btn-success btn-sm" onclick="approveCollab('${c.id}')"><i class="fas fa-check"></i> Approva</button>
+                                               <button class="btn btn-danger btn-sm"   onclick="rejectCollab('${c.id}')"><i class="fas fa-times"></i></button>` : ''}
+                    ${c.status==='active'    ? `<button class="btn btn-secondary btn-sm" onclick="setCollabStatus('${c.id}','suspended')"><i class="fas fa-pause"></i></button>` : ''}
+                    ${c.status==='suspended' ? `<button class="btn btn-primary btn-sm"   onclick="setCollabStatus('${c.id}','active')"><i class="fas fa-play"></i> Riattiva</button>` : ''}
+                    ${pend>0                 ? `<button class="btn btn-success btn-sm"   onclick="markPaid('${c.id}',${pend})"><i class="fas fa-euro-sign"></i> Paga €${pend.toFixed(2)}</button>` : ''}
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function approveCollab(id) {
+    if (!confirm('Approvare questo collaboratore?')) return;
+    await sb.from('collaborators').update({ status:'active', approved_at: new Date().toISOString() }).eq('id', id);
+    toast('✅ Collaboratore approvato!', '#16a34a');
+    loadCollabs();
+}
+async function rejectCollab(id) {
+    const note = prompt('Motivo del rifiuto (opzionale):');
+    if (note === null) return;
+    await sb.from('collaborators').update({ status:'banned', notes: note || 'Richiesta rifiutata' }).eq('id', id);
+    toast('❌ Richiesta rifiutata');
+    loadCollabs();
+}
+async function setCollabStatus(id, status) {
+    await sb.from('collaborators').update({ status }).eq('id', id);
+    toast('✅ Stato aggiornato', '#16a34a');
+    loadCollabs();
+}
+async function markPaid(collabId, amount) {
+    if (!confirm(`Segnare come pagati €${amount.toFixed(2)}?`)) return;
+    await sb.from('collaborator_earnings').update({ status:'paid', paid_at: new Date().toISOString() })
+        .eq('collaborator_id', collabId).eq('status', 'credited');
+    toast('💸 Pagamento registrato!', '#16a34a');
+    loadCollabs();
+}
+
+// ══════════════════════════════════════════════════════════
+// LOGOUT
+// ══════════════════════════════════════════════════════════
+async function logout() {
+    await sb.auth.signOut();
+    window.location.href = '/index.html';
+}
+
+// Chiudi modal cliccando fuori
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+
+// START
+init();
+</script>
+</body>
+</html>
