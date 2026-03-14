@@ -98,6 +98,20 @@
         .btn-save { padding: 10px 22px; background: #0f172a; color: white; border: none; border-radius: 10px; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
 
         .loading { text-align: center; padding: 40px; color: #64748b; }
+
+        /* ─── TOAST ─────────────────────────────────────────── */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; font-size: 0.875rem; font-weight: 600; color: white; box-shadow: 0 8px 24px rgba(0,0,0,0.18); pointer-events: all; min-width: 280px; max-width: 380px; animation: slideIn 0.3s ease; }
+        .toast.success { background: #16a34a; }
+        .toast.error   { background: #dc2626; }
+        .toast.info    { background: #2563eb; }
+        .toast i { font-size: 1rem; flex-shrink: 0; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+
+        /* ─── SAVE BUTTON LOADING ────────────────────────────── */
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
         @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -109,6 +123,8 @@
     </style>
 </head>
 <body>
+
+<div id="toast-container"></div>
 
 <div class="sidebar">
     <div class="sidebar-logo">
@@ -374,7 +390,11 @@
     async function saveCall() {
         const id   = document.getElementById('editCallId').value;
         const name = document.getElementById('callName').value.trim();
-        if (!name) { alert('Il nome contatto è obbligatorio'); return; }
+        if (!name) { showToast('Il nome contatto è obbligatorio', 'error'); return; }
+
+        const btn = document.querySelector('.btn-save');
+        btn.disabled = true;
+        btn.textContent = 'Salvataggio…';
 
         const payload = {
             contact_name: name,
@@ -386,25 +406,49 @@
             callback_at:  document.getElementById('callCallback').value || null,
         };
 
+        let error;
         if (id) {
-            const { error } = await sb.from('collaborator_calls').update(payload).eq('id', id);
-            if (error) { alert('Errore: ' + error.message); return; }
+            ({ error } = await sb.from('collaborator_calls').update(payload).eq('id', id));
         } else {
             payload.collaborator_id = collab.id;
-            const { error } = await sb.from('collaborator_calls').insert(payload);
-            if (error) { alert('Errore: ' + error.message); return; }
+            ({ error } = await sb.from('collaborator_calls').insert(payload));
         }
 
+        btn.disabled = false;
+        btn.textContent = 'Salva';
+
+        if (error) {
+            console.error('saveCall error:', error);
+            showToast('Errore nel salvataggio: ' + error.message, 'error');
+            return;
+        }
+
+        showToast(id ? '✅ Chiamata aggiornata!' : '✅ Chiamata aggiunta!', 'success');
         closeModal();
         await loadCalls();
     }
 
     async function deleteCall(id) {
         if (!confirm('Eliminare questa chiamata?')) return;
-        await sb.from('collaborator_calls').delete().eq('id', id);
+        const { error } = await sb.from('collaborator_calls').delete().eq('id', id);
+        if (error) { showToast('Errore eliminazione: ' + error.message, 'error'); return; }
         allCalls = allCalls.filter(c => c.id != id);
         updateStats();
         renderCalls();
+        showToast('🗑️ Chiamata eliminata', 'info');
+    }
+
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+        t.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+        container.appendChild(t);
+        setTimeout(() => {
+            t.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => t.remove(), 300);
+        }, 3500);
     }
 
     function escHtml(s) {
