@@ -2097,9 +2097,9 @@
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.9);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: rgba(10, 14, 30, 0.85);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
     z-index: 10002;
     display: flex;
     align-items: center;
@@ -2109,6 +2109,547 @@
     transition: opacity 0.35s ease;
     padding: 20px;
 }
+
+.org-reg-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.org-reg-modal {
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 40px 100px rgba(102, 126, 234, 0.35), 0 0 0 1px rgba(102,126,234,0.08);
+    max-width: 540px;
+    width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform: scale(0.9) translateY(30px);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.org-reg-modal::-webkit-scrollbar { width: 6px; }
+.org-reg-modal::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 28px 28px 0; }
+.org-reg-modal::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #667eea, #764ba2); border-radius: 10px; }
+
+.org-reg-modal-overlay.active .org-reg-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* ── Header ── */
+.org-reg-header {
+    padding: 48px 44px 36px;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 28px 28px 0 0;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.org-reg-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 40%, rgba(255,255,255,0.12) 0%, transparent 55%),
+        radial-gradient(circle at 85% 75%, rgba(255,255,255,0.10) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.org-reg-icon {
+    font-size: 56px;
+    display: block;
+    margin-bottom: 14px;
+    animation: orgFloatIcon 3.5s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes orgFloatIcon {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+}
+
+.org-reg-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.4px;
+    position: relative;
+    z-index: 1;
+}
+
+.org-reg-header p {
+    font-size: 14px;
+    margin: 0;
+    opacity: 0.88;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Close ── */
+.org-reg-close {
+    position: absolute;
+    top: 16px; right: 18px;
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.28);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    transition: background 0.25s, transform 0.3s;
+    line-height: 1;
+    padding: 0;
+}
+
+.org-reg-close:hover {
+    background: rgba(255,255,255,0.35);
+    transform: rotate(90deg);
+    border-color: rgba(255,255,255,0.5);
+}
+
+/* ── Progress bar ── */
+.org-reg-progress {
+    height: 5px;
+    background: #e8edf5;
+    overflow: hidden;
+    position: relative;
+}
+
+.org-reg-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #a78bfa, #764ba2);
+    background-size: 200% 100%;
+    transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: orgBarShimmer 2.5s linear infinite;
+}
+
+@keyframes orgBarShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Steps ── */
+.org-reg-step {
+    display: none;
+    padding: 32px 40px 36px;
+    animation: orgStepIn 0.3s ease;
+}
+
+.org-reg-step.active { display: block; }
+
+@keyframes orgStepIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Form fields override for org-reg ── */
+.org-reg-step .form-group {
+    margin-bottom: 18px;
+}
+
+.org-reg-step .form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.org-reg-step .form-group label .req {
+    color: #f43f5e;
+    margin-left: 2px;
+}
+
+.org-reg-step .form-group input,
+.org-reg-step .form-group select {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f8fafc;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.2s;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.org-reg-step .form-group input:focus,
+.org-reg-step .form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.14);
+}
+
+.org-reg-step .form-group input::placeholder {
+    color: #b0bec5;
+    font-weight: 400;
+}
+
+.org-reg-step .reg-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23667eea' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 42px;
+    cursor: pointer;
+}
+
+.org-reg-step .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* ── Buttons ── */
+.org-reg-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    align-items: center;
+}
+
+.org-reg-actions .btn-primary,
+.org-reg-actions .btn-secondary {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+}
+
+.org-reg-actions .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.38);
+    position: relative;
+    overflow: hidden;
+}
+
+.org-reg-actions .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.org-reg-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(102, 126, 234, 0.5);
+}
+
+.org-reg-actions .btn-primary:hover::after { opacity: 1; }
+.org-reg-actions .btn-primary span { position: relative; z-index: 1; }
+
+.org-reg-actions .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.org-reg-actions .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.org-reg-actions .btn-secondary {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    box-shadow: none;
+}
+
+.org-reg-actions .btn-secondary:hover {
+    background: #e8edf5;
+    border-color: #cbd5e1;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.org-reg-actions .btn-secondary:active {
+    transform: translateY(0);
+    background: #dde4ef;
+}
+
+/* ── Alerts ── */
+.form-alert { font-size: 13.5px; border-radius: 10px; padding: 0; margin-bottom: 0; }
+.form-alert:empty { display: none; }
+.form-alert-error {
+    background: #fff1f2;
+    border: 1px solid #fda4af;
+    color: #be123c;
+    padding: 11px 14px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+}
+.form-alert-success {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #15803d;
+    padding: 11px 14px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+}
+
+/* ── Referral radio ── */
+.org-reg-referral-question { margin-top: 4px; }
+
+.org-reg-question-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+.org-reg-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.org-reg-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    background: #f8fafc;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.org-reg-radio-label:hover {
+    border-color: #a5b4fc;
+    background: #f5f3ff;
+    box-shadow: 0 2px 10px rgba(102,126,234,0.1);
+}
+
+.org-reg-radio-label input[type="radio"] { display: none; }
+
+.org-reg-radio-custom {
+    width: 22px; height: 22px;
+    border: 2.5px solid #cbd5e1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.22s;
+    position: relative;
+    background: #fff;
+}
+
+.org-reg-radio-label.selected {
+    border-color: #667eea;
+    background: #eef2ff;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.18);
+}
+
+.org-reg-radio-label.selected .org-reg-radio-custom {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.org-reg-radio-label.selected .org-reg-radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 9px; height: 9px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+/* Referral code box */
+#orgRegCodeBox { display: none; }
+#orgRegCodeBox.visible { display: block; animation: orgStepIn 0.25s ease; }
+
+#orgRegCodeBox .form-group { margin-top: 4px; margin-bottom: 0; }
+#orgRegReferralCode {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 700;
+    font-size: 16px !important;
+    text-align: center;
+    background: #fafbff !important;
+    border-color: #c7d2fe !important;
+}
+#orgRegReferralCode:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* ── Summary box ── */
+.org-reg-summary {
+    background: linear-gradient(135deg, #f8fafc 0%, #f0f4ff 100%);
+    border: 2px solid #e0e7ff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    overflow: hidden;
+}
+
+.org-reg-summary-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #667eea;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.org-reg-summary-title::before {
+    content: '📋';
+    font-size: 14px;
+}
+
+.org-reg-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e7ff;
+    font-size: 14px;
+    gap: 12px;
+}
+
+.org-reg-summary-row:last-child { border-bottom: none; }
+
+.org-reg-summary-row span:first-child {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.org-reg-summary-row span:last-child {
+    color: #1e293b;
+    font-weight: 700;
+    text-align: right;
+    word-break: break-all;
+}
+
+/* ── Success step ── */
+.org-reg-success {
+    text-align: center;
+    padding: 16px 0 8px;
+}
+
+.org-reg-success-icon {
+    font-size: 72px;
+    display: block;
+    margin-bottom: 18px;
+    animation: orgSuccessPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes orgSuccessPop {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.org-reg-success h3 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #059669;
+    margin-bottom: 14px;
+}
+
+.org-reg-success p {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+
+.org-reg-success .btn-success-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 36px;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+}
+
+.org-reg-success .btn-success-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(5, 150, 105, 0.45);
+}
+
+/* ── Loading overlay ── */
+.org-reg-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 28px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #667eea;
+    z-index: 5;
+}
+
+.org-reg-loading p { margin: 0; }
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+    .org-reg-modal { border-radius: 22px; max-height: 100vh; border-radius: 22px 22px 0 0; align-self: flex-end; }
+    .org-reg-modal-overlay { align-items: flex-end; padding: 0; }
+    .org-reg-header { border-radius: 22px 22px 0 0; padding: 36px 28px 28px; }
+    .org-reg-step { padding: 24px 24px 28px; }
+    .org-reg-step .form-row { grid-template-columns: 1fr; gap: 0; }
+    .org-reg-actions .btn-primary,
+    .org-reg-actions .btn-secondary { padding: 14px 16px; font-size: 14px; }
+}
+
 
 .org-reg-modal-overlay.active {
     opacity: 1;
