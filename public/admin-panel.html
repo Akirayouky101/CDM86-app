@@ -7154,47 +7154,49 @@
         // ── Settings ─────────────────────────────────────────────────────
         async function loadCollabSettings() {
             const { data } = await window.supabaseClient
-                .from('collaborator_settings').select('*').single();
-            if (!data) return;
+                .from('collaborator_settings').select('*');
+            if (!data || data.length === 0) return;
+            // Converti array [{setting_key, setting_value}] in oggetto
+            const cfg = {};
+            data.forEach(row => { cfg[row.setting_key] = row.setting_value; });
             const s = document.getElementById('collabSettings');
             if (!s) return;
-            const field = (id, label, val) =>
+            const field = (key, label, val) =>
                 `<div style="margin-bottom:12px;">
                     <label style="font-size:0.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">${label}</label>
-                    <input id="cs_${id}" type="number" step="0.01" value="${val}"
+                    <input id="cs_${key}" type="number" step="0.01" value="${val}"
                         style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.9rem;">
                 </div>`;
             s.innerHTML = `
                 <div>
-                    <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Livello 1 (diretto)</div>
-                    ${field('l1_user_amount',    '👤 Utente (€)',      data.l1_user_amount    || 2)}
-                    ${field('l1_azienda_amount', '🏢 Azienda (€)',     data.l1_azienda_amount || 50)}
-                    ${field('l1_assoc_amount',   '🤝 Associazione (€)',data.l1_assoc_amount   || 0)}
+                    <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Compensi base</div>
+                    ${field('rate_user_default',    '👤 € per utente iscritto',   cfg.rate_user_default    || 0.50)}
+                    ${field('rate_azienda_default', '🏢 € per azienda iscritta',  cfg.rate_azienda_default || 5.00)}
                 </div>
                 <div>
-                    <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Livello 2 (indiretto)</div>
-                    ${field('l2_user_amount',    '👤 Utente (€)',      data.l2_user_amount    || 1)}
-                    ${field('l2_azienda_amount', '🏢 Azienda (€)',     data.l2_azienda_amount || 20)}
-                    ${field('l2_assoc_amount',   '🤝 Associazione (€)',data.l2_assoc_amount   || 0)}
-                </div>
-                <div>
-                    <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Livello 3 (solo collab.)</div>
-                    ${field('l3_user_amount',    '👤 Utente (€)',      data.l3_user_amount    || 0.5)}
-                    ${field('l3_azienda_amount', '🏢 Azienda (€)',     data.l3_azienda_amount || 5)}
-                    ${field('l3_assoc_amount',   '🤝 Associazione (€)',data.l3_assoc_amount   || 0)}
-                    ${field('payout_threshold',  '💰 Soglia pagamento (€)', data.payout_threshold || 50)}
+                    <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Pagamenti</div>
+                    ${field('min_payout',  '� Minimo per pagamento (€)', cfg.min_payout  || 20.00)}
+                    ${field('payout_day',  '📅 Giorno del mese',          cfg.payout_day  || 15)}
                 </div>`;
         }
 
         window.saveCollabSettings = async function() {
-            const get = id => parseFloat(document.getElementById('cs_' + id)?.value || 0);
-            const { error } = await window.supabaseClient.from('collaborator_settings').update({
-                l1_user_amount:    get('l1_user_amount'),    l1_azienda_amount: get('l1_azienda_amount'), l1_assoc_amount: get('l1_assoc_amount'),
-                l2_user_amount:    get('l2_user_amount'),    l2_azienda_amount: get('l2_azienda_amount'), l2_assoc_amount: get('l2_assoc_amount'),
-                l3_user_amount:    get('l3_user_amount'),    l3_azienda_amount: get('l3_azienda_amount'), l3_assoc_amount: get('l3_assoc_amount'),
-                payout_threshold: get('payout_threshold')
-            }).eq('singleton', true); // update the singleton row
-            if (error) { alert('Errore: ' + error.message); return; }
+            const get = id => document.getElementById('cs_' + id)?.value || '0';
+            const updates = [
+                { setting_key: 'rate_user_default',    setting_value: get('rate_user_default') },
+                { setting_key: 'rate_azienda_default', setting_value: get('rate_azienda_default') },
+                { setting_key: 'min_payout',           setting_value: get('min_payout') },
+                { setting_key: 'payout_day',           setting_value: get('payout_day') }
+            ];
+            let hasError = false;
+            for (const u of updates) {
+                const { error } = await window.supabaseClient
+                    .from('collaborator_settings')
+                    .update({ setting_value: u.setting_value, updated_at: new Date().toISOString() })
+                    .eq('setting_key', u.setting_key);
+                if (error) { hasError = true; console.error('Errore save settings:', error); }
+            }
+            if (hasError) { alert('Errore nel salvataggio'); return; }
             showNotification('✅ Impostazioni salvate!', 'success');
         };
 
