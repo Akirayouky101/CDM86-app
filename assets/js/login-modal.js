@@ -1049,6 +1049,7 @@ async function rwSubmit() {
         let referrer = null;
         let referrerOrgId = null;
         let referrerOrgName = null;
+        let referrerCollaboratorId = null;
         let referralType = null;
 
         if (referralCode) {
@@ -1079,7 +1080,21 @@ async function rwSubmit() {
                                  : orgData.referral_code_external  === referralCode ? 'org_external'
                                  : 'org_employee';
                 } else {
-                    throw new Error('CODICE REFERRAL NON VALIDO!');
+                    // Cerca in collaborators
+                    const { data: collabData, error: collabError } = await sb
+                        .from('collaborators')
+                        .select('id, first_name, last_name, referral_code')
+                        .eq('referral_code', referralCode)
+                        .eq('status', 'active')
+                        .maybeSingle();
+                    if (collabError) throw new Error('ERRORE DATABASE: ' + collabError.message);
+
+                    if (collabData) {
+                        referrerCollaboratorId = collabData.id;
+                        referralType = 'collaborator';
+                    } else {
+                        throw new Error('CODICE REFERRAL NON VALIDO!');
+                    }
                 }
             }
         }
@@ -1106,7 +1121,7 @@ async function rwSubmit() {
         if (authError) throw authError;
 
         // Imposta referral via API
-        if ((referrer || referrerOrgId) && authData.user) {
+        if ((referrer || referrerOrgId || referrerCollaboratorId) && authData.user) {
             await new Promise(resolve => setTimeout(resolve, 1500));
             const accessToken = authData.session?.access_token;
             if (accessToken) {
@@ -1123,6 +1138,7 @@ async function rwSubmit() {
                                 userId:         authData.user.id,
                                 referrerId:     referrer?.id || null,
                                 organizationId: referrerOrgId || null,
+                                collaboratorId: referrerCollaboratorId || null,
                                 referralType
                             })
                         }

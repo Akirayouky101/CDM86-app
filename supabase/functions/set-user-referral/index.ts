@@ -46,7 +46,7 @@ serve(async (req) => {
       )
     }
 
-    const { userId, referrerId, organizationId, referralType } = await req.json()
+    const { userId, referrerId, organizationId, collaboratorId, referralType } = await req.json()
 
     if (!userId) {
       throw new Error('userId è richiesto')
@@ -60,6 +60,7 @@ serve(async (req) => {
     console.log('🔄 Aggiornamento referral per user:', userId)
     console.log('👤 Referrer ID:', referrerId)
     console.log('🏢 Organization ID:', organizationId)
+    console.log('🤝 Collaborator ID:', collaboratorId)
     console.log('📋 Referral Type:', referralType)
 
     // Crea client Supabase con Service Role Key per bypassare RLS
@@ -88,6 +89,11 @@ serve(async (req) => {
       updateData.referral_type = referralType || 'org_employee'
     }
 
+    if (collaboratorId) {
+      updateData.referred_by_collaborator_id = collaboratorId
+      updateData.referral_type = 'collaborator'
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('users')
       .update(updateData)
@@ -96,6 +102,17 @@ serve(async (req) => {
     if (updateError) {
       console.error('❌ Errore aggiornamento:', updateError)
       throw updateError
+    }
+
+    // Se il referral è di un collaboratore, incrementa il contatore users_count
+    if (collaboratorId) {
+      const { error: incrError } = await supabaseAdmin.rpc('increment_collaborator_users_count', {
+        collab_id: collaboratorId
+      })
+      if (incrError) {
+        // Non blocchiamo la registrazione per questo errore, ma lo logghiamo
+        console.error('⚠️ Errore incremento users_count collaboratore:', incrError)
+      }
     }
 
     console.log('✅ Referral aggiornato con successo')
