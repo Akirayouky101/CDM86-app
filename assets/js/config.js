@@ -9,6 +9,11 @@ const CDM86_CONFIG = {
         anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
     },
 
+    // Stripe Configuration (publishable key only — secret key is in Supabase Edge Function secrets)
+    stripe: {
+        publishableKey: 'pk_test_51TAZGbDnoTkW1sMkoVVcmpxLJKKx9YVgqHF3CSMj1pVdsdUGXqvtfaiLD2nfvZQvFZBnqqP2wyACVeRY5ixE9pX700PRr4PoUW'
+    },
+
     // API Configuration
     api: {
         baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
