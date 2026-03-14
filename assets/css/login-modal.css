@@ -2088,3 +2088,229 @@
     .rw-btn-next, .rw-btn-submit { padding: 12px 20px; font-size: 14px; }
     .rw-step-labels { display: none; }
 }
+
+/* ============================================
+   ORG REGISTRATION WIZARD MODAL
+   ============================================ */
+
+.org-reg-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    padding: 20px;
+}
+
+.org-reg-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.org-reg-modal {
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 30px 90px rgba(102, 126, 234, 0.4);
+    max-width: 560px;
+    width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+    transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.org-reg-modal-overlay.active .org-reg-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.org-reg-close {
+    position: absolute;
+    top: 16px; right: 18px;
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.35);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    transition: background 0.2s, transform 0.2s;
+    line-height: 1;
+}
+
+.org-reg-close:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
+
+.org-reg-header {
+    padding: 44px 40px 32px;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 28px 28px 0 0;
+    color: #fff;
+}
+
+.org-reg-icon { font-size: 52px; display: block; margin-bottom: 12px; }
+.org-reg-header h2 { font-size: 26px; font-weight: 800; margin: 0 0 8px; }
+.org-reg-header p { font-size: 14px; margin: 0; opacity: 0.9; }
+
+.org-reg-progress {
+    height: 6px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.org-reg-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.5s ease;
+}
+
+.org-reg-step {
+    display: none;
+    padding: 28px 36px;
+    animation: orgRegFadeIn 0.3s ease;
+}
+
+.org-reg-step.active { display: block; }
+
+@keyframes orgRegFadeIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.org-reg-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.org-reg-actions button { flex: 1; }
+
+/* Referral radio group */
+.org-reg-referral-question { margin-top: 8px; }
+.org-reg-question-text { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 18px; }
+
+.org-reg-radio-group { display: flex; flex-direction: column; gap: 12px; }
+
+.org-reg-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.org-reg-radio-label input[type="radio"] { display: none; }
+
+.org-reg-radio-custom {
+    width: 20px; height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+}
+
+.org-reg-radio-label.selected {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.org-reg-radio-label.selected .org-reg-radio-custom {
+    border-color: #667eea;
+    background: #667eea;
+}
+
+.org-reg-radio-label.selected .org-reg-radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+/* Summary box */
+.org-reg-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 22px;
+}
+
+.org-reg-summary-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.org-reg-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.org-reg-summary-row:last-child { border-bottom: none; }
+.org-reg-summary-row span:first-child { color: #64748b; font-weight: 600; }
+.org-reg-summary-row span:last-child { color: #1e293b; font-weight: 600; text-align: right; max-width: 60%; word-break: break-all; }
+
+/* Success */
+.org-reg-success {
+    text-align: center;
+    padding: 20px 0 10px;
+}
+
+.org-reg-success-icon { font-size: 64px; display: block; margin-bottom: 16px; }
+.org-reg-success h3 { font-size: 24px; font-weight: 800; color: #059669; margin-bottom: 12px; }
+.org-reg-success p { font-size: 15px; color: #475569; line-height: 1.6; }
+
+/* Loading overlay */
+.org-reg-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.92);
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Code box hidden/shown */
+#orgRegCodeBox { display: none; }
+#orgRegCodeBox.visible { display: block; }
+#orgRegReferralCode { text-transform: uppercase; letter-spacing: 2px; }
+
+@media (max-width: 480px) {
+    .org-reg-modal { border-radius: 20px; }
+    .org-reg-header { padding: 32px 24px 24px; border-radius: 20px 20px 0 0; }
+    .org-reg-step { padding: 20px 20px; }
+}

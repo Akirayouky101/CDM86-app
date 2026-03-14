@@ -78,7 +78,7 @@ function selectUser() {
 
 function selectCompany() {
     closeSelectionModal();
-    showCompanyRequestModal();
+    OrgRegWizard.open();
 }
 
 function showExistingUserLogin() {
@@ -1668,8 +1668,241 @@ const CompanyWizard = {
 window.CompanyWizard = CompanyWizard;
 
 // ==========================================
-// AUTO-INITIALIZE
+// ORG REGISTRATION WIZARD
 // ==========================================
+
+const OrgRegWizard = {
+    currentStep: 1,
+    hasReferral: null,
+
+    open() {
+        const overlay = document.getElementById('orgRegModalOverlay');
+        if (!overlay) return;
+        this.currentStep = 1;
+        this.hasReferral = null;
+        this._resetForm();
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        this._updateUI();
+    },
+
+    close() {
+        const overlay = document.getElementById('orgRegModalOverlay');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => this._resetForm(), 400);
+    },
+
+    _resetForm() {
+        ['orgRegName','orgRegType','orgRegFirstName','orgRegLastName','orgRegEmail','orgRegPhone','orgRegReferralCode'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        // Reset radio
+        ['orgRegHasReferralYes','orgRegHasReferralNo'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+        });
+        document.querySelectorAll('.org-reg-radio-label').forEach(l => l.classList.remove('selected'));
+        const codeBox = document.getElementById('orgRegCodeBox');
+        if (codeBox) codeBox.classList.remove('visible');
+        const step2Next = document.getElementById('orgRegStep2Next');
+        if (step2Next) step2Next.disabled = true;
+        this.hasReferral = null;
+        ['orgRegAlert1','orgRegAlert2','orgRegAlert3'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = ''; el.className = 'form-alert'; }
+        });
+    },
+
+    toggleReferral(hasRef) {
+        this.hasReferral = hasRef;
+        // Update radio label styles
+        const yesLabel = document.getElementById('orgRegHasReferralYes')?.closest('.org-reg-radio-label');
+        const noLabel  = document.getElementById('orgRegHasReferralNo')?.closest('.org-reg-radio-label');
+        if (yesLabel) yesLabel.classList.toggle('selected', hasRef === true);
+        if (noLabel)  noLabel.classList.toggle('selected', hasRef === false);
+        // Show/hide code input
+        const codeBox = document.getElementById('orgRegCodeBox');
+        if (codeBox) codeBox.classList.toggle('visible', hasRef === true);
+        // Enable Next button
+        const step2Next = document.getElementById('orgRegStep2Next');
+        if (step2Next) step2Next.disabled = false;
+    },
+
+    _updateUI() {
+        const steps = [1, 2, 3, 4];
+        steps.forEach(s => {
+            const el = document.getElementById('orgRegStep' + s);
+            if (el) el.classList.toggle('active', s === this.currentStep);
+        });
+        // Progress bar
+        const progress = { 1: '33%', 2: '66%', 3: '90%', 4: '100%' };
+        const bar = document.getElementById('orgRegProgressBar');
+        if (bar) bar.style.width = progress[this.currentStep] || '33%';
+        // Subtitle
+        const subtitles = {
+            1: 'Passo 1 di 3 — Dati Azienda',
+            2: 'Passo 2 di 3 — Referral',
+            3: 'Passo 3 di 3 — Conferma',
+            4: 'Completato!'
+        };
+        const subtitle = document.getElementById('orgRegSubtitle');
+        if (subtitle) subtitle.textContent = subtitles[this.currentStep] || '';
+    },
+
+    _showAlert(step, msg, type = 'error') {
+        const el = document.getElementById('orgRegAlert' + step);
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'form-alert form-alert-' + type;
+    },
+
+    nextStep() {
+        if (this.currentStep === 1) {
+            // Validate step 1
+            const name  = document.getElementById('orgRegName')?.value.trim();
+            const type  = document.getElementById('orgRegType')?.value;
+            const fname = document.getElementById('orgRegFirstName')?.value.trim();
+            const lname = document.getElementById('orgRegLastName')?.value.trim();
+            const email = document.getElementById('orgRegEmail')?.value.trim();
+            const phone = document.getElementById('orgRegPhone')?.value.trim();
+            if (!name || !type || !fname || !lname || !email || !phone) {
+                this._showAlert(1, '⚠️ Compila tutti i campi obbligatori prima di procedere.');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                this._showAlert(1, '⚠️ Inserisci un indirizzo email valido.');
+                return;
+            }
+            this._showAlert(1, '');
+            this.currentStep = 2;
+        } else if (this.currentStep === 2) {
+            if (this.hasReferral === null) {
+                this._showAlert(2, '⚠️ Seleziona una delle opzioni prima di procedere.');
+                return;
+            }
+            if (this.hasReferral === true) {
+                const code = document.getElementById('orgRegReferralCode')?.value.trim();
+                if (!code) {
+                    this._showAlert(2, '⚠️ Inserisci il codice referral o seleziona "No".');
+                    return;
+                }
+            }
+            this._showAlert(2, '');
+            this._buildSummary();
+            this.currentStep = 3;
+        }
+        this._updateUI();
+    },
+
+    prevStep() {
+        if (this.currentStep > 1) {
+            this.currentStep--;
+            this._updateUI();
+        }
+    },
+
+    _buildSummary() {
+        const name  = document.getElementById('orgRegName')?.value.trim();
+        const type  = document.getElementById('orgRegType')?.value;
+        const fname = document.getElementById('orgRegFirstName')?.value.trim();
+        const lname = document.getElementById('orgRegLastName')?.value.trim();
+        const email = document.getElementById('orgRegEmail')?.value.trim();
+        const phone = document.getElementById('orgRegPhone')?.value.trim();
+        const code  = this.hasReferral ? (document.getElementById('orgRegReferralCode')?.value.trim() || '—') : 'Nessuno';
+        const typeLabel = { azienda: 'Azienda', associazione: 'Associazione', altro: 'Altro' };
+
+        const rows = [
+            ['Azienda/Ente', name],
+            ['Tipo', typeLabel[type] || type],
+            ['Referente', fname + ' ' + lname],
+            ['Email', email],
+            ['Telefono', phone],
+            ['Codice Referral', code],
+        ];
+
+        const summary = document.getElementById('orgRegSummary');
+        if (!summary) return;
+        summary.innerHTML = `
+            <div class="org-reg-summary-title">Riepilogo Richiesta</div>
+            ${rows.map(([label, val]) => `
+                <div class="org-reg-summary-row">
+                    <span>${label}</span>
+                    <span>${val}</span>
+                </div>
+            `).join('')}
+        `;
+    },
+
+    async submit() {
+        const submitBtn   = document.getElementById('orgRegSubmitBtn');
+        const submitLabel = document.getElementById('orgRegSubmitLabel');
+        const loading     = document.getElementById('orgRegLoading');
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (submitLabel) submitLabel.textContent = 'Invio in corso...';
+        if (loading) loading.style.display = 'flex';
+
+        try {
+            const name  = document.getElementById('orgRegName').value.trim();
+            const type  = document.getElementById('orgRegType').value;
+            const fname = document.getElementById('orgRegFirstName').value.trim();
+            const lname = document.getElementById('orgRegLastName').value.trim();
+            const email = document.getElementById('orgRegEmail').value.trim();
+            const phone = document.getElementById('orgRegPhone').value.trim();
+            const code  = (this.hasReferral && document.getElementById('orgRegReferralCode')?.value.trim()) || null;
+
+            const payload = {
+                organization_name: name,
+                organization_type: type,
+                contact_first_name: fname,
+                contact_last_name: lname,
+                contact_email: email,
+                contact_phone: phone,
+                status: 'pending',
+            };
+
+            if (code) payload.referred_by_code = code;
+
+            // If there's a referral code, look up the referring user
+            if (code && supabase) {
+                const { data: referrer } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('referral_code', code.toUpperCase())
+                    .single();
+                if (referrer?.id) {
+                    payload.referred_by_id = referrer.id;
+                }
+            }
+
+            if (!supabase) throw new Error('Supabase non disponibile');
+
+            const { error } = await supabase
+                .from('organization_requests')
+                .insert(payload);
+
+            if (error) throw error;
+
+            if (loading) loading.style.display = 'none';
+            this.currentStep = 4;
+            this._updateUI();
+
+        } catch (err) {
+            console.error('OrgRegWizard submit error:', err);
+            if (loading) loading.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = false;
+            if (submitLabel) submitLabel.textContent = 'Invia Richiesta';
+            this._showAlert(3, '❌ Errore durante l\'invio. Riprova o contattaci direttamente.');
+        }
+    }
+};
+
+// Make OrgRegWizard globally available
+window.OrgRegWizard = OrgRegWizard;
+
+
 
 
 // Wait for DOM to load and check auth status

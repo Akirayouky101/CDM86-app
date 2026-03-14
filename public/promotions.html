@@ -713,6 +713,125 @@
         </div>
     </div>
 
+    <!-- Org Registration Wizard Modal -->
+    <div class="org-reg-modal-overlay" id="orgRegModalOverlay">
+        <div class="org-reg-modal">
+            <button class="org-reg-close" onclick="OrgRegWizard.close()">&times;</button>
+
+            <div class="org-reg-header">
+                <span class="org-reg-icon">🏢</span>
+                <h2 id="orgRegTitle">Richiesta Registrazione</h2>
+                <p id="orgRegSubtitle">Passo 1 di 3 — Dati Azienda</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="org-reg-progress">
+                <div class="org-reg-progress-bar" id="orgRegProgressBar" style="width:33%"></div>
+            </div>
+
+            <!-- STEP 1: Dati Azienda -->
+            <div id="orgRegStep1" class="org-reg-step active">
+                <div id="orgRegAlert1" class="form-alert"></div>
+                <div class="form-group">
+                    <label for="orgRegName">Nome Azienda / Associazione <span class="req">*</span></label>
+                    <input type="text" id="orgRegName" placeholder="Es: Ristorante Da Mario">
+                </div>
+                <div class="form-group">
+                    <label for="orgRegType">Tipo <span class="req">*</span></label>
+                    <select id="orgRegType" class="reg-select">
+                        <option value="">Seleziona...</option>
+                        <option value="azienda">Azienda</option>
+                        <option value="associazione">Associazione</option>
+                        <option value="altro">Altro</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orgRegFirstName">Nome Referente <span class="req">*</span></label>
+                        <input type="text" id="orgRegFirstName" placeholder="Mario">
+                    </div>
+                    <div class="form-group">
+                        <label for="orgRegLastName">Cognome Referente <span class="req">*</span></label>
+                        <input type="text" id="orgRegLastName" placeholder="Rossi">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orgRegEmail">Email <span class="req">*</span></label>
+                        <input type="email" id="orgRegEmail" placeholder="info@azienda.it">
+                    </div>
+                    <div class="form-group">
+                        <label for="orgRegPhone">Telefono <span class="req">*</span></label>
+                        <input type="tel" id="orgRegPhone" placeholder="+39 123 456 7890">
+                    </div>
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.close()">Annulla</button>
+                    <button type="button" class="btn-primary" onclick="OrgRegWizard.nextStep()">Avanti →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Codice Referral -->
+            <div id="orgRegStep2" class="org-reg-step">
+                <div id="orgRegAlert2" class="form-alert"></div>
+                <div class="org-reg-referral-question">
+                    <p class="org-reg-question-text">Sei stato contattato da un nostro collaboratore o hai un codice referral?</p>
+                    <div class="org-reg-radio-group">
+                        <label class="org-reg-radio-label" onclick="OrgRegWizard.toggleReferral(true)">
+                            <input type="radio" name="orgRegHasReferral" value="yes" id="orgRegHasReferralYes">
+                            <span class="org-reg-radio-custom"></span>
+                            <span>Sì, ho un codice referral</span>
+                        </label>
+                        <label class="org-reg-radio-label" onclick="OrgRegWizard.toggleReferral(false)">
+                            <input type="radio" name="orgRegHasReferral" value="no" id="orgRegHasReferralNo">
+                            <span class="org-reg-radio-custom"></span>
+                            <span>No, non ho un codice</span>
+                        </label>
+                    </div>
+                    <div id="orgRegCodeBox" style="display:none; margin-top:16px;">
+                        <div class="form-group">
+                            <label for="orgRegReferralCode">Inserisci il codice referral</label>
+                            <input type="text" id="orgRegReferralCode" placeholder="Es: CDM-ABC123" style="text-transform:uppercase; letter-spacing:2px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.prevStep()">← Indietro</button>
+                    <button type="button" class="btn-primary" id="orgRegStep2Next" onclick="OrgRegWizard.nextStep()" disabled>Avanti →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Conferma / Invio -->
+            <div id="orgRegStep3" class="org-reg-step">
+                <div id="orgRegAlert3" class="form-alert"></div>
+                <div class="org-reg-summary" id="orgRegSummary">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.prevStep()">← Indietro</button>
+                    <button type="button" class="btn-primary" id="orgRegSubmitBtn" onclick="OrgRegWizard.submit()">
+                        <span id="orgRegSubmitLabel">Invia Richiesta</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Successo -->
+            <div id="orgRegStep4" class="org-reg-step">
+                <div class="org-reg-success">
+                    <div class="org-reg-success-icon">✅</div>
+                    <h3>Richiesta Inviata!</h3>
+                    <p>Grazie! La tua richiesta è stata inviata con successo.<br>Il nostro team ti contatterà entro 24–48 ore all'indirizzo email indicato.</p>
+                    <button type="button" class="btn-primary" onclick="OrgRegWizard.close()" style="margin-top:20px;">Chiudi</button>
+                </div>
+            </div>
+
+            <div class="org-reg-loading" id="orgRegLoading" style="display:none;">
+                <div class="spinner"></div>
+                <p>Invio richiesta in corso...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Login Modal -->
     <div class="login-modal-overlay" id="loginModalOverlay">
         <div class="login-modal">
