@@ -1416,10 +1416,17 @@
         async function loadOrganizationCards() {
             console.log('🏢 Loading organization cards...');
             const container = document.getElementById('organization-cards');
-            
+            const section = document.getElementById('organization-cards-section');
+
+            // Se gli elementi DOM non esistono o Supabase non è pronto, nascondi silenziosamente
+            if (!container || !section) {
+                console.warn('⚠️ organization-cards element not found, skipping');
+                return;
+            }
+
             if (!window.supabaseClient) {
-                console.error('❌ Supabase not ready');
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+                console.warn('⚠️ Supabase not ready, hiding org section');
+                section.style.display = 'none';
                 return;
             }
 
@@ -1431,13 +1438,13 @@
                     .eq('card_published', true);
 
                 if (opError) {
-                    console.error('❌ Error loading organization_pages:', opError);
-                    document.getElementById('organization-cards-section').style.display = 'none';
+                    console.warn('⚠️ Error loading organization_pages:', opError);
+                    section.style.display = 'none';
                     return;
                 }
 
                 if (!orgPages || orgPages.length === 0) {
-                    document.getElementById('organization-cards-section').style.display = 'none';
+                    section.style.display = 'none';
                     return;
                 }
 
@@ -1529,8 +1536,9 @@
                 console.log('✅ Organization cards rendered from promotions table');
 
             } catch (err) {
-                console.error('❌ Exception loading organization cards:', err);
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;"><p>Errore nel caricamento delle aziende partner</p></div>';
+                console.warn('⚠️ Exception loading organization cards:', err);
+                // Nascondi silenziosamente la sezione invece di mostrare errore
+                if (section) section.style.display = 'none';
             }
         }
         
