@@ -1115,6 +1115,11 @@ async function rwSubmit() {
                     provincia_residenza: provincia,
                     telefono:            telefono,
                     referral_code_used:  referralCode,
+                    // Referral — letti dal trigger handle_new_user anche senza token
+                    referred_by_id:                  referrer?.id || null,
+                    referred_by_organization_id:     referrerOrgId || null,
+                    referred_by_collaborator_id:     referrerCollaboratorId || null,
+                    referral_type:                   referralType || null,
                 }
             }
         });
