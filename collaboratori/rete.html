@@ -200,13 +200,38 @@
         document.getElementById('sidebarName').textContent  = `${user.first_name} ${user.last_name}`;
         document.getElementById('sidebarEmail').textContent = user.email;
 
+        // Carica guadagni (utenti che hanno pagato — L1/L2/L3)
         const { data: earnings } = await supabase_client
             .from('collaborator_earnings')
             .select('*, new_user:new_user_id(id, first_name, last_name, email, created_at)')
             .eq('collaborator_id', user.id)
             .order('created_at', { ascending: false });
 
-        allRows = earnings || [];
+        const earningsRows = earnings || [];
+
+        // Carica anche utenti diretti che si sono registrati col codice ma non hanno ancora pagato
+        const paidUserIds = new Set(earningsRows.filter(r => r.mlm_level === 1).map(r => r.new_user_id));
+        const { data: pendingUsers } = await supabase_client
+            .from('users')
+            .select('id, first_name, last_name, email, created_at, subscription_status')
+            .eq('referred_by_collaborator_id', user.id)
+            .order('created_at', { ascending: false });
+
+        // Costruisci righe sintetiche per gli utenti diretti non ancora in earnings
+        const pendingRows = (pendingUsers || [])
+            .filter(u => !paidUserIds.has(u.id))
+            .map(u => ({
+                _isPending: true,
+                new_user_id: u.id,
+                new_user: u,
+                mlm_level: 1,
+                registration_type: 'user',
+                total_amount: 0,
+                created_at: u.created_at,
+                subscription_status: u.subscription_status
+            }));
+
+        allRows = [...earningsRows, ...pendingRows];
         updateCounts();
         renderTable();
     });
@@ -252,13 +277,16 @@
             const date = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT') : '—';
             const typeLabel = { user: 'Utente', azienda: 'Azienda', associazione: 'Associazione' }[r.registration_type] || r.registration_type;
             const typeCls = r.registration_type === 'azienda' ? 'azienda' : '';
+            const amountCell = r._isPending
+                ? `<span style="font-size:0.75rem;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-weight:600;">⏳ In attesa pagamento</span>`
+                : `<span style="font-weight:700;color:#16a34a;">+€${parseFloat(r.total_amount).toFixed(2)}</span>`;
             return `
             <tr>
                 <td><div class="user-cell"><div class="avatar">${initials}</div><div><div style="font-weight:600;color:#0f172a;">${name}</div><div style="font-size:0.75rem;color:#94a3b8;">${u?.email || ''}</div></div></div></td>
                 <td><span class="badge-type ${typeCls}">${typeLabel}</span></td>
                 <td><span class="badge-level l${r.mlm_level}">L${r.mlm_level}</span></td>
                 <td>${date}</td>
-                <td style="font-weight:700;color:#16a34a;">+€${parseFloat(r.total_amount).toFixed(2)}</td>
+                <td>${amountCell}</td>
             </tr>`;
         }).join('');
     }
