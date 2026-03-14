@@ -2810,73 +2810,131 @@
 
     <!-- COLLABORATORI TAB -->
     <div id="collaboratoriTab" class="tab-content">
-        <div class="section-header">
-            <div>
-                <h2><i class="fas fa-handshake"></i> Collaboratori</h2>
-                <p>Gestisci le richieste e i collaboratori attivi</p>
-            </div>
-        </div>
 
         <!-- Stats -->
-        <div class="stats-grid" style="margin-bottom:1.5rem;">
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-header"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-hourglass-half"></i></div></div>
+                <div class="stat-header">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
                 <div class="stat-value" id="collabStatPending">0</div>
-                <div class="stat-label">In attesa</div>
+                <div class="stat-label">In Attesa</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header"><div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-check-circle"></i></div></div>
+                <div class="stat-header">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
                 <div class="stat-value" id="collabStatActive">0</div>
                 <div class="stat-label">Attivi</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header"><div class="stat-icon" style="background:#eff6ff;color:#3b82f6;"><i class="fas fa-users"></i></div></div>
+                <div class="stat-header">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
                 <div class="stat-value" id="collabStatTotal">0</div>
-                <div class="stat-label">Totale</div>
+                <div class="stat-label">Totale Collaboratori</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header"><div class="stat-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fas fa-euro-sign"></i></div></div>
+                <div class="stat-header">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                </div>
                 <div class="stat-value" id="collabStatEarned">€0</div>
-                <div class="stat-label">Guadagnato</div>
+                <div class="stat-label">Guadagnato Totale</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header"><div class="stat-icon" style="background:#fefce8;color:#ca8a04;"><i class="fas fa-wallet"></i></div></div>
+                <div class="stat-header">
+                    <div class="stat-icon pink">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
                 <div class="stat-value" id="collabStatToPay">€0</div>
-                <div class="stat-label">Da pagare</div>
+                <div class="stat-label">Da Pagare</div>
             </div>
         </div>
 
-        <!-- Filters + Search -->
+        <!-- Lista Collaboratori Card -->
         <div class="card">
-            <div class="card-header" style="flex-wrap:wrap;gap:10px;">
-                <h3><i class="fas fa-list"></i> Lista Collaboratori</h3>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                    <button class="btn btn-primary btn-sm" onclick="filterCollaboratori('all')">Tutti</button>
-                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('pending')" style="background:#fef3c7;color:#d97706;border-color:#fde68a;">⏳ In attesa</button>
-                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('active')" style="background:#dcfce7;color:#16a34a;border-color:#bbf7d0;">✅ Attivi</button>
-                    <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('suspended')" style="background:#fef2f2;color:#dc2626;border-color:#fecaca;">🚫 Sospesi</button>
-                    <input type="text" id="collabSearch" placeholder="🔍 Cerca per nome o email..."
-                        style="padding:7px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.875rem;outline:none;min-width:220px;"
-                        oninput="renderCollaboratoriTable()">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-handshake"></i> Gestione Collaboratori (<span id="collabCount">0</span>)
+                </h2>
+                <button class="btn btn-secondary btn-sm" onclick="loadCollaboratori()">
+                    <i class="fas fa-sync-alt"></i> Aggiorna
+                </button>
+            </div>
+
+            <!-- Filtri stato -->
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="collabSearch" placeholder="Cerca collaboratore per nome o email..." onkeyup="renderCollaboratoriTable()">
+            </div>
+            <div style="padding: 0 1.5rem 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="filterCollaboratori('all')" id="collabFilterAll">Tutti</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('pending')" id="collabFilterPending">⏳ In Attesa</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('active')" id="collabFilterActive">✅ Attivi</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('suspended')" id="collabFilterSuspended">⏸ Sospesi</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('banned')" id="collabFilterBanned">⛔ Bannati</button>
+            </div>
+
+            <!-- Loading -->
+            <div id="collabLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Caricamento collaboratori...</p>
+            </div>
+
+            <!-- Table -->
+            <div id="collabTableContainer" style="display: none;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Collaboratore</th>
+                                <th>Stato</th>
+                                <th>Rete</th>
+                                <th>Guadagnato</th>
+                                <th>Da Pagare</th>
+                                <th>Registrato</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collaboratoriTableBody"></tbody>
+                    </table>
                 </div>
             </div>
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr style="background:#f8fafc;">
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Collaboratore</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Stato</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Rete</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Guadagnato</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Da pagare</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Registrato</th>
-                            <th style="padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #f1f5f9;">Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody id="collaboratoriTableBody">
-                        <tr><td colspan="7" style="text-align:center;padding:48px;color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Caricamento...</td></tr>
-                    </tbody>
-                </table>
+
+            <!-- Empty State -->
+            <div id="collabEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-handshake empty-icon"></i>
+                <p>Nessun collaboratore trovato</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MODAL CONFERMA AZIONE COLLABORATORE ─────────────────────── -->
+    <div id="collabActionModal" class="modal">
+        <div class="modal-dialog" style="max-width: 460px;">
+            <div class="modal-header" id="collabActionModalHeader">
+                <h3 class="modal-title" id="collabActionModalTitle">Conferma azione</h3>
+                <button class="modal-close" onclick="closeModal('collabActionModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="collabActionModalMessage" style="font-size: 1rem; color: var(--gray-700); margin: 0 0 1.25rem;"></p>
+                <div id="collabActionNoteGroup" style="display: none;">
+                    <label for="collabActionNote">Motivo (opzionale)</label>
+                    <textarea id="collabActionNote" rows="3" placeholder="Inserisci il motivo..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('collabActionModal')">Annulla</button>
+                <button class="btn btn-primary" id="collabActionConfirmBtn" onclick="executeCollabAction()">Conferma</button>
             </div>
         </div>
     </div>
@@ -6835,10 +6893,21 @@
         let collabFilter = 'all';
 
         window.loadCollaboratori = async function() {
+            const tbody = document.getElementById('collaboratoriTableBody');
+            const loading = document.getElementById('collabLoading');
+            const container = document.getElementById('collabTableContainer');
+            const empty = document.getElementById('collabEmpty');
+
+            if (loading) loading.style.display = 'block';
+            if (container) container.style.display = 'none';
+            if (empty) empty.style.display = 'none';
+
             const { data, error } = await window.supabaseClient
                 .from('admin_collaborators_view')
                 .select('*')
                 .order('registered_at', { ascending: false });
+
+            if (loading) loading.style.display = 'none';
 
             if (error) { console.error('loadCollaboratori:', error); return; }
             allCollaboratori = data || [];
@@ -6854,6 +6923,8 @@
             document.getElementById('collabStatEarned').textContent  = '€' + earned.toFixed(2);
             document.getElementById('collabStatToPay').textContent   = '€' + toPay.toFixed(2);
             document.getElementById('cfCountPending').textContent    = pending;
+            const countEl = document.getElementById('collabCount');
+            if (countEl) countEl.textContent = allCollaboratori.length;
 
             renderCollaboratoriTable();
             loadBonusRules();
@@ -6874,11 +6945,17 @@
             );
 
             const tbody = document.getElementById('collaboratoriTableBody');
+            const container = document.getElementById('collabTableContainer');
+            const empty = document.getElementById('collabEmpty');
             if (!tbody) return;
+
             if (rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:#94a3b8;">Nessun collaboratore trovato</td></tr>`;
+                if (container) container.style.display = 'none';
+                if (empty) empty.style.display = 'block';
                 return;
             }
+            if (container) container.style.display = 'block';
+            if (empty) empty.style.display = 'none';
 
             const statusHtml = {
                 pending:   '<span style="background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">⏳ In attesa</span>',
@@ -6926,7 +7003,7 @@
             }
             const pending = parseFloat(c.total_pending || 0);
             if (pending > 0) {
-                btns.push(`<button class="btn btn-primary btn-sm" style="background:#16a34a;border-color:#16a34a;" onclick="markAsPaid('${c.id}')"><i class="fas fa-euro-sign"></i> Paga €${pending.toFixed(2)}</button>`);
+                btns.push(`<button class="btn btn-primary btn-sm" style="background:#16a34a;border-color:#16a34a;" onclick="markAsPaid('${c.id}', ${pending})"><i class="fas fa-euro-sign"></i> Paga €${pending.toFixed(2)}</button>`);
             }
             return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`;
         }
@@ -6938,70 +7015,141 @@
             }
             if (notes) update.notes = notes;
             const { error } = await window.supabaseClient.from('collaborators').update(update).eq('id', id);
-            if (error) { alert('Errore: ' + error.message); return false; }
+            if (error) { showNotification('Errore', error.message, 'error'); return false; }
             return true;
         }
 
+        // ── Modal conferma collaboratori ──────────────────────────────────
+        let _collabPendingAction = null;
+
+        function openCollabActionModal({ title, message, confirmLabel, confirmColor, showNote, action }) {
+            _collabPendingAction = action;
+            document.getElementById('collabActionModalTitle').textContent = title;
+            document.getElementById('collabActionModalMessage').textContent = message;
+            const noteGroup = document.getElementById('collabActionNoteGroup');
+            noteGroup.style.display = showNote ? 'block' : 'none';
+            document.getElementById('collabActionNote').value = '';
+            const btn = document.getElementById('collabActionConfirmBtn');
+            btn.textContent = confirmLabel || 'Conferma';
+            btn.style.background = confirmColor || '';
+            btn.style.borderColor = confirmColor || '';
+            openModal('collabActionModal');
+        }
+
+        window.executeCollabAction = async function() {
+            if (!_collabPendingAction) return;
+            closeModal('collabActionModal');
+            const note = document.getElementById('collabActionNote').value.trim();
+            await _collabPendingAction(note);
+            _collabPendingAction = null;
+        };
+
         window.approveCollab = async function(id) {
-            if (!confirm('Approvare questo collaboratore?')) return;
-            if (await setCollabStatus(id, 'active')) {
-                // 💰 Calcola compensi per chi ha referenziato questo collaboratore
-                try {
-                    await window.supabaseClient.rpc('calculate_collaborator_earnings', {
-                        p_new_user_id: id,
-                        p_registration_type: 'user'
-                    });
-                    console.log('✅ Compensi calcolati per approvazione collaboratore:', id);
-                } catch (e) {
-                    console.warn('⚠️ Errore calcolo compensi (non bloccante):', e);
+            openCollabActionModal({
+                title: '✅ Approva Collaboratore',
+                message: 'Stai per approvare questo collaboratore. Riceverà accesso alla dashboard e potrà iniziare a guadagnare commissioni.',
+                confirmLabel: 'Approva',
+                confirmColor: '#16a34a',
+                showNote: false,
+                action: async () => {
+                    if (await setCollabStatus(id, 'active')) {
+                        try {
+                            await window.supabaseClient.rpc('calculate_collaborator_earnings', {
+                                p_new_user_id: id,
+                                p_registration_type: 'user'
+                            });
+                        } catch (e) {
+                            console.warn('⚠️ Errore calcolo compensi (non bloccante):', e);
+                        }
+                        showNotification('Collaboratore approvato', '✅ Il collaboratore è ora attivo.', 'success');
+                        loadCollaboratori();
+                    }
                 }
-                showNotification('✅ Collaboratore approvato!', 'success');
-                loadCollaboratori();
-            }
+            });
         };
 
         window.rejectCollab = async function(id) {
-            const note = prompt('Motivo del rifiuto (opzionale):');
-            if (note === null) return;
-            if (await setCollabStatus(id, 'banned', note || 'Richiesta rifiutata')) {
-                showNotification('❌ Richiesta rifiutata', 'success');
-                loadCollaboratori();
-            }
+            openCollabActionModal({
+                title: '❌ Rifiuta Richiesta',
+                message: 'Stai per rifiutare questa richiesta di collaborazione. Il collaboratore verrà bloccato.',
+                confirmLabel: 'Rifiuta',
+                confirmColor: '#dc2626',
+                showNote: true,
+                action: async (note) => {
+                    if (await setCollabStatus(id, 'banned', note || 'Richiesta rifiutata')) {
+                        showNotification('Richiesta rifiutata', '❌ La richiesta è stata rifiutata.', 'error');
+                        loadCollaboratori();
+                    }
+                }
+            });
         };
 
         window.suspendCollab = async function(id) {
-            if (!confirm('Sospendere questo collaboratore?')) return;
-            if (await setCollabStatus(id, 'suspended')) {
-                showNotification('⏸ Collaboratore sospeso', 'success');
-                loadCollaboratori();
-            }
+            openCollabActionModal({
+                title: '⏸ Sospendi Collaboratore',
+                message: 'Il collaboratore verrà temporaneamente sospeso e non potrà accedere alla dashboard.',
+                confirmLabel: 'Sospendi',
+                confirmColor: '#d97706',
+                showNote: true,
+                action: async (note) => {
+                    if (await setCollabStatus(id, 'suspended', note || null)) {
+                        showNotification('Collaboratore sospeso', '⏸ Il collaboratore è stato sospeso.', 'warning');
+                        loadCollaboratori();
+                    }
+                }
+            });
         };
 
         window.reactivateCollab = async function(id) {
-            if (await setCollabStatus(id, 'active')) {
-                showNotification('▶️ Collaboratore riattivato', 'success');
-                loadCollaboratori();
-            }
+            openCollabActionModal({
+                title: '▶️ Riattiva Collaboratore',
+                message: 'Stai per riattivare questo collaboratore. Riavrà accesso alla dashboard.',
+                confirmLabel: 'Riattiva',
+                confirmColor: '#16a34a',
+                showNote: false,
+                action: async () => {
+                    if (await setCollabStatus(id, 'active')) {
+                        showNotification('Collaboratore riattivato', '▶️ Il collaboratore è di nuovo attivo.', 'success');
+                        loadCollaboratori();
+                    }
+                }
+            });
         };
 
         window.banCollab = async function(id) {
-            if (!confirm('Bannare definitivamente questo collaboratore?')) return;
-            if (await setCollabStatus(id, 'banned')) {
-                showNotification('⛔ Collaboratore bannato', 'success');
-                loadCollaboratori();
-            }
+            openCollabActionModal({
+                title: '⛔ Banna Collaboratore',
+                message: 'ATTENZIONE: Stai per bannare definitivamente questo collaboratore. Non potrà più accedere.',
+                confirmLabel: 'Banna',
+                confirmColor: '#991b1b',
+                showNote: true,
+                action: async (note) => {
+                    if (await setCollabStatus(id, 'banned', note || 'Account bannato')) {
+                        showNotification('Collaboratore bannato', '⛔ Il collaboratore è stato bannato.', 'error');
+                        loadCollaboratori();
+                    }
+                }
+            });
         };
 
-        window.markAsPaid = async function(collabId) {
-            if (!confirm('Segnare come pagati tutti i compensi in attesa?')) return;
-            const { error } = await window.supabaseClient
-                .from('collaborator_earnings')
-                .update({ status: 'paid', paid_at: new Date().toISOString() })
-                .eq('collaborator_id', collabId)
-                .eq('status', 'credited');
-            if (error) { alert('Errore: ' + error.message); return; }
-            showNotification('💸 Pagamento registrato!', 'success');
-            loadCollaboratori();
+        window.markAsPaid = async function(collabId, amount) {
+            openCollabActionModal({
+                title: '💸 Registra Pagamento',
+                message: `Stai per segnare come pagati i compensi in attesa${amount ? ' (€' + parseFloat(amount).toFixed(2) + ')' : ''}. Confermi?`,
+                confirmLabel: 'Segna come pagato',
+                confirmColor: '#16a34a',
+                showNote: false,
+                action: async () => {
+                    const { error } = await window.supabaseClient
+                        .from('collaborator_earnings')
+                        .update({ status: 'paid', paid_at: new Date().toISOString() })
+                        .eq('collaborator_id', collabId)
+                        .eq('status', 'credited');
+                    if (error) { showNotification('Errore', error.message, 'error'); return; }
+                    showNotification('Pagamento registrato', '💸 I compensi sono stati segnati come pagati.', 'success');
+                    loadCollaboratori();
+                }
+            });
         };
 
         // ── Bonus Rules ──────────────────────────────────────────────────
