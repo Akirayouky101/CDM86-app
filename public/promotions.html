@@ -1238,8 +1238,143 @@
         })();
     </script>
 
+    <!-- GESTIONE RITORNO DA STRIPE -->
     <script>
-        let currentUser = null;
+    (function() {
+        const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00';
+        const PAYMENT_STATUS_KEY  = 'cdm86_payment_status';
+
+        // Crea il banner HTML e lo inietta nel DOM
+        function createBanner(type, message, action) {
+            const existing = document.getElementById('stripe-payment-banner');
+            if (existing) existing.remove();
+
+            const banner = document.createElement('div');
+            banner.id = 'stripe-payment-banner';
+            const colors = {
+                success: { bg: '#f0fdf4', border: '#86efac', color: '#16a34a', icon: '🎉' },
+                warning: { bg: '#fefce8', border: '#fde047', color: '#ca8a04', icon: '⚠️' },
+                error:   { bg: '#fef2f2', border: '#fca5a5', color: '#dc2626', icon: '❌' },
+            };
+            const c = colors[type] || colors.warning;
+            banner.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+                background: ${c.bg}; border-bottom: 3px solid ${c.border};
+                padding: 14px 20px; display: flex; align-items: center;
+                justify-content: space-between; gap: 12px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.1); animation: slideDown 0.3s ease;
+            `;
+            banner.innerHTML = `
+                <span style="color:${c.color}; font-weight:700; font-size:0.95rem;">
+                    ${c.icon} ${message}
+                </span>
+                <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+                    ${action || ''}
+                    <button onclick="this.closest('#stripe-payment-banner').remove()"
+                        style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:${c.color};line-height:1;">✕</button>
+                </div>
+            `;
+            document.body.insertBefore(banner, document.body.firstChild);
+            // Auto-rimuovi i banner di successo dopo 8s
+            if (type === 'success') setTimeout(() => banner?.remove(), 8000);
+        }
+
+        // Controlla se l'utente ha già pagato (flag in localStorage)
+        function hasPaid() {
+            return localStorage.getItem(PAYMENT_STATUS_KEY) === 'paid';
+        }
+
+        // Segna utente come pagante
+        function markAsPaid() {
+            localStorage.setItem(PAYMENT_STATUS_KEY, 'paid');
+        }
+
+        // Gestisce i parametri URL al ritorno da Stripe
+        function handleStripeReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const paymentResult = params.get('payment');
+
+            if (paymentResult === 'success') {
+                markAsPaid();
+                // Pulisci URL senza reload
+                window.history.replaceState({}, '', window.location.pathname);
+                createBanner('success',
+                    'Pagamento completato! Benvenuto su CDM86 🎊 Accedi ora alle promozioni esclusive.',
+                    ''
+                );
+                return;
+            }
+
+            if (paymentResult === 'cancelled') {
+                window.history.replaceState({}, '', window.location.pathname);
+                createBanner('warning',
+                    'Pagamento non completato. Puoi riprovare quando vuoi.',
+                    `<a href="${STRIPE_PAYMENT_LINK}" target="_blank"
+                        style="background:#ca8a04;color:white;padding:7px 16px;border-radius:8px;
+                               text-decoration:none;font-weight:700;font-size:0.85rem;white-space:nowrap;">
+                        💳 Riprova il pagamento
+                    </a>`
+                );
+                return;
+            }
+        }
+
+        // Controlla se l'utente loggato non ha pagato (banner persistente)
+        async function checkUnpaidUser() {
+            if (hasPaid()) return; // ha già pagato, niente banner
+
+            // Aspetta che supabase sia pronto
+            function waitAndCheck() {
+                if (!window.supabaseClient) { setTimeout(waitAndCheck, 300); return; }
+                window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                    if (!session) return; // non loggato — niente banner
+
+                    // Controlla se è un'organizzazione (non paga)
+                    window.supabaseClient
+                        .from('organizations')
+                        .select('id')
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle()
+                        .then(({ data: org }) => {
+                            if (org) return; // è azienda — non paga
+
+                            // Controlla se è admin
+                            window.supabaseClient
+                                .from('users')
+                                .select('role')
+                                .eq('auth_user_id', session.user.id)
+                                .maybeSingle()
+                                .then(({ data: user }) => {
+                                    if (user?.role === 'admin') return; // admin — non paga
+
+                                    // Utente normale non pagante → banner
+                                    createBanner('warning',
+                                        'Completa l\'iscrizione per accedere a tutte le promozioni.',
+                                        `<a href="${STRIPE_PAYMENT_LINK}" target="_blank"
+                                            style="background:#ca8a04;color:white;padding:7px 16px;border-radius:8px;
+                                                   text-decoration:none;font-weight:700;font-size:0.85rem;white-space:nowrap;">
+                                            💳 Completa iscrizione
+                                        </a>`
+                                    );
+                                });
+                        });
+                });
+            }
+            waitAndCheck();
+        }
+
+        // Esegui al caricamento pagina
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                handleStripeReturn();
+                checkUnpaidUser();
+            });
+        } else {
+            handleStripeReturn();
+            checkUnpaidUser();
+        }
+    })();
+    </script>
         let favoriteIds = new Set(); // Global favorites cache
         
         // Check authentication
