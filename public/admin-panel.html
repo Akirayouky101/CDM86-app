@@ -2188,6 +2188,118 @@
         </div>
     </div>
 
+    <!-- COLLABORATORI TAB -->
+    <div id="collaboratoriTab" class="tab-content">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="collabStatPending">0</div>
+                <div class="stat-label">In Attesa</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="collabStatActive">0</div>
+                <div class="stat-label">Attivi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="collabStatTotal">0</div>
+                <div class="stat-label">Totale Collaboratori</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="collabStatEarned">€0</div>
+                <div class="stat-label">Guadagnato Totale</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon pink">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="collabStatToPay">€0</div>
+                <div class="stat-label">Da Pagare</div>
+            </div>
+        </div>
+
+        <!-- Lista Collaboratori Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-handshake"></i> Gestione Collaboratori (<span id="collabCount">0</span>)
+                </h2>
+                <button class="btn btn-secondary btn-sm" onclick="loadCollaboratori()">
+                    <i class="fas fa-sync-alt"></i> Aggiorna
+                </button>
+            </div>
+
+            <!-- Filtri stato -->
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="collabSearch" placeholder="Cerca collaboratore per nome o email..." onkeyup="renderCollaboratoriTable()">
+            </div>
+            <div style="padding: 0 1.5rem 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="filterCollaboratori('all')" id="collabFilterAll">Tutti</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('pending')" id="collabFilterPending">⏳ In Attesa</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('active')" id="collabFilterActive">✅ Attivi</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('suspended')" id="collabFilterSuspended">⏸ Sospesi</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('banned')" id="collabFilterBanned">⛔ Bannati</button>
+            </div>
+
+            <!-- Loading -->
+            <div id="collabLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Caricamento collaboratori...</p>
+            </div>
+
+            <!-- Table -->
+            <div id="collabTableContainer" style="display: none;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Collaboratore</th>
+                                <th>Stato</th>
+                                <th>Rete</th>
+                                <th>Guadagnato</th>
+                                <th>Da Pagare</th>
+                                <th>Registrato</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collaboratoriTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="collabEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-handshake empty-icon"></i>
+                <p>Nessun collaboratore trovato</p>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /container -->
+
     <!-- CREATE USER MODAL -->
     <div id="createUserModal" class="modal">
         <div class="modal-dialog">
@@ -2804,116 +2916,6 @@
                 <button class="btn btn-danger" onclick="confirmDeletePromo()">
                     <i class="fas fa-trash"></i> Elimina
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- COLLABORATORI TAB -->
-    <div id="collaboratoriTab" class="tab-content">
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon orange">
-                        <i class="fas fa-hourglass-half"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="collabStatPending">0</div>
-                <div class="stat-label">In Attesa</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon green">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="collabStatActive">0</div>
-                <div class="stat-label">Attivi</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon blue">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="collabStatTotal">0</div>
-                <div class="stat-label">Totale Collaboratori</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon purple">
-                        <i class="fas fa-euro-sign"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="collabStatEarned">€0</div>
-                <div class="stat-label">Guadagnato Totale</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon pink">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="collabStatToPay">€0</div>
-                <div class="stat-label">Da Pagare</div>
-            </div>
-        </div>
-
-        <!-- Lista Collaboratori Card -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-handshake"></i> Gestione Collaboratori (<span id="collabCount">0</span>)
-                </h2>
-                <button class="btn btn-secondary btn-sm" onclick="loadCollaboratori()">
-                    <i class="fas fa-sync-alt"></i> Aggiorna
-                </button>
-            </div>
-
-            <!-- Filtri stato -->
-            <div class="search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="collabSearch" placeholder="Cerca collaboratore per nome o email..." onkeyup="renderCollaboratoriTable()">
-            </div>
-            <div style="padding: 0 1.5rem 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn btn-primary btn-sm" onclick="filterCollaboratori('all')" id="collabFilterAll">Tutti</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('pending')" id="collabFilterPending">⏳ In Attesa</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('active')" id="collabFilterActive">✅ Attivi</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('suspended')" id="collabFilterSuspended">⏸ Sospesi</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterCollaboratori('banned')" id="collabFilterBanned">⛔ Bannati</button>
-            </div>
-
-            <!-- Loading -->
-            <div id="collabLoading" class="loading">
-                <div class="spinner"></div>
-                <p>Caricamento collaboratori...</p>
-            </div>
-
-            <!-- Table -->
-            <div id="collabTableContainer" style="display: none;">
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Collaboratore</th>
-                                <th>Stato</th>
-                                <th>Rete</th>
-                                <th>Guadagnato</th>
-                                <th>Da Pagare</th>
-                                <th>Registrato</th>
-                                <th>Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="collaboratoriTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div id="collabEmpty" class="empty-state" style="display: none;">
-                <i class="fas fa-handshake empty-icon"></i>
-                <p>Nessun collaboratore trovato</p>
             </div>
         </div>
     </div>
