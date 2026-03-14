@@ -1865,8 +1865,12 @@ const OrgRegWizard = {
 
             if (code) payload.referred_by_code = code;
 
+            // Ottieni istanza Supabase
+            const supabase = await ensureSupabase();
+            if (!supabase) throw new Error('Supabase non disponibile');
+
             // If there's a referral code, look up the referring user
-            if (code && supabase) {
+            if (code) {
                 const { data: referrer } = await supabase
                     .from('users')
                     .select('id')
@@ -1876,8 +1880,6 @@ const OrgRegWizard = {
                     payload.referred_by_id = referrer.id;
                 }
             }
-
-            if (!supabase) throw new Error('Supabase non disponibile');
 
             const { error } = await supabase
                 .from('organization_requests')
