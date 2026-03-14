@@ -995,53 +995,6 @@
             <div class="section hidden" id="company-management-section">
                 <h3>🏪 Gestione Azienda</h3>
 
-                <!-- ── ABBONAMENTO STRIPE ── -->
-                <div class="company-card" id="subscriptionCard" style="margin-bottom:20px;">
-                    <div class="company-card-header">
-                        <h4><i class="fas fa-credit-card" style="color:#6366f1;margin-right:8px;"></i>Abbonamento</h4>
-                    </div>
-                    <div style="padding:20px;">
-                        <div id="subscriptionStatus" style="margin-bottom:16px;">
-                            <span id="subStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;background:#f1f5f9;color:#64748b;">
-                                ⏳ Caricamento...
-                            </span>
-                        </div>
-                        <div id="subscriptionPlans" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-                            <div class="plan-card" style="border:2px solid #e5e7eb;border-radius:14px;padding:18px;text-align:center;">
-                                <div style="font-weight:800;font-size:1rem;color:#0f172a;margin-bottom:6px;">Base</div>
-                                <div style="font-size:1.6rem;font-weight:900;color:#6366f1;">€29<span style="font-size:0.8rem;color:#94a3b8;">/mese</span></div>
-                                <div style="font-size:0.78rem;color:#64748b;margin:10px 0;">Promozioni illimitate · Pagina azienda · Support email</div>
-                                <button onclick="startCheckout('base')" style="width:100%;padding:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem;">
-                                    Attiva Base
-                                </button>
-                            </div>
-                            <div class="plan-card" style="border:2px solid #6366f1;border-radius:14px;padding:18px;text-align:center;position:relative;">
-                                <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#6366f1;color:white;font-size:0.7rem;font-weight:800;padding:3px 12px;border-radius:20px;">POPOLARE</div>
-                                <div style="font-weight:800;font-size:1rem;color:#0f172a;margin-bottom:6px;">Professional</div>
-                                <div style="font-size:1.6rem;font-weight:900;color:#6366f1;">€59<span style="font-size:0.8rem;color:#94a3b8;">/mese</span></div>
-                                <div style="font-size:0.78rem;color:#64748b;margin:10px 0;">Tutto di Base + Analytics · Card Builder · Priority support</div>
-                                <button onclick="startCheckout('professional')" style="width:100%;padding:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem;">
-                                    Attiva Professional
-                                </button>
-                            </div>
-                            <div class="plan-card" style="border:2px solid #e5e7eb;border-radius:14px;padding:18px;text-align:center;">
-                                <div style="font-weight:800;font-size:1rem;color:#0f172a;margin-bottom:6px;">Enterprise</div>
-                                <div style="font-size:1.6rem;font-weight:900;color:#6366f1;">€99<span style="font-size:0.8rem;color:#94a3b8;">/mese</span></div>
-                                <div style="font-size:0.78rem;color:#64748b;margin:10px 0;">Tutto di Pro + API access · White-label · Account manager</div>
-                                <button onclick="startCheckout('enterprise')" style="width:100%;padding:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem;">
-                                    Attiva Enterprise
-                                </button>
-                            </div>
-                        </div>
-                        <div id="manageSubscription" style="display:none;margin-top:14px;text-align:center;">
-                            <p style="font-size:0.85rem;color:#64748b;margin-bottom:8px;">Gestisci il tuo abbonamento direttamente dal portale Stripe.</p>
-                            <button onclick="openCustomerPortal()" style="padding:9px 22px;background:#0f172a;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
-                                <i class="fas fa-external-link-alt"></i> Gestisci abbonamento
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Gestione Promozioni -->
                 <div class="company-card">
                     <div class="company-card-header">

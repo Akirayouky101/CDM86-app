@@ -1453,7 +1453,7 @@
                     </ul>
 
                     <!-- CTA -->
-                    <a id="cdm86-modal-cta" href="https://buy.stripe.com/test_9B6dR902Z1s22Eb438gMw00" style="
+                    <a id="cdm86-modal-cta" href="https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00" style="
                         display:block;
                         background:linear-gradient(135deg,#667eea,#764ba2);
                         color:#fff;
@@ -1551,18 +1551,10 @@
     (function() {
         const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00';
 
-        // Costruisce il link con return URL corretto
-        function buildStripeLink() {
-            const returnUrl = encodeURIComponent(
-                window.location.origin + window.location.pathname + '?payment=success'
-            );
-            return STRIPE_PAYMENT_LINK + '?return_url=' + returnUrl;
-        }
-
-        // Aggiorna href del CTA con URL di ritorno
+        // Aggiorna href del CTA (il redirect URL è già configurato nel Payment Link su Stripe)
         function initCtaLink() {
             const cta = document.getElementById('cdm86-modal-cta');
-            if (cta) cta.href = buildStripeLink();
+            if (cta) cta.href = STRIPE_PAYMENT_LINK;
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initCtaLink);
