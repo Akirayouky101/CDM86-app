@@ -208,8 +208,9 @@
             .from('collaborator_earnings_summary')
             .select('*').eq('collaborator_id', user.id).maybeSingle();
 
-        const { data: settings } = await supabase_client
-            .from('collaborator_settings').select('payout_threshold').single();
+        const { data: settingsRows } = await supabase_client
+            .from('collaborator_settings').select('setting_key, setting_value')
+            .eq('setting_key', 'payout_threshold');
 
         if (summary) {
             document.getElementById('statTotal').textContent   = fmt(summary.total_earned || 0);
@@ -218,7 +219,7 @@
             const bonus = allEarnings.reduce((s, e) => s + parseFloat(e.bonus_amount || 0), 0);
             document.getElementById('statBonus').textContent   = fmt(bonus);
 
-            const threshold = settings?.payout_threshold || 50;
+            const threshold = parseFloat(settingsRows?.[0]?.setting_value || 50);
             const pending   = parseFloat(summary.total_pending || 0);
             const pct       = Math.min(100, (pending / threshold) * 100).toFixed(0);
             document.getElementById('pbFill').style.width      = pct + '%';
