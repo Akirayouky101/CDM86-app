@@ -34,6 +34,18 @@
       "permanent": false
     },
     {
+      "source": "/collaboratori/:path*",
+      "has": [{ "type": "host", "value": "cdm86.io" }],
+      "destination": "https://www.cdm86.it/collaboratori/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/collaboratori/:path*",
+      "has": [{ "type": "host", "value": "www.cdm86.io" }],
+      "destination": "https://www.cdm86.it/collaboratori/:path*",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "cdm86.io" }],
       "destination": "https://www.cdm86.it/collaboratori/:path*",
