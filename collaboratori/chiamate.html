@@ -31,7 +31,9 @@
 
         /* ─── MAIN ─────────────────────────────────────────── */
         .main { margin-left: 0; padding: 28px 32px; transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1); }
-        body.sidebar-open .main { margin-left: 240px; }
+        @media (min-width: 769px) {
+            body.sidebar-open .main { margin-left: 240px; }
+        }
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
         .page-header p { color: #64748b; margin-top: 4px; }
@@ -664,9 +666,9 @@
 
             window.addEventListener('DOMContentLoaded', function() {
                 applyStoredPosition();
-                // Ripristina stato sidebar solo su desktop
+                // Ripristina stato sidebar su tutti i device
                 const sidebarWasOpen = localStorage.getItem('cdm86_sidebar_open') === '1';
-                if (sidebarWasOpen && window.innerWidth > 768) {
+                if (sidebarWasOpen) {
                     const sidebar = document.querySelector('.sidebar');
                     const tab     = getTab();
                     sidebar.classList.add('open');
