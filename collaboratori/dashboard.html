@@ -469,7 +469,7 @@
                             <div class="type">${type}</div>
                         </div>
                     </div>
-                    <div class="amount">+${formatEuro(e.total_amount)}</div>
+                    <div class="amount">+${formatEuro(parseFloat(e.total_amount || e.amount || 0))}</div>
                 </div>`;
             }).join('');
         }

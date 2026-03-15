@@ -203,10 +203,11 @@
 
         allEarnings = earnings || [];
 
-        // Summary
+        // Summary — legge direttamente dal record collaborator (non dalla view che potrebbe non esistere)
         const { data: summary } = await supabase_client
-            .from('collaborator_earnings_summary')
-            .select('*').eq('collaborator_id', user.id).maybeSingle();
+            .from('collaborators')
+            .select('total_earned, total_pending, total_paid')
+            .eq('id', user.id).maybeSingle();
 
         const { data: settingsRows } = await supabase_client
             .from('collaborator_settings').select('setting_key, setting_value')
@@ -256,14 +257,16 @@
         tbody.innerHTML = rows.map(r => {
             const name = r.new_user ? `${r.new_user.first_name} ${r.new_user.last_name}` : '—';
             const date = new Date(r.created_at).toLocaleDateString('it-IT');
-            const bonus = parseFloat(r.bonus_amount || 0);
+            const baseAmount  = parseFloat(r.amount || r.base_amount || 0);
+            const bonusAmount = parseFloat(r.bonus_amount || 0);
+            const totalAmount = parseFloat(r.total_amount || r.amount || 0);
             return `<tr>
                 <td style="font-weight:600;color:#0f172a;">${name}</td>
                 <td>${typeLabels[r.registration_type] || r.registration_type}</td>
                 <td><span class="badge-level l${r.mlm_level}">L${r.mlm_level}</span></td>
-                <td>€${parseFloat(r.base_amount).toFixed(2)}</td>
-                <td>${bonus > 0 ? `<span style="color:#ca8a04;font-weight:600;">+€${bonus.toFixed(2)}</span>` : '—'}</td>
-                <td style="font-weight:700;color:#16a34a;">€${parseFloat(r.total_amount).toFixed(2)}</td>
+                <td>€${baseAmount.toFixed(2)}</td>
+                <td>${bonusAmount > 0 ? `<span style="color:#ca8a04;font-weight:600;">+€${bonusAmount.toFixed(2)}</span>` : '—'}</td>
+                <td style="font-weight:700;color:#16a34a;">€${totalAmount.toFixed(2)}</td>
                 <td>${statusHtml[r.status] || r.status}</td>
                 <td style="color:#94a3b8;">${date}</td>
             </tr>`;
