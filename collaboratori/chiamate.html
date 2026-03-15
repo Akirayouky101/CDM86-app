@@ -664,9 +664,9 @@
 
             window.addEventListener('DOMContentLoaded', function() {
                 applyStoredPosition();
-                // Ripristina stato sidebar
+                // Ripristina stato sidebar solo su desktop
                 const sidebarWasOpen = localStorage.getItem('cdm86_sidebar_open') === '1';
-                if (sidebarWasOpen) {
+                if (sidebarWasOpen && window.innerWidth > 768) {
                     const sidebar = document.querySelector('.sidebar');
                     const tab     = getTab();
                     sidebar.classList.add('open');
