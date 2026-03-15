@@ -92,6 +92,39 @@
         .empty i { font-size: 2.5rem; display: block; margin-bottom: 12px; }
         .loading-row td { text-align: center; padding: 36px; color: #94a3b8; }
 
+        /* ── Mobile cards (sostituiscono la tabella su mobile) ── */
+        .member-cards { display: none; flex-direction: column; gap: 12px; padding: 16px; }
+        .member-card {
+            background: white; border-radius: 14px;
+            padding: 16px 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .member-card .avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .member-card .mc-info { flex: 1; min-width: 0; }
+        .member-card .mc-name { font-weight: 700; color: #0f172a; font-size: 0.9rem; }
+        .member-card .mc-email { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .member-card .mc-meta { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+        .member-card .mc-date { font-size: 0.72rem; color: #94a3b8; margin-left: auto; }
+        .member-card .mc-amount { font-size: 0.8rem; font-weight: 700; color: #16a34a; }
+
+        @media (max-width: 768px) {
+            .table-wrap table, .table-wrap thead, .table-wrap tbody { display: none; }
+            .table-filter { display: none; }
+            .member-cards { display: flex; }
+            .summary-cards { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+            .summary-card { padding: 14px 12px; }
+            .summary-card .sc-value { font-size: 1.2rem; }
+            .level-tabs { gap: 8px; }
+            .tab-btn { padding: 8px 14px; font-size: 0.8rem; }
+        }
+
         /* ─── BOTTOM NAV (mobile) ───────────────────────────── */
         .bottom-nav {
             display: none;
@@ -122,16 +155,6 @@
     </style>
 </head>
 <body>
-<div class="bottom-nav">
-        <a href="/collaboratori/dashboard.html" class="bn-item"><i class="fas fa-chart-line"></i>Dashboard</a>
-        <a href="/collaboratori/rete.html" class="bn-item active"><i class="fas fa-sitemap"></i>Rete</a>
-        <a href="/collaboratori/guadagni.html" class="bn-item"><i class="fas fa-euro-sign"></i>Guadagni</a>
-        <a href="/collaboratori/chiamate.html" class="bn-item"><i class="fas fa-phone"></i>Chiamate</a>
-        <a href="/collaboratori/task.html" class="bn-item"><i class="fas fa-check-square"></i>Task</a>
-        <a href="/collaboratori/note.html" class="bn-item"><i class="fas fa-sticky-note"></i>Note</a>
-        <a href="/collaboratori/profilo.html" class="bn-item"><i class="fas fa-user-circle"></i>Profilo</a>
-</div>
-
 
 <div class="sidebar">
     <div class="sidebar-logo">
@@ -220,6 +243,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Mobile cards -->
+    <div class="member-cards" id="memberCards"></div>
 </div>
 
 <script>
@@ -303,8 +329,11 @@
         if (typeFilter) rows = rows.filter(r => r.registration_type === typeFilter);
 
         const tbody = document.getElementById('networkTable');
+        const cards = document.getElementById('memberCards');
+
         if (rows.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-users"></i>Nessun membro trovato</div></td></tr>`;
+            cards.innerHTML = `<div class="empty"><i class="fas fa-users"></i>Nessun membro trovato</div>`;
             return;
         }
 
@@ -329,6 +358,35 @@
                 <td>${amountCell}</td>
             </tr>`;
         }).join('');
+
+        // Mobile cards
+        cards.innerHTML = rows.map(r => {
+            const u = r.new_user;
+            const name = u ? `${u.first_name} ${u.last_name}` : 'Utente';
+            const initials = u ? `${u.first_name[0]}${u.last_name[0]}`.toUpperCase() : '??';
+            const date = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT') : '—';
+            const typeLabel = { user: 'Utente', azienda: 'Azienda', associazione: 'Associazione' }[r.registration_type] || r.registration_type;
+            const typeCls = r.registration_type === 'azienda' ? 'azienda' : '';
+            const amountBadge = r._isPending
+                ? (r.subscription_status === 'active'
+                    ? `<span style="font-size:0.72rem;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-weight:600;">✅ Abbonato</span>`
+                    : `<span style="font-size:0.72rem;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-weight:600;">⏳ In attesa</span>`)
+                : `<span class="mc-amount">+€${parseFloat(r.total_amount).toFixed(2)}</span>`;
+            return `
+            <div class="member-card">
+                <div class="avatar">${initials}</div>
+                <div class="mc-info">
+                    <div class="mc-name">${name}</div>
+                    <div class="mc-email">${u?.email || ''}</div>
+                    <div class="mc-meta">
+                        <span class="badge-type ${typeCls}">${typeLabel}</span>
+                        <span class="badge-level l${r.mlm_level}">L${r.mlm_level}</span>
+                        ${amountBadge}
+                        <span class="mc-date">${date}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
     async function logout() {
@@ -336,5 +394,15 @@
         window.location.href = '/collaboratori/login.html';
     }
 </script>
+
+<div class="bottom-nav">
+        <a href="/collaboratori/dashboard.html" class="bn-item"><i class="fas fa-chart-line"></i>Dashboard</a>
+        <a href="/collaboratori/rete.html" class="bn-item active"><i class="fas fa-sitemap"></i>Rete</a>
+        <a href="/collaboratori/guadagni.html" class="bn-item"><i class="fas fa-euro-sign"></i>Guadagni</a>
+        <a href="/collaboratori/chiamate.html" class="bn-item"><i class="fas fa-phone"></i>Chiamate</a>
+        <a href="/collaboratori/task.html" class="bn-item"><i class="fas fa-check-square"></i>Task</a>
+        <a href="/collaboratori/note.html" class="bn-item"><i class="fas fa-sticky-note"></i>Note</a>
+        <a href="/collaboratori/profilo.html" class="bn-item"><i class="fas fa-user-circle"></i>Profilo</a>
+</div>
 </body>
 </html>
