@@ -93,9 +93,47 @@
         .l2-cell { background: #dbeafe; color: #2563eb; font-weight: 700; border-radius: 6px; padding: 4px 10px; display: inline-block; }
         .l3-cell { background: #fef3c7; color: #d97706; font-weight: 700; border-radius: 6px; padding: 4px 10px; display: inline-block; }
         .zero-cell { color: #94a3b8; }
+
+        /* ─── BOTTOM NAV (mobile) ───────────────────────────── */
+        .bottom-nav {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 64px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            z-index: 200;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 8px;
+        }
+        .bn-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: #64748b; text-decoration: none;
+            font-size: 0.6rem; font-weight: 600;
+            gap: 3px; padding: 6px 10px; border-radius: 10px;
+            transition: all 0.2s; min-width: 48px;
+        }
+        .bn-item i { font-size: 1.15rem; }
+        .bn-item.active { color: #fbbf24; }
+        .bn-item:hover { color: white; }
+        @media (max-width: 768px) {
+            .sidebar  { display: none; }
+            .bottom-nav { display: flex; }
+            .main { margin-left: 0 !important; padding: 16px 14px 80px 14px !important; }
+        }
     </style>
 </head>
 <body>
+<nav class="bottom-nav">
+        <a href="/collaboratori/dashboard.html" class="bn-item"><i class="fas fa-chart-line"></i>Dashboard</a>
+        <a href="/collaboratori/rete.html" class="bn-item"><i class="fas fa-sitemap"></i>Rete</a>
+        <a href="/collaboratori/guadagni.html" class="bn-item"><i class="fas fa-euro-sign"></i>Guadagni</a>
+        <a href="/collaboratori/chiamate.html" class="bn-item"><i class="fas fa-phone"></i>Chiamate</a>
+        <a href="/collaboratori/task.html" class="bn-item"><i class="fas fa-check-square"></i>Task</a>
+        <a href="/collaboratori/note.html" class="bn-item"><i class="fas fa-sticky-note"></i>Note</a>
+        <a href="/collaboratori/profilo.html" class="bn-item active"><i class="fas fa-user-circle"></i>Profilo</a>
+</nav>
+
 
 <div class="sidebar">
     <div class="sidebar-logo">
