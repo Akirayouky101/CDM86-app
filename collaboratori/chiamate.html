@@ -178,7 +178,14 @@
             border-left: 3px solid #fbbf24;
         }
         .menu-tab:hover { padding: 18px 11px; }
-        .menu-tab.open { left: 240px; border-radius: 0 10px 10px 0; border-left: none; border-right: 3px solid #fbbf24; }
+        /* Su desktop il tab si sposta con la sidebar */
+        @media (min-width: 769px) {
+            .menu-tab.open { left: 240px; border-right: 3px solid #fbbf24; border-left: none; }
+        }
+        /* Su mobile il tab rimane sempre al bordo sinistro */
+        @media (max-width: 768px) {
+            .menu-tab.open { left: 0; border-left: 3px solid #fbbf24; border-right: none; }
+        }
 
         /* Overlay solo su mobile */
         .sidebar-overlay {
@@ -654,10 +661,6 @@
                 const overlay = document.getElementById('sidebarOverlay');
                 const tab     = getTab();
                 const isOpen  = sidebar.classList.toggle('open');
-                // Overlay solo su mobile
-                if (window.innerWidth <= 768) {
-                    overlay.classList.toggle('active', isOpen);
-                }
                 tab.classList.toggle('open', isOpen);
                 document.body.classList.toggle('sidebar-open', isOpen);
                 // Salva stato in localStorage
