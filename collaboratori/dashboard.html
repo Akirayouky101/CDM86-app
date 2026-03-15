@@ -226,6 +226,104 @@
         }
         .empty-state i { font-size: 2rem; margin-bottom: 10px; display: block; }
 
+        /* ─── CALLBACKS TODAY ───────────────────────────────── */
+        .callbacks-section {
+            margin-bottom: 24px;
+        }
+        .callbacks-section .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .callbacks-section .section-title .badge-count {
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .callbacks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .callback-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            border-left: 4px solid #f59e0b;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+        .callback-card.overdue {
+            border-left-color: #dc2626;
+            background: #fff8f8;
+        }
+        .callback-card.upcoming {
+            border-left-color: #16a34a;
+        }
+        .callback-card .cb-time {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+        }
+        .callback-card .cb-time.overdue  { background: #fee2e2; color: #dc2626; }
+        .callback-card .cb-time.upcoming { background: #dcfce7; color: #16a34a; }
+        .callback-card .cb-time.soon     { background: #fef3c7; color: #d97706; }
+        .callback-card .cb-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .callback-card .cb-phone {
+            font-size: 0.82rem;
+            color: #3b82f6;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .callback-card .cb-notes {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-style: italic;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .callback-card .cb-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .callback-card .cb-btn {
+            flex: 1;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .callback-card .cb-btn:hover { opacity: 0.82; }
+        .cb-btn.call  { background: #dcfce7; color: #16a34a; }
+        .cb-btn.done  { background: #f1f5f9; color: #64748b; }
+
         /* ─── LOADING / MOBILE ──────────────────────────────── */
         .loading { text-align: center; padding: 60px; color: #64748b; }
 
@@ -343,6 +441,16 @@
             </div>
         </div>
 
+        <!-- CHIAMATE IN SCADENZA OGGI -->
+        <div class="callbacks-section" id="callbacksSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-bell" style="color:#f59e0b;"></i>
+                Richiami di oggi
+                <span class="badge-count" id="callbacksCount">0</span>
+            </div>
+            <div class="callbacks-grid" id="callbacksGrid"></div>
+        </div>
+
         <!-- BOTTOM GRID -->
         <div class="bottom-grid">
             <!-- Ultimi guadagni -->
@@ -402,6 +510,7 @@
             await loadStats(user);
             await loadRecentEarnings(user.id);
             await loadRecentNetwork(user.id);
+            await loadTodayCallbacks(user.id);
         });
 
         function renderProfile(user) {
@@ -505,6 +614,78 @@
                     </div>
                 </div>`;
             }).join('');
+        }
+
+        async function loadTodayCallbacks(userId) {
+            const now   = new Date();
+            const today = new Date(now); today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const { data: calls } = await supabase_client
+                .from('collaborator_calls')
+                .select('*')
+                .eq('collaborator_id', userId)
+                .gte('callback_at', today.toISOString())
+                .lt('callback_at', tomorrow.toISOString())
+                .order('callback_at', { ascending: true });
+
+            if (!calls || calls.length === 0) return;
+
+            document.getElementById('callbacksSection').style.display = 'block';
+            document.getElementById('callbacksCount').textContent = calls.length;
+
+            const grid = document.getElementById('callbacksGrid');
+            grid.innerHTML = calls.map(c => {
+                const cbTime    = new Date(c.callback_at);
+                const isOverdue = cbTime < now;
+                const minutesLeft = Math.round((cbTime - now) / 60000);
+                const isSoon    = !isOverdue && minutesLeft <= 60;
+
+                const timeStr = cbTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                const cardCls = isOverdue ? 'overdue' : isSoon ? '' : 'upcoming';
+                const timeCls = isOverdue ? 'overdue' : isSoon ? 'soon' : 'upcoming';
+                const timeLabel = isOverdue
+                    ? `⚠️ Scaduto alle ${timeStr}`
+                    : isSoon
+                        ? `⏰ Tra ${minutesLeft} min — ${timeStr}`
+                        : `🕐 Ore ${timeStr}`;
+
+                return `
+                <div class="callback-card ${cardCls}">
+                    <span class="cb-time ${timeCls}">${timeLabel}</span>
+                    <div class="cb-name">${c.contact_name || '—'}</div>
+                    ${c.contact_phone ? `<div class="cb-phone"><i class="fas fa-phone-alt"></i>${c.contact_phone}</div>` : ''}
+                    ${c.notes ? `<div class="cb-notes">${c.notes}</div>` : ''}
+                    <div class="cb-actions">
+                        ${c.contact_phone ? `<button class="cb-btn call" onclick="window.location.href='tel:${c.contact_phone}'"><i class="fas fa-phone"></i> Chiama</button>` : ''}
+                        <button class="cb-btn done" onclick="markCallbackDone('${c.id}', this)"><i class="fas fa-check"></i> Fatto</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function markCallbackDone(callId, btn) {
+            btn.disabled = true;
+            btn.textContent = '...';
+            const { error } = await supabase_client
+                .from('collaborator_calls')
+                .update({ callback_at: null, outcome: 'completata' })
+                .eq('id', callId);
+
+            if (!error) {
+                const card = btn.closest('.callback-card');
+                card.style.opacity = '0';
+                card.style.transition = 'opacity 0.4s';
+                setTimeout(() => {
+                    card.remove();
+                    const remaining = document.querySelectorAll('.callback-card').length;
+                    document.getElementById('callbacksCount').textContent = remaining;
+                    if (remaining === 0) document.getElementById('callbacksSection').style.display = 'none';
+                }, 400);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Fatto';
+            }
         }
 
         function formatEuro(n) {
