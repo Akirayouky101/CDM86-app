@@ -304,8 +304,8 @@
         if (currentFilter !== 'all') calls = calls.filter(c => c.outcome === currentFilter);
         if (search) calls = calls.filter(c =>
             (c.contact_name||'').toLowerCase().includes(search) ||
-            (c.company_name||'').toLowerCase().includes(search) ||
-            (c.phone||'').includes(search)
+            (c.contact_email||'').toLowerCase().includes(search) ||
+            (c.contact_phone||'').includes(search)
         );
 
         const tbody = document.getElementById('callsBody');
@@ -334,8 +334,8 @@
                 ? `<span title="${escHtml(c.notes)}" style="cursor:help;color:#64748b;font-size:0.78rem;">${escHtml(c.notes.substring(0,30))}${c.notes.length > 30 ? '…' : ''}</span>`
                 : '<span style="color:#e2e8f0;">—</span>';
 
-            const phoneLink = c.phone
-                ? `<a href="tel:${c.phone}" style="color:#16a34a;font-weight:600;font-size:0.8rem;text-decoration:none;">${escHtml(c.phone)}</a>`
+            const phoneLink = c.contact_phone
+                ? `<a href="tel:${c.contact_phone}" style="color:#16a34a;font-weight:600;font-size:0.8rem;text-decoration:none;">${escHtml(c.contact_phone)}</a>`
                 : '—';
 
             return `
@@ -344,14 +344,14 @@
                     <div class="contact-name">${escHtml(c.contact_name)}</div>
                     <div class="contact-phone">${phoneLink}</div>
                 </td>
-                <td>${c.company_name ? escHtml(c.company_name) : '<span style="color:#e2e8f0;">—</span>'}</td>
+                <td>${c.contact_email ? escHtml(c.contact_email) : '<span style="color:#e2e8f0;">—</span>'}</td>
                 <td>${outcomeLabels[c.outcome] || c.outcome}</td>
                 <td>${callbackHtml}</td>
                 <td style="color:#94a3b8;font-size:0.8rem;">${dateStr}</td>
                 <td>${notesHtml}</td>
                 <td>
                     <div style="display:flex;gap:4px;">
-                        ${c.phone ? `<button class="icon-btn call-btn" onclick="window.open('tel:${escHtml(c.phone)}')" title="Chiama"><i class="fas fa-phone"></i></button>` : ''}
+                        ${c.contact_phone ? `<button class="icon-btn call-btn" onclick="window.open('tel:${escHtml(c.contact_phone)}')" title="Chiama"><i class="fas fa-phone"></i></button>` : ''}
                         <button class="icon-btn" onclick="editCall('${c.id}')" title="Modifica"><i class="fas fa-pen"></i></button>
                         <button class="icon-btn delete" onclick="deleteCall('${c.id}')" title="Elimina"><i class="fas fa-trash"></i></button>
                     </div>
@@ -365,9 +365,9 @@
         document.getElementById('editCallId').value     = call ? call.id : '';
         document.getElementById('modalTitle').textContent = call ? 'Modifica Chiamata' : 'Nuova Chiamata';
         document.getElementById('callName').value        = call ? call.contact_name : '';
-        document.getElementById('callPhone').value       = call ? (call.phone || '') : '';
-        document.getElementById('callCompany').value     = call ? (call.company_name || '') : '';
-        document.getElementById('callEmail').value       = call ? (call.email || '') : '';
+        document.getElementById('callPhone').value       = call ? (call.contact_phone || '') : '';
+        document.getElementById('callCompany').value     = call ? (call.contact_email || '') : '';
+        document.getElementById('callEmail').value       = call ? (call.contact_email || '') : '';
         document.getElementById('callOutcome').value     = call ? call.outcome : 'pending';
         document.getElementById('callNotes').value       = call ? (call.notes || '') : '';
         if (call && call.callback_at) {
@@ -397,13 +397,12 @@
         btn.textContent = 'Salvataggio…';
 
         const payload = {
-            contact_name: name,
-            phone:        document.getElementById('callPhone').value.trim() || null,
-            company_name: document.getElementById('callCompany').value.trim() || null,
-            email:        document.getElementById('callEmail').value.trim() || null,
-            outcome:      document.getElementById('callOutcome').value,
-            notes:        document.getElementById('callNotes').value.trim() || null,
-            callback_at:  document.getElementById('callCallback').value || null,
+            contact_name:  name,
+            contact_phone: document.getElementById('callPhone').value.trim() || null,
+            contact_email: document.getElementById('callEmail').value.trim() || null,
+            outcome:       document.getElementById('callOutcome').value,
+            notes:         document.getElementById('callNotes').value.trim() || null,
+            callback_at:   document.getElementById('callCallback').value || null,
         };
 
         let error;
