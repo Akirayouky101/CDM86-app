@@ -113,42 +113,79 @@
         .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
         @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
-        
+
+        /* ── Mobile call cards ── */
+        .call-cards { display: none; flex-direction: column; gap: 12px; padding: 14px; }
+        .call-card {
+            background: white; border-radius: 14px; padding: 16px 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            border-left: 4px solid #e5e7eb;
+        }
+        .call-card.oc-pending        { border-left-color: #ca8a04; }
+        .call-card.oc-answered       { border-left-color: #2563eb; }
+        .call-card.oc-callback       { border-left-color: #9333ea; }
+        .call-card.oc-converted      { border-left-color: #16a34a; }
+        .call-card.oc-not_interested { border-left-color: #dc2626; }
+        .cc-top  { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+        .cc-name { font-weight: 700; color: #0f172a; font-size: 0.92rem; }
+        .cc-phone{ font-size: 0.82rem; color: #16a34a; font-weight: 600; margin-top: 2px; }
+        .cc-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+        .cc-notes{ font-size: 0.75rem; color: #64748b; margin-top: 6px; font-style: italic; }
+        .cc-callback { font-size: 0.75rem; color: #9333ea; font-weight: 600; margin-top: 4px; }
+        .cc-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .cc-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+        .cc-btn.call  { background: #f0fdf4; color: #16a34a; }
+        .cc-btn.edit  { background: #f1f5f9; color: #374151; }
+        .cc-btn.del   { background: #fef2f2; color: #dc2626; }
+
+        @media (max-width: 768px) {
+            .table-wrap { display: none; }
+            .call-cards { display: flex; }
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .form-row { grid-template-columns: 1fr; }
-            table { font-size: 0.8rem; }
+            .filters { gap: 6px; }
+            .search-box { width: 100%; min-width: 0; }
         }
 
-        /* ─── HAMBURGER + SIDEBAR MOBILE ───────────────────── */
-        .menu-toggle {
+        /* ─── SEGNALIBRO MENU MOBILE ────────────────────────── */
+        .menu-tab {
             display: none;
             position: fixed;
-            top: 14px; left: 14px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
             z-index: 300;
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            background: #0f172a;
-            border: none;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: #fbbf24;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 18px 8px;
+            border-radius: 0 10px 10px 0;
             cursor: pointer;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-            transition: background 0.2s;
+            border: none;
+            box-shadow: 3px 0 16px rgba(0,0,0,0.25);
+            transition: padding 0.2s, background 0.2s;
+            user-select: none;
+            border-left: 3px solid #fbbf24;
         }
-        .menu-toggle:hover { background: #1e293b; }
-        .menu-toggle i { color: #fbbf24; font-size: 1.1rem; }
+        .menu-tab:hover { padding: 18px 11px; }
+        .menu-tab.open { left: 240px; border-radius: 0 10px 10px 0; border-left: none; border-right: 3px solid #fbbf24; }
 
         .sidebar-overlay {
             display: none;
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.45);
             z-index: 150;
             backdrop-filter: blur(2px);
         }
         .sidebar-overlay.active { display: block; }
 
         @media (max-width: 768px) {
-            .menu-toggle { display: flex; }
+            .menu-tab { display: flex; }
+            .menu-toggle { display: none !important; }
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
@@ -160,9 +197,7 @@
     </style>
 </head>
 <body>
-<button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Menu">
-    <i class="fas fa-bars" id="menuIcon"></i>
-</button>
+<button class="menu-tab" id="menuTab" onclick="toggleMenu()" aria-label="Menu">CDM86</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 
 
@@ -238,6 +273,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Mobile call cards -->
+    <div class="call-cards" id="callCards"></div>
 </div>
 
 <!-- MODAL -->
@@ -351,8 +389,10 @@
         );
 
         const tbody = document.getElementById('callsBody');
+        const cards = document.getElementById('callCards');
         if (calls.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-phone-slash"></i><h3>Nessuna chiamata trovata</h3></div></td></tr>`;
+            cards.innerHTML = `<div class="empty-state"><i class="fas fa-phone-slash"></i><h3>Nessuna chiamata trovata</h3></div>`;
             return;
         }
 
@@ -399,6 +439,34 @@
                     </div>
                 </td>
             </tr>`;
+        }).join('');
+
+        // Mobile call cards
+        cards.innerHTML = calls.map(c => {
+            const dateStr = new Date(c.created_at).toLocaleDateString('it-IT');
+            const outcomeKey = c.outcome || 'pending';
+            const outcomeBadge = outcomeLabels[outcomeKey] || outcomeKey;
+            const callbackStr = c.callback_at
+                ? `<div class="cc-callback"><i class="fas fa-clock"></i> Richiama: ${new Date(c.callback_at).toLocaleString('it-IT', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`
+                : '';
+            return `
+            <div class="call-card oc-${outcomeKey}">
+                <div class="cc-top">
+                    <div>
+                        <div class="cc-name">${escHtml(c.contact_name)}</div>
+                        ${c.contact_phone ? `<div class="cc-phone"><i class="fas fa-phone-alt"></i> ${escHtml(c.contact_phone)}</div>` : ''}
+                    </div>
+                    <div style="font-size:0.72rem;color:#94a3b8;white-space:nowrap;">${dateStr}</div>
+                </div>
+                <div class="cc-meta">${outcomeBadge}</div>
+                ${callbackStr}
+                ${c.notes ? `<div class="cc-notes">${escHtml(c.notes.substring(0,80))}${c.notes.length>80?'…':''}</div>` : ''}
+                <div class="cc-actions">
+                    ${c.contact_phone ? `<button class="cc-btn call" onclick="window.location.href='tel:${escHtml(c.contact_phone)}'"><i class="fas fa-phone"></i> Chiama</button>` : ''}
+                    <button class="cc-btn edit" onclick="editCall('${c.id}')"><i class="fas fa-pen"></i> Modifica</button>
+                    <button class="cc-btn del"  onclick="deleteCall('${c.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
         }).join('');
     }
 
@@ -508,10 +576,10 @@
         function toggleMenu() {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            const icon    = document.getElementById('menuIcon');
+            const tab     = document.getElementById('menuTab');
             const isOpen  = sidebar.classList.toggle('open');
             overlay.classList.toggle('active', isOpen);
-            icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+            tab.classList.toggle('open', isOpen);
         }
     </script>
 </body>

@@ -131,37 +131,45 @@
         
             .notes-grid { grid-template-columns: 1fr; }
         }
-
-        /* ─── HAMBURGER + SIDEBAR MOBILE ───────────────────── */
-        .menu-toggle {
+        /* ─── SEGNALIBRO MENU MOBILE ────────────────────────── */
+        .menu-tab {
             display: none;
             position: fixed;
-            top: 14px; left: 14px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
             z-index: 300;
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            background: #0f172a;
-            border: none;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: #fbbf24;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 18px 8px;
+            border-radius: 0 10px 10px 0;
             cursor: pointer;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-            transition: background 0.2s;
+            border: none;
+            box-shadow: 3px 0 16px rgba(0,0,0,0.25);
+            transition: padding 0.2s, background 0.2s;
+            user-select: none;
+            border-left: 3px solid #fbbf24;
         }
-        .menu-toggle:hover { background: #1e293b; }
-        .menu-toggle i { color: #fbbf24; font-size: 1.1rem; }
+        .menu-tab:hover { padding: 18px 11px; }
+        .menu-tab.open { left: 240px; border-radius: 0 10px 10px 0; border-left: none; border-right: 3px solid #fbbf24; }
 
         .sidebar-overlay {
             display: none;
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.45);
             z-index: 150;
             backdrop-filter: blur(2px);
         }
         .sidebar-overlay.active { display: block; }
 
         @media (max-width: 768px) {
-            .menu-toggle { display: flex; }
+            .menu-tab { display: flex; }
+            .menu-toggle { display: none !important; }
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
@@ -173,9 +181,7 @@
     </style>
 </head>
 <body>
-<button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Menu">
-    <i class="fas fa-bars" id="menuIcon"></i>
-</button>
+<button class="menu-tab" id="menuTab" onclick="toggleMenu()" aria-label="Menu">CDM86</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 
 
@@ -466,10 +472,10 @@
         function toggleMenu() {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            const icon    = document.getElementById('menuIcon');
+            const tab     = document.getElementById('menuTab');
             const isOpen  = sidebar.classList.toggle('open');
             overlay.classList.toggle('active', isOpen);
-            icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+            tab.classList.toggle('open', isOpen);
         }
     </script>
 </body>
