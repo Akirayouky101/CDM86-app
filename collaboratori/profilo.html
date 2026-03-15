@@ -125,13 +125,21 @@
             border-left: 3px solid #fbbf24;
         }
         .menu-tab:hover { padding: 18px 11px; }
-        /* Su desktop il tab si sposta con la sidebar */
-        @media (min-width: 769px) {
-            .menu-tab.open { left: 240px; border-right: 3px solid #fbbf24; border-left: none; }
+        /* Stato aperto: desktop si sposta, mobile rimane al bordo ma cambia colore */
+        .menu-tab.open {
+            left: 240px;
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+            border-right: 3px solid #fbbf24;
         }
-        /* Su mobile il tab rimane sempre al bordo sinistro */
         @media (max-width: 768px) {
-            .menu-tab.open { left: 0; border-left: 3px solid #fbbf24; border-right: none; }
+            .menu-tab.open {
+                left: 0;
+                border-radius: 0 10px 10px 0;
+                border-left: 3px solid #ef4444;
+                border-right: none;
+                background: linear-gradient(180deg, #1e3a2f 0%, #14532d 100%);
+            }
         }
 
         /* Overlay solo su mobile */
@@ -501,6 +509,10 @@
                 const isOpen  = sidebar.classList.toggle('open');
                 tab.classList.toggle('open', isOpen);
                 document.body.classList.toggle('sidebar-open', isOpen);
+                // Su mobile cambia testo: aperto=✕ chiuso=CDM86
+                if (window.innerWidth <= 768) {
+                    tab.textContent = isOpen ? '✕' : 'CDM86';
+                }
                 // Salva stato in localStorage
                 localStorage.setItem('cdm86_sidebar_open', isOpen ? '1' : '0');
             };
@@ -513,7 +525,10 @@
                     const sidebar = document.querySelector('.sidebar');
                     const tab     = getTab();
                     sidebar.classList.add('open');
-                    if (tab) tab.classList.add('open');
+                    if (tab) {
+                        tab.classList.add('open');
+                        if (window.innerWidth <= 768) tab.textContent = '✕';
+                    }
                     document.body.classList.add('sidebar-open');
                 }
                 const tab = getTab();
