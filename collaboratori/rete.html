@@ -278,7 +278,9 @@
             const typeLabel = { user: 'Utente', azienda: 'Azienda', associazione: 'Associazione' }[r.registration_type] || r.registration_type;
             const typeCls = r.registration_type === 'azienda' ? 'azienda' : '';
             const amountCell = r._isPending
-                ? `<span style="font-size:0.75rem;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-weight:600;">⏳ In attesa pagamento</span>`
+                ? (r.subscription_status === 'active'
+                    ? `<span style="font-size:0.75rem;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-weight:600;">✅ Abbonato</span>`
+                    : `<span style="font-size:0.75rem;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-weight:600;">⏳ In attesa pagamento</span>`)
                 : `<span style="font-weight:700;color:#16a34a;">+€${parseFloat(r.total_amount).toFixed(2)}</span>`;
             return `
             <tr>
