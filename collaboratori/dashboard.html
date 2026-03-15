@@ -22,9 +22,12 @@
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             color: white;
             display: flex; flex-direction: column;
-            z-index: 100;
+            z-index: 200;
             overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
         }
+        .sidebar.open { transform: translateX(0); }
         .sidebar-logo {
             padding: 24px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -67,7 +70,8 @@
         .sidebar-user .logout:hover { color: #ef4444; }
 
         /* ─── MAIN ─────────────────────────────────────────── */
-        .main { margin-left: 240px; padding: 28px 32px; }
+        .main { margin-left: 0; padding: 28px 32px; transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1); }
+        body.sidebar-open .main { margin-left: 240px; }
 
         .page-header { margin-bottom: 28px; }
         .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
@@ -337,7 +341,7 @@
         }
         /* ─── SEGNALIBRO MENU MOBILE ────────────────────────── */
         .menu-tab {
-            display: none;
+            display: flex;
             position: fixed;
             top: 50%;
             left: 0;
@@ -374,15 +378,7 @@
         .sidebar-overlay.active { display: block; }
 
         @media (max-width: 768px) {
-            .menu-tab { display: flex; }
-            .menu-toggle { display: none !important; }
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-                z-index: 200;
-            }
-            .sidebar.open { transform: translateX(0); }
-            .main { margin-left: 0 !important; padding: 16px 14px 24px 14px !important; }
+            .main { padding: 16px 14px 24px 14px !important; }
         }
     </style>
 </head>
@@ -858,6 +854,7 @@
                 const isOpen  = sidebar.classList.toggle('open');
                 overlay.classList.toggle('active', isOpen);
                 tab.classList.toggle('open', isOpen);
+                document.body.classList.toggle('sidebar-open', isOpen);
             };
 
             window.addEventListener('DOMContentLoaded', function() {
