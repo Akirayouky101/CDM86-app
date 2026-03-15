@@ -200,7 +200,7 @@
         document.getElementById('sidebarName').textContent  = `${user.first_name} ${user.last_name}`;
         document.getElementById('sidebarEmail').textContent = user.email;
 
-        // Carica guadagni (utenti che hanno pagato — L1/L2/L3)
+        // Carica guadagni (utenti che hanno pagato)
         const { data: earnings } = await supabase_client
             .from('collaborator_earnings')
             .select('*, new_user:new_user_id(id, first_name, last_name, email, created_at)')
@@ -209,8 +209,8 @@
 
         const earningsRows = earnings || [];
 
-        // Carica anche utenti diretti che si sono registrati col codice ma non hanno ancora pagato
-        const paidUserIds = new Set(earningsRows.filter(r => r.mlm_level === 1).map(r => r.new_user_id));
+        // Carica anche utenti diretti che si sono registrati col codice ma non hanno ancora una riga earnings
+        const paidUserIds = new Set(earningsRows.map(r => r.new_user_id).filter(Boolean));
         const { data: pendingUsers } = await supabase_client
             .from('users')
             .select('id, first_name, last_name, email, created_at, subscription_status')
