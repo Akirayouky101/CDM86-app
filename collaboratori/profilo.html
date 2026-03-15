@@ -125,14 +125,18 @@
         .menu-tab:hover { padding: 18px 11px; }
         .menu-tab.open { left: 240px; border-radius: 0 10px 10px 0; border-left: none; border-right: 3px solid #fbbf24; }
 
+        /* Overlay solo su mobile */
         .sidebar-overlay {
             display: none;
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.45);
             z-index: 150;
+            -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
         }
-        .sidebar-overlay.active { display: block; }
+        @media (max-width: 768px) {
+            .sidebar-overlay.active { display: block; }
+        }
 
         @media (max-width: 768px) {
             .menu-tab { display: flex; }
@@ -486,7 +490,10 @@
                 const overlay = document.getElementById('sidebarOverlay');
                 const tab     = getTab();
                 const isOpen  = sidebar.classList.toggle('open');
-                overlay.classList.toggle('active', isOpen);
+                // Overlay solo su mobile
+                if (window.innerWidth <= 768) {
+                    overlay.classList.toggle('active', isOpen);
+                }
                 tab.classList.toggle('open', isOpen);
                 document.body.classList.toggle('sidebar-open', isOpen);
             };
