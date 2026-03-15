@@ -9,7 +9,7 @@
     <script src="/assets/js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #f1f5f9; min-height: 100vh; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
         /* Sidebar */
         .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; display: flex; flex-direction: column; z-index: 100; }
         .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -84,6 +84,7 @@
         .alert.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
         /* Tabella piano compensi */
         .comp-table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; border: 1px solid #f1f5f9; }
+        .comp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
         .comp-table thead th { background: #f8fafc; padding: 10px 14px; text-align: center; font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
         .comp-table thead th:first-child { text-align: left; }
         .comp-table tbody td { padding: 10px 14px; text-align: center; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; }
@@ -110,11 +111,13 @@
             letter-spacing: 0.15em;
             padding: 18px 8px;
             border-radius: 0 10px 10px 0;
-            cursor: pointer;
+            cursor: grab;
             border: none;
             box-shadow: 3px 0 16px rgba(0,0,0,0.25);
-            transition: padding 0.2s, background 0.2s;
+            transition: padding 0.2s, background 0.2s, top 0.15s ease;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
             border-left: 3px solid #fbbf24;
         }
         .menu-tab:hover { padding: 18px 11px; }
@@ -139,6 +142,11 @@
             }
             .sidebar.open { transform: translateX(0); }
             .main { margin-left: 0 !important; padding: 16px 14px 24px 14px !important; }
+            /* Profilo: colonne → una sola colonna */
+            .profile-grid { grid-template-columns: 1fr !important; gap: 16px; }
+            .form-row { grid-template-columns: 1fr !important; }
+            .comp-table thead th:last-child,
+            .comp-table tbody td:last-child { display: none; } /* nascondi col L3 su mobile */
         }
     </style>
 </head>
@@ -240,6 +248,7 @@
             </button>
 
             <div class="panel-section-title" style="margin-top:32px;">Piano compensi</div>
+            <div class="comp-table-wrap">
             <table class="comp-table" id="compTable">
                 <thead>
                     <tr>
@@ -270,6 +279,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div><!-- /comp-table-wrap -->
         </div>
     </div>
 </div>
@@ -395,14 +405,97 @@
         window.location.href = '/collaboratori/login.html';
     }
 
-        function toggleMenu() {
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const tab     = document.getElementById('menuTab');
-            const isOpen  = sidebar.classList.toggle('open');
-            overlay.classList.toggle('active', isOpen);
-            tab.classList.toggle('open', isOpen);
-        }
+        /* ── Menu tab: toggle + drag verticale ── */
+        (function() {
+            const STORAGE_KEY = 'cdm86_tab_top';
+            let isDragging = false;
+            let dragStartY = 0;
+            let tabStartTop = 0;
+            let movedEnough = false;
+
+            function getTab() { return document.getElementById('menuTab'); }
+
+            function applyStoredPosition() {
+                const tab = getTab();
+                if (!tab) return;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    tab.style.top = saved;
+                    tab.style.transform = 'none';
+                } else {
+                    tab.style.top = '50%';
+                    tab.style.transform = 'translateY(-50%)';
+                }
+            }
+
+            function onDragStart(e) {
+                const tab = getTab();
+                isDragging = false;
+                movedEnough = false;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                dragStartY = clientY;
+                // Converti top% in px se necessario
+                const rect = tab.getBoundingClientRect();
+                tabStartTop = rect.top + rect.height / 2;
+                tab.style.transition = 'padding 0.2s, background 0.2s';
+                tab.style.cursor = 'grabbing';
+
+                document.addEventListener('mousemove', onDragMove, {passive:false});
+                document.addEventListener('touchmove', onDragMove, {passive:false});
+                document.addEventListener('mouseup', onDragEnd);
+                document.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dy = clientY - dragStartY;
+                if (Math.abs(dy) > 6) {
+                    isDragging = true;
+                    movedEnough = true;
+                    if (e.cancelable) e.preventDefault();
+                }
+                if (!isDragging) return;
+                const tab = getTab();
+                let newTop = tabStartTop + dy;
+                // Clamp tra 40px e altezza schermo - 40px
+                const minTop = 40;
+                const maxTop = window.innerHeight - 40;
+                newTop = Math.max(minTop, Math.min(maxTop, newTop));
+                tab.style.top = newTop + 'px';
+                tab.style.transform = 'none';
+            }
+
+            function onDragEnd(e) {
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('touchmove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                document.removeEventListener('touchend', onDragEnd);
+                const tab = getTab();
+                tab.style.cursor = 'grab';
+                tab.style.transition = 'padding 0.2s, background 0.2s, top 0.15s ease';
+                if (movedEnough) {
+                    localStorage.setItem(STORAGE_KEY, tab.style.top);
+                }
+            }
+
+            window.toggleMenu = function() {
+                if (movedEnough) { movedEnough = false; return; }
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const tab     = getTab();
+                const isOpen  = sidebar.classList.toggle('open');
+                overlay.classList.toggle('active', isOpen);
+                tab.classList.toggle('open', isOpen);
+            };
+
+            window.addEventListener('DOMContentLoaded', function() {
+                applyStoredPosition();
+                const tab = getTab();
+                if (!tab) return;
+                tab.addEventListener('mousedown', onDragStart);
+                tab.addEventListener('touchstart', onDragStart, {passive:true});
+            });
+        })();
     </script>
 </body>
 </html>
