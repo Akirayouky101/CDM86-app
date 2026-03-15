@@ -496,10 +496,21 @@
                 }
                 tab.classList.toggle('open', isOpen);
                 document.body.classList.toggle('sidebar-open', isOpen);
+                // Salva stato in localStorage
+                localStorage.setItem('cdm86_sidebar_open', isOpen ? '1' : '0');
             };
 
             window.addEventListener('DOMContentLoaded', function() {
                 applyStoredPosition();
+                // Ripristina stato sidebar
+                const sidebarWasOpen = localStorage.getItem('cdm86_sidebar_open') === '1';
+                if (sidebarWasOpen) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const tab     = getTab();
+                    sidebar.classList.add('open');
+                    if (tab) tab.classList.add('open');
+                    document.body.classList.add('sidebar-open');
+                }
                 const tab = getTab();
                 if (!tab) return;
                 tab.addEventListener('mousedown', onDragStart);
