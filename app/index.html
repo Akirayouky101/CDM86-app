@@ -28,6 +28,11 @@
             font-size: 0.9rem;
             color: #94a3b8;
         }
+        .splash-version {
+            font-size: 0.75rem;
+            color: #475569;
+            margin-top: 4px;
+        }
         .spinner {
             width: 32px; height: 32px;
             border: 3px solid rgba(251,191,36,0.3);
@@ -42,7 +47,7 @@
 <body>
     <div class="splash">
         <div class="splash-logo">CDM86</div>
-        <div class="splash-sub">Pannello Collaboratori</div>
+        <div class="splash-sub">Promozioni Esclusive</div>
         <div class="spinner"></div>
     </div>
 
@@ -54,9 +59,20 @@
         (async () => {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
-                window.location.href = 'collaboratori/dashboard.html';
+                // Controlla se è un collaboratore
+                const { data: collab } = await sb.from('collaborators')
+                    .select('id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (collab) {
+                    window.location.href = 'collaboratori/dashboard.html';
+                } else {
+                    window.location.href = 'public/promotions.html';
+                }
             } else {
-                window.location.href = 'login.html';
+                // Non loggato → pagina promozioni (visibile anche senza login)
+                window.location.href = 'public/promotions.html';
             }
         })();
     </script>

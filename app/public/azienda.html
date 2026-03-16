@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Azienda - CDM86</title>
+    <meta name="description" id="page-description" content="">
+    <meta property="og:image" id="page-og-image" content="">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../assets/js/config.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 2rem;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(37, 99, 235, 0.2);
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.25rem;
+            color: #94a3b8;
+        }
+
+        /* Error State */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 2rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: #ef4444;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .error-message {
+            font-size: 1.125rem;
+            color: #94a3b8;
+            max-width: 500px;
+        }
+
+        .btn-home {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-home:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* Page Content */
+        #page-content {
+            display: none;
+        }
+
+        #page-content.loaded {
+            display: block;
+        }
+
+        /* Reuse styles from page-preview.html for sections */
+        .section {
+            min-height: 50vh;
+            padding: 4rem 2rem;
+        }
+
+        .section-hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .section-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-hero h2 {
+            font-size: 1.5rem;
+            color: #fbbf24;
+            margin-bottom: 2rem;
+        }
+
+        .section-hero p {
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            color: #cbd5e1;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #fbbf24;
+            color: #1e293b;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fbbf24;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Organization Info Header */
+        .org-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 2rem;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        .org-info {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .org-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 1rem;
+            object-fit: cover;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .org-details h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .org-details p {
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .org-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .org-link {
+            color: #fbbf24;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .org-link:hover {
+            color: #f59e0b;
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .section-hero h1 {
+                font-size: 2rem;
+            }
+
+            .org-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Caricamento pagina...</div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">Pagina non trovata</h1>
+        <p class="error-message">La pagina aziendale che stai cercando non esiste o non è stata ancora pubblicata.</p>
+        <a href="../index.html" class="btn-home">Torna alla Home</a>
+    </div>
+
+    <!-- Page Content -->
+    <div id="page-content">
+        <!-- Organization Header (will be populated dynamically) -->
+        <div id="org-header"></div>
+        
+        <!-- Page Sections (will be populated from page_data) -->
+        <div id="sections-container"></div>
+    </div>
+
+    <script>
+        // Get slug from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+
+        if (!slug) {
+            showError('Nessuno slug specificato nell\'URL');
+        } else {
+            loadOrganizationPage(slug);
+        }
+
+        async function loadOrganizationPage(slug) {
+            try {
+                const response = await fetch(
+                    `${window.SUPABASE_URL}/functions/v1/get-organization-page?slug=${encodeURIComponent(slug)}`,
+                    {
+                        headers: {
+                            'apikey': window.SUPABASE_ANON_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Errore nel caricamento');
+                }
+
+                renderPage(result.page);
+            } catch (error) {
+                console.error('Error loading page:', error);
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'flex';
+            document.querySelector('.error-message').textContent = message;
+        }
+
+        function renderPage(pageData) {
+            const { page_title, page_description, meta_image, page_data, organization } = pageData;
+
+            // Update meta tags
+            if (page_title) {
+                document.getElementById('page-title').textContent = page_title;
+                document.title = page_title;
+            }
+            if (page_description) {
+                document.getElementById('page-description').setAttribute('content', page_description);
+            }
+            if (meta_image) {
+                document.getElementById('page-og-image').setAttribute('content', meta_image);
+            }
+
+            // Render organization header
+            renderOrgHeader(organization);
+
+            // Render page sections
+            if (page_data && page_data.sections) {
+                page_data.sections.forEach(section => {
+                    renderSection(section);
+                });
+            }
+
+            // Show page, hide loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('page-content').classList.add('loaded');
+        }
+
+        function renderOrgHeader(org) {
+            if (!org) return;
+
+            const headerHTML = `
+                <div class="org-header">
+                    <div class="org-info">
+                        ${org.logo_url ? `<img src="${org.logo_url}" alt="${org.name}" class="org-logo">` : ''}
+                        <div class="org-details">
+                            <h1>${org.name}</h1>
+                            ${org.description ? `<p>${org.description}</p>` : ''}
+                            <div class="org-links">
+                                ${org.website ? `<a href="${org.website}" class="org-link" target="_blank"><i class="fas fa-globe"></i></a>` : ''}
+                                ${org.email ? `<a href="mailto:${org.email}" class="org-link"><i class="fas fa-envelope"></i></a>` : ''}
+                                ${org.phone ? `<a href="tel:${org.phone}" class="org-link"><i class="fas fa-phone"></i></a>` : ''}
+                                ${org.social_links?.facebook ? `<a href="${org.social_links.facebook}" class="org-link" target="_blank"><i class="fab fa-facebook"></i></a>` : ''}
+                                ${org.social_links?.instagram ? `<a href="${org.social_links.instagram}" class="org-link" target="_blank"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${org.social_links?.linkedin ? `<a href="${org.social_links.linkedin}" class="org-link" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('org-header').innerHTML = headerHTML;
+        }
+
+        function renderSection(section) {
+            const container = document.getElementById('sections-container');
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'section';
+            sectionDiv.innerHTML = getSectionHTML(section);
+            container.appendChild(sectionDiv);
+        }
+
+        function getSectionHTML(section) {
+            const { type, data } = section;
+
+            switch (type) {
+                case 'hero':
+                    return `
+                        <div class="section-hero" style="background: ${data.background || '#2563eb'}">
+                            <div class="container">
+                                <h1>${data.title || ''}</h1>
+                                <h2>${data.subtitle || ''}</h2>
+                                <p>${data.text || ''}</p>
+                                ${data.ctaText ? `<a href="${data.ctaLink || '#'}" class="cta-button">${data.ctaText}</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                case 'cards-3':
+                case 'cards-4':
+                    const cardsHTML = (data.cards || []).map(card => `
+                        <div class="card">
+                            <div class="card-icon"><i class="fas ${card.icon}"></i></div>
+                            <h3>${card.title}</h3>
+                            <p>${card.text}</p>
+                        </div>
+                    `).join('');
+                    
+                    return `
+                        <div class="container">
+                            ${data.title ? `<h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">${data.title}</h2>` : ''}
+                            <div class="cards-grid">${cardsHTML}</div>
+                        </div>
+                    `;
+
+                case 'stats':
+                    const statsHTML = (data.stats || []).map(stat => `
+                        <div class="stat-card">
+                            <div class="stat-number">${stat.number}</div>
+                            <div class="stat-label">${stat.label}</div>
+                        </div>
+                    `).join('');
+                    
+                    return `
+                        <div class="container">
+                            <div class="stats-container">${statsHTML}</div>
+                        </div>
+                    `;
+
+                case 'cta':
+                    return `
+                        <div class="section-hero" style="background: ${data.background || '#2563eb'}">
+                            <div class="container">
+                                <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">${data.text || ''}</h2>
+                                ${data.ctaText ? `<a href="${data.ctaLink || '#'}" class="cta-button">${data.ctaText}</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return '<div class="container"><p>Tipo di sezione non supportato</p></div>';
+            }
+        }
+    </script>
+</body>
+</html>

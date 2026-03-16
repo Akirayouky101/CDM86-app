@@ -1,0 +1,3100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scopri promozioni esclusive e risparmia con CDM86">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDM86">
+    
+    <title>CDM86 - Promozioni Esclusive</title>
+    
+    <!-- PWA Manifest -->
+    <!-- <link rel="manifest" href="/manifest.json"> -->
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/icon-72x72.png">
+    <link rel="apple-touch-icon" href="../assets/images/icon-192x192.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../assets/css/promotions.css">
+    <link rel="stylesheet" href="../assets/css/filters.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <link rel="stylesheet" href="../assets/css/intro-modal.css">
+    <link rel="stylesheet" href="../assets/css/auth-modal.css">
+    <link rel="stylesheet" href="../assets/css/login-modal.css">
+    <link rel="stylesheet" href="../assets/css/promo-modal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Login Required Modal */
+        .login-required-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .login-required-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-required-modal {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUpBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        /* Make promo cards clickable */
+        .promo-card {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Riscatta button on org partner cards */
+        .riscatta-card-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .riscatta-card-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .riscatta-card-btn:active { transform: translateY(0); }
+
+        /* QR Redemption Modal (inline in promotions page) */
+        .qr-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .qr-overlay.show { opacity: 1; pointer-events: all; }
+        .qr-modal {
+            background: #1e293b; color: #f1f5f9;
+            border-radius: 20px; padding: 2rem 1.8rem;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+            text-align: center;
+            animation: qrPopIn 0.3s ease;
+        }
+        @keyframes qrPopIn {
+            from { opacity: 0; transform: scale(0.92) translateY(16px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .qr-modal-icon { font-size: 2.5rem; margin-bottom: 0.6rem; }
+        .qr-modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; }
+        .qr-modal p  { font-size: 0.88rem; color: #94a3b8; margin-bottom: 1.2rem; line-height: 1.5; }
+        .qr-promo-name-badge {
+            background: #0f172a; border-radius: 8px; padding: 0.6rem 0.9rem;
+            font-size: 0.88rem; font-weight: 600; color: #a5b4fc; margin-bottom: 1.2rem;
+        }
+        .qr-modal-btns { display: flex; gap: 0.7rem; }
+        .qr-btn {
+            flex: 1; padding: 0.85rem; border: none; border-radius: 12px;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+        }
+        .qr-btn:hover { opacity: 0.85; }
+        .qr-btn.cancel { background: #334155; color: #94a3b8; }
+        .qr-btn.confirm { background: linear-gradient(135deg, #059669, #10b981); color: #fff; }
+        .qr-canvas-wrap { margin: 1rem auto; }
+        .qr-canvas-wrap canvas { border-radius: 12px; display: block; margin: 0 auto; }
+        .qr-countdown-label { font-size: 0.78rem; color: #64748b; margin-top: 0.8rem; }
+        .qr-countdown { font-size: 2rem; font-weight: 800; color: #10b981; margin: 0.2rem 0; }
+        .qr-countdown.urgent { color: #ef4444; }
+        .qr-progress { width: 100%; height: 6px; background: #334155; border-radius: 3px; margin: 0.5rem 0 1rem; overflow: hidden; }
+        .qr-progress-bar { height: 100%; background: #10b981; border-radius: 3px; transition: width 1s linear, background 1s; }
+        .qr-status-msg { font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem; }
+        .qr-success-msg { display: none; color: #10b981; font-weight: 700; font-size: 1rem; margin-top: 0.5rem; }
+        .qr-expired-msg { display: none; color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; }
+        .qr-new-btn { display: none; margin-top: 0.8rem; width: 100%; padding: 0.8rem; background: #334155; color: #f1f5f9; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+        .login-required-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .login-required-icon i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        .login-required-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        
+        .login-required-text {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        
+        .login-required-features {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            animation: slideInLeft 0.5s ease-out backwards;
+        }
+        
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon i {
+            font-size: 18px;
+            color: white;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .login-required-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .login-required-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .login-required-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-required-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .login-required-btn-secondary {
+            background: #f1f3f5;
+            color: #495057;
+        }
+        
+        .login-required-btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUpBounce {
+            from {
+                opacity: 0;
+                transform: translateY(100px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .login-required-modal {
+                padding: 32px 24px;
+            }
+            
+            .login-required-title {
+                font-size: 24px;
+            }
+            
+            .login-required-buttons {
+                flex-direction: column;
+            }
+            
+            .login-required-btn {
+                width: 100%;
+            }
+        }
+    </style>
+    
+    <!-- Config -->
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/auth-modal.js"></script>
+</head>
+<body class="promotions-page">
+    
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <h1 class="brand-name">CDM86</h1>
+            </div>
+            
+            <div class="nav-actions">
+                <!-- Search Bar (desktop) -->
+                <div class="search-container" id="searchContainer">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cerca promozioni...">
+                    <button class="search-clear hidden" id="searchClear" title="Cancella ricerca" aria-label="Cancella ricerca">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <button class="nav-btn" id="filter-btn">
+                    <i class="fas fa-filter"></i>
+                    <span class="filter-badge hidden" id="filterBadge">0</span>
+                </button>
+                <button class="nav-btn nav-btn-primary" id="login-btn">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-nav">Accedi</span>
+                </button>
+            </div>
+            
+            <!-- Search Bar (mobile - separate row) -->
+            <div class="search-container" id="searchContainerMobile">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInputMobile" placeholder="Cerca promozioni...">
+                <button class="search-clear hidden" id="searchClearMobile" title="Cancella ricerca" aria-label="Cancella ricerca">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <!-- Hero Section - Unified -->
+    <section class="hero-section-unified">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    La Piattaforma del <span class="highlight">Risparmio</span>
+                </h1>
+                <p class="hero-subtitle hero-subtitle--large">
+                    Registrati e scopri come accedere ad un Mondo di sconti e servizi a te dedicati
+                </p>
+                
+                <div class="cta-block">
+                    <p class="cta-text">
+                        Aiutaci a far crescere la piattaforma e ricevi compensi fino a 30€ 
+                        <a href="#" class="cta-link" onclick="event.preventDefault(); if(window.CDM86Intro) CDM86Intro.show();">Clicca Qui</a> 
+                        e scopri come fare
+                    </p>
+                    <p class="cta-promo-badge">
+                        <span class="cta-promo-highlight">SCONTO 50%</span> <span class="cta-promo-sub">sull'abbonamento 2026</span>
+                    </p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">+3000</span>
+                        <span class="stat-label">Utenti Test</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">25%</span>
+                        <span class="stat-label">Risparmio Medio</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Filter -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="categories-scroll">
+                <button class="category-chip active" data-category="all">
+                    <i class="fas fa-th"></i>
+                    <span>Tutte</span>
+                </button>
+                <button class="category-chip" data-category="food">
+                    <i class="fas fa-utensils"></i>
+                    <span>Ristorazione</span>
+                </button>
+                <button class="category-chip" data-category="shopping">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Shopping</span>
+                </button>
+                <button class="category-chip" data-category="services">
+                    <i class="fas fa-concierge-bell"></i>
+                    <span>Servizi</span>
+                </button>
+                <button class="category-chip" data-category="entertainment">
+                    <i class="fas fa-film"></i>
+                    <span>Intrattenimento</span>
+                </button>
+                <button class="category-chip" data-category="wellness">
+                    <i class="fas fa-spa"></i>
+                    <span>Benessere</span>
+                </button>
+                <button class="category-chip" data-category="travel">
+                    <i class="fas fa-plane"></i>
+                    <span>Viaggi</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Filters Panel -->
+    <div class="filters-panel" id="filtersPanel">
+        <div class="filters-header">
+            <h3>Filtri Avanzati</h3>
+            <button class="filters-close" id="filtersClose" title="Chiudi filtri" aria-label="Chiudi filtri">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="filters-content">
+            <!-- Price Range Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-euro-sign"></i>
+                    Fascia di Prezzo
+                </label>
+                <div class="price-inputs">
+                    <input type="number" class="price-input" id="priceMin" placeholder="Min €" min="0">
+                    <span>-</span>
+                    <input type="number" class="price-input" id="priceMax" placeholder="Max €" min="0">
+                </div>
+                <div class="price-range-slider">
+                    <input type="range" id="priceRange" min="0" max="200" value="200" step="5" title="Prezzo massimo" aria-label="Seleziona prezzo massimo">
+                    <div class="range-values">
+                        <span>€0</span>
+                        <span id="rangeValue">€200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Discount Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-percent"></i>
+                    Sconto Minimo
+                </label>
+                <div class="discount-options">
+                    <button class="discount-btn" data-discount="0">Tutti</button>
+                    <button class="discount-btn" data-discount="10">10%+</button>
+                    <button class="discount-btn" data-discount="20">20%+</button>
+                    <button class="discount-btn" data-discount="30">30%+</button>
+                    <button class="discount-btn" data-discount="50">50%+</button>
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-sort"></i>
+                    Ordina Per
+                </label>
+                <select class="filter-select" id="sortSelect" title="Ordina promozioni" aria-label="Seleziona ordinamento">
+                    <option value="newest">Più Recenti</option>
+                    <option value="price-low">Prezzo: Basso → Alto</option>
+                    <option value="price-high">Prezzo: Alto → Basso</option>
+                    <option value="discount">Sconto Maggiore</option>
+                    <option value="popular">Più Popolari</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="filters-footer">
+            <button class="btn-filter-reset" id="resetFilters">
+                <i class="fas fa-undo"></i>
+                Reset Filtri
+            </button>
+            <button class="btn-filter-apply" id="applyFilters">
+                <i class="fas fa-check"></i>
+                Applica Filtri
+            </button>
+        </div>
+    </div>
+    <div class="filters-overlay" id="filtersOverlay"></div>
+
+    <!-- Selection Modal (User vs Azienda) -->
+    <div class="selection-modal-overlay" id="selectionModalOverlay">
+        <div class="selection-modal">
+            <div class="selection-modal-header">
+                <button class="selection-modal-close" onclick="LoginModal.closeSelection()">&times;</button>
+                <div class="selection-modal-icon">🔐</div>
+                <h2 class="selection-modal-title">Benvenuto su CDM86</h2>
+                <p class="selection-modal-subtitle">Scegli come vuoi accedere alla piattaforma</p>
+            </div>
+
+            <div class="selection-modal-body">
+                <div class="selection-options">
+                    <div class="selection-option" onclick="LoginModal.selectUser()">
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">👤</span>
+                            <h3 class="selection-option-title">Sono un Utente</h3>
+                            <p class="selection-option-description">Accedi alle promozioni e guadagna punti</p>
+                        </div>
+                    </div>
+
+                    <div class="selection-option" onclick="LoginModal.selectCompany()">
+                        <span class="selection-option-badge">Partner</span>
+                        <div class="selection-option-content">
+                            <span class="selection-option-icon">🏢</span>
+                            <h3 class="selection-option-title">Azienda/Associazione</h3>
+                            <p class="selection-option-description">Richiedi informazioni per pubblicare promozioni</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="selection-login-section">
+                    <p>Hai già un account?</p>
+                    <button class="selection-login-btn" onclick="LoginModal.showExistingUserLogin()">
+                        <span>🔑</span>
+                        <span>Accedi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Request Modal -->
+    <div class="company-request-modal-overlay" id="companyRequestModalOverlay">
+        <div class="company-request-modal">
+            <button class="selection-modal-close" onclick="CompanyWizard.close()">&times;</button>
+            
+            <div class="company-request-header">
+                <span class="company-request-icon">🏢</span>
+                <h2 id="wizardTitle">Segnala Azienda/Associazione</h2>
+                <p id="wizardSubtitle">Passo 1 di 2 - Dati Azienda</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="wizard-progress">
+                <div class="wizard-progress-bar" id="wizardProgressBar" style="width: 50%"></div>
+            </div>
+
+            <!-- STEP 1: Dati Azienda -->
+            <div id="wizardStep1" class="wizard-step active">
+                <form id="companyDataForm" class="company-request-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyName">Nome Azienda/Associazione *</label>
+                            <input type="text" id="companyName" required placeholder="Es: Ristorante Da Mario">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyContact">Nome e Cognome Referente *</label>
+                            <input type="text" id="companyContact" required placeholder="Es: Mario Rossi">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyEmail">Email *</label>
+                            <input type="email" id="companyEmail" required placeholder="info@azienda.it">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyPhone">Telefono *</label>
+                            <input type="tel" id="companyPhone" required placeholder="+39 123 456 7890">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyAddress">Indirizzo *</label>
+                        <input type="text" id="companyAddress" required placeholder="Via, Città, CAP">
+                    </div>
+
+                    <div class="company-request-actions">
+                        <button type="button" class="btn-secondary" onclick="CompanyWizard.close()">Annulla</button>
+                        <button type="button" class="btn-primary" onclick="CompanyWizard.nextStep()">
+                            <span>Avanti</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- STEP 2: Sondaggio -->
+            <div id="wizardStep2" class="wizard-step">
+                <form id="companySurveyForm" class="company-request-form">
+                    <!-- Settore -->
+                    <div class="form-group">
+                        <label for="companySector">Settore *</label>
+                        <select id="companySector" required onchange="CompanyWizard.toggleSectorOther()">
+                            <option value="">Seleziona...</option>
+                            <option value="Ristorazione">Ristorazione</option>
+                            <option value="Bar/Caffetteria">Bar/Caffetteria</option>
+                            <option value="Retail/Abbigliamento">Retail/Abbigliamento</option>
+                            <option value="Elettronica">Elettronica</option>
+                            <option value="Alimentari/Supermercato">Alimentari/Supermercato</option>
+                            <option value="Servizi alla Persona">Servizi alla Persona</option>
+                            <option value="Benessere/SPA">Benessere/SPA</option>
+                            <option value="Fitness/Palestra">Fitness/Palestra</option>
+                            <option value="Intrattenimento">Intrattenimento</option>
+                            <option value="Viaggi/Turismo">Viaggi/Turismo</option>
+                            <option value="Hotel/B&B">Hotel/B&B</option>
+                            <option value="Artigianato">Artigianato</option>
+                            <option value="Automotive">Automotive</option>
+                            <option value="Immobiliare">Immobiliare</option>
+                            <option value="Associazione No-Profit">Associazione No-Profit</option>
+                            <option value="Associazione Sportiva">Associazione Sportiva</option>
+                            <option value="Associazione Culturale">Associazione Culturale</option>
+                            <option value="other">Altro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="sectorOtherGroup" style="display: none;">
+                        <label for="sectorOther">Specifica Settore</label>
+                        <input type="text" id="sectorOther" placeholder="Inserisci il settore">
+                    </div>
+
+                    <!-- Azienda Consapevole -->
+                    <div class="form-group">
+                        <label>L'azienda è a conoscenza di questa segnalazione? *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="companyAware" value="si" required>
+                                <span>✅ Sì</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="companyAware" value="no" required>
+                                <span>❌ No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chi è a conoscenza -->
+                    <div class="form-group">
+                        <label for="whoKnows">Chi ne è a conoscenza? *</label>
+                        <select id="whoKnows" required onchange="CompanyWizard.toggleWhoKnowsOther()">
+                            <option value="">Seleziona...</option>
+                            <option value="Titolare">Titolare</option>
+                            <option value="Direttore">Direttore</option>
+                            <option value="Responsabile Commerciale">Responsabile Commerciale</option>
+                            <option value="Responsabile Marketing">Responsabile Marketing</option>
+                            <option value="Segreteria">Segreteria</option>
+                            <option value="Addetto Vendite">Addetto Vendite</option>
+                            <option value="other">Altro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="whoKnowsOtherGroup" style="display: none;">
+                        <label for="whoKnowsOther">Specifica Ruolo</label>
+                        <input type="text" id="whoKnowsOther" placeholder="Inserisci il ruolo">
+                    </div>
+
+                    <!-- Orari di Contatto -->
+                    <div class="form-group">
+                        <label for="callTime">Orari in cui si può chiamare? *</label>
+                        <select id="callTime" required>
+                            <option value="">Seleziona...</option>
+                            <option value="08:00 - 10:00">08:00 - 10:00</option>
+                            <option value="10:00 - 12:00">10:00 - 12:00</option>
+                            <option value="12:00 - 14:00">12:00 - 14:00</option>
+                            <option value="14:00 - 16:00">14:00 - 16:00</option>
+                            <option value="16:00 - 18:00">16:00 - 18:00</option>
+                            <option value="18:00 - 20:00">18:00 - 20:00</option>
+                            <option value="20:00 - 22:00">20:00 - 22:00</option>
+                            <option value="Sempre disponibile">Sempre disponibile</option>
+                            <option value="Solo mattina (08:00-13:00)">Solo mattina (08:00-13:00)</option>
+                            <option value="Solo pomeriggio (13:00-18:00)">Solo pomeriggio (13:00-18:00)</option>
+                            <option value="Solo sera (18:00-22:00)">Solo sera (18:00-22:00)</option>
+                        </select>
+                    </div>
+
+                    <div class="company-request-actions">
+                        <button type="button" class="btn-secondary" onclick="CompanyWizard.prevStep()">
+                            <span>←</span>
+                            <span>Indietro</span>
+                        </button>
+                        <button type="button" class="btn-primary" onclick="CompanyWizard.submitForm()">
+                            <span>📧</span>
+                            <span>Invia Segnalazione</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="company-request-loading" id="companyRequestLoading">
+                <div class="spinner"></div>
+                <p>Invio segnalazione in corso...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Org Registration Wizard Modal -->
+    <div class="org-reg-modal-overlay" id="orgRegModalOverlay">
+        <div class="org-reg-modal">
+            <button class="org-reg-close" onclick="OrgRegWizard.close()">&times;</button>
+
+            <div class="org-reg-header">
+                <span class="org-reg-icon">🏢</span>
+                <h2 id="orgRegTitle">Richiesta Registrazione</h2>
+                <p id="orgRegSubtitle">Passo 1 di 3 — Dati Azienda</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="org-reg-progress">
+                <div class="org-reg-progress-bar" id="orgRegProgressBar" style="width:33%"></div>
+            </div>
+
+            <!-- STEP 1: Dati Azienda -->
+            <div id="orgRegStep1" class="org-reg-step active">
+                <div id="orgRegAlert1" class="form-alert"></div>
+                <div class="form-group">
+                    <label for="orgRegName">Nome Azienda / Associazione <span class="req">*</span></label>
+                    <input type="text" id="orgRegName" placeholder="Es: Ristorante Da Mario">
+                </div>
+                <div class="form-group">
+                    <label for="orgRegType">Tipo <span class="req">*</span></label>
+                    <select id="orgRegType" class="reg-select">
+                        <option value="">Seleziona...</option>
+                        <option value="azienda">Azienda</option>
+                        <option value="associazione">Associazione</option>
+                        <option value="altro">Altro</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orgRegFirstName">Nome Referente <span class="req">*</span></label>
+                        <input type="text" id="orgRegFirstName" placeholder="Mario">
+                    </div>
+                    <div class="form-group">
+                        <label for="orgRegLastName">Cognome Referente <span class="req">*</span></label>
+                        <input type="text" id="orgRegLastName" placeholder="Rossi">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orgRegEmail">Email <span class="req">*</span></label>
+                        <input type="email" id="orgRegEmail" placeholder="info@azienda.it">
+                    </div>
+                    <div class="form-group">
+                        <label for="orgRegPhone">Telefono <span class="req">*</span></label>
+                        <input type="tel" id="orgRegPhone" placeholder="+39 123 456 7890">
+                    </div>
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.close()">Annulla</button>
+                    <button type="button" class="btn-primary" onclick="OrgRegWizard.nextStep()">Avanti →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Codice Referral -->
+            <div id="orgRegStep2" class="org-reg-step">
+                <div id="orgRegAlert2" class="form-alert"></div>
+                <div class="org-reg-referral-question">
+                    <p class="org-reg-question-text">Sei stato contattato da un nostro collaboratore o hai un codice referral?</p>
+                    <div class="org-reg-radio-group">
+                        <label class="org-reg-radio-label" onclick="OrgRegWizard.toggleReferral(true)">
+                            <input type="radio" name="orgRegHasReferral" value="yes" id="orgRegHasReferralYes">
+                            <span class="org-reg-radio-custom"></span>
+                            <span>Sì, ho un codice referral</span>
+                        </label>
+                        <label class="org-reg-radio-label" onclick="OrgRegWizard.toggleReferral(false)">
+                            <input type="radio" name="orgRegHasReferral" value="no" id="orgRegHasReferralNo">
+                            <span class="org-reg-radio-custom"></span>
+                            <span>No, non ho un codice</span>
+                        </label>
+                    </div>
+                    <div id="orgRegCodeBox" style="display:none; margin-top:16px;">
+                        <div class="form-group">
+                            <label for="orgRegReferralCode">Inserisci il codice referral</label>
+                            <input type="text" id="orgRegReferralCode" placeholder="Es: CDM-ABC123" style="text-transform:uppercase; letter-spacing:2px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.prevStep()">← Indietro</button>
+                    <button type="button" class="btn-primary" id="orgRegStep2Next" onclick="OrgRegWizard.nextStep()" disabled>Avanti →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Conferma / Invio -->
+            <div id="orgRegStep3" class="org-reg-step">
+                <div id="orgRegAlert3" class="form-alert"></div>
+                <div class="org-reg-summary" id="orgRegSummary">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="org-reg-actions">
+                    <button type="button" class="btn-secondary" onclick="OrgRegWizard.prevStep()">← Indietro</button>
+                    <button type="button" class="btn-primary" id="orgRegSubmitBtn" onclick="OrgRegWizard.submit()">
+                        <span id="orgRegSubmitLabel">Invia Richiesta</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Successo -->
+            <div id="orgRegStep4" class="org-reg-step">
+                <div class="org-reg-success">
+                    <div class="org-reg-success-icon">✅</div>
+                    <h3>Richiesta Inviata!</h3>
+                    <p>Grazie! La tua richiesta è stata inviata con successo.<br>Il nostro team ti contatterà entro 24–48 ore all'indirizzo email indicato.</p>
+                    <button type="button" class="btn-success-close" onclick="OrgRegWizard.close()">✓ Chiudi</button>
+                </div>
+            </div>
+
+            <div class="org-reg-loading" id="orgRegLoading" style="display:none;">
+                <div class="spinner"></div>
+                <p>Invio richiesta in corso...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="login-modal-overlay" id="loginModalOverlay">
+        <div class="login-modal">
+            <div class="login-modal-header">
+                <button class="login-modal-close" onclick="LoginModal.close()">&times;</button>
+                <div class="login-modal-logo">🎫</div>
+                <h2 class="login-modal-title">CDM86</h2>
+                <p class="login-modal-subtitle">Promozioni Esclusive con Referral</p>
+            </div>
+
+            <div class="login-modal-body">
+                <div class="login-tabs">
+                    <button class="login-tab active" data-tab="login" onclick="LoginModal.switchTab('login')">Login</button>
+                    <button class="login-tab" data-tab="register" onclick="LoginModal.switchTab('register')">Registrati</button>
+                </div>
+
+                <div id="loginAlert" class="form-alert"></div>
+
+                <!-- LOGIN PANEL -->
+                <div id="loginPanel" class="login-form-panel active">
+                    <form id="loginForm" onsubmit="return LoginModal.handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" required placeholder="mario.rossi@test.com">
+                        </div>
+
+                        <div class="form-group" style="position: relative;">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required placeholder="••••••••" style="padding-right: 45px;">
+                            <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 12px; top: 38px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; color: #6b7280;">
+                                👁️
+                            </button>
+                        </div>
+
+                        <button type="submit" class="form-btn form-btn-primary">Accedi</button>
+                        
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="#" onclick="LoginModal.showForgotPassword(event)" style="color: #dc2626; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">
+                                🔑 Password dimenticata?
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="form-loading" id="loginLoading">
+                        <div class="form-spinner"></div>
+                        <p>Accesso in corso...</p>
+                    </div>
+                </div>
+
+                <!-- REGISTER PANEL — WIZARD 4 STEP -->
+                <div id="registerPanel" class="login-form-panel">
+
+                    <!-- Progress bar -->
+                    <div class="rw-progress">
+                        <div class="rw-progress-track">
+                            <div class="rw-progress-fill" id="rwProgressFill"></div>
+                        </div>
+                        <div class="rw-steps-dots">
+                            <div class="rw-dot active" id="rwDot1"><span>1</span></div>
+                            <div class="rw-dot" id="rwDot2"><span>2</span></div>
+                            <div class="rw-dot" id="rwDot3"><span>3</span></div>
+                            <div class="rw-dot" id="rwDot4"><span>4</span></div>
+                        </div>
+                        <div class="rw-step-labels">
+                            <span>Chi sei</span>
+                            <span>Residenza</span>
+                            <span>Cod. Fiscale</span>
+                            <span>Account</span>
+                        </div>
+                    </div>
+
+                    <!-- STEP 1: Chi sei -->
+                    <div class="rw-step active" id="rwStep1">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">👤</div>
+                            <h3>Chi sei?</h3>
+                            <p>Dati anagrafici di base</p>
+                        </div>
+                        <div class="reg-row">
+                            <div class="form-group">
+                                <label for="registerFirstname">Nome <span class="req">*</span></label>
+                                <input type="text" id="registerFirstname" placeholder="Mario" autocomplete="given-name">
+                                <span class="field-error" id="err-firstname"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerLastname">Cognome <span class="req">*</span></label>
+                                <input type="text" id="registerLastname" placeholder="Rossi" autocomplete="family-name">
+                                <span class="field-error" id="err-lastname"></span>
+                            </div>
+                        </div>
+                        <div class="reg-row">
+                            <div class="form-group">
+                                <label for="registerBirthdate">Data di nascita <span class="req">*</span></label>
+                                <input type="date" id="registerBirthdate" autocomplete="bday">
+                                <span class="field-error" id="err-birthdate"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerSex">Sesso <span class="req">*</span></label>
+                                <select id="registerSex" class="reg-select">
+                                    <option value="">Seleziona...</option>
+                                    <option value="M">Maschio</option>
+                                    <option value="F">Femmina</option>
+                                </select>
+                                <span class="field-error" id="err-sex"></span>
+                            </div>
+                        </div>
+                        <div class="rw-actions">
+                            <button type="button" class="rw-btn-next" onclick="LoginModal.rwNext()">Avanti →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Residenza -->
+                    <div class="rw-step" id="rwStep2">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">📍</div>
+                            <h3>Dove abiti?</h3>
+                            <p>Dati di residenza</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerComune">Comune di residenza <span class="req">*</span></label>
+                            <input type="text" id="registerComune" placeholder="Roma" autocomplete="address-level2">
+                            <span class="field-error" id="err-comune"></span>
+                        </div>
+                        <div class="reg-row">
+                            <div class="form-group">
+                                <label for="registerProvincia">Provincia <span class="req">*</span></label>
+                                <input type="text" id="registerProvincia" placeholder="RM" maxlength="2" class="uppercase-input" autocomplete="address-level1">
+                                <span class="field-error" id="err-provincia"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerCAP">CAP <span class="req">*</span></label>
+                                <input type="text" id="registerCAP" placeholder="00100" maxlength="5" inputmode="numeric" autocomplete="postal-code">
+                                <span class="field-error" id="err-cap"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerTelefono">Telefono <span class="req-opt">(opzionale)</span></label>
+                            <input type="tel" id="registerTelefono" placeholder="+39 333 1234567" autocomplete="tel">
+                        </div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-next" onclick="LoginModal.rwNext()">Avanti →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Codice Fiscale -->
+                    <div class="rw-step" id="rwStep3">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">🪪</div>
+                            <h3>Codice Fiscale</h3>
+                            <p>Necessario per verificare la tua identità</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerCodiceFiscale">Codice Fiscale <span class="req">*</span></label>
+                            <div class="cf-input-wrap">
+                                <input type="text" id="registerCodiceFiscale" placeholder="RSSMRA80A01H501U" maxlength="16" class="uppercase-input" autocomplete="off" oninput="LoginModal.checkCFLive(this)">
+                                <span class="cf-status" id="cfStatus"></span>
+                            </div>
+                            <span class="field-error" id="err-cf"></span>
+                        </div>
+                        <!-- Riepilogo dati usati per calcolo CF -->
+                        <div class="rw-cf-recap" id="rwCFRecap"></div>
+                        <!-- Box conferma CF (appare inline quando valido) -->
+                        <div class="rw-cf-ok" id="rwCFOk" style="display:none">
+                            <div class="rw-cf-ok-icon">✅</div>
+                            <div class="rw-cf-ok-text">
+                                <strong>Codice fiscale verificato!</strong>
+                                <span id="rwCFOkSummary"></span>
+                            </div>
+                        </div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-next" id="rwNextFromCF" onclick="LoginModal.rwNext()" disabled>Avanti →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Account -->
+                    <div class="rw-step" id="rwStep4">
+                        <div class="rw-step-header">
+                            <div class="rw-step-icon">🔐</div>
+                            <h3>Crea il tuo account</h3>
+                            <p>Credenziali di accesso</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email <span class="req">*</span></label>
+                            <input type="email" id="registerEmail" placeholder="mario.rossi@example.com" autocomplete="email">
+                            <span class="field-error" id="err-email"></span>
+                        </div>
+                        <div class="form-group reg-password-wrap">
+                            <label for="registerPassword">Password <span class="req">*</span></label>
+                            <input type="password" id="registerPassword" placeholder="Minimo 8 caratteri" minlength="8" autocomplete="new-password">
+                            <button type="button" class="reg-eye-btn" onclick="LoginModal.togglePwd('registerPassword', this)" aria-label="Mostra password">👁️</button>
+                            <span class="field-error" id="err-password"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerReferral">Codice Referral <span class="req">*</span> 🎫</label>
+                            <input type="text" id="registerReferral" placeholder="MARIO123" class="uppercase-input" autocomplete="off">
+                            <span class="field-error" id="err-referral"></span>
+                        </div>
+                        <!-- Riepilogo finale prima di inviare -->
+                        <div class="rw-summary" id="rwSummary"></div>
+                        <div class="rw-actions rw-actions-2">
+                            <button type="button" class="rw-btn-back" onclick="LoginModal.rwBack()">← Indietro</button>
+                            <button type="button" class="rw-btn-submit" id="registerSubmitBtn" onclick="LoginModal.rwSubmit()">
+                                🚀 Crea Account
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-loading" id="registerLoading">
+                        <div class="form-spinner"></div>
+                        <p>Registrazione in corso...</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Modal -->
+    <div class="referral-modal-overlay" id="referralModalOverlay">
+        <div class="referral-modal">
+            <button class="login-modal-close" onclick="LoginModal.closeReferral()">&times;</button>
+
+            <!-- Initial Question -->
+            <div id="referralModalQuestion">
+                <div class="referral-modal-header">
+                    <h2>🎁 Hai un codice d'invito?</h2>
+                    <p>Per registrarti hai bisogno di un codice referral</p>
+                </div>
+                <div class="referral-modal-body">
+                    <div class="referral-modal-buttons">
+                        <button class="referral-modal-btn referral-modal-btn-yes" onclick="LoginModal.handleHasCode()">Sì, ho un codice</button>
+                        <button class="referral-modal-btn referral-modal-btn-no" onclick="LoginModal.showWizard()">No, non ce l'ho</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard -->
+            <div class="wizard-container" id="referralModalWizard">
+                <div class="referral-modal-header">
+                    <h2>📧 Richiedi un codice referral</h2>
+                    <p>Compila il form per richiedere il tuo codice</p>
+                </div>
+
+                <div class="referral-modal-body">
+                    <div class="wizard-progress">
+                        <div class="wizard-progress-step active" id="refWizardProgress1"></div>
+                        <div class="wizard-progress-step" id="refWizardProgress2"></div>
+                        <div class="wizard-progress-step" id="refWizardProgress3"></div>
+                    </div>
+
+                    <!-- Step 1: Nome e Cognome -->
+                    <div class="wizard-step-content active" id="refWizardStep1">
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="refWizardFirstname" required placeholder="Mario">
+                        </div>
+                        <div class="form-group">
+                            <label>Cognome</label>
+                            <input type="text" id="refWizardLastname" required placeholder="Rossi">
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Email -->
+                    <div class="wizard-step-content" id="refWizardStep2">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="refWizardEmail" required placeholder="mario.rossi@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Conferma -->
+                    <div class="wizard-step-content" id="refWizardStep3">
+                        <div class="wizard-confirm">
+                            <p><strong>Verifica i tuoi dati:</strong></p>
+                            <p><strong>Nome:</strong> <span id="refWizardConfirmName"></span></p>
+                            <p><strong>Email:</strong> <span id="refWizardConfirmEmail"></span></p>
+                        </div>
+                        <p class="wizard-note">
+                            Riceverai il codice referral all'indirizzo fornito.
+                        </p>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div class="wizard-step-content" id="refWizardStepSuccess">
+                        <div class="wizard-success">
+                            <div class="wizard-success-icon">✅</div>
+                            <h3>Richiesta inviata!</h3>
+                            <p>Riceverai il codice referral via email a breve.</p>
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="wizard-btn wizard-btn-back" id="refWizardBtnBack" onclick="LoginModal.wizardBack()">Indietro</button>
+                        <button class="wizard-btn wizard-btn-next" id="refWizardBtnNext" onclick="LoginModal.wizardNext()">Avanti</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="forgot-password-overlay" id="forgotPasswordOverlay">
+        <div class="forgot-password-modal">
+            <button class="forgot-password-close" onclick="LoginModal.closeForgotPassword()">&times;</button>
+            
+            <div class="forgot-password-header">
+                <div class="forgot-password-icon">🔑</div>
+                <h2 class="forgot-password-title">Recupera Password</h2>
+                <p class="forgot-password-subtitle">Inserisci la tua email per reimpostare la password</p>
+            </div>
+
+            <div class="forgot-password-body">
+                <div id="forgotPasswordAlert" class="form-alert"></div>
+                
+                <form id="forgotPasswordForm" onsubmit="return LoginModal.handleForgotPassword(event)">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email</label>
+                        <input type="email" id="forgotPasswordEmail" required placeholder="mario.rossi@test.com">
+                    </div>
+
+                    <button type="submit" class="form-btn form-btn-primary">Invia Email di Reset</button>
+                </form>
+
+                <div class="form-loading" id="forgotPasswordLoading">
+                    <div class="form-spinner"></div>
+                    <p>Invio email in corso...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div class="login-required-overlay" id="loginRequiredOverlay">
+        <div class="login-required-modal">
+            <div class="login-required-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2 class="login-required-title">Accedi per Continuare</h2>
+            <p class="login-required-text">
+                Registrati gratuitamente per accedere a tutte le promozioni esclusive e sconti riservati ai membri!
+            </p>
+            
+            <div class="login-required-features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="feature-text">Accesso a centinaia di offerte esclusive</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="feature-text">Salva le tue promozioni preferite</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="feature-text">Ricevi notifiche per nuove offerte</div>
+                </div>
+            </div>
+            
+            <div class="login-required-buttons">
+                <button class="login-required-btn login-required-btn-primary" id="loginRequiredLogin">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Accedi Ora
+                </button>
+                <button class="login-required-btn login-required-btn-secondary" id="loginRequiredClose">
+                    <i class="fas fa-times"></i>
+                    Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotions Grid -->
+    <section class="promotions-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Promozioni Attive</h2>
+                <div class="view-toggle">
+                    <button class="toggle-btn active" data-view="grid" aria-label="Vista griglia">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="toggle-btn" data-view="list" aria-label="Vista lista">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Organization Cards Section -->
+            <div id="organization-cards-section" style="margin-bottom: 3rem;">
+                <h2 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-building" style="color: #667eea;"></i>
+                    Aziende Partner
+                </h2>
+                <div class="promotions-grid" id="organization-cards">
+                    <!-- Loaded dynamically from database -->
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>Caricamento aziende partner...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty section - all cards are now organization cards loaded from database -->
+            <div class="promotions-grid" id="promotions-grid" style="display: none;">
+                <!-- Reserved for future system promotions -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <button class="bottom-nav-btn active" onclick="window.location.href='promotions.html'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="bottom-nav-btn">
+            <i class="fas fa-search"></i>
+            <span>Cerca</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="window.location.href='favorites.html'">
+            <i class="fas fa-heart"></i>
+            <span>Preferiti</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-user"></i>
+            <span>Profilo</span>
+        </button>
+    </nav>
+
+    <!-- PWA Service Worker Registration -->
+    
+    <!-- Supabase JS Library - VERSIONE UMD -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+    
+    <!-- Supabase Config -->
+    <script>
+        // Wait for Supabase UMD to load
+        function initSupabase() {
+            if (typeof supabase === 'undefined' || !supabase.createClient) {
+                console.warn('⚠️ Supabase not ready, retrying...');
+                setTimeout(initSupabase, 100);
+                return;
+            }
+            
+            window.SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+            window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+            
+            try {
+                window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+                console.log('✅ Promotions: Supabase initialized');
+                window.dispatchEvent(new Event('supabase-ready'));
+                
+                // Load login modal script AFTER Supabase is ready
+                // Prima carica codice-fiscale.js, poi login-modal.js
+                const cfScript = document.createElement('script');
+                cfScript.src = '../assets/js/codice-fiscale.js';
+                cfScript.onload = function() {
+                    const script = document.createElement('script');
+                    script.src = '../assets/js/login-modal.js';
+                    document.body.appendChild(script);
+                };
+                document.body.appendChild(cfScript);
+            } catch (error) {
+                console.error('❌ Supabase init error:', error);
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSupabase);
+        } else {
+            initSupabase();
+        }
+    </script>
+
+    <!-- AUTO-APRI REGISTRAZIONE SE URL CONTIENE ?ref= -->
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const refCode = params.get('ref');
+            if (!refCode) return;
+
+            async function tryOpenWithRef() {
+                // Aspetta che LoginModal e Supabase siano pronti
+                if (!window.LoginModal || !window.LoginModal.selectUser || !window.supabaseClient) {
+                    setTimeout(tryOpenWithRef, 200);
+                    return;
+                }
+
+                // Se l'utente è già loggato, non aprire la modal di registrazione
+                try {
+                    const { data: { session } } = await window.supabaseClient.auth.getSession();
+                    if (session) return; // già autenticato, non fare nulla
+                } catch(e) { /* ignora errori, tenta comunque */ }
+
+                // 1. Apri la modal "sei un utente?" → salta a "Sì, ho un codice"
+                LoginModal.selectUser();
+                // 2. Simula "Sì, ho un codice" e pre-compila il campo referral
+                setTimeout(function() {
+                    if (window.LoginModal && LoginModal.handleHasCode) {
+                        LoginModal.handleHasCode();
+                    }
+                    setTimeout(function() {
+                        const input = document.getElementById('registerReferral');
+                        if (input) {
+                            input.value = refCode.toUpperCase();
+                            input.dispatchEvent(new Event('input'));
+                        }
+                    }, 150);
+                }, 150);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryOpenWithRef);
+            } else {
+                tryOpenWithRef();
+            }
+        })();
+    </script>
+
+    <!-- GESTIONE RITORNO DA STRIPE -->
+    <!-- ═══════════════════════════════════════════════════
+         MODALE PAGAMENTO CDM86
+         ═══════════════════════════════════════════════════ -->
+    <div id="cdm86-payment-modal" style="display:none; position:fixed; inset:0; z-index:99999; font-family:'Segoe UI',system-ui,sans-serif;">
+        <!-- Overlay -->
+        <div id="cdm86-modal-overlay" style="position:absolute; inset:0; background:rgba(10,10,30,0.75); backdrop-filter:blur(6px);"></div>
+        <!-- Box -->
+        <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:center; min-height:100%; padding:1rem;">
+            <div id="cdm86-modal-box" style="
+                background:#fff;
+                border-radius:24px;
+                max-width:480px;
+                width:100%;
+                overflow:hidden;
+                box-shadow:0 32px 80px rgba(0,0,0,0.35);
+                animation: cdm86ModalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            ">
+                <!-- Header gradient -->
+                <div style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 2.5rem 2rem 2rem;
+                    text-align:center;
+                    position:relative;
+                ">
+                    <div style="font-size:3.5rem; margin-bottom:0.5rem;">🔐</div>
+                    <h2 id="cdm86-modal-title" style="color:#fff; font-size:1.6rem; font-weight:800; margin:0 0 0.5rem; line-height:1.2;">
+                        Accedi alle Promozioni Esclusive
+                    </h2>
+                    <p id="cdm86-modal-subtitle" style="color:rgba(255,255,255,0.85); font-size:0.95rem; margin:0;">
+                        Attiva il tuo abbonamento annuale CDM86
+                    </p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:1.75rem 2rem;">
+                    <!-- Prezzo -->
+                    <div style="
+                        background:linear-gradient(135deg,#f0f4ff,#f5f0ff);
+                        border-radius:16px;
+                        padding:1.25rem;
+                        text-align:center;
+                        margin-bottom:1.5rem;
+                        border:1px solid #e0e7ff;
+                        position:relative;
+                        overflow:hidden;
+                    ">
+                        <!-- Badge sconto -->
+                        <div style="
+                            position:absolute; top:0; right:0;
+                            background:linear-gradient(135deg,#f59e0b,#d97706);
+                            color:#fff; font-size:0.7rem; font-weight:800;
+                            padding:4px 12px; border-radius:0 16px 0 12px;
+                            letter-spacing:0.04em; text-transform:uppercase;
+                        ">⚡ Sconto 2026</div>
+
+                        <div style="font-size:0.85rem; color:#6366f1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Abbonamento Annuale</div>
+
+                        <!-- Prezzo -->
+                        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.25rem; margin-bottom:0.15rem;">
+                            <span style="font-size:2.8rem; font-weight:900; color:#4f46e5;">€10</span>
+                            <span style="font-size:1rem; color:#94a3b8;">/anno</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:#64748b;">meno di <strong style="color:#4f46e5;">€0,84 al mese</strong></div>
+                        <div style="
+                            display:inline-block;
+                            background:linear-gradient(135deg,#fef3c7,#fde68a);
+                            border:1px solid #f59e0b;
+                            color:#92400e;
+                            font-size:0.75rem; font-weight:800;
+                            padding:4px 12px; border-radius:20px;
+                            margin-top:0.5rem; letter-spacing:0.02em;
+                        ">🎁 Prezzo speciale riservato al 2026</div>
+                    </div>
+
+                    <!-- Benefici -->
+                    <ul style="list-style:none; padding:0; margin:0 0 1.5rem; display:flex; flex-direction:column; gap:0.75rem;">
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Accesso illimitato a <strong>&nbsp;tutte le promozioni</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Sconti esclusivi presso <strong>&nbsp;aziende partner</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Salva i preferiti e ricevi <strong>&nbsp;notifiche offerte</strong>
+                        </li>
+                        <li style="display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; color:#334155;">
+                            <span style="background:#dcfce7; color:#16a34a; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">✓</span>
+                            Rinnovo automatico — <strong>&nbsp;annulla quando vuoi</strong>
+                        </li>
+                    </ul>
+
+                    <!-- CTA -->
+                    <a id="cdm86-modal-cta" href="https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00" style="
+                        display:block;
+                        background:linear-gradient(135deg,#667eea,#764ba2);
+                        color:#fff;
+                        text-decoration:none;
+                        text-align:center;
+                        padding:1rem;
+                        border-radius:14px;
+                        font-size:1.05rem;
+                        font-weight:800;
+                        letter-spacing:0.02em;
+                        box-shadow:0 8px 24px rgba(102,126,234,0.4);
+                        transition:transform 0.15s, box-shadow 0.15s;
+                        margin-bottom:0.75rem;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(102,126,234,0.5)'"
+                    onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(102,126,234,0.4)'"
+                    >
+                        💳 Attiva Abbonamento — €10/anno
+                    </a>
+
+                    <!-- Link chiudi (solo se non è modale bloccante) -->
+                    <button id="cdm86-modal-close-btn" onclick="window.cdm86PaymentModal.close()" style="
+                        display:block;
+                        width:100%;
+                        background:none;
+                        border:none;
+                        color:#94a3b8;
+                        font-size:0.85rem;
+                        cursor:pointer;
+                        padding:0.5rem;
+                        text-align:center;
+                    ">Non adesso — continua senza accesso completo</button>
+                </div>
+
+                <!-- Footer sicurezza -->
+                <div style="
+                    background:#f8fafc;
+                    border-top:1px solid #f1f5f9;
+                    padding:0.9rem 2rem;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    gap:0.5rem;
+                ">
+                    <span style="font-size:0.8rem; color:#94a3b8;">🔒 Pagamento sicuro via</span>
+                    <span style="font-size:0.8rem; font-weight:700; color:#635bff;">Stripe</span>
+                    <span style="font-size:0.8rem; color:#94a3b8;">· Disdici in qualsiasi momento</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale successo pagamento -->
+    <div id="cdm86-success-modal" style="display:none; position:fixed; inset:0; z-index:99999; font-family:'Segoe UI',system-ui,sans-serif;">
+        <div style="position:absolute; inset:0; background:rgba(10,10,30,0.7); backdrop-filter:blur(6px);"></div>
+        <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:center; min-height:100%; padding:1rem;">
+            <div style="
+                background:#fff;
+                border-radius:24px;
+                max-width:400px;
+                width:100%;
+                overflow:hidden;
+                box-shadow:0 32px 80px rgba(0,0,0,0.3);
+                animation: cdm86ModalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+                text-align:center;
+                padding:3rem 2rem;
+            ">
+                <div style="font-size:4rem; margin-bottom:1rem;">🎊</div>
+                <h2 style="font-size:1.5rem; font-weight:800; color:#1e293b; margin:0 0 0.75rem;">Benvenuto in CDM86!</h2>
+                <p style="color:#64748b; font-size:0.95rem; margin:0 0 0.5rem;">Il tuo abbonamento annuale è attivo.</p>
+                <p id="cdm86-success-expires" style="color:#4f46e5; font-size:0.9rem; font-weight:600; margin:0 0 2rem;"></p>
+                <button onclick="document.getElementById('cdm86-success-modal').style.display='none'" style="
+                    background:linear-gradient(135deg,#667eea,#764ba2);
+                    color:#fff;
+                    border:none;
+                    padding:0.9rem 2.5rem;
+                    border-radius:14px;
+                    font-size:1rem;
+                    font-weight:700;
+                    cursor:pointer;
+                    box-shadow:0 8px 24px rgba(102,126,234,0.4);
+                ">🚀 Esplora le Promozioni</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    @keyframes cdm86ModalIn {
+        from { opacity:0; transform:scale(0.85) translateY(20px); }
+        to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+    </style>
+
+    <script>
+    (function() {
+        const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00';
+
+        // Aggiorna href del CTA (il redirect URL è già configurato nel Payment Link su Stripe)
+        function initCtaLink() {
+            const cta = document.getElementById('cdm86-modal-cta');
+            if (cta) cta.href = STRIPE_PAYMENT_LINK;
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCtaLink);
+        } else {
+            initCtaLink();
+        }
+
+        /* ─── API pubblica ─── */
+        window.cdm86PaymentModal = {
+            open:  function(mode) {
+                const modal = document.getElementById('cdm86-payment-modal');
+                const closeBtn = document.getElementById('cdm86-modal-close-btn');
+                if (mode === 'expired') {
+                    document.getElementById('cdm86-modal-title').textContent = 'Abbonamento Scaduto';
+                    document.getElementById('cdm86-modal-subtitle').textContent = 'Rinnova per continuare ad accedere alle promozioni esclusive';
+                    document.querySelector('#cdm86-modal-box div[style*="font-size:3.5rem"]').textContent = '⏰';
+                    document.getElementById('cdm86-modal-cta').textContent = '🔄 Rinnova Abbonamento — €10/anno';
+                    if (closeBtn) closeBtn.textContent = 'Continua senza accesso completo';
+                }
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            },
+            close: function() {
+                document.getElementById('cdm86-payment-modal').style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        };
+
+        /* ─── Gestione ritorno da Stripe (?payment=success) ─── */
+        async function handleStripeReturn() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('payment') !== 'success') return;
+
+            window.history.replaceState({}, '', window.location.pathname);
+
+            // Aspetta Supabase e aggiorna il DB
+            function doUpdate() {
+                if (!window.supabaseClient) { setTimeout(doUpdate, 300); return; }
+                window.supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+                    if (!session) return;
+
+                    const now = new Date();
+                    const expiresAt = new Date(now);
+                    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+                    await window.supabaseClient
+                        .from('users')
+                        .update({
+                            subscription_status: 'active',
+                            subscription_started_at: now.toISOString(),
+                            subscription_expires_at: expiresAt.toISOString()
+                        })
+                        .eq('auth_user_id', session.user.id);
+
+                    // Mostra modale successo
+                    const successModal = document.getElementById('cdm86-success-modal');
+                    const expiresEl = document.getElementById('cdm86-success-expires');
+                    if (expiresEl) {
+                        expiresEl.textContent = 'Abbonamento valido fino al ' +
+                            expiresAt.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+                    }
+                    if (successModal) {
+                        successModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                        setTimeout(() => {
+                            successModal.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }, 6000);
+                    }
+                });
+            }
+            doUpdate();
+        }
+
+        /* ─── Verifica abbonamento utente dal DB ─── */
+        async function checkSubscription() {
+            function waitAndCheck() {
+                if (!window.supabaseClient) { setTimeout(waitAndCheck, 300); return; }
+
+                window.supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+                    if (!session) return; // non loggato — niente modale
+
+                    // Controlla se è organizzazione (non paga)
+                    const { data: org } = await window.supabaseClient
+                        .from('organizations')
+                        .select('id')
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle();
+                    if (org) return;
+
+                    // Leggi dati abbonamento + ruolo
+                    const { data: user } = await window.supabaseClient
+                        .from('users')
+                        .select('role, subscription_status, subscription_expires_at')
+                        .eq('auth_user_id', session.user.id)
+                        .maybeSingle();
+
+                    if (!user) return;
+                    if (user.role === 'admin') return; // admin libero
+
+                    const status  = user.subscription_status || 'none';
+                    const expires = user.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
+                    const now     = new Date();
+
+                    if (status === 'active' && expires && expires > now) {
+                        // ✅ Abbonamento valido — tutto ok
+                        return;
+                    }
+
+                    if ((status === 'active' && expires && expires <= now) || status === 'expired') {
+                        // ⏰ Abbonamento scaduto
+                        await window.supabaseClient
+                            .from('users')
+                            .update({ subscription_status: 'expired' })
+                            .eq('auth_user_id', session.user.id);
+                        window.cdm86PaymentModal.open('expired');
+                        return;
+                    }
+
+                    // ❌ Non ha mai pagato
+                    window.cdm86PaymentModal.open('new');
+                });
+            }
+            waitAndCheck();
+        }
+
+        // Esegui al caricamento
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                handleStripeReturn();
+                checkSubscription();
+            });
+        } else {
+            handleStripeReturn();
+            checkSubscription();
+        }
+    })();
+    </script>
+    <script>
+        let favoriteIds = new Set(); // Global favorites cache
+        
+        // Check authentication
+        async function checkAuth() {
+            console.log('🔐 checkAuth() called');
+            if (!window.supabaseClient) {
+                console.warn('⚠️ checkAuth: Supabase not ready');
+                return null;
+            }
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            
+            console.log('Session data:', session);
+            
+            if (!session) {
+                // Don't redirect - let users browse
+                console.log('❌ No session found');
+                currentUser = null;
+                return null;
+            }
+            
+            // Set current user - works for both users and organizations
+            currentUser = session.user;
+            console.log('✅ Session found, currentUser set to:', currentUser.id, currentUser.email);
+            return currentUser;
+        }
+        
+        // Show login required modal
+        function showLoginRequiredModal() {
+            console.log('showLoginRequiredModal called');
+            const overlay = document.getElementById('loginRequiredOverlay');
+            console.log('Overlay element:', overlay);
+            if (overlay) {
+                overlay.classList.add('active');
+                console.log('Added active class to overlay');
+            } else {
+                console.error('Overlay element not found!');
+            }
+        }
+        
+        // Hide login required modal
+        function hideLoginRequiredModal() {
+            console.log('hideLoginRequiredModal called');
+            const overlay = document.getElementById('loginRequiredOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+        }
+
+        // Emails of orgs already shown as partner cards (set by loadOrganizationCards)
+        const orgCardEmails = new Set();
+
+        // Load organization cards from database
+        async function loadOrganizationCards() {
+            console.log('🏢 Loading organization cards...');
+            const container = document.getElementById('organization-cards');
+            const section = document.getElementById('organization-cards-section');
+
+            // Se gli elementi DOM non esistono o Supabase non è pronto, nascondi silenziosamente
+            if (!container || !section) {
+                console.warn('⚠️ organization-cards element not found, skipping');
+                return;
+            }
+
+            if (!window.supabaseClient) {
+                console.warn('⚠️ Supabase not ready, hiding org section');
+                section.style.display = 'none';
+                return;
+            }
+
+            try {
+                // 1️⃣ Fetch all published organization pages to get partner emails + slugs
+                const { data: orgPages, error: opError } = await window.supabaseClient
+                    .from('organization_pages')
+                    .select('organization_id, slug, landing_slug, card_data, page_data')
+                    .eq('card_published', true);
+
+                if (opError) {
+                    console.warn('⚠️ Error loading organization_pages:', opError);
+                    section.style.display = 'none';
+                    return;
+                }
+
+                if (!orgPages || orgPages.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                // 2️⃣ Fetch org emails so we can match promotions
+                const orgIds = [...new Set(orgPages.map(p => p.organization_id).filter(Boolean))];
+                const { data: orgs } = await window.supabaseClient
+                    .from('organizations')
+                    .select('id, name, email')
+                    .in('id', orgIds);
+
+                // Build map: orgId → { email, slug }
+                const orgEmailMap = {};   // orgId → email
+                const emailSlugMap = {};  // email → landing slug
+                if (orgs) {
+                    orgs.forEach(org => {
+                        orgEmailMap[org.id] = org.email;
+                        if (org.email) orgCardEmails.add(org.email.toLowerCase());
+                    });
+                }
+                orgPages.forEach(page => {
+                    const email = orgEmailMap[page.organization_id];
+                    if (email) emailSlugMap[email.toLowerCase()] = page.slug || page.landing_slug || '';
+                });
+
+                // 3️⃣ Fetch promotions that belong to these orgs (by partner_email)
+                const partnerEmails = [...orgCardEmails];
+                if (partnerEmails.length === 0) {
+                    document.getElementById('organization-cards-section').style.display = 'none';
+                    return;
+                }
+
+                const { data: orgPromos } = await window.supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .in('partner_email', partnerEmails)
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                // De-duplicate: one card per org (latest promo)
+                const seenEmails = new Set();
+                const dedupedPromos = (orgPromos || []).filter(p => {
+                    const email = (p.partner_email || '').toLowerCase();
+                    if (seenEmails.has(email)) return false;
+                    seenEmails.add(email);
+                    return true;
+                });
+
+                if (dedupedPromos.length === 0) {
+                    document.getElementById('organization-cards-section').style.display = 'none';
+                    return;
+                }
+
+                // 4️⃣ Render — use the promo card visual, CTA → landing page
+                container.innerHTML = dedupedPromos.map(promo => {
+                    const email = (promo.partner_email || '').toLowerCase();
+                    const landingSlug = emailSlugMap[email] || promo.landing_slug || '';
+                    const ctaHref = landingSlug ? `/promo/${landingSlug}` : '#';
+
+                    const origPrice = parseFloat(promo.original_price) || 0;
+                    const finalPrice = parseFloat(promo.discounted_price ?? promo.price) || origPrice;
+                    const discount = origPrice > 0 ? Math.round(((origPrice - finalPrice) / origPrice) * 100) : 0;
+
+                    const promoId = promo.id || '';
+                    const promoTitle = (promo.title || 'Promo Partner').replace(/'/g, "\\'");
+
+                    return `
+                        <div class="promo-card">
+                            <div class="promo-image">
+                                ${discount > 0 ? `<div class="promo-badge">-${discount}%</div>` : ''}
+                                ${promo.image_url ? `<img src="${promo.image_url}" alt="${promo.title}">` : ''}
+                            </div>
+                            <div class="promo-content">
+                                <h3>${promo.title || 'Azienda Partner'}</h3>
+                                <p>${promo.short_description || promo.description || ''}</p>
+                            </div>
+                            <div class="promo-cta" style="display:flex;flex-direction:column;gap:0.5rem;padding:1rem;">
+                                <a href="${ctaHref}" class="cta-btn">
+                                    ${promo.cta_text || 'Scopri di più'}
+                                </a>
+                                ${promoId ? `
+                                <button class="riscatta-card-btn" onclick="openQRModal('${promoId}','${promoTitle}',event)">
+                                    <i class="fas fa-qrcode"></i> Riscatta Promo
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                console.log('✅ Organization cards rendered from promotions table');
+
+            } catch (err) {
+                console.warn('⚠️ Exception loading organization cards:', err);
+                // Nascondi silenziosamente la sezione invece di mostrare errore
+                if (section) section.style.display = 'none';
+            }
+        }
+        
+        // Initialize - Wait for Supabase to be ready
+        window.addEventListener('supabase-ready', async () => {
+            console.log('🚀 Initializing page...');
+            const user = await checkAuth();
+            console.log('📍 Current user after checkAuth:', user);
+            
+            if (user) {
+                console.log('✅ User is logged in, calling loadUserInfo()...');
+                await loadUserInfo();
+            } else {
+                console.log('❌ User is NOT logged in');
+                // Update login button for non-logged users
+                const loginBtn = document.getElementById('login-btn');
+                if (loginBtn) {
+                    loginBtn.innerHTML = '<i class="fas fa-user"></i><span>Accedi</span>';
+                    loginBtn.onclick = () => {
+                        // Open auth modal
+                        if (window.authModal && window.authModal.open) {
+                            window.authModal.open();
+                        } else {
+                            console.error('Auth modal not available');
+                        }
+                    };
+                }
+            }
+            
+            await loadOrganizationCards(); // Load organization cards first
+            await loadPromotions();
+            setupEventListeners();
+            setupLoginRequiredModal();
+            console.log('✅ Page initialization complete');
+        });
+        
+        // Setup login required modal
+        function setupLoginRequiredModal() {
+            // Close button
+            const closeBtn = document.getElementById('loginRequiredClose');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hideLoginRequiredModal);
+            }
+            
+            // Login button
+            const loginBtn = document.getElementById('loginRequiredLogin');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    hideLoginRequiredModal();
+                    // Open auth modal
+                    if (window.authModal && window.authModal.open) {
+                        window.authModal.open();
+                    } else {
+                        console.error('Auth modal not available');
+                    }
+                });
+            }
+            
+            // Close on overlay click
+            const overlay = document.getElementById('loginRequiredOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        hideLoginRequiredModal();
+                    }
+                });
+            }
+        }
+        
+        // Load user info
+        let loadUserInfoRetries = 0;
+        const MAX_RETRIES = 5;
+        
+        async function loadUserInfo() {
+            console.log('🔍 loadUserInfo() called (attempt', loadUserInfoRetries + 1, '/', MAX_RETRIES, ')');
+            console.log('Current user:', currentUser);
+            
+            try {
+                // First check if it's an organization
+                console.log('🔍 Checking if user is an organization...');
+                const { data: orgData, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .maybeSingle();
+                
+                console.log('Organization query result:', { orgData, orgError });
+                
+                if (orgData) {
+                    // It's an organization
+                    const orgName = orgData.name || 'Organization';
+                    console.log('✅ User IS an organization:', orgName);
+                    
+                    // Update login button with organization name
+                    const loginBtn = document.getElementById('login-btn');
+                    console.log('Login button element:', loginBtn);
+                    
+                    if (loginBtn) {
+                        console.log('🔄 Updating login button with org name...');
+                        // Remove any existing click handlers
+                        const newLoginBtn = loginBtn.cloneNode(false);
+                        loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
+                        
+                        newLoginBtn.innerHTML = `
+                            <i class="fas fa-building"></i>
+                            <span>${orgName}</span>
+                            <i class="fas fa-chevron-down chevron-icon"></i>
+                        `;
+                        
+                        console.log('✅ Login button updated with org name:', orgName);
+                        console.log('Button HTML:', newLoginBtn.innerHTML);
+                        
+                        // Create dropdown menu for organization
+                        const dropdown = document.createElement('div');
+                        dropdown.id = 'user-dropdown';
+                        dropdown.className = 'user-dropdown-menu';
+                        dropdown.style.cssText = `
+                            position: absolute;
+                            top: calc(100% + 10px);
+                            right: 0;
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                            min-width: 200px;
+                            display: none;
+                            z-index: 1000;
+                            overflow: hidden;
+                        `;
+                        
+                        dropdown.innerHTML = `
+                            <a href="organization-dashboard.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
+                                <span>🏢</span><span>Dashboard Azienda</span>
+                            </a>
+                            <div class="dropdown-menu-item logout-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; color: #ef4444; border-top: 1px solid #e2e8f0; transition: background 0.2s;">
+                                <span>🚪</span><span>Esci</span>
+                            </div>
+                        `;
+                        
+                        // Set parent position
+                        if (newLoginBtn.parentElement) {
+                            newLoginBtn.parentElement.style.position = 'relative';
+                            newLoginBtn.parentElement.appendChild(dropdown);
+                        }
+                        
+                        // Toggle dropdown on button click
+                        newLoginBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const isVisible = dropdown.style.display === 'block';
+                            dropdown.style.display = isVisible ? 'none' : 'block';
+                        });
+                        
+                        // Prevent dropdown from closing when clicking inside
+                        dropdown.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                        });
+                        
+                        // Close dropdown when clicking outside
+                        document.addEventListener('click', () => {
+                            dropdown.style.display = 'none';
+                        });
+                        
+                        // Logout handler
+                        const logoutBtn = dropdown.querySelector('.logout-item');
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', async (e) => {
+                                e.preventDefault();
+                                await window.supabaseClient.auth.signOut();
+                                window.location.reload();
+                            });
+                        }
+                        
+                        // Hover effects
+                        const items = dropdown.querySelectorAll('.dropdown-menu-item');
+                        items.forEach(item => {
+                            item.addEventListener('mouseenter', () => {
+                                item.style.background = '#f1f5f9';
+                            });
+                            item.addEventListener('mouseleave', () => {
+                                item.style.background = '';
+                            });
+                        });
+                    }
+                    return;
+                }
+                
+                // If not organization, check users table
+                console.log('🔍 Not an organization, checking users table...');
+                const { data: userData, error } = await window.supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('auth_user_id', currentUser.id)
+                    .maybeSingle();
+                
+                console.log('User query result:', { userData, error });
+                
+                if (error) throw error;
+                
+                // Se l'utente non esiste ancora nella tabella users, aspetta e riprova
+                if (!userData) {
+                    loadUserInfoRetries++;
+                    
+                    if (loadUserInfoRetries >= MAX_RETRIES) {
+                        console.error('❌ User record not created after', MAX_RETRIES, 'attempts');
+                        console.error('⚠️ Il trigger handle_new_user potrebbe non funzionare correttamente');
+                        console.error('📧 User email:', currentUser.email);
+                        console.error('🆔 User ID:', currentUser.id);
+                        
+                        // Mostra messaggio all'utente
+                        alert('Si è verificato un problema con la registrazione. Contatta il supporto con questo ID: ' + currentUser.id);
+                        
+                        // Forza logout
+                        await window.supabaseClient.auth.signOut();
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    console.warn('⚠️ User not yet in users table, retrying in 2s... (attempt', loadUserInfoRetries, '/', MAX_RETRIES, ')');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    return loadUserInfo();
+                }
+                
+                const firstName = userData.first_name || 'User';
+                console.log('✅ User loaded:', firstName);
+                
+                const greetingEl = document.getElementById('user-greeting'); if (greetingEl) greetingEl.textContent = `Ciao, ${firstName}!`;
+                const pointsEl = document.getElementById('user-points'); if (pointsEl) pointsEl.textContent = userData.points || 0;
+                
+                // Update login button with user name
+                const loginBtn = document.getElementById('login-btn');
+                if (loginBtn) {
+                    // Remove any existing click handlers
+                    const newLoginBtn = loginBtn.cloneNode(false);
+                    loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
+                    
+                    newLoginBtn.innerHTML = `
+                        <i class="fas fa-user-circle"></i>
+                        <span>${firstName}</span>
+                        <i class="fas fa-chevron-down chevron-icon"></i>
+                    `;
+                    
+                    // Create dropdown menu
+                    const dropdown = document.createElement('div');
+                    dropdown.id = 'user-dropdown';
+                    dropdown.className = 'user-dropdown-menu';
+                    dropdown.style.cssText = `
+                        position: absolute;
+                        top: calc(100% + 10px);
+                        right: 0;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                        min-width: 200px;
+                        display: none;
+                        z-index: 1000;
+                        overflow: hidden;
+                    `;
+                    
+                    dropdown.innerHTML = `
+                        <a href="dashboard.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
+                            <span>📊</span><span>Dashboard</span>
+                        </a>
+                        <a href="promotions.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
+                            <span>🎫</span><span>Promozioni</span>
+                        </a>
+                        <a href="favorites.html" class="dropdown-menu-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: #334155; transition: background 0.2s;">
+                            <span>❤️</span><span>Preferiti</span>
+                        </a>
+                        <div class="dropdown-menu-item logout-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; color: #ef4444; border-top: 1px solid #e2e8f0; transition: background 0.2s;">
+                            <span>🚪</span><span>Esci</span>
+                        </div>
+                    `;
+                    
+                    // Set parent position
+                    if (newLoginBtn.parentElement) {
+                        newLoginBtn.parentElement.style.position = 'relative';
+                        newLoginBtn.parentElement.appendChild(dropdown);
+                    }
+                    
+                    // Toggle dropdown on button click
+                    newLoginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const isVisible = dropdown.style.display === 'block';
+                        dropdown.style.display = isVisible ? 'none' : 'block';
+                    });
+                    
+                    // Prevent dropdown from closing when clicking inside
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', () => {
+                        dropdown.style.display = 'none';
+                    });
+                    
+                    // Logout handler
+                    const logoutBtn = dropdown.querySelector('.logout-item');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            console.log('Logout clicked');
+                            try {
+                                // Clear all storage
+                                localStorage.clear();
+                                sessionStorage.clear();
+                                
+                                // Sign out
+                                await window.supabaseClient.auth.signOut({ scope: 'global' });
+                                
+                                // Force redirect
+                                window.location.replace('/public/promotions.html');
+                            } catch (error) {
+                                console.error('Logout error:', error);
+                            }
+                        });
+                    }
+                    
+                    // Hover effects
+                    const items = dropdown.querySelectorAll('.dropdown-menu-item');
+                    items.forEach(item => {
+                        item.addEventListener('mouseenter', () => {
+                            item.style.background = '#f1f5f9';
+                        });
+                        item.addEventListener('mouseleave', () => {
+                            item.style.background = '';
+                        });
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
+        
+        // Load promotions
+        async function loadPromotions() {
+            try {
+                const { data: promotions, error } = await window.supabaseClient
+                    .from('promotions')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                // Store all promotions — exclude those already shown as org partner cards
+                allPromotions = (promotions || []).filter(p => {
+                    if (!p.partner_email) return true;
+                    return !orgCardEmails.has(p.partner_email.toLowerCase());
+                });
+                
+                // Load favorites only if user is logged in
+                favoriteIds = new Set();
+                if (currentUser) {
+                    const { data: favorites, error: favError } = await window.supabaseClient
+                        .from('favorites')
+                        .select('promotion_id')
+                        .eq('user_id', currentUser.id);
+                    
+                    console.log('🔍 DEBUG favorites query:', { favorites, favError, userId: currentUser.id });
+                    favoriteIds = new Set(favorites?.map(f => f.promotion_id) || []);
+                    console.log('❤️ favoriteIds loaded:', Array.from(favoriteIds));
+                }
+                
+                displayPromotions(allPromotions, favoriteIds);
+                
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                // Don't override the static cards, just log the error
+                console.log('Keeping static promotion cards');
+            }
+        }
+        
+        // Display promotions
+        function displayPromotions(promotions, favoriteIds) {
+            const grid = document.getElementById('promotions-grid');
+            
+            console.log('displayPromotions called with', promotions?.length || 0, 'promotions');
+            
+            if (!promotions || promotions.length === 0) {
+                console.log('No promotions from database, keeping static cards');
+                // Don't override if there are no promotions - keep static cards
+                return;
+            }
+            
+            // Show the grid
+            grid.style.display = 'grid';
+            
+            grid.innerHTML = promotions.map(promo => {
+                const isFavorite = favoriteIds.has(promo.id);
+                const heartIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+                const favoriteClass = isFavorite ? 'active' : '';
+                
+                const originalPrice = parseFloat(promo.original_price) || 0;
+                const discountedPrice = parseFloat(promo.discounted_price) || originalPrice;
+                const description = promo.short_description || promo.description || 'Nessuna descrizione';
+                const title = promo.title || 'Promo';
+                const partnerName = promo.partner_name || 'Partner';
+                const imageUrl = promo.image_url || '../assets/images/placeholder.jpg';
+                
+                // Calculate discount percentage
+                const discountPercent = originalPrice > 0 
+                    ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+                    : 0;
+                
+                const discountBadge = discountPercent > 0 
+                    ? `<div class="promo-badge">-${discountPercent}%</div>` 
+                    : '';
+                
+                return `
+                    <div class="promo-card" data-id="${promo.id}">
+                        <div class="promo-image">
+                            ${discountBadge}
+                            <img src="${imageUrl}" alt="${title}" onerror="this.src='../assets/images/placeholder.jpg'">
+                            <button class="promo-favorite ${favoriteClass}" onclick="toggleFavorite('${promo.id}', event)" aria-label="Toggle favorite">
+                                <i class="${heartIcon}"></i>
+                            </button>
+                        </div>
+                        <div class="promo-content">
+                            <div class="promo-header">
+                                <h3 class="promo-title">${title}</h3>
+                                <div class="promo-category-badge">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                            </div>
+                            <p class="promo-description">${description}</p>
+                            <div class="promo-partner">
+                                <i class="fas fa-store"></i>
+                                <span>${partnerName}</span>
+                            </div>
+                            <div class="promo-footer">
+                                <div class="promo-price">
+                                    <span class="price-original">€${originalPrice.toFixed(2)}</span>
+                                    <span class="price-final">€${discountedPrice.toFixed(2)}</span>
+                                </div>
+                                <button class="btn-promo" onclick="viewPromotion('${promo.id}', event, '${promo.landing_slug || ''}')">
+                                    <span>Dettagli</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Toggle favorite (simplified version that works)
+        window.toggleFavorite = async function(promotionId, event) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            
+            try {
+                const isCurrentlyFavorite = btn.classList.contains('active');
+                
+                if (isCurrentlyFavorite) {
+                    // Remove from favorites
+                    const { error } = await window.supabaseClient
+                        .from('favorites')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('promotion_id', promotionId);
+                    
+                    if (error) throw error;
+                    
+                    btn.classList.remove('active');
+                    icon.className = 'far fa-heart';
+                    favoriteIds.delete(promotionId);
+                } else {
+                    // Add to favorites - use upsert to handle duplicates
+                    const { error } = await window.supabaseClient
+                        .from('favorites')
+                        .upsert({
+                            user_id: currentUser.id,
+                            promotion_id: promotionId
+                        }, {
+                            onConflict: 'user_id,promotion_id'
+                        });
+                    
+                    if (error) throw error;
+                    
+                    btn.classList.add('active');
+                    icon.className = 'fas fa-heart';
+                    favoriteIds.add(promotionId);
+                }
+                
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                alert('Errore nell\'aggiornare i preferiti');
+            }
+        };
+        
+        // View promotion
+        // Handle promotion click
+        window.handlePromotionClick = function(promotionId, event) {
+            // Check if user is logged in
+            if (!currentUser) {
+                event.stopPropagation();
+                event.preventDefault();
+                showLoginRequiredModal();
+                return;
+            }
+            
+            // User is logged in, proceed to detail page
+            window.location.href = `/public/promotion-detail.html?id=${promotionId}`;
+        };
+        
+        // Handle favorite click
+        window.handleFavoriteClick = function(promotionId, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            // Check if user is logged in
+            if (!currentUser) {
+                showLoginRequiredModal();
+                return;
+            }
+            
+            // User is logged in, toggle favorite
+            toggleFavorite(promotionId, event);
+        };
+        
+        window.viewPromotion = function(promotionId, event, landingSlug) {
+            // If the promo has a dedicated landing page, go there directly
+            const destination = landingSlug
+                ? `/promo/${landingSlug}`
+                : `/public/promotion-detail.html?id=${promotionId}`;
+
+            // Get the card element
+            const cardElement = event?.target?.closest('.promo-card') || 
+                               document.querySelector(`.promo-card[data-id="${promotionId}"]`);
+            
+            if (cardElement) {
+                cardElement.classList.add('flipping');
+                setTimeout(() => {
+                    window.location.href = destination;
+                }, 600);
+            } else {
+                window.location.href = destination;
+            }
+        };
+        
+        // Filter state
+        let filterState = {
+            searchQuery: '',
+            category: 'all',
+            priceMin: 0,
+            priceMax: 200,
+            discount: 0,
+            sortBy: 'newest'
+        };
+        
+        let allPromotions = [];
+        let currentFavorites = new Set();
+        
+        // Render promotions (used by filters)
+        async function renderPromotions(promotions) {
+            const grid = document.getElementById('promotions-grid');
+            if (!grid) return;
+            
+            // Refresh favorites only if user is logged in
+            if (currentUser) {
+                const { data: favorites } = await window.supabaseClient
+                    .from('favorites')
+                    .select('promotion_id')
+                    .eq('user_id', currentUser.id);
+                
+                currentFavorites = new Set(favorites?.map(f => f.promotion_id) || []);
+            } else {
+                currentFavorites = new Set();
+            }
+            
+            if (promotions.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state-container">
+                        <i class="fas fa-search empty-state-icon"></i>
+                        <h2 class="empty-state-title">Nessuna promozione trovata</h2>
+                        <p class="empty-state-text">Prova a modificare i filtri di ricerca</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = promotions.map(promo => {
+                const isFavorite = currentFavorites.has(promo.id);
+                const heartIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+                const favoriteClass = isFavorite ? 'active' : '';
+                
+                const originalPrice = parseFloat(promo.original_price) || 0;
+                const discountedPrice = parseFloat(promo.discounted_price) || originalPrice;
+                
+                return `
+                    <div class="promo-card" data-id="${promo.id}" onclick="handlePromotionClick('${promo.id}', event)">
+                        <div class="promo-image">
+                            <img src="${promo.image_url || '../assets/images/placeholder.jpg'}" alt="${promo.title}">
+                            <button class="promo-favorite ${favoriteClass}" onclick="handleFavoriteClick('${promo.id}', event)" aria-label="Toggle favorite">
+                                <i class="${heartIcon}"></i>
+                            </button>
+                        </div>
+                        <div class="promo-content">
+                            <div class="promo-header">
+                                <h3 class="promo-title">${promo.title}</h3>
+                                <div class="promo-category-badge">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                            </div>
+                            <p class="promo-description">${promo.short_description || promo.description}</p>
+                            <div class="promo-partner">
+                                <i class="fas fa-store"></i>
+                                <span>${promo.partner_name}</span>
+                            </div>
+                            <div class="promo-footer">
+                                <div class="promo-price">
+                                    <span class="price-original">€${originalPrice.toFixed(2)}</span>
+                                    <span class="price-final">€${discountedPrice.toFixed(2)}</span>
+                                </div>
+                                <button class="btn-promo">
+                                    <span>Dettagli</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Apply filters and render
+        async function applyFiltersAndRender() {
+            let filtered = [...allPromotions];
+            
+            // Search filter
+            if (filterState.searchQuery) {
+                const query = filterState.searchQuery.toLowerCase();
+                filtered = filtered.filter(promo => 
+                    promo.title.toLowerCase().includes(query) ||
+                    promo.description.toLowerCase().includes(query) ||
+                    promo.partner_name.toLowerCase().includes(query)
+                );
+            }
+            
+            // Category filter
+            if (filterState.category !== 'all') {
+                filtered = filtered.filter(promo => promo.category === filterState.category);
+            }
+            
+            // Price filter
+            filtered = filtered.filter(promo => {
+                const price = parseFloat(promo.discounted_price);
+                return price >= filterState.priceMin && price <= filterState.priceMax;
+            });
+            
+            // Discount filter
+            if (filterState.discount > 0) {
+                filtered = filtered.filter(promo => {
+                    const originalPrice = parseFloat(promo.original_price);
+                    const discountedPrice = parseFloat(promo.discounted_price);
+                    const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                    return discountPercent >= filterState.discount;
+                });
+            }
+            
+            // Sort
+            switch (filterState.sortBy) {
+                case 'price-low':
+                    filtered.sort((a, b) => parseFloat(a.discounted_price) - parseFloat(b.discounted_price));
+                    break;
+                case 'price-high':
+                    filtered.sort((a, b) => parseFloat(b.discounted_price) - parseFloat(a.discounted_price));
+                    break;
+                case 'discount':
+                    filtered.sort((a, b) => {
+                        const discountA = ((parseFloat(a.original_price) - parseFloat(a.discounted_price)) / parseFloat(a.original_price)) * 100;
+                        const discountB = ((parseFloat(b.original_price) - parseFloat(b.discounted_price)) / parseFloat(b.original_price)) * 100;
+                        return discountB - discountA;
+                    });
+                    break;
+                case 'newest':
+                default:
+                    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+            
+            await renderPromotions(filtered);
+            updateFilterBadge();
+        }
+        
+        // Update filter badge
+        function updateFilterBadge() {
+            const badge = document.getElementById('filterBadge');
+            let count = 0;
+            
+            if (filterState.searchQuery) count++;
+            if (filterState.category !== 'all') count++;
+            if (filterState.priceMin > 0 || filterState.priceMax < 200) count++;
+            if (filterState.discount > 0) count++;
+            if (filterState.sortBy !== 'newest') count++;
+            
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'block' : 'none';
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Intercept clicks on all promotion cards and buttons
+            document.addEventListener('click', (e) => {
+                // Check if clicked on a promo card or any element inside it
+                const promoCard = e.target.closest('.promo-card');
+                if (promoCard) {
+                    console.log('Promo card clicked, currentUser:', currentUser);
+                    
+                    // Don't intercept if clicked on favorite button
+                    if (e.target.closest('.promo-favorite')) {
+                        console.log('Favorite button clicked, skipping');
+                        return;
+                    }
+                    
+                    // Check if user is logged in
+                    if (!currentUser) {
+                        console.log('User not logged in, showing modal');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showLoginRequiredModal();
+                        return;
+                    } else {
+                        console.log('User logged in, allowing click');
+                    }
+                }
+            });
+            
+            // View Toggle (Grid/List)
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            const promotionsGrid = document.getElementById('promotions-grid');
+            
+            toggleButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    toggleButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Toggle view
+                    const view = btn.dataset.view;
+                    if (view === 'list') {
+                        promotionsGrid.classList.add('list-view');
+                        promotionsGrid.classList.remove('grid-view');
+                    } else {
+                        promotionsGrid.classList.add('grid-view');
+                        promotionsGrid.classList.remove('list-view');
+                    }
+                });
+            });
+            
+            // Logout
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        // Clear all storage
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Sign out
+                        await window.supabaseClient.auth.signOut({ scope: 'global' });
+                        
+                        // Force redirect
+                        window.location.replace('/index.html');
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        // Force logout anyway
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        window.location.replace('/index.html');
+                    }
+                });
+            }
+            
+            // Search input (desktop + mobile sync)
+            const searchInput = document.getElementById('searchInput');
+            const searchClear = document.getElementById('searchClear');
+            const searchInputMobile = document.getElementById('searchInputMobile');
+            const searchClearMobile = document.getElementById('searchClearMobile');
+            
+            const handleSearch = (value) => {
+                // Sync both inputs
+                if (searchInput) searchInput.value = value;
+                if (searchInputMobile) searchInputMobile.value = value;
+                
+                // Show/hide clear buttons
+                if (searchClear) searchClear.style.display = value ? 'block' : 'none';
+                if (searchClearMobile) searchClearMobile.style.display = value ? 'block' : 'none';
+                
+                // Apply filter
+                filterState.searchQuery = value;
+                applyFiltersAndRender();
+            };
+            
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const value = e.target.value;
+                    searchTimeout = setTimeout(() => handleSearch(value), 300);
+                });
+            }
+            
+            if (searchInputMobile) {
+                let searchTimeout;
+                searchInputMobile.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const value = e.target.value;
+                    searchTimeout = setTimeout(() => handleSearch(value), 300);
+                });
+            }
+            
+            if (searchClear) {
+                searchClear.addEventListener('click', () => handleSearch(''));
+            }
+            
+            if (searchClearMobile) {
+                searchClearMobile.addEventListener('click', () => handleSearch(''));
+            }
+            
+            // Filter panel toggle
+            const filterBtn = document.getElementById('filter-btn');
+            const filtersPanel = document.getElementById('filtersPanel');
+            const filtersOverlay = document.getElementById('filtersOverlay');
+            const filtersClose = document.getElementById('filtersClose');
+            
+            const toggleFilters = () => {
+                filtersPanel.classList.toggle('active');
+                filtersOverlay.classList.toggle('active');
+            };
+            
+            if (filterBtn) filterBtn.addEventListener('click', toggleFilters);
+            if (filtersClose) filtersClose.addEventListener('click', toggleFilters);
+            if (filtersOverlay) filtersOverlay.addEventListener('click', toggleFilters);
+            
+            // Price filters
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const priceRange = document.getElementById('priceRange');
+            
+            if (priceMin) {
+                priceMin.addEventListener('change', (e) => {
+                    filterState.priceMin = parseFloat(e.target.value) || 0;
+                });
+            }
+            
+            if (priceMax) {
+                priceMax.addEventListener('change', (e) => {
+                    filterState.priceMax = parseFloat(e.target.value) || 200;
+                    if (priceRange) priceRange.value = filterState.priceMax;
+                });
+            }
+            
+            if (priceRange) {
+                priceRange.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    filterState.priceMax = parseFloat(value);
+                    if (priceMax) priceMax.value = value;
+                });
+            }
+            
+            // Discount buttons
+            document.querySelectorAll('.discount-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.discount-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterState.discount = parseInt(e.target.dataset.discount) || 0;
+                });
+            });
+            
+            // Sort select
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', (e) => {
+                    filterState.sortBy = e.target.value;
+                });
+            }
+            
+            // Category chips
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.addEventListener('click', (e) => {
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterState.category = e.target.dataset.category;
+                    applyFiltersAndRender();
+                });
+            });
+            
+            // Apply filters button
+            const applyBtn = document.getElementById('applyFilters');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    applyFiltersAndRender();
+                    toggleFilters();
+                });
+            }
+            
+            // Reset filters button
+            const resetBtn = document.getElementById('resetFilters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    filterState = {
+                        searchQuery: '',
+                        category: 'all',
+                        priceMin: 0,
+                        priceMax: 200,
+                        discount: 0,
+                        sortBy: 'newest'
+                    };
+                    
+                    // Reset UI
+                    if (searchInput) searchInput.value = '';
+                    if (searchClear) searchClear.style.display = 'none';
+                    if (priceMin) priceMin.value = '0';
+                    if (priceMax) priceMax.value = '200';
+                    if (priceRange) priceRange.value = '200';
+                    if (sortSelect) sortSelect.value = 'newest';
+                    
+                    document.querySelectorAll('.discount-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelector('.discount-btn[data-discount="0"]')?.classList.add('active');
+                    
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    document.querySelector('.category-chip[data-category="all"]')?.classList.add('active');
+                    
+                    applyFiltersAndRender();
+                });
+            }
+        }
+        
+        // Toggle Password Visibility
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+    </script>
+
+    <!-- Intro Modal - Come funziona CDM86 -->
+    <script src="../assets/js/intro-modal.js"></script>
+
+    <!-- Bottone fisso "Come funziona?" -->
+    <style>
+      .cdm86-help-btn {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        z-index: 9999;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(99,102,241,0.45);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.25s;
+        letter-spacing: 0.2px;
+      }
+      .cdm86-help-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(99,102,241,0.55);
+      }
+    </style>
+    <button class="cdm86-help-btn" onclick="CDM86Intro.show()" title="Scopri come funziona CDM86">
+      ❓ Come funziona?
+    </button>
+
+    <!-- QR Redemption Modal -->
+    <div class="qr-overlay" id="qrModalOverlay">
+        <div class="qr-modal">
+            <!-- Step 1: Confirm -->
+            <div id="qrModalConfirm">
+                <div class="qr-modal-icon">🎟️</div>
+                <h3>Riscatta questa Promo?</h3>
+                <p>Genera un QR code valido <strong>5 minuti</strong>.<br>Mostralo al gestore per riscattare l'offerta.</p>
+                <div class="qr-promo-name-badge" id="qrModalPromoName">—</div>
+                <div id="qrModalUsesInfo" style="font-size:0.85rem;margin:-0.3rem 0 1rem;color:#64748b;"></div>
+                <div class="qr-modal-btns">
+                    <button class="qr-btn cancel" onclick="closeQRModal()">Annulla</button>
+                    <button class="qr-btn confirm" id="qrModalGenBtn" onclick="generateQRFromCard()">
+                        <i class="fas fa-qrcode"></i> Genera QR
+                    </button>
+                </div>
+            </div>
+            <!-- Step 2: QR Display -->
+            <div id="qrModalDisplay" style="display:none;">
+                <div class="qr-canvas-wrap"><canvas id="qrModalCanvas"></canvas></div>
+                <div class="qr-countdown-label">Scade tra</div>
+                <div class="qr-countdown" id="qrModalCountdown">5:00</div>
+                <div class="qr-progress"><div class="qr-progress-bar" id="qrModalProgressBar" style="width:100%"></div></div>
+                <div class="qr-status-msg" id="qrModalStatusMsg">In attesa di validazione dal gestore...</div>
+                <div id="qrModalDisplayUsesInfo" style="font-size:0.82rem;margin-top:0.3rem;"></div>
+                <div class="qr-success-msg" id="qrModalSuccessMsg">✅ Promo riscattata con successo!</div>
+                <div class="qr-expired-msg" id="qrModalExpiredMsg">⏱️ QR scaduto.</div>
+                <button class="qr-new-btn" id="qrModalNewBtn" onclick="generateQRFromCard()">
+                    <i class="fas fa-redo"></i> Genera nuovo QR
+                </button>
+                <button class="qr-btn cancel" style="margin-top:0.8rem;width:100%;" onclick="closeQRModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR library -->
+    <script src="../assets/js/vendor/qrcode.min.js"></script>
+    <script>
+        // ── QR Modal (for org partner cards in promotions.html) ──────────────────
+        let qrCardPromoId = null;
+        let qrCardPromoTitle = '';
+        let qrCardCountdownInterval = null;
+        let qrCardPollInterval = null;
+
+        function openQRModal(promoId, promoTitle, event) {
+            if (event) event.preventDefault();
+
+            // Se non loggato → mostra modal login, non aprire QR
+            if (!currentUser) {
+                showLoginRequiredModal();
+                return;
+            }
+
+            qrCardPromoId = promoId;
+            qrCardPromoTitle = promoTitle;
+
+            // Reset to confirm step
+            document.getElementById('qrModalConfirm').style.display = 'block';
+            document.getElementById('qrModalDisplay').style.display = 'none';
+            document.getElementById('qrModalPromoName').textContent = promoTitle;
+            document.getElementById('qrModalUsesInfo').textContent = '';
+            const genBtn = document.getElementById('qrModalGenBtn');
+            genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
+            genBtn.disabled = false;
+            document.getElementById('qrModalOverlay').classList.add('show');
+
+            // Pre-load uses info
+            loadQRModalUsesInfo(promoId);
+        }
+
+        async function loadQRModalUsesInfo(promoId) {
+            if (!window.supabaseClient || !promoId) return;
+            try {
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                if (!session) return;
+
+                const [{ count: usedCount }, { data: promo }] = await Promise.all([
+                    window.supabaseClient
+                        .from('redemption_tokens')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('promo_id', promoId)
+                        .eq('user_id', session.user.id)
+                        .eq('status', 'used'),
+                    window.supabaseClient
+                        .from('promotions')
+                        .select('max_uses_per_user')
+                        .eq('id', promoId)
+                        .maybeSingle()
+                ]);
+
+                const maxUses = promo?.max_uses_per_user ?? 1;
+                const used = usedCount ?? 0;
+                const remaining = maxUses - used;
+                const el = document.getElementById('qrModalUsesInfo');
+                if (!el) return;
+
+                if (maxUses === 1) {
+                    el.textContent = used >= 1 ? '⚠️ Hai già usato questo codice.' : '🎟️ Utilizzabile 1 sola volta.';
+                } else {
+                    el.textContent = remaining <= 0
+                        ? '⚠️ Hai esaurito tutti gli utilizzi.'
+                        : `🎟️ Utilizzi rimanenti: ${remaining} di ${maxUses}`;
+                }
+                el.style.color = remaining <= 0 ? '#ef4444' : remaining === 1 ? '#f59e0b' : '#64748b';
+            } catch (e) { /* ignore */ }
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModalOverlay').classList.remove('show');
+            clearInterval(qrCardCountdownInterval);
+            clearInterval(qrCardPollInterval);
+        }
+
+        async function generateQRFromCard() {
+            if (!window.supabaseClient) {
+                alert('Errore: sessione non disponibile. Ricarica la pagina.');
+                return;
+            }
+
+            // Auth check
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            if (!session) {
+                alert('⚠️ Devi essere loggato per riscattare questa promo.');
+                closeQRModal();
+                return;
+            }
+
+            const genBtn = document.getElementById('qrModalGenBtn');
+            genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generazione...';
+            genBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/redeem-promo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ promo_id: qrCardPromoId, user_id: session.user.id })
+                });
+                const rawText = await res.text();
+                console.error('[redeem-promo] raw response:', res.status, rawText);
+                let data = {};
+                try { data = JSON.parse(rawText); } catch(e) { data = { error: rawText || 'Errore ' + res.status }; }
+
+                if (!res.ok) {
+                    alert('❌ Errore ' + res.status + ': ' + (data.error || rawText || 'Errore nella generazione del codice.'));
+                    genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
+                    genBtn.disabled = false;
+                    return;
+                }
+
+                // Badge utilizzi rimanenti nel display step
+                const remAfter = data.remaining_uses ?? (data.max_uses - data.used_count - 1);
+                const usesDispEl = document.getElementById('qrModalDisplayUsesInfo');
+                if (usesDispEl) {
+                    if (remAfter <= 0) {
+                        usesDispEl.textContent = '⚠️ Questo è il tuo ultimo utilizzo disponibile.';
+                        usesDispEl.style.color = '#f59e0b';
+                    } else {
+                        usesDispEl.textContent = remAfter === 1
+                            ? 'Dopo questo ti resterà ancora 1 utilizzo.'
+                            : `Dopo questo ti resteranno ancora ${remAfter} utilizzi.`;
+                        usesDispEl.style.color = '#64748b';
+                    }
+                }
+
+                // Show QR display step
+                document.getElementById('qrModalConfirm').style.display = 'none';
+                const display = document.getElementById('qrModalDisplay');
+                display.style.display = 'block';
+                document.getElementById('qrModalExpiredMsg').style.display = 'none';
+                document.getElementById('qrModalSuccessMsg').style.display = 'none';
+                document.getElementById('qrModalStatusMsg').style.display = 'block';
+                document.getElementById('qrModalStatusMsg').textContent = 'In attesa di validazione dal gestore...';
+                document.getElementById('qrModalNewBtn').style.display = 'none';
+
+                // Draw QR
+                const canvas = document.getElementById('qrModalCanvas');
+                await QRCode.toCanvas(canvas, data.qr_data, {
+                    width: 210, margin: 2,
+                    color: { dark: '#1e293b', light: '#ffffff' }
+                });
+
+                // Countdown 5 min
+                const expiresAt = new Date(data.expires_at).getTime();
+                const totalMs = 5 * 60 * 1000;
+                const progressBar = document.getElementById('qrModalProgressBar');
+                const countdownEl = document.getElementById('qrModalCountdown');
+                progressBar.style.background = '#10b981';
+
+                clearInterval(qrCardCountdownInterval);
+                qrCardCountdownInterval = setInterval(() => {
+                    const remaining = expiresAt - Date.now();
+                    if (remaining <= 0) {
+                        clearInterval(qrCardCountdownInterval);
+                        clearInterval(qrCardPollInterval);
+                        countdownEl.textContent = '0:00';
+                        countdownEl.classList.add('urgent');
+                        progressBar.style.width = '0%';
+                        progressBar.style.background = '#ef4444';
+                        document.getElementById('qrModalStatusMsg').style.display = 'none';
+                        document.getElementById('qrModalExpiredMsg').style.display = 'block';
+                        document.getElementById('qrModalNewBtn').style.display = 'block';
+                        return;
+                    }
+                    const mins = Math.floor(remaining / 60000);
+                    const secs = Math.floor((remaining % 60000) / 1000);
+                    countdownEl.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+                    if (remaining < 60000) countdownEl.classList.add('urgent');
+                    progressBar.style.width = `${(remaining / totalMs) * 100}%`;
+                    if (remaining < 60000) progressBar.style.background = '#ef4444';
+                }, 1000);
+
+                // Poll for validation
+                const token = data.token;
+                clearInterval(qrCardPollInterval);
+                qrCardPollInterval = setInterval(async () => {
+                    try {
+                        const { data: row } = await window.supabaseClient
+                            .from('redemption_tokens')
+                            .select('status')
+                            .eq('token', token)
+                            .maybeSingle();
+                        if (row?.status === 'used') {
+                            clearInterval(qrCardCountdownInterval);
+                            clearInterval(qrCardPollInterval);
+                            document.getElementById('qrModalStatusMsg').style.display = 'none';
+                            document.getElementById('qrModalSuccessMsg').style.display = 'block';
+                            countdownEl.style.display = 'none';
+                            progressBar.style.width = '100%';
+                            progressBar.style.background = '#10b981';
+                        }
+                    } catch (e) { /* ignore */ }
+                }, 5000);
+
+            } catch (err) {
+                alert('❌ Errore di rete: ' + (err.message || 'Riprova.'));
+                genBtn.innerHTML = '<i class="fas fa-qrcode"></i> Genera QR';
+                genBtn.disabled = false;
+            }
+        }
+
+        // Close on backdrop click
+        document.getElementById('qrModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeQRModal();
+        });
+    </script>
+</body>
+</html>

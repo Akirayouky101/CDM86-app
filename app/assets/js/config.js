@@ -1,24 +1,55 @@
-// CDM86 — Capacitor App Config
-// Questo file viene caricato da tutte le pagine nell'app/
+/**
+ * CDM86 Configuration File
+ */
 
-const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5NzMzMzUsImV4cCI6MjA1NzU0OTMzNX0.y7PoGMTBpIwFMGFhhJn9nBcMwR2tsOzuCeFl1rkMpyA';
+const CDM86_CONFIG = {
+    // Supabase Configuration
+    supabase: {
+        url: 'https://uchrjlngfzfibcpdxtky.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM'
+    },
 
-// Crea il client globale Supabase
-window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Stripe Configuration (publishable key only — secret key is in Supabase Edge Function secrets)
+    stripe: {
+        publishableKey: 'pk_test_51TAZGbDnoTkW1sMkoVVcmpxLJKKx9YVgqHF3CSMj1pVdsdUGXqvtfaiLD2nfvZQvFZBnqqP2wyACVeRY5ixE9pX700PRr4PoUW'
+    },
 
-// Helper: controlla sessione — se non loggato redirect a login
-window.requireAuth = async function(redirectPath = '../login.html') {
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) {
-        window.location.href = redirectPath;
-        return null;
+    // API Configuration
+    api: {
+        baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3000/api' 
+            : 'https://cdm86project.vercel.app/api',
+        timeout: 30000
+    },
+
+    // Branding
+    branding: {
+        siteName: "CDM86",
+        domain: "cdm86.it",
+        logoIcon: "fas fa-cube",
+        tagline: "Dashboard Professionale"
+    },
+
+    // Colori personalizzati
+    colors: {
+        primary: "#2563eb",
+        primaryDark: "#1d4ed8",
+        primaryLight: "#3b82f6",
+        accent: "#10b981",
+        warning: "#f59e0b",
+        error: "#ef4444",
+        success: "#10b981"
     }
-    return session;
 };
 
-// Helper: logout
-window.doLogout = async function() {
-    await window.supabaseClient.auth.signOut();
-    window.location.href = '../login.html';
-};
+// Export configurazione
+if (typeof window !== 'undefined') {
+    window.CDM86_CONFIG = CDM86_CONFIG;
+    window.SUPABASE_URL = CDM86_CONFIG.supabase.url;
+    window.SUPABASE_KEY = CDM86_CONFIG.supabase.anonKey;
+    window.API_URL = CDM86_CONFIG.api.baseUrl;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CDM86_CONFIG;
+}
