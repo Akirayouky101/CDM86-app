@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Collaboratore — CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* ─── SIDEBAR ─────────────────────────────────────── */
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 240px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            display: flex; flex-direction: column;
+            z-index: 200;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+        }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .sidebar-logo .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.1rem; font-weight: 800;
+        }
+        .sidebar-logo .brand i { color: #fbbf24; }
+        .sidebar-logo .subtitle { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+
+        nav { flex: 1; padding: 20px 12px; }
+        nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+        nav a:hover  { background: rgba(255,255,255,0.08); color: white; }
+        nav a.active { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        nav a i { width: 18px; text-align: center; }
+
+        .sidebar-user {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.85rem;
+        }
+        .sidebar-user .name { font-weight: 700; color: white; }
+        .sidebar-user .email { color: #94a3b8; font-size: 0.75rem; margin-top: 2px; }
+        .sidebar-user .logout {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #64748b; font-size: 0.75rem; cursor: pointer;
+            margin-top: 8px; transition: color 0.2s;
+        }
+        .sidebar-user .logout:hover { color: #ef4444; }
+
+        /* ─── MAIN ─────────────────────────────────────────── */
+        .main { margin-left: 0; padding: 28px 32px; transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1); }
+        @media (min-width: 769px) {
+            body.sidebar-open .main { margin-left: 240px; }
+        }
+
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+        .page-header p  { color: #64748b; margin-top: 4px; }
+
+        /* ─── STAT CARDS ────────────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 22px 20px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        .stat-card .icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 14px;
+        }
+        .stat-card .value  { font-size: 1.8rem; font-weight: 800; color: #0f172a; }
+        .stat-card .label  { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+        .stat-card .change { font-size: 0.75rem; margin-top: 6px; font-weight: 600; }
+        .change.up   { color: #16a34a; }
+        .change.down { color: #dc2626; }
+
+        .icon.green  { background: #f0fdf4; color: #16a34a; }
+        .icon.blue   { background: #eff6ff; color: #3b82f6; }
+        .icon.yellow { background: #fefce8; color: #ca8a04; }
+        .icon.purple { background: #faf5ff; color: #9333ea; }
+
+        /* ─── REFERRAL BOX ──────────────────────────────────── */
+        .referral-box {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            border-radius: 20px;
+            padding: 28px 32px;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .referral-box h3 { font-size: 1rem; opacity: 0.8; margin-bottom: 8px; }
+        .referral-code {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: #fbbf24;
+        }
+        .referral-box .copy-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .referral-box .copy-btn:hover { background: rgba(251,191,36,0.25); }
+        .referral-box .share-link { font-size: 0.8rem; opacity: 0.6; margin-top: 4px; }
+
+        /* ─── PAYOUT PROGRESS ───────────────────────────────── */
+        .payout-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            margin-bottom: 24px;
+        }
+        .payout-card h3 { font-weight: 700; color: #0f172a; margin-bottom: 16px; font-size: 1rem; }
+        .progress-bar-wrap {
+            background: #f1f5f9;
+            border-radius: 50px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #16a34a, #22c55e);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+        }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; }
+        .progress-labels .amount { font-weight: 700; color: #0f172a; }
+
+        /* ─── BOTTOM GRID ───────────────────────────────────── */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .panel-header h3 { font-weight: 700; color: #0f172a; font-size: 1rem; }
+        .panel-header a { font-size: 0.8rem; color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+        .earning-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .earning-item:last-child { border-bottom: none; }
+        .earning-item .left { display: flex; align-items: center; gap: 10px; }
+        .earning-item .badge-level {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 800;
+        }
+        .l1 { background: #dcfce7; color: #16a34a; }
+        .l2 { background: #dbeafe; color: #2563eb; }
+        .l3 { background: #fef3c7; color: #d97706; }
+        .earning-item .name { font-size: 0.875rem; font-weight: 600; color: #0f172a; }
+        .earning-item .type { font-size: 0.75rem; color: #94a3b8; }
+        .earning-item .amount { font-size: 0.95rem; font-weight: 700; color: #16a34a; }
+
+        .network-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .network-row:last-child { border-bottom: none; }
+        .network-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .network-badge.l1 { background: #dcfce7; color: #16a34a; }
+        .network-badge.l2 { background: #dbeafe; color: #2563eb; }
+        .network-badge.azienda { background: #fef3c7; color: #d97706; }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .empty-state i { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+        /* ─── CALLBACKS TODAY ───────────────────────────────── */
+        .callbacks-section {
+            margin-bottom: 24px;
+        }
+        .callbacks-section .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .callbacks-section .section-title .badge-count {
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .callbacks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .callback-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            border-left: 4px solid #f59e0b;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+        .callback-card.overdue {
+            border-left-color: #dc2626;
+            background: #fff8f8;
+        }
+        .callback-card.upcoming {
+            border-left-color: #16a34a;
+        }
+        .callback-card .cb-time {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+        }
+        .callback-card .cb-time.overdue  { background: #fee2e2; color: #dc2626; }
+        .callback-card .cb-time.upcoming { background: #dcfce7; color: #16a34a; }
+        .callback-card .cb-time.soon     { background: #fef3c7; color: #d97706; }
+        .callback-card .cb-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .callback-card .cb-phone {
+            font-size: 0.82rem;
+            color: #3b82f6;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .callback-card .cb-notes {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-style: italic;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .callback-card .cb-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .callback-card .cb-btn {
+            flex: 1;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .callback-card .cb-btn:hover { opacity: 0.82; }
+        .cb-btn.call  { background: #dcfce7; color: #16a34a; }
+        .cb-btn.done  { background: #f1f5f9; color: #64748b; }
+
+        /* ─── LOADING / MOBILE ──────────────────────────────── */
+        .loading { text-align: center; padding: 60px; color: #64748b; }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .referral-box { flex-direction: column; }
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+        /* ─── SEGNALIBRO MENU MOBILE ────────────────────────── */
+        .menu-tab {
+            display: flex;
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: #fbbf24;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 18px 8px;
+            border-radius: 0 10px 10px 0;
+            cursor: grab;
+            border: none;
+            box-shadow: 3px 0 16px rgba(0,0,0,0.25);
+            transition: padding 0.2s, background 0.2s, top 0.15s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            border-left: 3px solid #fbbf24;
+        }
+        .menu-tab:hover { padding: 18px 11px; }
+        .menu-tab.open {
+            left: 240px;
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+            border-right: 3px solid #fbbf24;
+        }
+
+        /* Overlay solo su mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+        }
+        @media (max-width: 768px) {
+            .sidebar-overlay.active { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            .main { padding: 16px 14px 24px 14px !important; }
+        }
+    </style>
+</head>
+<body>
+<button class="menu-tab" id="menuTab" onclick="toggleMenu()" aria-label="Menu">CDM86</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="brand">
+                <i class="fas fa-handshake"></i>
+                CDM86
+            </div>
+            <div class="subtitle">Pannello Collaboratori</div>
+        </div>
+        <nav>
+            <a href="dashboard.html" class="active">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="rete.html">
+                <i class="fas fa-sitemap"></i> La mia rete
+            </a>
+            <a href="guadagni.html">
+                <i class="fas fa-euro-sign"></i> Guadagni
+            </a>
+            <a href="task.html">
+                <i class="fas fa-check-square"></i> Task
+            </a>
+            <a href="chiamate.html">
+                <i class="fas fa-phone"></i> Chiamate
+            </a>
+            <a href="note.html">
+                <i class="fas fa-sticky-note"></i> Note
+            </a>
+            <a href="profilo.html">
+                <i class="fas fa-user-circle"></i> Profilo
+            </a>
+        </nav>
+        <div class="sidebar-user">
+            <div class="name" id="sidebarName">—</div>
+            <div class="email" id="sidebarEmail">—</div>
+            <div class="logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Esci
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="page-header">
+            <h1>Buongiorno, <span id="userName">—</span> 👋</h1>
+            <p>Ecco il riepilogo della tua attività come collaboratore CDM86</p>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon green"><i class="fas fa-euro-sign"></i></div>
+                <div class="value" id="statTotalEarned">€0,00</div>
+                <div class="label">Guadagni totali</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon blue"><i class="fas fa-hourglass-half"></i></div>
+                <div class="value" id="statPending">€0,00</div>
+                <div class="label">In attesa di pagamento</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon yellow"><i class="fas fa-users"></i></div>
+                <div class="value" id="statNetwork">0</div>
+                <div class="label">Persone nella rete</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon purple"><i class="fas fa-building"></i></div>
+                <div class="value" id="statAziende">0</div>
+                <div class="label">Aziende iscritte</div>
+            </div>
+        </div>
+
+        <!-- REFERRAL BOX -->
+        <div class="referral-box">
+            <div>
+                <h3><i class="fas fa-link"></i> Il tuo codice referral</h3>
+                <div class="referral-code" id="referralCode">———</div>
+                <div class="share-link" id="shareLink">Caricamento...</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="fas fa-copy"></i> Copia codice
+                </button>
+                <button class="copy-btn" onclick="copyLink()">
+                    <i class="fas fa-share-alt"></i> Copia link
+                </button>
+            </div>
+        </div>
+
+        <!-- PAYOUT PROGRESS -->
+        <div class="payout-card">
+            <h3><i class="fas fa-wallet" style="color:#16a34a; margin-right:8px;"></i>Progressione verso il pagamento</h3>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-labels">
+                <span class="amount" id="progressAmount">€0,00 maturati</span>
+                <span id="progressThreshold">Soglia: €50,00</span>
+            </div>
+        </div>
+
+        <!-- CHIAMATE IN SCADENZA OGGI -->
+        <div class="callbacks-section" id="callbacksSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-bell" style="color:#f59e0b;"></i>
+                Richiami di oggi
+                <span class="badge-count" id="callbacksCount">0</span>
+            </div>
+            <div class="callbacks-grid" id="callbacksGrid"></div>
+        </div>
+
+        <!-- BOTTOM GRID -->
+        <div class="bottom-grid">
+            <!-- Ultimi guadagni -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-receipt" style="color:#16a34a; margin-right:8px;"></i>Ultimi guadagni</h3>
+                    <a href="guadagni.html">Vedi tutti →</a>
+                </div>
+                <div id="recentEarnings">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
+
+            <!-- Ultimi nella rete -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-users" style="color:#3b82f6; margin-right:8px;"></i>Ultimi nella rete</h3>
+                    <a href="rete.html">Vedi tutti →</a>
+                </div>
+                <div id="recentNetwork">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let supabase_client, currentUser, userData;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            supabase_client = supabase.createClient(
+                CDM86_CONFIG.supabase.url,
+                CDM86_CONFIG.supabase.anonKey
+            );
+
+            const { data: { session } } = await supabase_client.auth.getSession();
+            if (!session) { window.location.href = '../login.html'; return; }
+
+            currentUser = session.user;
+
+            // Carica dati profilo
+            const { data: user } = await supabase_client
+                .from('collaborators')
+                .select('*')
+                .eq('auth_user_id', currentUser.id)
+                .single();
+
+            if (!user) {
+                window.location.href = '../login.html'; return;
+            }
+            if (user.status !== 'active') {
+                window.location.href = '../login.html'; return;
+            }
+
+            userData = user;
+            renderProfile(user);
+            await loadStats(user);
+            await loadRecentEarnings(user.id);
+            await loadRecentNetwork(user.id);
+            await loadTodayCallbacks(user.id);
+        });
+
+        function renderProfile(user) {
+            const name = `${user.first_name} ${user.last_name}`;
+            document.getElementById('userName').textContent     = user.first_name;
+            document.getElementById('sidebarName').textContent  = name;
+            document.getElementById('sidebarEmail').textContent = user.email;
+            document.getElementById('referralCode').textContent = user.referral_code || '—';
+            document.getElementById('shareLink').textContent    = `cdmottantasei.com/?ref=${user.referral_code}`;
+        }
+
+        async function loadStats(user) {
+            // Earnings summary
+            const { data: summary } = await supabase_client
+                .from('collaborator_earnings_summary')
+                .select('*')
+                .eq('collaborator_id', user.id)
+                .maybeSingle();
+
+            if (summary) {
+                document.getElementById('statTotalEarned').textContent = formatEuro(summary.total_earned || 0);
+                document.getElementById('statPending').textContent     = formatEuro(summary.total_pending || 0);
+                document.getElementById('statNetwork').textContent     = (summary.users_count || 0) + (summary.aziende_count || 0);
+                document.getElementById('statAziende').textContent     = summary.aziende_count || 0;
+
+                // Payout progress
+                const { data: settingsRows } = await supabase_client
+                    .from('collaborator_settings')
+                    .select('setting_key, setting_value')
+                    .eq('setting_key', 'payout_threshold');
+
+                const threshold = parseFloat(settingsRows?.[0]?.setting_value || 50);
+                const pending   = parseFloat(summary.total_pending || 0);
+                const pct       = Math.min(100, Math.round((pending / threshold) * 100));
+
+                document.getElementById('progressBar').style.width = pct + '%';
+                document.getElementById('progressAmount').textContent  = `${formatEuro(pending)} maturati`;
+                document.getElementById('progressThreshold').textContent = `Soglia: ${formatEuro(threshold)}`;
+            }
+        }
+
+        async function loadRecentEarnings(userId) {
+            const { data: earnings } = await supabase_client
+                .from('collaborator_earnings')
+                .select('*, new_user:new_user_id(first_name, last_name)')
+                .eq('collaborator_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            const container = document.getElementById('recentEarnings');
+            if (!earnings || earnings.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i>Nessun guadagno ancora</div>`;
+                return;
+            }
+
+            container.innerHTML = earnings.map(e => {
+                const name = e.new_user ? `${e.new_user.first_name} ${e.new_user.last_name}` : 'Utente';
+                const type = { user: 'Utente', azienda: 'Azienda', associazione: 'Associazione' }[e.registration_type] || '';
+                return `
+                <div class="earning-item">
+                    <div class="left">
+                        <div class="badge-level l${e.mlm_level}">L${e.mlm_level}</div>
+                        <div>
+                            <div class="name">${name}</div>
+                            <div class="type">${type}</div>
+                        </div>
+                    </div>
+                    <div class="amount">+${formatEuro(parseFloat(e.total_amount || e.amount || 0))}</div>
+                </div>`;
+            }).join('');
+        }
+
+        async function loadRecentNetwork(userId) {
+            // Iscrizioni dirette (L1)
+            const { data: direct } = await supabase_client
+                .from('collaborator_earnings')
+                .select('new_user_id, mlm_level, registration_type, created_at, new_user:new_user_id(first_name, last_name)')
+                .eq('collaborator_id', userId)
+                .in('mlm_level', [1, 2])
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            const container = document.getElementById('recentNetwork');
+            if (!direct || direct.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i>Nessun membro ancora</div>`;
+                return;
+            }
+
+            container.innerHTML = direct.map(e => {
+                const name = e.new_user ? `${e.new_user.first_name} ${e.new_user.last_name}` : 'Utente';
+                const levelCls = `l${e.mlm_level}`;
+                const typeLabel = e.registration_type === 'azienda' ? 'azienda' : 'l' + e.mlm_level;
+                const typeCls   = e.registration_type === 'azienda' ? 'azienda' : levelCls;
+                const date = new Date(e.created_at).toLocaleDateString('it-IT');
+                return `
+                <div class="network-row">
+                    <div style="font-size:0.875rem; font-weight:600; color:#0f172a;">${name}</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="network-badge ${typeCls}">${e.registration_type === 'azienda' ? '🏢 Azienda' : 'L' + e.mlm_level}</span>
+                        <span style="font-size:0.75rem; color:#94a3b8;">${date}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function loadTodayCallbacks(userId) {
+            const now   = new Date();
+            const today = new Date(now); today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const { data: calls } = await supabase_client
+                .from('collaborator_calls')
+                .select('*')
+                .eq('collaborator_id', userId)
+                .gte('callback_at', today.toISOString())
+                .lt('callback_at', tomorrow.toISOString())
+                .order('callback_at', { ascending: true });
+
+            if (!calls || calls.length === 0) return;
+
+            document.getElementById('callbacksSection').style.display = 'block';
+            document.getElementById('callbacksCount').textContent = calls.length;
+
+            const grid = document.getElementById('callbacksGrid');
+            grid.innerHTML = calls.map(c => {
+                const cbTime    = new Date(c.callback_at);
+                const isOverdue = cbTime < now;
+                const minutesLeft = Math.round((cbTime - now) / 60000);
+                const isSoon    = !isOverdue && minutesLeft <= 60;
+
+                const timeStr = cbTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                const cardCls = isOverdue ? 'overdue' : isSoon ? '' : 'upcoming';
+                const timeCls = isOverdue ? 'overdue' : isSoon ? 'soon' : 'upcoming';
+                const timeLabel = isOverdue
+                    ? `⚠️ Scaduto alle ${timeStr}`
+                    : isSoon
+                        ? `⏰ Tra ${minutesLeft} min — ${timeStr}`
+                        : `🕐 Ore ${timeStr}`;
+
+                return `
+                <div class="callback-card ${cardCls}">
+                    <span class="cb-time ${timeCls}">${timeLabel}</span>
+                    <div class="cb-name">${c.contact_name || '—'}</div>
+                    ${c.contact_phone ? `<div class="cb-phone"><i class="fas fa-phone-alt"></i>${c.contact_phone}</div>` : ''}
+                    ${c.notes ? `<div class="cb-notes">${c.notes}</div>` : ''}
+                    <div class="cb-actions">
+                        ${c.contact_phone ? `<button class="cb-btn call" onclick="window.location.href='tel:${c.contact_phone}'"><i class="fas fa-phone"></i> Chiama</button>` : ''}
+                        <button class="cb-btn done" onclick="markCallbackDone('${c.id}', this)"><i class="fas fa-check"></i> Fatto</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function markCallbackDone(callId, btn) {
+            btn.disabled = true;
+            btn.textContent = '...';
+            const { error } = await supabase_client
+                .from('collaborator_calls')
+                .update({ callback_at: null, outcome: 'completata' })
+                .eq('id', callId);
+
+            if (!error) {
+                const card = btn.closest('.callback-card');
+                card.style.opacity = '0';
+                card.style.transition = 'opacity 0.4s';
+                setTimeout(() => {
+                    card.remove();
+                    const remaining = document.querySelectorAll('.callback-card').length;
+                    document.getElementById('callbacksCount').textContent = remaining;
+                    if (remaining === 0) document.getElementById('callbacksSection').style.display = 'none';
+                }, 400);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Fatto';
+            }
+        }
+
+        function formatEuro(n) {
+            return '€' + parseFloat(n).toFixed(2).replace('.', ',');
+        }
+
+        function copyCode() {
+            const code = userData?.referral_code;
+            if (!code) return;
+            navigator.clipboard.writeText(code);
+            showToast('Codice copiato!');
+        }
+
+        function copyLink() {
+            const code = userData?.referral_code;
+            const link = `https://cdmottantasei.com/?ref=${code}`;
+            navigator.clipboard.writeText(link);
+            showToast('Link copiato!');
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.textContent = msg;
+            Object.assign(t.style, {
+                position: 'fixed', bottom: '20px', left: '50%',
+                transform: 'translateX(-50%)',
+                background: '#0f172a', color: 'white',
+                padding: '10px 20px', borderRadius: '8px',
+                fontSize: '0.875rem', fontWeight: '600',
+                zIndex: '9999', boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+            });
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        async function logout() {
+            await supabase_client.auth.signOut();
+            window.location.href = '../login.html';
+        }
+    
+        /* ── Menu tab: toggle + drag verticale ── */
+        (function() {
+            const STORAGE_KEY = 'cdm86_tab_top';
+            let isDragging = false;
+            let dragStartY = 0;
+            let tabStartTop = 0;
+            let movedEnough = false;
+
+            function getTab() { return document.getElementById('menuTab'); }
+
+            function applyStoredPosition() {
+                const tab = getTab();
+                if (!tab) return;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                // Su mobile usa sempre posizione centrale (il drag funziona per dispositivo)
+                if (saved && window.innerWidth > 768) {
+                    tab.style.top = saved;
+                    tab.style.transform = 'none';
+                } else {
+                    tab.style.top = '50%';
+                    tab.style.transform = 'translateY(-50%)';
+                }
+            }
+
+            function onDragStart(e) {
+                const tab = getTab();
+                isDragging = false;
+                movedEnough = false;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                dragStartY = clientY;
+                // Converti top% in px se necessario
+                const rect = tab.getBoundingClientRect();
+                tabStartTop = rect.top + rect.height / 2;
+                tab.style.transition = 'padding 0.2s, background 0.2s';
+                tab.style.cursor = 'grabbing';
+
+                document.addEventListener('mousemove', onDragMove, {passive:false});
+                document.addEventListener('touchmove', onDragMove, {passive:false});
+                document.addEventListener('mouseup', onDragEnd);
+                document.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dy = clientY - dragStartY;
+                if (Math.abs(dy) > 6) {
+                    isDragging = true;
+                    movedEnough = true;
+                    if (e.cancelable) e.preventDefault();
+                }
+                if (!isDragging) return;
+                const tab = getTab();
+                let newTop = tabStartTop + dy;
+                // Clamp tra 40px e altezza schermo - 40px
+                const minTop = 40;
+                const maxTop = window.innerHeight - 40;
+                newTop = Math.max(minTop, Math.min(maxTop, newTop));
+                tab.style.top = newTop + 'px';
+                tab.style.transform = 'none';
+            }
+
+            function onDragEnd(e) {
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('touchmove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                document.removeEventListener('touchend', onDragEnd);
+                const tab = getTab();
+                tab.style.cursor = 'grab';
+                tab.style.transition = 'padding 0.2s, background 0.2s, top 0.15s ease';
+                if (movedEnough) {
+                    localStorage.setItem(STORAGE_KEY, tab.style.top);
+                }
+            }
+
+            window.toggleMenu = function() {
+                if (movedEnough) { movedEnough = false; return; }
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const tab     = getTab();
+                const isOpen  = sidebar.classList.toggle('open');
+                tab.classList.toggle('open', isOpen);
+                document.body.classList.toggle('sidebar-open', isOpen);
+                // Salva stato in localStorage
+                localStorage.setItem('cdm86_sidebar_open', isOpen ? '1' : '0');
+            };
+
+            window.addEventListener('DOMContentLoaded', function() {
+                applyStoredPosition();
+                // Ripristina stato sidebar su tutti i device
+                const sidebarWasOpen = localStorage.getItem('cdm86_sidebar_open') === '1';
+                if (sidebarWasOpen) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const tab     = getTab();
+                    sidebar.classList.add('open');
+                    if (tab) tab.classList.add('open');
+                    document.body.classList.add('sidebar-open');
+                }
+                const tab = getTab();
+                if (!tab) return;
+                tab.addEventListener('mousedown', onDragStart);
+                tab.addEventListener('touchstart', onDragStart, {passive:true});
+            });
+        })();
+    </script>
+</body>
+</html>

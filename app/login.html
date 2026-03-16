@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Accedi — CDM86</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, 'SF Pro Display', 'Inter', sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            min-height: -webkit-fill-available;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 24px env(safe-area-inset-bottom);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .logo-icon {
+            width: 80px; height: 80px;
+            background: rgba(251,191,36,0.15);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            border: 2px solid rgba(251,191,36,0.3);
+        }
+        .logo-icon i { font-size: 2rem; color: #fbbf24; }
+        .logo-title { font-size: 2rem; font-weight: 900; color: white; letter-spacing: 0.05em; }
+        .logo-sub { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 380px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+        }
+        .card p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+        .form-group input:focus { border-color: #fbbf24; }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #0f172a;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s, transform 0.1s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .btn-login:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-login:disabled { opacity: 0.5; }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .alert.error { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); display: block; }
+
+        .forgot {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.82rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .forgot:hover { color: #fbbf24; }
+
+        .loading-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(251,191,36,0.3);
+            border-top-color: #fbbf24;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="logo-area">
+        <div class="logo-icon"><i class="fas fa-handshake"></i></div>
+        <div class="logo-title">CDM86</div>
+        <div class="logo-sub">Pannello Collaboratori</div>
+    </div>
+
+    <div class="card">
+        <h2>Bentornato 👋</h2>
+        <p>Accedi al tuo account collaboratore</p>
+
+        <div class="alert" id="alertBox"></div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="emailInput" placeholder="la-tua@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="pwdInput" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <button class="btn-login" id="loginBtn" onclick="doLogin()">
+            <i class="fas fa-sign-in-alt"></i> Accedi
+        </button>
+
+        <div class="forgot" onclick="doForgot()">Password dimenticata?</div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5NzMzMzUsImV4cCI6MjA1NzU0OTMzNX0.y7PoGMTBpIwFMGFhhJn9nBcMwR2tsOzuCeFl1rkMpyA';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Enter per login
+        document.getElementById('pwdInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        async function doLogin() {
+            const email = document.getElementById('emailInput').value.trim();
+            const pwd   = document.getElementById('pwdInput').value;
+            const alert = document.getElementById('alertBox');
+            const btn   = document.getElementById('loginBtn');
+
+            alert.className = 'alert';
+            alert.textContent = '';
+
+            if (!email || !pwd) {
+                alert.className = 'alert error';
+                alert.textContent = 'Inserisci email e password.';
+                return;
+            }
+
+            btn.disabled = true;
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            const { error } = await sb.auth.signInWithPassword({ email, password: pwd });
+
+            document.getElementById('loadingOverlay').classList.remove('active');
+            btn.disabled = false;
+
+            if (error) {
+                alert.className = 'alert error';
+                alert.textContent = 'Email o password non corretti.';
+                return;
+            }
+
+            // Verifica che sia un collaboratore
+            const { data: { user } } = await sb.auth.getUser();
+            const { data: collab } = await sb.from('collaborators').select('id,status').eq('user_id', user.id).single();
+
+            if (!collab) {
+                await sb.auth.signOut();
+                alert.className = 'alert error';
+                alert.textContent = 'Accesso riservato ai collaboratori CDM86.';
+                return;
+            }
+
+            if (collab.status === 'suspended') {
+                await sb.auth.signOut();
+                alert.className = 'alert error';
+                alert.textContent = 'Il tuo account è stato sospeso. Contatta l\'amministratore.';
+                return;
+            }
+
+            window.location.href = 'collaboratori/dashboard.html';
+        }
+
+        async function doForgot() {
+            const email = document.getElementById('emailInput').value.trim();
+            if (!email) {
+                document.getElementById('alertBox').className = 'alert error';
+                document.getElementById('alertBox').textContent = 'Inserisci prima la tua email.';
+                return;
+            }
+            await sb.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://cdm86.it/collaboratori/profilo.html'
+            });
+            document.getElementById('alertBox').className = 'alert error';
+            document.getElementById('alertBox').style.background = 'rgba(34,197,94,0.15)';
+            document.getElementById('alertBox').style.color = '#86efac';
+            document.getElementById('alertBox').textContent = 'Email inviata! Controlla la tua casella.';
+        }
+    </script>
+</body>
+</html>

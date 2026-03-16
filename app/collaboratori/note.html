@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note — CDM86 Collaboratori</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; }
+
+        /* ─── SIDEBAR ─────────────────────────────────────── */
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; display: flex; flex-direction: column; z-index: 200; overflow-y: auto; transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 800; }
+        .sidebar-logo .brand i { color: #fbbf24; }
+        .sidebar-logo .subtitle { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        nav { flex: 1; padding: 20px 12px; }
+        nav a { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; transition: all 0.2s; }
+        nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        nav a.active { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        nav a i { width: 18px; text-align: center; }
+        .sidebar-user { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .sidebar-user .name { font-weight: 700; color: white; }
+        .sidebar-user .email { color: #94a3b8; font-size: 0.75rem; margin-top: 2px; }
+        .sidebar-user .logout { display: inline-flex; align-items: center; gap: 6px; color: #64748b; font-size: 0.75rem; cursor: pointer; margin-top: 8px; transition: color 0.2s; }
+        .sidebar-user .logout:hover { color: #ef4444; }
+
+        /* ─── MAIN ─────────────────────────────────────────── */
+        .main { margin-left: 0; padding: 28px 32px; transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1); }
+        @media (min-width: 769px) {
+            body.sidebar-open .main { margin-left: 240px; }
+        }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+        .page-header p { color: #64748b; margin-top: 4px; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #0f172a; color: white; border: none; padding: 11px 22px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-primary:hover { background: #1e293b; }
+
+        /* ─── TOOLBAR ─────────────────────────────────────── */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .search-box { padding: 9px 16px; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: 0.85rem; outline: none; min-width: 240px; }
+        .search-box:focus { border-color: #0f172a; }
+        .color-filter { display: flex; gap: 6px; }
+        .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent; transition: transform 0.2s; }
+        .color-dot:hover { transform: scale(1.2); }
+        .color-dot.active { border-color: #0f172a; transform: scale(1.15); }
+        .sort-select { padding: 8px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.82rem; outline: none; background: white; cursor: pointer; }
+        .sort-select:focus { border-color: #0f172a; }
+
+        /* ─── NOTES GRID ─────────────────────────────────── */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .note-card {
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+        .note-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+
+        /* Note colors */
+        .note-yellow { background: #fefce8; }
+        .note-blue   { background: #eff6ff; }
+        .note-green  { background: #f0fdf4; }
+        .note-pink   { background: #fdf2f8; }
+        .note-purple { background: #faf5ff; }
+        .note-orange { background: #fff7ed; }
+
+        .note-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+        .note-title { font-size: 1rem; font-weight: 800; color: #0f172a; flex: 1; }
+        .note-pin { font-size: 0.85rem; color: #94a3b8; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: all 0.2s; }
+        .note-pin.pinned { color: #dc2626; }
+        .note-pin:hover { background: rgba(0,0,0,0.06); }
+
+        .note-body { font-size: 0.875rem; color: #374151; line-height: 1.5; flex: 1; white-space: pre-wrap; word-break: break-word; }
+
+        .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
+        .note-date { font-size: 0.72rem; color: #94a3b8; }
+        .note-actions { display: flex; gap: 4px; }
+        .icon-btn { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 5px 7px; border-radius: 6px; font-size: 0.82rem; transition: all 0.2s; }
+        .icon-btn:hover { background: rgba(0,0,0,0.08); color: #0f172a; }
+        .icon-btn.delete:hover { color: #dc2626; }
+
+        .pin-banner {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            font-size: 0.82rem;
+            color: #dc2626;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        /* ─── EMPTY ─────────────────────────────────────────── */
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 3rem; margin-bottom: 14px; display: block; }
+        .empty-state h3 { font-size: 1.1rem; color: #64748b; margin-bottom: 6px; }
+
+        /* ─── MODAL ─────────────────────────────────────────── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: white; border-radius: 20px; padding: 28px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .modal h2 { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border 0.2s; font-family: inherit; }
+        .form-control:focus { border-color: #0f172a; }
+        textarea.form-control { resize: vertical; min-height: 140px; }
+        .color-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+        .cp-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s; }
+        .cp-dot:hover { transform: scale(1.15); }
+        .cp-dot.selected { border-color: #0f172a; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+        .btn-cancel { padding: 10px 20px; border: 1.5px solid #e5e7eb; background: white; border-radius: 10px; font-size: 0.875rem; font-weight: 600; cursor: pointer; color: #64748b; }
+        .btn-save { padding: 10px 22px; background: #0f172a; color: white; border: none; border-radius: 10px; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+
+        .loading { text-align: center; padding: 60px; color: #64748b; }
+
+        @media (max-width: 768px) {
+            .notes-grid { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { min-width: 0; width: 100%; }
+        }
+        /* ─── SEGNALIBRO MENU MOBILE ────────────────────────── */
+        .menu-tab {
+            display: flex;
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: #fbbf24;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 18px 8px;
+            border-radius: 0 10px 10px 0;
+            cursor: grab;
+            border: none;
+            box-shadow: 3px 0 16px rgba(0,0,0,0.25);
+            transition: padding 0.2s, background 0.2s, top 0.15s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            border-left: 3px solid #fbbf24;
+        }
+        .menu-tab:hover { padding: 18px 11px; }
+        .menu-tab.open {
+            left: 240px;
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+            border-right: 3px solid #fbbf24;
+        }
+
+        /* Overlay solo su mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+        }
+        @media (max-width: 768px) {
+            .sidebar-overlay.active { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            .main { padding: 16px 14px 24px 14px !important; }
+        }
+    </style>
+</head>
+<body>
+<button class="menu-tab" id="menuTab" onclick="toggleMenu()" aria-label="Menu">CDM86</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="brand"><i class="fas fa-handshake"></i> CDM86</div>
+        <div class="subtitle">Pannello Collaboratori</div>
+    </div>
+    <nav>
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="rete.html"><i class="fas fa-sitemap"></i> La mia rete</a>
+        <a href="guadagni.html"><i class="fas fa-euro-sign"></i> Guadagni</a>
+        <a href="task.html"><i class="fas fa-check-square"></i> Task</a>
+        <a href="chiamate.html"><i class="fas fa-phone"></i> Chiamate</a>
+        <a href="note.html" class="active"><i class="fas fa-sticky-note"></i> Note</a>
+        <a href="profilo.html"><i class="fas fa-user-circle"></i> Profilo</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+        <div class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Esci</div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-sticky-note" style="color:#fbbf24; margin-right:10px;"></i>Note</h1>
+            <p>Le tue note personali, sempre a portata di mano</p>
+        </div>
+        <button class="btn-primary" onclick="openModal()">
+            <i class="fas fa-plus"></i> Nuova nota
+        </button>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Cerca nelle note..." oninput="renderNotes()">
+        <div class="color-filter" id="colorFilter">
+            <div class="color-dot active" style="background:#f1f5f9;border:1.5px solid #cbd5e1;" data-color="all" onclick="setColorFilter('all',this)" title="Tutti i colori"></div>
+            <div class="color-dot" style="background:#fef08a;" data-color="yellow" onclick="setColorFilter('yellow',this)" title="Giallo"></div>
+            <div class="color-dot" style="background:#93c5fd;" data-color="blue"   onclick="setColorFilter('blue',this)"   title="Blu"></div>
+            <div class="color-dot" style="background:#86efac;" data-color="green"  onclick="setColorFilter('green',this)"  title="Verde"></div>
+            <div class="color-dot" style="background:#f9a8d4;" data-color="pink"   onclick="setColorFilter('pink',this)"   title="Rosa"></div>
+            <div class="color-dot" style="background:#c4b5fd;" data-color="purple" onclick="setColorFilter('purple',this)" title="Viola"></div>
+            <div class="color-dot" style="background:#fdba74;" data-color="orange" onclick="setColorFilter('orange',this)" title="Arancio"></div>
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="renderNotes()">
+            <option value="newest">Più recenti</option>
+            <option value="oldest">Più vecchie</option>
+            <option value="alpha">A–Z</option>
+        </select>
+    </div>
+
+    <div id="notesContainer">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
+</div>
+
+<!-- MODAL AGGIUNGI/MODIFICA -->
+<div class="modal-overlay" id="noteModal">
+    <div class="modal">
+        <h2 id="modalTitle">Nuova Nota</h2>
+        <input type="hidden" id="editNoteId">
+        <div class="form-group">
+            <label>Titolo *</label>
+            <input type="text" class="form-control" id="noteTitle" placeholder="Titolo della nota">
+        </div>
+        <div class="form-group">
+            <label>Testo</label>
+            <textarea class="form-control" id="noteContent" placeholder="Scrivi qui la tua nota..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Colore</label>
+            <div class="color-picker">
+                <div class="cp-dot selected" style="background:#fef08a;" data-color="yellow" onclick="selectColor('yellow',this)" title="Giallo"></div>
+                <div class="cp-dot" style="background:#93c5fd;" data-color="blue"   onclick="selectColor('blue',this)"   title="Blu"></div>
+                <div class="cp-dot" style="background:#86efac;" data-color="green"  onclick="selectColor('green',this)"  title="Verde"></div>
+                <div class="cp-dot" style="background:#f9a8d4;" data-color="pink"   onclick="selectColor('pink',this)"   title="Rosa"></div>
+                <div class="cp-dot" style="background:#c4b5fd;" data-color="purple" onclick="selectColor('purple',this)" title="Viola"></div>
+                <div class="cp-dot" style="background:#fdba74;" data-color="orange" onclick="selectColor('orange',this)" title="Arancio"></div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Annulla</button>
+            <button class="btn-save" onclick="saveNote()"><i class="fas fa-save"></i> Salva</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let sb, currentUser, collab, allNotes = [], currentColor = 'all', selectedNoteColor = 'yellow';
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        sb = supabase.createClient(CDM86_CONFIG.supabase.url, CDM86_CONFIG.supabase.anonKey);
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        currentUser = session.user;
+
+        const { data: user } = await sb.from('collaborators').select('*').eq('auth_user_id', currentUser.id).single();
+        if (!user || user.status !== 'active') { window.location.href = '../login.html'; return; }
+
+        collab = user;
+        document.getElementById('sidebarName').textContent  = `${user.first_name} ${user.last_name}`;
+        document.getElementById('sidebarEmail').textContent = user.email;
+
+        await loadNotes();
+    });
+
+    async function loadNotes() {
+        const { data } = await sb
+            .from('collaborator_notes')
+            .select('*')
+            .eq('collaborator_id', collab.id)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        allNotes = data || [];
+        renderNotes();
+    }
+
+    function setColorFilter(color, el) {
+        currentColor = color;
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        renderNotes();
+    }
+
+    function renderNotes() {
+        const search = document.getElementById('searchBox').value.toLowerCase();
+        const sort   = document.getElementById('sortSelect').value;
+
+        let notes = allNotes;
+
+        if (currentColor !== 'all') notes = notes.filter(n => n.color === currentColor);
+        if (search) notes = notes.filter(n =>
+            (n.title||'').toLowerCase().includes(search) ||
+            (n.content||'').toLowerCase().includes(search)
+        );
+
+        if (sort === 'oldest') notes = [...notes].sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+        else if (sort === 'alpha') notes = [...notes].sort((a,b) => (a.title||'').localeCompare(b.title||''));
+        else notes = [...notes].sort((a,b) => {
+            if (a.is_pinned && !b.is_pinned) return -1;
+            if (!a.is_pinned && b.is_pinned) return 1;
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        const container = document.getElementById('notesContainer');
+
+        if (notes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-sticky-note"></i>
+                    <h3>Nessuna nota trovata</h3>
+                    <p>Crea la tua prima nota cliccando "Nuova nota"</p>
+                </div>`;
+            return;
+        }
+
+        const pinned   = notes.filter(n => n.is_pinned);
+        const unpinned = notes.filter(n => !n.is_pinned);
+
+        let html = '';
+
+        if (pinned.length > 0) {
+            html += `<div class="pin-banner"><i class="fas fa-thumbtack"></i> Note in evidenza (${pinned.length})</div>`;
+            html += `<div class="notes-grid" style="margin-bottom:20px;">${pinned.map(n => renderCard(n)).join('')}</div>`;
+        }
+
+        if (unpinned.length > 0) {
+            if (pinned.length > 0) html += `<div style="font-size:0.8rem;color:#94a3b8;font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;">Altre note</div>`;
+            html += `<div class="notes-grid">${unpinned.map(n => renderCard(n)).join('')}</div>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function renderCard(n) {
+        const dateStr = new Date(n.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'short' });
+        const content = n.content ? escHtml(n.content).substring(0, 200) + (n.content.length > 200 ? '…' : '') : '';
+        const pinIcon = n.is_pinned ? 'fas fa-thumbtack' : 'far fa-thumbtack';
+        const pinClass = n.is_pinned ? 'pinned' : '';
+
+        return `
+        <div class="note-card note-${n.color || 'yellow'}" id="nc-${n.id}">
+            <div class="note-header">
+                <div class="note-title">${escHtml(n.title || 'Senza titolo')}</div>
+                <button class="note-pin ${pinClass}" onclick="togglePin('${n.id}', ${n.is_pinned}, event)" title="${n.is_pinned ? 'Rimuovi da evidenza' : 'Metti in evidenza'}">
+                    <i class="${pinIcon}"></i>
+                </button>
+            </div>
+            ${content ? `<div class="note-body">${content}</div>` : ''}
+            <div class="note-footer">
+                <span class="note-date"><i class="fas fa-clock"></i> ${dateStr}</span>
+                <div class="note-actions">
+                    <button class="icon-btn" onclick="editNote('${n.id}', event)" title="Modifica"><i class="fas fa-pen"></i></button>
+                    <button class="icon-btn delete" onclick="deleteNote('${n.id}', event)" title="Elimina"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    async function togglePin(id, isPinned, e) {
+        e.stopPropagation();
+        await sb.from('collaborator_notes').update({ is_pinned: !isPinned }).eq('id', id);
+        const note = allNotes.find(n => n.id == id);
+        if (note) note.is_pinned = !isPinned;
+        renderNotes();
+    }
+
+    function selectColor(color, el) {
+        selectedNoteColor = color;
+        document.querySelectorAll('.cp-dot').forEach(d => d.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function openModal(note = null) {
+        document.getElementById('noteModal').classList.add('open');
+        document.getElementById('editNoteId').value     = note ? note.id : '';
+        document.getElementById('modalTitle').textContent = note ? 'Modifica Nota' : 'Nuova Nota';
+        document.getElementById('noteTitle').value       = note ? (note.title || '') : '';
+        document.getElementById('noteContent').value     = note ? (note.content || '') : '';
+
+        const color = note ? (note.color || 'yellow') : 'yellow';
+        selectedNoteColor = color;
+        document.querySelectorAll('.cp-dot').forEach(d => {
+            d.classList.toggle('selected', d.dataset.color === color);
+        });
+    }
+
+    function closeModal() {
+        document.getElementById('noteModal').classList.remove('open');
+    }
+
+    function editNote(id, e) {
+        if (e) e.stopPropagation();
+        const note = allNotes.find(n => n.id == id);
+        if (note) openModal(note);
+    }
+
+    async function saveNote() {
+        const id    = document.getElementById('editNoteId').value;
+        const title = document.getElementById('noteTitle').value.trim();
+        if (!title) { alert('Il titolo è obbligatorio'); return; }
+
+        const payload = {
+            title,
+            content: document.getElementById('noteContent').value.trim() || null,
+            color:   selectedNoteColor,
+        };
+
+        if (id) {
+            const { error } = await sb.from('collaborator_notes').update(payload).eq('id', id);
+            if (error) { alert('Errore: ' + error.message); return; }
+        } else {
+            payload.collaborator_id = collab.id;
+            payload.is_pinned = false;
+            const { error } = await sb.from('collaborator_notes').insert(payload);
+            if (error) { alert('Errore: ' + error.message); return; }
+        }
+
+        closeModal();
+        await loadNotes();
+    }
+
+    async function deleteNote(id, e) {
+        if (e) e.stopPropagation();
+        if (!confirm('Eliminare questa nota?')) return;
+        await sb.from('collaborator_notes').delete().eq('id', id);
+        allNotes = allNotes.filter(n => n.id != id);
+        renderNotes();
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function logout() {
+        await sb.auth.signOut();
+        window.location.href = '../login.html';
+    }
+
+    document.getElementById('noteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+        /* ── Menu tab: toggle + drag verticale ── */
+        (function() {
+            const STORAGE_KEY = 'cdm86_tab_top';
+            let isDragging = false;
+            let dragStartY = 0;
+            let tabStartTop = 0;
+            let movedEnough = false;
+
+            function getTab() { return document.getElementById('menuTab'); }
+
+            function applyStoredPosition() {
+                const tab = getTab();
+                if (!tab) return;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                // Su mobile usa sempre posizione centrale (il drag funziona per dispositivo)
+                if (saved && window.innerWidth > 768) {
+                    tab.style.top = saved;
+                    tab.style.transform = 'none';
+                } else {
+                    tab.style.top = '50%';
+                    tab.style.transform = 'translateY(-50%)';
+                }
+            }
+
+            function onDragStart(e) {
+                const tab = getTab();
+                isDragging = false;
+                movedEnough = false;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                dragStartY = clientY;
+                // Converti top% in px se necessario
+                const rect = tab.getBoundingClientRect();
+                tabStartTop = rect.top + rect.height / 2;
+                tab.style.transition = 'padding 0.2s, background 0.2s';
+                tab.style.cursor = 'grabbing';
+
+                document.addEventListener('mousemove', onDragMove, {passive:false});
+                document.addEventListener('touchmove', onDragMove, {passive:false});
+                document.addEventListener('mouseup', onDragEnd);
+                document.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dy = clientY - dragStartY;
+                if (Math.abs(dy) > 6) {
+                    isDragging = true;
+                    movedEnough = true;
+                    if (e.cancelable) e.preventDefault();
+                }
+                if (!isDragging) return;
+                const tab = getTab();
+                let newTop = tabStartTop + dy;
+                // Clamp tra 40px e altezza schermo - 40px
+                const minTop = 40;
+                const maxTop = window.innerHeight - 40;
+                newTop = Math.max(minTop, Math.min(maxTop, newTop));
+                tab.style.top = newTop + 'px';
+                tab.style.transform = 'none';
+            }
+
+            function onDragEnd(e) {
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('touchmove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                document.removeEventListener('touchend', onDragEnd);
+                const tab = getTab();
+                tab.style.cursor = 'grab';
+                tab.style.transition = 'padding 0.2s, background 0.2s, top 0.15s ease';
+                if (movedEnough) {
+                    localStorage.setItem(STORAGE_KEY, tab.style.top);
+                }
+            }
+
+            window.toggleMenu = function() {
+                if (movedEnough) { movedEnough = false; return; }
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const tab     = getTab();
+                const isOpen  = sidebar.classList.toggle('open');
+                tab.classList.toggle('open', isOpen);
+                document.body.classList.toggle('sidebar-open', isOpen);
+                // Salva stato in localStorage
+                localStorage.setItem('cdm86_sidebar_open', isOpen ? '1' : '0');
+            };
+
+            window.addEventListener('DOMContentLoaded', function() {
+                applyStoredPosition();
+                // Ripristina stato sidebar su tutti i device
+                const sidebarWasOpen = localStorage.getItem('cdm86_sidebar_open') === '1';
+                if (sidebarWasOpen) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const tab     = getTab();
+                    sidebar.classList.add('open');
+                    if (tab) tab.classList.add('open');
+                    document.body.classList.add('sidebar-open');
+                }
+                const tab = getTab();
+                if (!tab) return;
+                tab.addEventListener('mousedown', onDragStart);
+                tab.addEventListener('touchstart', onDragStart, {passive:true});
+            });
+        })();
+    </script>
+</body>
+</html>
