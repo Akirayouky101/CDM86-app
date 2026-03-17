@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Abbonamento CDM86</title>
+
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f172a;
+            --surface:   #1e293b;
+            --surface2:  #263347;
+            --border:    rgba(255,255,255,0.08);
+            --purple:    #a78bfa;
+            --purple2:   #7c3aed;
+            --gold:      #fbbf24;
+            --green:     #34d399;
+            --red:       #f87171;
+            --blue:      #60a5fa;
+            --text:      #f1f5f9;
+            --muted:     #94a3b8;
+            --radius:    18px;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 100dvh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Layout ─────────────────────────────────── */
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+            padding-top: max(env(safe-area-inset-top), 20px);
+            padding-bottom: max(env(safe-area-inset-bottom), 32px);
+        }
+
+        /* ── Header ─────────────────────────────────── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--purple), var(--purple2));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .logo-text {
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .secure-badge {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; color: var(--green); font-weight: 600;
+        }
+        .secure-badge svg { width: 14px; height: 14px; }
+
+        /* ── Hero ────────────────────────────────────── */
+        .hero {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .crown-wrap {
+            width: 80px; height: 80px;
+            background: rgba(167,139,250,0.12);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 36px;
+        }
+        .hero h1 {
+            font-size: 26px; font-weight: 900;
+            margin-bottom: 8px;
+        }
+        .hero p {
+            font-size: 14px; color: var(--muted); line-height: 1.5;
+            max-width: 320px; margin: 0 auto;
+        }
+
+        /* ── Prezzo ──────────────────────────────────── */
+        .price-card {
+            background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(124,58,237,0.08));
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .price-row {
+            display: flex; align-items: flex-end;
+            justify-content: center; gap: 4px;
+            margin-bottom: 4px;
+        }
+        .price-curr { font-size: 20px; font-weight: 700; color: var(--purple); align-self: flex-start; padding-top: 8px; }
+        .price-num  { font-size: 56px; font-weight: 900; color: var(--purple); line-height: 1; }
+        .price-per  { font-size: 14px; color: var(--muted); padding-bottom: 8px; }
+        .price-sub  { font-size: 12px; color: var(--muted); }
+        .price-sub strong { color: var(--green); }
+
+        /* ── Benefici ────────────────────────────────── */
+        .benefits {
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .benefit-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .benefit-item:last-child { border-bottom: none; }
+        .benefit-icon {
+            width: 34px; height: 34px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .benefit-text { font-size: 14px; font-weight: 500; }
+
+        /* ── Form card ───────────────────────────────── */
+        .form-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+        .form-card h3 {
+            font-size: 15px; font-weight: 700;
+            margin-bottom: 18px; color: var(--text);
+        }
+        .field {
+            margin-bottom: 14px;
+        }
+        .field label {
+            display: block;
+            font-size: 12px; font-weight: 600;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 0.06em; margin-bottom: 7px;
+        }
+        .field input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 15px;
+            font-size: 15px; color: var(--text);
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .field input:focus { border-color: var(--purple); }
+        .field input::placeholder { color: var(--muted); }
+
+        /* Stripe Elements container */
+        #stripe-card-element {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 15px;
+            transition: border-color 0.2s;
+        }
+        #stripe-card-element.StripeElement--focus { border-color: var(--purple); }
+        #stripe-card-element.StripeElement--invalid { border-color: var(--red); }
+
+        /* Card error */
+        #card-errors {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        /* ── CTA Button ──────────────────────────────── */
+        #pay-btn {
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(135deg, var(--purple), var(--purple2));
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px; font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+            transition: opacity 0.2s, transform 0.1s;
+            margin-bottom: 12px;
+        }
+        #pay-btn:active { transform: scale(0.98); }
+        #pay-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── Footer note ────────────────────────────── */
+        .footer-note {
+            text-align: center;
+            font-size: 11px; color: var(--muted); line-height: 1.6;
+        }
+        .footer-note a { color: var(--purple); text-decoration: none; }
+
+        /* ── Spinner ─────────────────────────────────── */
+        .spinner {
+            width: 22px; height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Success ─────────────────────────────────── */
+        #success-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-icon {
+            width: 90px; height: 90px;
+            background: rgba(52,211,153,0.15);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 44px;
+        }
+        #success-screen h2 {
+            font-size: 26px; font-weight: 900; margin-bottom: 10px;
+        }
+        #success-screen p {
+            font-size: 15px; color: var(--muted); line-height: 1.5; margin-bottom: 32px;
+        }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 13px 28px;
+            border-radius: 14px;
+            font-size: 15px; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* ── Error banner ────────────────────────────── */
+        #global-error {
+            display: none;
+            background: rgba(248,113,113,0.1);
+            border: 1px solid rgba(248,113,113,0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 13px; color: var(--red);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- ── Schermata pagamento ───────────────────────── -->
+    <div id="checkout-screen">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">👑</div>
+                <span class="logo-text">CDM86</span>
+            </div>
+            <div class="secure-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Pagamento sicuro
+            </div>
+        </div>
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="crown-wrap">👑</div>
+            <h1>Abbonamento CDM86</h1>
+            <p>Accedi a tutte le promozioni esclusive, genera QR code e risparmia ogni giorno</p>
+        </div>
+
+        <!-- Prezzo -->
+        <div class="price-card">
+            <div class="price-row">
+                <span class="price-curr">€</span>
+                <span class="price-num">10</span>
+                <span class="price-per">/anno</span>
+            </div>
+            <div class="price-sub">Solo <strong>0,83€ al mese</strong> — meno di un caffè</div>
+        </div>
+
+        <!-- Benefici -->
+        <div class="benefits">
+            <div class="benefit-item">
+                <div class="benefit-icon" style="background:rgba(52,211,153,0.15);">✅</div>
+                <span class="benefit-text">Accesso illimitato alle promozioni</span>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon" style="background:rgba(251,191,36,0.15);">🔲</div>
+                <span class="benefit-text">Genera QR code per ogni promo</span>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon" style="background:rgba(248,113,113,0.15);">❤️</div>
+                <span class="benefit-text">Salva i preferiti</span>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon" style="background:rgba(96,165,250,0.15);">👥</div>
+                <span class="benefit-text">Invita amici e guadagna punti</span>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon" style="background:rgba(251,191,36,0.15);">⭐</div>
+                <span class="benefit-text">Accumula punti CDM86</span>
+            </div>
+        </div>
+
+        <!-- Errore globale -->
+        <div id="global-error"></div>
+
+        <!-- Form pagamento -->
+        <div class="form-card">
+            <h3>💳 Dati di pagamento</h3>
+
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="email-input" placeholder="nome@esempio.it" autocomplete="email">
+            </div>
+
+            <div class="field">
+                <label>Numero carta</label>
+                <div id="stripe-card-element"></div>
+                <div id="card-errors"></div>
+            </div>
+        </div>
+
+        <button id="pay-btn">
+            <span id="pay-btn-text">🔒 Attiva Abbonamento — €10/anno</span>
+        </button>
+
+        <div class="footer-note">
+            Pagamento sicuro crittografato tramite <strong>Stripe</strong><br>
+            Rinnovo automatico annuale • Cancella quando vuoi<br>
+            <a href="mailto:info@cdm86.com">Supporto: info@cdm86.com</a>
+        </div>
+
+    </div><!-- /checkout-screen -->
+
+    <!-- ── Schermata successo ────────────────────────── -->
+    <div id="success-screen">
+        <div class="success-icon">🎉</div>
+        <h2>Abbonamento Attivato!</h2>
+        <p>Benvenuto in CDM86 Premium.<br>Ora puoi accedere a tutte le promozioni esclusive.</p>
+        <button class="back-btn" onclick="handleSuccess()">
+            ✨ Inizia a esplorare
+        </button>
+    </div>
+
+</div><!-- /page -->
+
+<script>
+// ── Configurazione ──────────────────────────────────────────────────────────
+const SUPABASE_URL     = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+const SUPABASE_ANON    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4NjcyMzAsImV4cCI6MjA1MjQ0MzIzMH0.p_PfkubdcOtlJbkMTCJzSgMRNHERjHB_Jn3v1vkmOhw';
+// STRIPE_PUBLISHABLE_KEY — usa la chiave pubblica TEST o LIVE di Stripe
+// TEST:  pk_test_...
+// LIVE:  pk_live_...
+const STRIPE_PUB_KEY   = 'pk_test_SOSTITUISCI_CON_LA_TUA_CHIAVE_PUBBLICA_STRIPE';
+
+// ── Leggi parametri URL ─────────────────────────────────────────────────────
+const params   = new URLSearchParams(window.location.search);
+const urlEmail = params.get('email') || '';
+const urlToken = params.get('token') || '';   // access token passato dall'app Swift
+
+// ── Precompila email se passata dall'app ────────────────────────────────────
+const emailInput = document.getElementById('email-input');
+if (urlEmail) emailInput.value = decodeURIComponent(urlEmail);
+
+// ── Inizializza Stripe ──────────────────────────────────────────────────────
+const stripe   = Stripe(STRIPE_PUB_KEY);
+const elements = stripe.elements({
+    appearance: {
+        theme: 'night',
+        variables: {
+            colorPrimary:        '#a78bfa',
+            colorBackground:     '#263347',
+            colorText:           '#f1f5f9',
+            colorDanger:         '#f87171',
+            fontFamily:          'Inter, -apple-system, sans-serif',
+            borderRadius:        '8px',
+            spacingUnit:         '4px',
+        }
+    }
+});
+
+const cardElement = elements.create('card', {
+    hidePostalCode: true,
+    style: {
+        base: {
+            fontSize: '15px',
+            fontFamily: 'Inter, -apple-system, sans-serif',
+            color: '#f1f5f9',
+            '::placeholder': { color: '#94a3b8' },
+        },
+        invalid: { color: '#f87171' },
+    }
+});
+cardElement.mount('#stripe-card-element');
+
+cardElement.on('change', (e) => {
+    document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+});
+
+// ── Helpers UI ──────────────────────────────────────────────────────────────
+function setLoading(on) {
+    const btn  = document.getElementById('pay-btn');
+    const text = document.getElementById('pay-btn-text');
+    btn.disabled = on;
+    if (on) {
+        text.innerHTML = '';
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+        text.appendChild(spinner);
+    } else {
+        text.textContent = '🔒 Attiva Abbonamento — €10/anno';
+    }
+}
+
+function showError(msg) {
+    const el = document.getElementById('global-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideError() {
+    document.getElementById('global-error').style.display = 'none';
+}
+
+// ── Notifica app Swift (via URL scheme / postMessage) ───────────────────────
+function handleSuccess() {
+    // Metodo 1: URL scheme custom (se l'app usa WKWebView con handler)
+    // window.location.href = 'cdm86://payment-success';
+
+    // Metodo 2: postMessage verso WKWebView
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.paymentSuccess) {
+        window.webkit.messageHandlers.paymentSuccess.postMessage({ status: 'success' });
+        return;
+    }
+
+    // Metodo 3: redirect URL classico (fallback per Safari/browser)
+    window.location.href = '/promotions.html?payment=success';
+}
+
+// ── Submit pagamento ────────────────────────────────────────────────────────
+document.getElementById('pay-btn').addEventListener('click', async () => {
+    hideError();
+
+    const email = emailInput.value.trim();
+    if (!email || !email.includes('@')) {
+        showError('Inserisci un indirizzo email valido.');
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        // Step 1 — Crea PaymentMethod con Stripe.js
+        const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: { email },
+        });
+
+        if (pmError) {
+            showError(pmError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Step 2 — Chiama edge function per creare la sessione / subscription
+        const headers = {
+            'Content-Type':  'application/json',
+            'apikey':        SUPABASE_ANON,
+        };
+        // Aggiunge il token se passato dall'app
+        if (urlToken) headers['Authorization'] = `Bearer ${urlToken}`;
+
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                email,
+                planType:         'base',
+                paymentMethodId:  paymentMethod.id,
+                organizationName: '',
+            }),
+        });
+
+        const result = await resp.json();
+
+        if (result.url) {
+            // Redirect a Stripe Checkout hosted (se la edge function restituisce URL)
+            window.location.href = result.url;
+            return;
+        }
+
+        if (result.error) {
+            showError('Errore: ' + result.error);
+            setLoading(false);
+            return;
+        }
+
+        // Se la funzione ha completato il pagamento direttamente
+        showSuccessScreen();
+
+    } catch (err) {
+        showError('Errore di rete: ' + err.message);
+        setLoading(false);
+    }
+});
+
+function showSuccessScreen() {
+    document.getElementById('checkout-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display  = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Controlla se tornato da Stripe con ?payment=success ─────────────────────
+if (params.get('payment') === 'success') {
+    showSuccessScreen();
+}
+</script>
+</body>
+</html>
