@@ -416,8 +416,8 @@ document.getElementById('pay-btn').addEventListener('click', async () => {
     setLoading(true);
 
     // Usa il Payment Link Stripe con email precompilata
-    const successUrl = encodeURIComponent('https://www.cdm86.it/public/checkout.html?payment=success');
-    const payUrl = `${PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}&success_url=${successUrl}`;
+    // success_url va configurato nel Dashboard Stripe → Payment Link
+    const payUrl = `${PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}`;
     window.location.href = payUrl;
 });
 
