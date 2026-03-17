@@ -7,10 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Abbonamento CDM86</title>
 
-    <!-- Stripe.js -->
-    <script src="https://js.stripe.com/v3/"></script>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- nessun SDK esterno necessario (redirect al Payment Link Stripe) -->
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -178,24 +175,9 @@
         .field input:focus { border-color: var(--purple); }
         .field input::placeholder { color: var(--muted); }
 
-        /* Stripe Elements container */
-        #stripe-card-element {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 15px;
-            transition: border-color 0.2s;
-        }
-        #stripe-card-element.StripeElement--focus { border-color: var(--purple); }
-        #stripe-card-element.StripeElement--invalid { border-color: var(--red); }
-
-        /* Card error */
-        #card-errors {
-            color: var(--red);
-            font-size: 13px;
-            margin-top: 8px;
-            min-height: 18px;
-        }
+        /* Stripe Elements container — non usato con Payment Link */
+        #stripe-card-element { display: none; }
+        #card-errors { display: none; }
 
         /* ── CTA Button ──────────────────────────────── */
         #pay-btn {
@@ -344,18 +326,16 @@
 
         <!-- Form pagamento -->
         <div class="form-card">
-            <h3>💳 Dati di pagamento</h3>
+            <h3>📧 Inserisci la tua email</h3>
 
             <div class="field">
                 <label>Email</label>
                 <input type="email" id="email-input" placeholder="nome@esempio.it" autocomplete="email">
             </div>
 
-            <div class="field">
-                <label>Numero carta</label>
-                <div id="stripe-card-element"></div>
-                <div id="card-errors"></div>
-            </div>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:4px;">
+                Verrai reindirizzato a Stripe per completare il pagamento in sicurezza.
+            </p>
         </div>
 
         <button id="pay-btn">
@@ -384,12 +364,7 @@
 
 <script>
 // ── Configurazione ──────────────────────────────────────────────────────────
-const SUPABASE_URL     = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-const SUPABASE_ANON    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4NjcyMzAsImV4cCI6MjA1MjQ0MzIzMH0.p_PfkubdcOtlJbkMTCJzSgMRNHERjHB_Jn3v1vkmOhw';
-// STRIPE_PUBLISHABLE_KEY — usa la chiave pubblica TEST o LIVE di Stripe
-// TEST:  pk_test_...
-// LIVE:  pk_live_...
-const STRIPE_PUB_KEY   = 'pk_test_51TAZGbDnoTkW1sMkoVVcmpxLJKKx9YVgqHF3CSMj1pVdsdUGXqvtfaiLD2nfvZQvFZBnqqP2wyACVeRY5ixE9pX700PRr4PoUW';
+const PAYMENT_LINK = 'https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00';
 
 // ── Leggi parametri URL ─────────────────────────────────────────────────────
 const params   = new URLSearchParams(window.location.search);
@@ -400,83 +375,35 @@ const urlToken = params.get('token') || '';   // access token passato dall'app S
 const emailInput = document.getElementById('email-input');
 if (urlEmail) emailInput.value = decodeURIComponent(urlEmail);
 
-// ── Inizializza Stripe ──────────────────────────────────────────────────────
-const stripe   = Stripe(STRIPE_PUB_KEY);
-const elements = stripe.elements({
-    appearance: {
-        theme: 'night',
-        variables: {
-            colorPrimary:        '#a78bfa',
-            colorBackground:     '#263347',
-            colorText:           '#f1f5f9',
-            colorDanger:         '#f87171',
-            fontFamily:          'Inter, -apple-system, sans-serif',
-            borderRadius:        '8px',
-            spacingUnit:         '4px',
-        }
-    }
-});
-
-const cardElement = elements.create('card', {
-    hidePostalCode: true,
-    style: {
-        base: {
-            fontSize: '15px',
-            fontFamily: 'Inter, -apple-system, sans-serif',
-            color: '#f1f5f9',
-            '::placeholder': { color: '#94a3b8' },
-        },
-        invalid: { color: '#f87171' },
-    }
-});
-cardElement.mount('#stripe-card-element');
-
-cardElement.on('change', (e) => {
-    document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
-});
-
 // ── Helpers UI ──────────────────────────────────────────────────────────────
 function setLoading(on) {
     const btn  = document.getElementById('pay-btn');
     const text = document.getElementById('pay-btn-text');
     btn.disabled = on;
-    if (on) {
-        text.innerHTML = '';
-        const spinner = document.createElement('div');
-        spinner.className = 'spinner';
-        text.appendChild(spinner);
-    } else {
-        text.textContent = '🔒 Attiva Abbonamento — €10/anno';
-    }
+    text.innerHTML = on
+        ? '<div class="spinner"></div>'
+        : '🔒 Attiva Abbonamento — €10/anno';
 }
-
 function showError(msg) {
     const el = document.getElementById('global-error');
     el.textContent = msg;
     el.style.display = 'block';
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
 function hideError() {
     document.getElementById('global-error').style.display = 'none';
 }
 
-// ── Notifica app Swift (via URL scheme / postMessage) ───────────────────────
+// ── handleSuccess — chiamato dopo pagamento completato ──────────────────────
 function handleSuccess() {
-    // Metodo 1: URL scheme custom (se l'app usa WKWebView con handler)
-    // window.location.href = 'cdm86://payment-success';
-
-    // Metodo 2: postMessage verso WKWebView
-    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.paymentSuccess) {
+    // Notifica l'app Swift tramite WKWebView message handler
+    if (window.webkit?.messageHandlers?.paymentSuccess) {
         window.webkit.messageHandlers.paymentSuccess.postMessage({ status: 'success' });
         return;
     }
-
-    // Metodo 3: redirect URL classico (fallback per Safari/browser)
     window.location.href = '/promotions.html?payment=success';
 }
 
-// ── Submit pagamento ────────────────────────────────────────────────────────
+// ── Bottone pagamento ───────────────────────────────────────────────────────
 document.getElementById('pay-btn').addEventListener('click', async () => {
     hideError();
 
@@ -488,71 +415,17 @@ document.getElementById('pay-btn').addEventListener('click', async () => {
 
     setLoading(true);
 
-    try {
-        // Step 1 — Crea PaymentMethod con Stripe.js
-        const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: cardElement,
-            billing_details: { email },
-        });
-
-        if (pmError) {
-            showError(pmError.message);
-            setLoading(false);
-            return;
-        }
-
-        // Step 2 — Chiama edge function per creare la sessione / subscription
-        const headers = {
-            'Content-Type':  'application/json',
-            'apikey':        SUPABASE_ANON,
-        };
-        // Aggiunge il token se passato dall'app
-        if (urlToken) headers['Authorization'] = `Bearer ${urlToken}`;
-
-        const resp = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-                email,
-                planType:         'base',
-                paymentMethodId:  paymentMethod.id,
-                organizationName: '',
-            }),
-        });
-
-        const result = await resp.json();
-
-        if (result.url) {
-            // Redirect a Stripe Checkout hosted (se la edge function restituisce URL)
-            window.location.href = result.url;
-            return;
-        }
-
-        if (result.error) {
-            showError('Errore: ' + result.error);
-            setLoading(false);
-            return;
-        }
-
-        // Se la funzione ha completato il pagamento direttamente
-        showSuccessScreen();
-
-    } catch (err) {
-        showError('Errore di rete: ' + err.message);
-        setLoading(false);
-    }
+    // Usa il Payment Link Stripe con email precompilata
+    const successUrl = encodeURIComponent('https://www.cdm86.it/public/checkout.html?payment=success');
+    const payUrl = `${PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}&success_url=${successUrl}`;
+    window.location.href = payUrl;
 });
-
-function showSuccessScreen() {
-    document.getElementById('checkout-screen').style.display = 'none';
-    document.getElementById('success-screen').style.display  = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 // ── Controlla se tornato da Stripe con ?payment=success ─────────────────────
 if (params.get('payment') === 'success') {
-    showSuccessScreen();
+    document.getElementById('checkout-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display  = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 </body>
