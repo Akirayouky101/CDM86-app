@@ -387,6 +387,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const params   = new URLSearchParams(window.location.search);
 const urlEmail = params.get('email') || '';
 const urlToken = params.get('token') || '';
+const urlUid   = params.get('uid')   || '';
 
 // ── Precompila email se passata dall'app ────────────────────────────────────
 const emailInput = document.getElementById('email-input');
@@ -470,8 +471,35 @@ if (params.get('payment') === 'success') {
     document.getElementById('checkout-screen').style.display = 'none';
     document.getElementById('success-screen').style.display  = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Notifica subito l'app Swift se siamo in WKWebView
-    setTimeout(handleSuccess, 500);
+
+    // Aggiorna subito il DB se abbiamo il token dell'utente
+    (async () => {
+        if (urlToken && urlUid) {
+            try {
+                const expiresAt = new Date();
+                expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+                await fetch(`${SUPABASE_URL}/rest/v1/users?auth_user_id=eq.${urlUid}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type':  'application/json',
+                        'apikey':        SUPABASE_ANON,
+                        'Authorization': `Bearer ${urlToken}`,
+                        'Prefer':        'return=minimal',
+                    },
+                    body: JSON.stringify({
+                        subscription_status:     'active',
+                        subscription_started_at: new Date().toISOString(),
+                        subscription_expires_at: expiresAt.toISOString(),
+                    }),
+                });
+                console.log('✅ subscription_status aggiornato via REST');
+            } catch (e) {
+                console.warn('REST update fallita, il webhook aggiornerà il DB', e);
+            }
+        }
+        // Notifica Swift dopo aggiornamento DB
+        setTimeout(handleSuccess, 800);
+    })();
 }
 </script>
 </body>
