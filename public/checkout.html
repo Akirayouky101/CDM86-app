@@ -381,7 +381,7 @@
 <script>
 // ── Configurazione ──────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://uchrjlngfzfibcpdxtky.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4NjcyMzAsImV4cCI6MjA1MjQ0MzIzMH0.p_PfkubdcOtlJbkMTCJzSgMRNHERjHB_Jn3v1vkmOhw';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
 
 // ── Leggi parametri URL ─────────────────────────────────────────────────────
 const params   = new URLSearchParams(window.location.search);
@@ -472,33 +472,25 @@ if (params.get('payment') === 'success') {
     document.getElementById('success-screen').style.display  = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Aggiorna subito il DB se abbiamo il token dell'utente
+    // Aggiorna abbonamento nel DB via edge function (usa service role, bypassa RLS)
     (async () => {
         if (urlToken && urlUid) {
             try {
-                const expiresAt = new Date();
-                expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-                await fetch(`${SUPABASE_URL}/rest/v1/users?auth_user_id=eq.${urlUid}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type':  'application/json',
-                        'apikey':        SUPABASE_ANON,
-                        'Authorization': `Bearer ${urlToken}`,
-                        'Prefer':        'return=minimal',
-                    },
-                    body: JSON.stringify({
-                        subscription_status:     'active',
-                        subscription_started_at: new Date().toISOString(),
-                        subscription_expires_at: expiresAt.toISOString(),
-                    }),
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/activate-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+                    body: JSON.stringify({ uid: urlUid, token: urlToken }),
                 });
-                console.log('✅ subscription_status aggiornato via REST');
+                const data = await res.json();
+                console.log('✅ activate-subscription:', JSON.stringify(data));
             } catch (e) {
-                console.warn('REST update fallita, il webhook aggiornerà il DB', e);
+                console.warn('⚠️ activate-subscription fallita:', e);
             }
+        } else {
+            console.warn('⚠️ uid o token mancante — uid:', urlUid, 'token:', !!urlToken);
         }
         // Notifica Swift dopo aggiornamento DB
-        setTimeout(handleSuccess, 800);
+        setTimeout(handleSuccess, 1000);
     })();
 }
 </script>
