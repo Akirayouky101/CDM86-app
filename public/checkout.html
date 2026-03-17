@@ -350,6 +350,22 @@
 
     </div><!-- /checkout-screen -->
 
+    <!-- ── Schermata attesa ritorno da Stripe ───────── -->
+    <div id="pending-screen" style="display:none;text-align:center;padding:40px 20px;">
+        <div style="width:80px;height:80px;background:rgba(167,139,250,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:40px;">⏳</div>
+        <h2 style="font-size:22px;font-weight:900;margin-bottom:10px;">Completando il pagamento…</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:32px;">
+            Hai completato il pagamento su Stripe?<br>Tocca il pulsante per tornare all'app.
+        </p>
+        <button class="back-btn" onclick="handleSuccess()" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;border:none;padding:14px 32px;border-radius:16px;font-size:16px;font-weight:700;cursor:pointer;">
+            ✅ Ho completato il pagamento
+        </button>
+        <br><br>
+        <button onclick="showCheckoutScreen()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;">
+            ← Torna indietro
+        </button>
+    </div>
+
     <!-- ── Schermata successo ────────────────────────── -->
     <div id="success-screen">
         <div class="success-icon">🎉</div>
@@ -415,11 +431,25 @@ document.getElementById('pay-btn').addEventListener('click', async () => {
 
     setLoading(true);
 
-    // Usa il Payment Link Stripe con email precompilata
-    // success_url va configurato nel Dashboard Stripe → Payment Link
+    // Mostra schermata di attesa PRIMA di aprire Stripe
+    // (dopo il redirect di ritorno il WebView intercetta ?payment=success)
+    setTimeout(() => {
+        document.getElementById('checkout-screen').style.display = 'none';
+        document.getElementById('pending-screen').style.display  = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 300);
+
+    // Naviga verso il Payment Link Stripe con email precompilata
     const payUrl = `${PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}`;
     window.location.href = payUrl;
 });
+
+function showCheckoutScreen() {
+    document.getElementById('pending-screen').style.display  = 'none';
+    document.getElementById('checkout-screen').style.display = 'block';
+    document.getElementById('pay-btn').disabled = false;
+    document.getElementById('pay-btn-text').textContent = '🔒 Attiva Abbonamento — €10/anno';
+}
 
 // ── Controlla se tornato da Stripe con ?payment=success ─────────────────────
 if (params.get('payment') === 'success') {
