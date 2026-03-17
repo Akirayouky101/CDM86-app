@@ -380,12 +380,13 @@
 
 <script>
 // ── Configurazione ──────────────────────────────────────────────────────────
-const PAYMENT_LINK = 'https://buy.stripe.com/test_00w9AM36m8gcgZIdzf0Ny00';
+const SUPABASE_URL  = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4NjcyMzAsImV4cCI6MjA1MjQ0MzIzMH0.p_PfkubdcOtlJbkMTCJzSgMRNHERjHB_Jn3v1vkmOhw';
 
 // ── Leggi parametri URL ─────────────────────────────────────────────────────
 const params   = new URLSearchParams(window.location.search);
 const urlEmail = params.get('email') || '';
-const urlToken = params.get('token') || '';   // access token passato dall'app Swift
+const urlToken = params.get('token') || '';
 
 // ── Precompila email se passata dall'app ────────────────────────────────────
 const emailInput = document.getElementById('email-input');
@@ -411,7 +412,6 @@ function hideError() {
 
 // ── handleSuccess — chiamato dopo pagamento completato ──────────────────────
 function handleSuccess() {
-    // Notifica l'app Swift tramite WKWebView message handler
     if (window.webkit?.messageHandlers?.paymentSuccess) {
         window.webkit.messageHandlers.paymentSuccess.postMessage({ status: 'success' });
         return;
@@ -419,7 +419,7 @@ function handleSuccess() {
     window.location.href = '/promotions.html?payment=success';
 }
 
-// ── Bottone pagamento ───────────────────────────────────────────────────────
+// ── Bottone pagamento → chiama edge function → redirect Stripe Checkout ─────
 document.getElementById('pay-btn').addEventListener('click', async () => {
     hideError();
 
@@ -431,17 +431,31 @@ document.getElementById('pay-btn').addEventListener('click', async () => {
 
     setLoading(true);
 
-    // Mostra schermata di attesa PRIMA di aprire Stripe
-    // (dopo il redirect di ritorno il WebView intercetta ?payment=success)
-    setTimeout(() => {
-        document.getElementById('checkout-screen').style.display = 'none';
-        document.getElementById('pending-screen').style.display  = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 300);
+    try {
+        const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON };
+        if (urlToken) headers['Authorization'] = `Bearer ${urlToken}`;
 
-    // Naviga verso il Payment Link Stripe con email precompilata
-    const payUrl = `${PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}`;
-    window.location.href = payUrl;
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ email, planType: 'base', organizationName: '' }),
+        });
+
+        const result = await resp.json();
+
+        if (result.url) {
+            // Redirect a Stripe Checkout hosted — il success_url è cdm86.it?payment=success
+            window.location.href = result.url;
+            return;
+        }
+
+        showError(result.error || 'Errore sconosciuto. Riprova.');
+        setLoading(false);
+
+    } catch (err) {
+        showError('Errore di rete: ' + err.message);
+        setLoading(false);
+    }
 });
 
 function showCheckoutScreen() {
@@ -456,6 +470,8 @@ if (params.get('payment') === 'success') {
     document.getElementById('checkout-screen').style.display = 'none';
     document.getElementById('success-screen').style.display  = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Notifica subito l'app Swift se siamo in WKWebView
+    setTimeout(handleSuccess, 500);
 }
 </script>
 </body>
