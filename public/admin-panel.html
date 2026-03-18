@@ -6975,23 +6975,12 @@
 
                 if (pErr) throw pErr;
 
-                // 2. Conteggio redemptions valide per promo_id
-                const { data: redemptions, error: rErr } = await client
-                    .from('redemption_tokens')
-                    .select('promo_id')
-                    .eq('status', 'used');
-
-                if (rErr) throw rErr;
-
-                // 3. Aggrega
-                const countMap = {};
-                for (const r of (redemptions || [])) {
-                    countMap[r.promo_id] = (countMap[r.promo_id] || 0) + 1;
-                }
-
+                // Usiamo current_redemptions dalla tabella promotions
+                // (aggiornato da validate-promo.js ad ogni scan riuscito)
+                // Nessun bisogno di leggere redemption_tokens (RLS bloccherebbe)
                 const partners = (promos || []).map(p => ({
                     ...p,
-                    scans_valid: countMap[p.id] || 0,
+                    scans_valid: p.current_redemptions || 0,
                 }));
 
                 const totalValid = partners.reduce((s, p) => s + p.scans_valid, 0);
