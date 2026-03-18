@@ -7156,18 +7156,15 @@
             document.body.style.overflow = 'hidden';
 
             try {
-                const client = window.supabaseClient;
-
-                const { data: rows, error: rErr } = await client
-                    .from('redemption_tokens')
-                    .select('id, token, used_at, validated_by, user_id, status, created_at')
-                    .eq('promo_id', promoId)
-                    .order('used_at', { ascending: false })
-                    .limit(200);
+                // Usa l'endpoint API (service key lato server, bypass RLS)
+                const resp = await fetch(`/api/scan-log?promo_id=${encodeURIComponent(promoId)}`, {
+                    headers: { 'x-admin-key': 'cdm86-admin-2026' }
+                });
+                const json = await resp.json();
+                if (!resp.ok) throw new Error(json.error || 'Errore server');
+                const rows = json.rows || [];
 
                 sdmLoad.style.display = 'none';
-
-                if (rErr) throw rErr;
 
                 const success = (rows || []).filter(r => r.status === 'used');
                 const other   = (rows || []).filter(r => r.status !== 'used');
