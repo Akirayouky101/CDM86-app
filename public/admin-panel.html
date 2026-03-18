@@ -2081,11 +2081,13 @@
                         <option value="ristoranti">🍕 Ristoranti</option>
                         <option value="shopping">🛍️ Shopping</option>
                         <option value="benessere">💆 Benessere</option>
+                        <option value="bellezza">💅 Bellezza</option>
                         <option value="sport">⚽ Sport</option>
                         <option value="intrattenimento">🎬 Intrattenimento</option>
                         <option value="tecnologia">💻 Tecnologia</option>
                         <option value="viaggi">✈️ Viaggi</option>
                         <option value="servizi">🔧 Servizi</option>
+                        <option value="food">🍔 Food</option>
                     </select>
                     <select id="promoFilterStatus" onchange="applyPromoFilters()">
                         <option value="">Tutti gli stati</option>
@@ -5382,6 +5384,14 @@
                 loading.style.display = 'block';
                 container.innerHTML = '';
 
+                // Reset filtri al caricamento
+                const catFilter = document.getElementById('promoFilterCategory');
+                const statFilter = document.getElementById('promoFilterStatus');
+                const searchFilter = document.getElementById('promoFilterSearch');
+                if (catFilter) catFilter.value = '';
+                if (statFilter) statFilter.value = '';
+                if (searchFilter) searchFilter.value = '';
+
                 const { data, error } = await window.supabaseClient
                     .from('promotions')
                     .select('*')
@@ -5403,9 +5413,9 @@
             const now = new Date();
             const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-            const active = promos.filter(p => p.is_active && new Date(p.end_date) > now).length;
-            const expiring = promos.filter(p => p.is_active && new Date(p.end_date) > now && new Date(p.end_date) <= sevenDaysFromNow).length;
-            const expired = promos.filter(p => new Date(p.end_date) <= now).length;
+            const active   = promos.filter(p => p.is_active && (!p.end_date || new Date(p.end_date) > now)).length;
+            const expiring = promos.filter(p => p.is_active && p.end_date && new Date(p.end_date) > now && new Date(p.end_date) <= sevenDaysFromNow).length;
+            const expired  = promos.filter(p => p.end_date && new Date(p.end_date) <= now).length;
 
             document.getElementById('promoStatTotal').textContent = promos.length;
             document.getElementById('promoStatActive').textContent = active;
@@ -5426,10 +5436,10 @@
             const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
             container.innerHTML = promos.map(promo => {
-                const endDate = new Date(promo.end_date);
-                const isExpired = endDate <= now;
-                const isExpiring = !isExpired && endDate <= sevenDaysFromNow;
-                const isActive = promo.is_active && !isExpired;
+                const endDate  = promo.end_date ? new Date(promo.end_date) : null;
+                const isExpired  = endDate && endDate <= now;
+                const isExpiring = endDate && !isExpired && endDate <= sevenDaysFromNow;
+                const isActive   = promo.is_active && !isExpired;
 
                 let statusBadge = '';
                 if (isExpired) {
@@ -5455,7 +5465,7 @@
 
                 const discount = promo.discount_type === 'percentage' 
                     ? `-${promo.discount_value}%` 
-                    : `-€${promo.discount_value.toFixed(2)}`;
+                    : promo.discount_value != null ? `-€${Number(promo.discount_value).toFixed(2)}` : '';
 
                 return `
                     <div class="card" style="margin-bottom: 1rem;">
@@ -5528,7 +5538,7 @@
             }
 
             if (category) {
-                filtered = filtered.filter(p => p.category === category);
+                filtered = filtered.filter(p => p.category && p.category.toLowerCase() === category.toLowerCase());
             }
 
             if (status) {
@@ -5536,10 +5546,10 @@
                 const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
                 filtered = filtered.filter(p => {
-                    const endDate = new Date(p.end_date);
-                    if (status === 'active') return p.is_active && endDate > now;
-                    if (status === 'expiring') return p.is_active && endDate > now && endDate <= sevenDaysFromNow;
-                    if (status === 'expired') return endDate <= now;
+                    const endDate = p.end_date ? new Date(p.end_date) : null;
+                    if (status === 'active')   return p.is_active && (!endDate || endDate > now);
+                    if (status === 'expiring') return p.is_active && endDate && endDate > now && endDate <= sevenDaysFromNow;
+                    if (status === 'expired')  return endDate && endDate <= now;
                     return true;
                 });
             }
