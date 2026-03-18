@@ -1290,11 +1290,11 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem;">
                     <h1>CDM86</h1>
-                    <div title="Codice referral admin" onclick="navigator.clipboard.writeText('274EB3F4').then(()=>{this.querySelector('span').textContent='Copiato!';setTimeout(()=>{this.querySelector('span').textContent='274EB3F4'},1500)})"
-                         style="display:flex;align-items:center;gap:0.35rem;background:rgba(220,178,0,0.13);border:1px solid rgba(220,178,0,0.35);border-radius:8px;padding:3px 10px;cursor:pointer;transition:background 0.15s;"
-                         onmouseover="this.style.background='rgba(220,178,0,0.22)'" onmouseout="this.style.background='rgba(220,178,0,0.13)'">
+                    <div id="adminReferralBadge" title="Codice referral admin — clicca per copiare"
+                         onclick="copyAdminReferral(this)"
+                         style="display:flex;align-items:center;gap:0.35rem;background:rgba(220,178,0,0.13);border:1px solid rgba(220,178,0,0.35);border-radius:8px;padding:3px 10px;cursor:pointer;transition:background 0.15s;">
                         <i class="fas fa-tag" style="color:#b8860b;font-size:0.7rem;"></i>
-                        <span style="font-size:0.75rem;font-weight:700;color:#92700a;letter-spacing:0.06em;font-family:monospace;">274EB3F4</span>
+                        <span id="adminReferralCode" style="font-size:0.75rem;font-weight:700;color:#92700a;letter-spacing:0.06em;font-family:monospace;">274EB3F4</span>
                     </div>
                 </div>
             </div>
@@ -7266,6 +7266,29 @@
             if (modal) modal.style.display = 'none';
             document.body.style.overflow = '';
         };
+
+        // Badge referral admin — copia negli appunti
+        window.copyAdminReferral = function(el) {
+            const code = '274EB3F4';
+            const span = document.getElementById('adminReferralCode');
+            navigator.clipboard.writeText(code).then(function() {
+                if (span) span.textContent = 'Copiato!';
+                if (el) el.style.background = 'rgba(220,178,0,0.30)';
+                setTimeout(function() {
+                    if (span) span.textContent = code;
+                    if (el) el.style.background = 'rgba(220,178,0,0.13)';
+                }, 1500);
+            });
+        };
+
+        // Hover badge referral
+        (function() {
+            const badge = document.getElementById('adminReferralBadge');
+            if (badge) {
+                badge.addEventListener('mouseover', function() { this.style.background = 'rgba(220,178,0,0.22)'; });
+                badge.addEventListener('mouseout',  function() { this.style.background = 'rgba(220,178,0,0.13)'; });
+            }
+        })();
 
         // ── SCANSIONI TAB ──────────────────────────────────────────────
         window.loadScansioni = async function() {
