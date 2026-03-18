@@ -1335,6 +1335,9 @@
                 <i class="fas fa-handshake"></i> Collaboratori
                 <span id="cfCountPending" style="background:#dc2626;color:white;border-radius:50%;width:18px;height:18px;font-size:0.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span>
             </button>
+            <button class="tab" onclick="switchTab('scansioni')">
+                <i class="fas fa-qrcode"></i> Scansioni
+            </button>
 
         </div>
 
@@ -2296,8 +2299,51 @@
                 <p>Nessun collaboratore trovato</p>
             </div>
         </div>
-    </div>
 
+        <!-- ═══════════════════════════════════════════════════════
+             SCANSIONI TAB — statistiche anonime per attività
+             ═══════════════════════════════════════════════════════ -->
+        <div id="scansioniTab" class="tab-content">
+
+            <!-- Header + refresh -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+                <div>
+                    <h2 style="font-size:1.5rem;font-weight:800;color:#1f2937;margin:0;">
+                        <i class="fas fa-qrcode" style="color:#dc2626;margin-right:0.5rem;"></i>
+                        Statistiche Scansioni QR
+                    </h2>
+                    <p style="color:#6b7280;font-size:0.9rem;margin-top:0.25rem;">Dati anonimi per attività partner — solo validazioni riuscite</p>
+                </div>
+                <button onclick="loadScansioni()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:white;border:none;padding:0.6rem 1.4rem;border-radius:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.5rem;">
+                    <i class="fas fa-sync-alt" id="scanRefreshIcon"></i> Aggiorna
+                </button>
+            </div>
+
+            <!-- Totale globale -->
+            <div id="scanTotaleBox" style="background:linear-gradient(135deg,#1f2937,#374151);color:white;border-radius:16px;padding:1.2rem 1.8rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;">
+                <div style="background:#dc2626;border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div style="font-size:2rem;font-weight:900;" id="scanTotaleNum">—</div>
+                    <div style="font-size:0.85rem;opacity:0.7;">Validazioni riuscite totali su tutte le attività</div>
+                </div>
+            </div>
+
+            <!-- Stato caricamento -->
+            <div id="scanLoadingState" style="text-align:center;padding:3rem;color:#6b7280;display:none;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;margin-bottom:1rem;color:#dc2626;"></i>
+                <p>Caricamento statistiche...</p>
+            </div>
+            <div id="scanEmptyState" style="text-align:center;padding:3rem;color:#6b7280;display:none;">
+                <i class="fas fa-qrcode" style="font-size:3rem;margin-bottom:1rem;opacity:0.3;"></i>
+                <p>Nessuna scansione registrata ancora.</p>
+            </div>
+
+            <!-- Grid card attività -->
+            <div id="scanPartnersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;"></div>
+
+        </div>
     </div><!-- /container -->
 
     <!-- CREATE USER MODAL -->
@@ -3200,6 +3246,8 @@
                 loadZones();
             } else if (tabName === 'collaboratori') {
                 loadCollaboratori();
+            } else if (tabName === 'scansioni') {
+                loadScansioni();
             }
         };
 
@@ -6890,6 +6938,147 @@
         // ================================================================
         // COLLABORATORI SECTION
         // ================================================================
+
+        // ── SCANSIONI ──────────────────────────────────────────────────
+        window.loadScansioni = async function() {
+            const grid    = document.getElementById('scanPartnersGrid');
+            const loading = document.getElementById('scanLoadingState');
+            const empty   = document.getElementById('scanEmptyState');
+            const totEl   = document.getElementById('scanTotaleNum');
+            const icon    = document.getElementById('scanRefreshIcon');
+
+            if (!grid) return;
+
+            // Animazione refresh
+            if (icon) { icon.classList.add('fa-spin'); }
+            if (loading) loading.style.display = 'block';
+            if (empty) empty.style.display = 'none';
+            grid.innerHTML = '';
+            if (totEl) totEl.textContent = '…';
+
+            try {
+                // Usiamo la service key come admin_key (già disponibile come variabile d'ambiente lato Vercel)
+                // Lato browser chiamiamo l'endpoint con la anonKey come fallback per test,
+                // ma l'endpoint usa la service key internamente
+                const SUPABASE_URL  = 'https://uchrjlngfzfibcpdxtky.supabase.co';
+                const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzEyMDYsImV4cCI6MjA3NTYwNzIwNn0.64JK3OhYJi2YtrErctNAp_sCcSHwB656NVLdooyceOM';
+
+                // Fetch diretto a Supabase (service-role via RLS bypass non disponibile lato browser)
+                // Usiamo la query Supabase JS client già istanziato
+                const client = window.supabaseClient;
+
+                // 1. Promozioni
+                const { data: promos, error: pErr } = await client
+                    .from('promotions')
+                    .select('id, title, partner_name, image_url, discount_type, discount_value, max_redemptions, current_redemptions, per_user_limit, is_active, end_date')
+                    .order('partner_name', { ascending: true });
+
+                if (pErr) throw pErr;
+
+                // 2. Conteggio redemptions valide per promo_id
+                const { data: redemptions, error: rErr } = await client
+                    .from('redemption_tokens')
+                    .select('promo_id')
+                    .eq('status', 'used');
+
+                if (rErr) throw rErr;
+
+                // 3. Aggrega
+                const countMap = {};
+                for (const r of (redemptions || [])) {
+                    countMap[r.promo_id] = (countMap[r.promo_id] || 0) + 1;
+                }
+
+                const partners = (promos || []).map(p => ({
+                    ...p,
+                    scans_valid: countMap[p.id] || 0,
+                }));
+
+                const totalValid = partners.reduce((s, p) => s + p.scans_valid, 0);
+                if (totEl) totEl.textContent = totalValid.toLocaleString('it-IT');
+
+                if (loading) loading.style.display = 'none';
+
+                if (partners.length === 0) {
+                    if (empty) empty.style.display = 'block';
+                    return;
+                }
+
+                // 4. Renderizza card
+                grid.innerHTML = partners.map(p => {
+                    const isExpired = p.end_date && new Date(p.end_date) < new Date();
+                    const pct       = p.max_redemptions ? Math.min(100, Math.round(p.scans_valid / p.max_redemptions * 100)) : null;
+                    const remaining = p.max_redemptions ? (p.max_redemptions - p.scans_valid) : null;
+                    const statusColor = !p.is_active || isExpired ? '#6b7280' : p.scans_valid > 0 ? '#10b981' : '#f59e0b';
+                    const statusLabel = !p.is_active ? 'Inattiva' : isExpired ? 'Scaduta' : p.scans_valid > 0 ? 'Attiva' : 'In attesa';
+
+                    let discountBadge = '';
+                    if (p.discount_value && p.discount_type !== 'code') {
+                        const label = p.discount_type === 'percentage' ? `-${Math.round(p.discount_value)}%` : `-${Math.round(p.discount_value)}€`;
+                        discountBadge = `<span style="position:absolute;top:10px;left:10px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:900;font-size:0.85rem;padding:4px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(245,158,11,0.5);">${label}</span>`;
+                    }
+
+                    const imageSrc = p.image_url
+                        ? `<img src="${p.image_url}" alt="${p.partner_name}" style="width:100%;height:100%;object-fit:cover;border-radius:12px 12px 0 0;" onerror="this.parentElement.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#4b5563;font-size:2rem;\'><i class=\'fas fa-store\'></i></div>'">`
+                        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#4b5563;font-size:2rem;"><i class="fas fa-store"></i></div>`;
+
+                    const progressBar = pct !== null ? `
+                        <div style="margin-top:0.75rem;">
+                            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#6b7280;margin-bottom:4px;">
+                                <span>Utilizzi</span>
+                                <span>${p.scans_valid} / ${p.max_redemptions} ${remaining !== null ? `(${remaining} rimasti)` : ''}</span>
+                            </div>
+                            <div style="background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden;">
+                                <div style="height:100%;border-radius:99px;background:${pct >= 100 ? '#ef4444' : pct >= 75 ? '#f59e0b' : '#10b981'};width:${pct}%;transition:width 0.5s ease;"></div>
+                            </div>
+                        </div>` : `
+                        <div style="margin-top:0.5rem;font-size:0.78rem;color:#6b7280;">
+                            <i class="fas fa-infinity" style="margin-right:4px;"></i>Nessun limite impostato
+                        </div>`;
+
+                    return `
+                    <div style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.14)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'">
+
+                        <!-- Immagine -->
+                        <div style="position:relative;height:160px;background:#f3f4f6;overflow:hidden;">
+                            ${imageSrc}
+                            ${discountBadge}
+                            <span style="position:absolute;top:10px;right:10px;background:${statusColor};color:white;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;">${statusLabel}</span>
+                        </div>
+
+                        <!-- Contenuto -->
+                        <div style="padding:1rem 1.1rem 1.2rem;">
+                            <div style="font-size:0.72rem;font-weight:600;color:#9ca3af;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">${p.partner_name || '—'}</div>
+                            <div style="font-size:1rem;font-weight:700;color:#111827;margin-bottom:0.75rem;line-height:1.3;">${p.title || 'Promozione'}</div>
+
+                            <!-- Contatore grande -->
+                            <div style="display:flex;align-items:center;gap:0.75rem;background:#f0fdf4;border-radius:10px;padding:0.7rem 0.9rem;">
+                                <div style="background:#10b981;color:white;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size:1.6rem;font-weight:900;color:#065f46;line-height:1;">${p.scans_valid}</div>
+                                    <div style="font-size:0.75rem;color:#059669;font-weight:600;">validazioni riuscite</div>
+                                </div>
+                            </div>
+
+                            ${progressBar}
+
+                            ${p.per_user_limit ? `<div style="margin-top:0.5rem;font-size:0.78rem;color:#6b7280;"><i class="fas fa-user-clock" style="margin-right:4px;color:#f59e0b;"></i>Limite per partner: ${p.per_user_limit} utilizzo${p.per_user_limit > 1 ? 'i' : ''}</div>` : ''}
+                        </div>
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                console.error('[loadScansioni]', err);
+                if (loading) loading.style.display = 'none';
+                grid.innerHTML = `<div style="grid-column:1/-1;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:1.5rem;color:#dc2626;font-weight:600;"><i class="fas fa-exclamation-triangle" style="margin-right:0.5rem;"></i>Errore nel caricamento: ${err.message}</div>`;
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        };
+
+        // ── FINE SCANSIONI ─────────────────────────────────────────────
 
         let allCollaboratori = [];
         let collabFilter = 'all';
