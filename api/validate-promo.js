@@ -1,6 +1,8 @@
 // POST /api/validate-promo
-// Body: { promo_id, validated_by }
-// Chiamato dall'app Partner quando scansiona un QR statico "CDM86:PROMO:<UUID>"
+// Body: { promo_id, validated_by, customer_id? }
+// customer_id = auth.user.id del cliente CDM86 (UUID)
+// validated_by = email del partner che scansiona
+// Chiamato dall'app Partner quando scansiona un QR statico "CDM86:PROMO:<UUID>:USER:<UUID>"
 // Returns: { valid, promo_title, image_url, discount_type, discount_value, message, promo_id } or { error }
 
 const { createClient } = require('@supabase/supabase-js');
@@ -34,7 +36,7 @@ module.exports = async function handler(req, res) {
     });
 
     try {
-        const { promo_id, validated_by } = req.body || {};
+        const { promo_id, validated_by, customer_id } = req.body || {};
         if (!promo_id) return res.status(400).json({ error: 'promo_id obbligatorio' });
 
         // 1. Leggi la promozione (inclusi campi limite e immagine)
@@ -76,20 +78,31 @@ module.exports = async function handler(req, res) {
             );
         }
 
-        // 6. Limite per partner (per_user_limit): quante volte questo validated_by ha già validato questa promo
-        if (promo.per_user_limit !== null && validated_by) {
-            const { count: alreadyUsed, error: countErr } = await supabase
+        // 6. Limite per CLIENTE (per_user_limit): quante volte questo customer_id ha già usato questa promo
+        //    Se customer_id non è disponibile (QR vecchio formato), fallback su validated_by
+        if (promo.per_user_limit !== null) {
+            let countQuery = supabase
                 .from('redemption_tokens')
                 .select('id', { count: 'exact', head: true })
                 .eq('promo_id', promo_id)
-                .eq('validated_by', validated_by)
                 .eq('status', 'used');
 
+            if (customer_id) {
+                // Nuovo formato QR: limita per cliente (user_id)
+                countQuery = countQuery.eq('user_id', customer_id);
+            } else if (validated_by) {
+                // Fallback vecchio formato: limita per partner (meno preciso)
+                countQuery = countQuery.eq('validated_by', validated_by);
+            }
+
+            const { count: alreadyUsed, error: countErr } = await countQuery;
+
             if (!countErr && alreadyUsed >= promo.per_user_limit) {
+                const subject = customer_id ? 'Il cliente ha' : 'Hai';
                 return errorWithPromo(409, promo,
                     promo.per_user_limit === 1
-                        ? 'Hai già validato questa promozione. Non è più disponibile.'
-                        : `Hai già validato questa promozione ${alreadyUsed} volte (limite: ${promo.per_user_limit}).`
+                        ? `${subject} già utilizzato questa promozione. Non è più disponibile.`
+                        : `${subject} già usato questa promozione ${alreadyUsed} volte (limite: ${promo.per_user_limit}).`
                 );
             }
         }
@@ -101,11 +114,11 @@ module.exports = async function handler(req, res) {
             .insert({
                 token,
                 promo_id,
-                user_id:      null,
+                user_id:      customer_id || null,   // UUID del cliente (per per_user_limit)
                 status:       'used',
                 expires_at:   new Date(Date.now() + 60 * 60 * 1000).toISOString(),
                 used_at:      new Date().toISOString(),
-                validated_by: validated_by || null
+                validated_by: validated_by || null    // email del partner (per audit)
             });
 
         if (insertErr) {

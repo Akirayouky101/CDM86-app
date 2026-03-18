@@ -2148,6 +2148,38 @@
         </div>
     </div>
 
+    <!-- ══ MODAL DETTAGLIO SCANSIONI ══════════════════════════════════════ -->
+    <div id="scanDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);overflow-y:auto;"
+         onclick="if(event.target===this)closeScanDetailModal()">
+        <div style="max-width:700px;margin:2rem auto;background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
+            <!-- Header modal -->
+            <div style="background:linear-gradient(135deg,#1f2937,#374151);padding:1.4rem 1.8rem;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="font-size:0.72rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;" id="sdmPartnerName">—</div>
+                    <div style="font-size:1.1rem;font-weight:800;color:white;" id="sdmPromoTitle">—</div>
+                </div>
+                <button onclick="closeScanDetailModal()" style="background:rgba(255,255,255,0.12);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background 0.15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Stats bar -->
+            <div id="sdmStats" style="display:flex;gap:0;border-bottom:1px solid #f3f4f6;"></div>
+            <!-- Lista log -->
+            <div style="padding:1.2rem 1.6rem;">
+                <div id="sdmLoading" style="text-align:center;padding:2rem;color:#6b7280;display:none;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+                    <div style="margin-top:0.5rem;font-size:0.85rem;">Caricamento log…</div>
+                </div>
+                <div id="sdmEmpty" style="text-align:center;padding:2rem;color:#9ca3af;display:none;">
+                    <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:0.5rem;display:block;"></i>
+                    Nessuna scansione registrata per questa promo.
+                </div>
+                <div id="sdmList"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ZONE CAP TAB -->
     <div id="zonesTab" class="tab-content">
         <div class="section-header">
@@ -7084,7 +7116,14 @@
                                 </div>
                             </div>` : `<div style="font-size:0.7rem;color:#9ca3af;margin-top:0.3rem;"><i class="fas fa-infinity" style="margin-right:3px;"></i>Nessun limite</div>`}
 
-                            ${p.per_user_limit ? `<div style="font-size:0.7rem;color:#f59e0b;margin-top:0.35rem;font-weight:600;"><i class="fas fa-user-clock" style="margin-right:3px;"></i>Max ${p.per_user_limit} per partner</div>` : ''}
+                            ${p.per_user_limit ? `<div style="font-size:0.7rem;color:#f59e0b;margin-top:0.35rem;font-weight:600;"><i class="fas fa-user-clock" style="margin-right:3px;"></i>Max ${p.per_user_limit} per cliente</div>` : ''}
+
+                            <!-- Pulsante log -->
+                            <button onclick="openScanDetailModal('${p.id}','${(p.title||'').replace(/'/g,"\\'")}','${(p.partner_name||'').replace(/'/g,"\\'")}',${scans})"
+                                style="width:100%;margin-top:0.65rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:0.45rem 0.7rem;font-size:0.78rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:background 0.15s;"
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
+                                <i class="fas fa-list-alt" style="color:#6b7280;"></i> Vedi log scansioni
+                            </button>
                         </div>
                     </div>`;
                 }).join('');
@@ -7096,6 +7135,104 @@
             } finally {
                 if (icon) icon.classList.remove('fa-spin');
             }
+        };
+
+        // ── MODAL DETTAGLIO SCANSIONI ────────────────────────────────────
+        window.openScanDetailModal = async function(promoId, promoTitle, partnerName, totalScans) {
+            const modal   = document.getElementById('scanDetailModal');
+            const sdmList = document.getElementById('sdmList');
+            const sdmLoad = document.getElementById('sdmLoading');
+            const sdmEmpty= document.getElementById('sdmEmpty');
+            const statsBar= document.getElementById('sdmStats');
+
+            document.getElementById('sdmPromoTitle').textContent  = promoTitle  || '—';
+            document.getElementById('sdmPartnerName').textContent = partnerName || '—';
+
+            sdmList.innerHTML = '';
+            sdmLoad.style.display  = 'block';
+            sdmEmpty.style.display = 'none';
+            statsBar.innerHTML     = '';
+            modal.style.display    = 'block';
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const client = window.supabaseClient;
+
+                const { data: rows, error: rErr } = await client
+                    .from('redemption_tokens')
+                    .select('id, token, used_at, validated_by, user_id, status, created_at')
+                    .eq('promo_id', promoId)
+                    .order('used_at', { ascending: false })
+                    .limit(200);
+
+                sdmLoad.style.display = 'none';
+
+                if (rErr) throw rErr;
+
+                const success = (rows || []).filter(r => r.status === 'used');
+                const other   = (rows || []).filter(r => r.status !== 'used');
+
+                // Stats bar
+                statsBar.innerHTML = `
+                    <div style="flex:1;text-align:center;padding:0.9rem;border-right:1px solid #f3f4f6;">
+                        <div style="font-size:1.6rem;font-weight:900;color:#065f46;">${success.length}</div>
+                        <div style="font-size:0.72rem;color:#059669;font-weight:600;">Successi</div>
+                    </div>
+                    <div style="flex:1;text-align:center;padding:0.9rem;">
+                        <div style="font-size:1.6rem;font-weight:900;color:#b45309;">${other.length}</div>
+                        <div style="font-size:0.72rem;color:#d97706;font-weight:600;">Altro stato</div>
+                    </div>
+                `;
+
+                if (!rows || rows.length === 0) {
+                    sdmEmpty.style.display = 'block';
+                    return;
+                }
+
+                // Raggruppa per customer (user_id) o validated_by
+                const byUser = {};
+                for (const r of success) {
+                    const key = r.user_id || r.validated_by || 'sconosciuto';
+                    if (!byUser[key]) byUser[key] = { count: 0, rows: [], isUuid: !!r.user_id };
+                    byUser[key].count++;
+                    byUser[key].rows.push(r);
+                }
+
+                const grouped = Object.entries(byUser).sort((a,b) => b[1].count - a[1].count);
+
+                sdmList.innerHTML = grouped.map(([key, info]) => {
+                    const label = info.isUuid
+                        ? `<span style="font-family:monospace;font-size:0.72rem;color:#6b7280;" title="${key}">Cliente: ${key.substring(0,8)}…</span>`
+                        : `<span style="font-size:0.8rem;color:#374151;">${key}</span>`;
+
+                    const rows = info.rows.map(r => {
+                        const dt = r.used_at || r.created_at;
+                        const dtFmt = dt ? new Date(dt).toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+                        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.6rem;background:#f9fafb;border-radius:6px;margin-top:4px;">
+                            <span style="font-size:0.75rem;color:#6b7280;">${dtFmt}</span>
+                            <span style="font-size:0.7rem;font-family:monospace;color:#9ca3af;">${(r.token||r.id||'').substring(0,12)}…</span>
+                        </div>`;
+                    }).join('');
+
+                    return `<div style="border:1px solid #f3f4f6;border-radius:10px;padding:0.75rem 0.9rem;margin-bottom:0.6rem;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            ${label}
+                            <span style="background:#dcfce7;color:#065f46;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;">${info.count}×</span>
+                        </div>
+                        ${rows}
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                sdmLoad.style.display = 'none';
+                sdmList.innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:1rem;color:#dc2626;font-size:0.85rem;">Errore: ${err.message}</div>`;
+            }
+        };
+
+        window.closeScanDetailModal = function() {
+            const modal = document.getElementById('scanDetailModal');
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
         };
 
         // ── SCANSIONI TAB ──────────────────────────────────────────────
