@@ -36,13 +36,14 @@ module.exports = async function handler(req, res) {
         }
 
         // 2️⃣ Controlla che il partner possa validare questa promo
+        // Solo se la promo ha un partner_email impostato — se è null, chiunque può validare
         if (validated_by && redemption.promotions?.partner_email) {
             const promoPartnerEmail = redemption.promotions.partner_email.toLowerCase().trim();
             const validatorEmail = validated_by.toLowerCase().trim();
             if (promoPartnerEmail !== validatorEmail) {
                 return res.status(403).json({
                     valid: false,
-                    message: `❌ Questa promo appartiene a un altro locale (${redemption.promotions.partner_name || 'altro partner'}). Non puoi validarla.`
+                    message: `Questa promo appartiene a un altro locale (${redemption.promotions.partner_name || 'altro partner'}). Non puoi validarla.`
                 });
             }
         }
