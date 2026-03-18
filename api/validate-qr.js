@@ -27,12 +27,24 @@ module.exports = async function handler(req, res) {
         // 1️⃣ Leggi il token
         const { data: redemption, error: fetchErr } = await supabase
             .from('redemption_tokens')
-            .select('*, promotions(title, max_uses_per_user)')
+            .select('*, promotions(title, max_uses_per_user, partner_email, partner_name)')
             .eq('token', token)
             .maybeSingle();
 
         if (fetchErr || !redemption) {
             return res.status(404).json({ valid: false, message: 'Codice non trovato o non valido.' });
+        }
+
+        // 2️⃣ Controlla che il partner possa validare questa promo
+        if (validated_by && redemption.promotions?.partner_email) {
+            const promoPartnerEmail = redemption.promotions.partner_email.toLowerCase().trim();
+            const validatorEmail = validated_by.toLowerCase().trim();
+            if (promoPartnerEmail !== validatorEmail) {
+                return res.status(403).json({
+                    valid: false,
+                    message: `❌ Questa promo appartiene a un altro locale (${redemption.promotions.partner_name || 'altro partner'}). Non puoi validarla.`
+                });
+            }
         }
 
         // 2️⃣ Controlla stato
