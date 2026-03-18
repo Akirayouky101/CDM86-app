@@ -7520,7 +7520,7 @@
         function buildCollabActions(c) {
             const btns = [];
             if (c.status === 'pending') {
-                btns.push(`<button class="btn btn-primary btn-sm" onclick="approveCollab('${c.id}')"><i class="fas fa-check"></i> Approva</button>`);
+                btns.push(`<button class="btn btn-primary btn-sm" onclick="approveCollab('${c.id}','${c.referred_by_id||''}')"><i class="fas fa-check"></i> Approva</button>`);
                 btns.push(`<button class="btn btn-secondary btn-sm" onclick="rejectCollab('${c.id}')"><i class="fas fa-times"></i> Rifiuta</button>`);
             }
             if (c.status === 'active') {
@@ -7536,6 +7536,8 @@
             if (pending > 0) {
                 btns.push(`<button class="btn btn-primary btn-sm" style="background:#16a34a;border-color:#16a34a;" onclick="markAsPaid('${c.id}', ${pending})"><i class="fas fa-euro-sign"></i> Paga €${pending.toFixed(2)}</button>`);
             }
+            // Elimina definitivamente — sempre visibile (tranne solo per sicurezza doppio click)
+            btns.push(`<button class="btn btn-secondary btn-sm" title="Elimina definitivamente" style="background:#7f1d1d;border-color:#7f1d1d;color:white;" onclick="deleteCollab('${c.id}','${c.first_name} ${c.last_name}')"><i class="fas fa-trash"></i></button>`);
             return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`;
         }
 
@@ -7575,26 +7577,37 @@
             _collabPendingAction = null;
         };
 
-        window.approveCollab = async function(id) {
+        window.approveCollab = async function(id, existingReferredById) {
             openCollabActionModal({
                 title: '✅ Approva Collaboratore',
-                message: 'Stai per approvare questo collaboratore. Riceverà accesso alla dashboard e potrà iniziare a guadagnare commissioni.',
+                message: 'Stai per approvare questo collaboratore. Riceverà accesso alla dashboard e potrà iniziare a guadagnare commissioni.' +
+                    (!existingReferredById ? '\n\n⚠️ Nessun referral: verrà assegnato automaticamente al referral admin (274EB3F4).' : ''),
                 confirmLabel: 'Approva',
                 confirmColor: '#16a34a',
                 showNote: false,
                 action: async () => {
-                    if (await setCollabStatus(id, 'active')) {
-                        try {
-                            await window.supabaseClient.rpc('calculate_collaborator_earnings', {
-                                p_new_user_id: id,
-                                p_registration_type: 'user'
-                            });
-                        } catch (e) {
-                            console.warn('⚠️ Errore calcolo compensi (non bloccante):', e);
-                        }
-                        showNotification('Collaboratore approvato', '✅ Il collaboratore è ora attivo.', 'success');
-                        loadCollaboratori();
+                    // Se non ha referred_by_id, assegna l'admin (e8cde03d-2aa6-4ea6-a29f-43f290ae00ce)
+                    const ADMIN_COLLAB_USER_ID = 'e8cde03d-2aa6-4ea6-a29f-43f290ae00ce';
+                    const update = {
+                        status: 'active',
+                        approved_at: new Date().toISOString()
+                    };
+                    if (!existingReferredById) {
+                        update.referred_by_id = ADMIN_COLLAB_USER_ID;
                     }
+                    const { error: updErr } = await window.supabaseClient
+                        .from('collaborators').update(update).eq('id', id);
+                    if (updErr) { showNotification('Errore', updErr.message, 'error'); return; }
+                    try {
+                        await window.supabaseClient.rpc('calculate_collaborator_earnings', {
+                            p_new_user_id: id,
+                            p_registration_type: 'user'
+                        });
+                    } catch (e) {
+                        console.warn('⚠️ Errore calcolo compensi (non bloccante):', e);
+                    }
+                    showNotification('Collaboratore approvato', '✅ Il collaboratore è ora attivo.' + (!existingReferredById ? ' Assegnato al referral admin.' : ''), 'success');
+                    loadCollaboratori();
                 }
             });
         };
@@ -7659,6 +7672,31 @@
                         showNotification('Collaboratore bannato', '⛔ Il collaboratore è stato bannato.', 'error');
                         loadCollaboratori();
                     }
+                }
+            });
+        };
+
+        window.deleteCollab = async function(id, name) {
+            openCollabActionModal({
+                title: '🗑️ Elimina Definitivamente',
+                message: `Stai per eliminare DEFINITIVAMENTE il collaboratore "${name}". Questa azione è irreversibile: verranno cancellati anche tutti i guadagni e i dati associati.`,
+                confirmLabel: 'Elimina definitivamente',
+                confirmColor: '#7f1d1d',
+                showNote: false,
+                action: async () => {
+                    // Elimina prima i guadagni collegati
+                    await window.supabaseClient
+                        .from('collaborator_earnings')
+                        .delete()
+                        .eq('collaborator_id', id);
+                    // Poi elimina il collaboratore
+                    const { error } = await window.supabaseClient
+                        .from('collaborators')
+                        .delete()
+                        .eq('id', id);
+                    if (error) { showNotification('Errore', error.message, 'error'); return; }
+                    showNotification('Collaboratore eliminato', '🗑️ Il collaboratore è stato eliminato definitivamente.', 'error');
+                    loadCollaboratori();
                 }
             });
         };
