@@ -5491,11 +5491,11 @@
                                 </div>
                                 <div>
                                     <div style="color: var(--gray-600); font-size: 0.875rem;">Prezzo Originale</div>
-                                    <div style="font-size: 1.25rem; text-decoration: line-through; color: var(--gray-500);">€${promo.original_price.toFixed(2)}</div>
+                                    <div style="font-size: 1.25rem; text-decoration: line-through; color: var(--gray-500);">${promo.original_price != null ? '€' + Number(promo.original_price).toFixed(2) : '—'}</div>
                                 </div>
                                 <div>
                                     <div style="color: var(--gray-600); font-size: 0.875rem;">Prezzo Scontato</div>
-                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">€${promo.discounted_price.toFixed(2)}</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">${promo.discounted_price != null ? '€' + Number(promo.discounted_price).toFixed(2) : '—'}</div>
                                 </div>
                                 <div>
                                     <div style="color: var(--gray-600); font-size: 0.875rem;">Validità</div>
