@@ -7536,6 +7536,10 @@
             if (pending > 0) {
                 btns.push(`<button class="btn btn-primary btn-sm" style="background:#16a34a;border-color:#16a34a;" onclick="markAsPaid('${c.id}', ${pending})"><i class="fas fa-euro-sign"></i> Paga €${pending.toFixed(2)}</button>`);
             }
+            // Abbandona Ruolo — solo per collaboratori attivi o sospesi
+            if (c.status === 'active' || c.status === 'suspended') {
+                btns.push(`<button class="btn btn-secondary btn-sm" title="Abbandona ruolo collaboratore" style="background:#f59e0b;border-color:#f59e0b;color:white;" onclick="abandonCollabRole('${c.id}','${c.first_name} ${c.last_name}','${c.email}')"><i class="fas fa-user-times"></i> Abbandona Ruolo</button>`);
+            }
             // Elimina definitivamente — sempre visibile (tranne solo per sicurezza doppio click)
             btns.push(`<button class="btn btn-secondary btn-sm" title="Elimina definitivamente" style="background:#7f1d1d;border-color:#7f1d1d;color:white;" onclick="deleteCollab('${c.id}','${c.first_name} ${c.last_name}')"><i class="fas fa-trash"></i></button>`);
             return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`;
@@ -7558,7 +7562,10 @@
         function openCollabActionModal({ title, message, confirmLabel, confirmColor, showNote, action }) {
             _collabPendingAction = action;
             document.getElementById('collabActionModalTitle').textContent = title;
-            document.getElementById('collabActionModalMessage').textContent = message;
+            const msgEl = document.getElementById('collabActionModalMessage');
+            // Supporta newline nel messaggio
+            msgEl.style.whiteSpace = 'pre-line';
+            msgEl.textContent = message;
             const noteGroup = document.getElementById('collabActionNoteGroup');
             noteGroup.style.display = showNote ? 'block' : 'none';
             document.getElementById('collabActionNote').value = '';
@@ -7675,6 +7682,316 @@
                 }
             });
         };
+
+        // ── Abbandona Ruolo: modal di scelta modalità ────────────────────────────
+        window.abandonCollabRole = async function(id, name, email) {
+            // Rimuovi modal precedente se esiste
+            const oldM = document.getElementById('abandonModeModal');
+            if (oldM) oldM.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'abandonModeModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.65); z-index: 9998;
+                display: flex; align-items: center; justify-content: center;
+                padding: 1rem;
+            `;
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.35);">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 60px; height: 60px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.8rem;">🚪</div>
+                        <h2 style="font-size: 1.2rem; font-weight: 800; color: #1f2937; margin: 0 0 0.25rem;">Abbandona Ruolo Collaboratore</h2>
+                        <p style="color: #6b7280; font-size: 0.85rem; margin: 0;"><strong>${name}</strong> (${email})</p>
+                    </div>
+
+                    <!-- Scelta modalità -->
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; margin-bottom: 0.625rem; transition: border-color 0.15s;" id="optionDefLabel">
+                            <input type="radio" name="abandonMode" value="definitivo" id="modeDefinitivo" checked style="margin-top: 2px; accent-color: #f59e0b; width: 16px; height: 16px; flex-shrink: 0;">
+                            <div>
+                                <div style="font-weight: 700; color: #1f2937; font-size: 0.9rem;">Abbandona definitivamente</div>
+                                <div style="font-size: 0.78rem; color: #6b7280; margin-top: 2px;">Tutti gli utenti (L1, L2, L3) passeranno sotto l'admin CDM86.</div>
+                            </div>
+                        </label>
+
+                        <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: border-color 0.15s;" id="optionReiLabel">
+                            <input type="radio" name="abandonMode" value="reiscritto" id="modeReiscritto" style="margin-top: 2px; accent-color: #6366f1; width: 16px; height: 16px; flex-shrink: 0;">
+                            <div style="width: 100%;">
+                                <div style="font-weight: 700; color: #1f2937; font-size: 0.9rem;">Si è reiscritto come utente</div>
+                                <div style="font-size: 0.78rem; color: #6b7280; margin-top: 2px;">L1 e L2 passeranno sotto il nuovo utente, L3 sotto l'admin.</div>
+
+                                <!-- Input referral code -->
+                                <div id="referralCodeSection" style="display: none; margin-top: 0.875rem;">
+                                    <div style="font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem;">Codice referral del nuovo utente:</div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <input type="text" id="newReferralCodeInput" placeholder="Es. MARIO123" maxlength="20"
+                                            style="flex: 1; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 7px 11px; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; outline: none;"
+                                            oninput="this.value=this.value.toUpperCase()">
+                                        <button onclick="verifyAbandonReferralCode()" id="verifyCodeBtn"
+                                            style="background: #6366f1; color: white; border: none; border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                                            Verifica
+                                        </button>
+                                    </div>
+                                    <!-- Risultato verifica -->
+                                    <div id="referralVerifyResult" style="margin-top: 0.5rem; font-size: 0.78rem; display: none;"></div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Warning -->
+                    <div style="background: #fffbeb; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; border: 1px solid #fde68a; font-size: 0.78rem; color: #92400e;">
+                        ⚠️ <strong>Azione irreversibile.</strong> Il ruolo collaboratore verrà rimosso e verrà generata una nuova password.
+                    </div>
+
+                    <!-- Bottoni -->
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button onclick="document.getElementById('abandonModeModal').remove()"
+                            style="flex: 1; background: #f3f4f6; color: #374151; border: none; padding: 0.75rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                            Annulla
+                        </button>
+                        <button onclick="confirmAbandonRole('${id}', '${name}', '${email}')" id="confirmAbandonBtn"
+                            style="flex: 2; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; padding: 0.75rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                            🚪 Conferma Abbandono
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Chiudi cliccando fuori
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+            // Toggle referral section on radio change
+            const radios = modal.querySelectorAll('input[type=radio]');
+            const refSection = modal.querySelector('#referralCodeSection');
+            const optDefLabel = modal.querySelector('#optionDefLabel');
+            const optReiLabel = modal.querySelector('#optionReiLabel');
+
+            function updateRadioStyles() {
+                if (document.getElementById('modeDefinitivo').checked) {
+                    optDefLabel.style.borderColor = '#f59e0b';
+                    optReiLabel.style.borderColor = '#e5e7eb';
+                    refSection.style.display = 'none';
+                } else {
+                    optDefLabel.style.borderColor = '#e5e7eb';
+                    optReiLabel.style.borderColor = '#6366f1';
+                    refSection.style.display = 'block';
+                }
+            }
+            radios.forEach(r => r.addEventListener('change', updateRadioStyles));
+            updateRadioStyles();
+        };
+
+        // Verifica codice referral nel modal abbandono
+        window.verifyAbandonReferralCode = async function() {
+            const input = document.getElementById('newReferralCodeInput');
+            const resultDiv = document.getElementById('referralVerifyResult');
+            const btn = document.getElementById('verifyCodeBtn');
+            const code = (input?.value || '').trim().toUpperCase();
+
+            if (!code) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<span style="color:#dc2626;">⚠️ Inserisci un codice referral.</span>`;
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '...';
+            resultDiv.style.display = 'none';
+
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('users')
+                    .select('id, first_name, last_name, email, referral_code')
+                    .eq('referral_code', code)
+                    .single();
+
+                if (error || !data) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `<span style="color:#dc2626;">❌ Nessun utente trovato con il codice <strong>${code}</strong>.</span>`;
+                } else {
+                    const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ') || data.email;
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `<span style="color:#16a34a;">✅ Trovato: <strong>${fullName}</strong> (${data.email})</span>`;
+                    input.dataset.verified = 'true';
+                    input.dataset.userId = data.id;
+                }
+            } catch (e) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<span style="color:#dc2626;">❌ Errore: ${e.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verifica';
+            }
+        };
+
+        // Esecuzione effettiva abbandono ruolo dopo conferma
+        window.confirmAbandonRole = async function(id, name, email) {
+            const mode = document.querySelector('input[name="abandonMode"]:checked')?.value || 'definitivo';
+            let newReferralCode = null;
+
+            if (mode === 'reiscritto') {
+                const input = document.getElementById('newReferralCodeInput');
+                newReferralCode = (input?.value || '').trim().toUpperCase();
+                if (!newReferralCode) {
+                    showNotification('Codice mancante', 'Inserisci e verifica il codice referral del nuovo utente.', 'error');
+                    return;
+                }
+                if (input?.dataset.verified !== 'true') {
+                    showNotification('Codice non verificato', 'Clicca "Verifica" per confermare il codice referral prima di procedere.', 'error');
+                    return;
+                }
+            }
+
+            // Chiudi il modal di scelta
+            document.getElementById('abandonModeModal')?.remove();
+
+            showNotification('Elaborazione...', 'Migrazione in corso, attendi...', 'info');
+
+            try {
+                const rpcParams = {
+                    p_collaborator_id: id,
+                    p_mode: mode
+                };
+                if (mode === 'reiscritto' && newReferralCode) {
+                    rpcParams.p_new_referral_code = newReferralCode;
+                }
+
+                const { data, error } = await window.supabaseClient
+                    .rpc('abandon_collaborator_role', rpcParams);
+
+                if (error) {
+                    showNotification('Errore migrazione', error.message, 'error');
+                    return;
+                }
+
+                if (!data.success) {
+                    showNotification('Errore', data.error || 'Errore sconosciuto', 'error');
+                    return;
+                }
+
+                const info = data.data;
+
+                // Aggiorna la password via Supabase Auth Admin API
+                try {
+                    const pwResp = await fetch(
+                        `https://uchrjlngfzfibcpdxtky.supabase.co/auth/v1/admin/users/${info.auth_user_id}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDAzMTIwNiwiZXhwIjoyMDc1NjA3MjA2fQ.lK0csqtGl2zREC3YsHLfQ_gt4XUAQTQr3bx0CXt96L0',
+                                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDAzMTIwNiwiZXhwIjoyMDc1NjA3MjA2fQ.lK0csqtGl2zREC3YsHLfQ_gt4XUAQTQr3bx0CXt96L0'
+                            },
+                            body: JSON.stringify({ password: info.new_password })
+                        }
+                    );
+                    if (!pwResp.ok) {
+                        const pwErr = await pwResp.text();
+                        console.warn('Password update warning:', pwErr);
+                    }
+                } catch (pwEx) {
+                    console.warn('Password update exception:', pwEx.message);
+                }
+
+                // Mostra modal con il risultato
+                showAbandonRoleResult({
+                    email: info.email,
+                    password: info.new_password,
+                    referralCode: info.referral_code,
+                    mode: info.mode,
+                    level1Reassigned: info.level_1_reassigned || 0,
+                    level2Reassigned: info.level_2_reassigned || 0,
+                    level3Reassigned: info.level_3_reassigned || 0
+                });
+
+                loadCollaboratori();
+
+            } catch (e) {
+                showNotification('Errore', 'Errore imprevisto: ' + e.message, 'error');
+            }
+        };
+
+        // Modal risultato abbandono ruolo
+        function showAbandonRoleResult({ email, password, referralCode, mode, level1Reassigned, level2Reassigned, level3Reassigned }) {
+            const oldModal = document.getElementById('abandonRoleResultModal');
+            if (oldModal) oldModal.remove();
+
+            const isReiscritto = mode === 'reiscritto';
+
+            const networkLines = isReiscritto
+                ? `<li>${level1Reassigned} utenti di livello 1 riassegnati al nuovo utente</li>
+                   <li>${level2Reassigned} utenti di livello 2 riassegnati al nuovo utente</li>
+                   <li>${level3Reassigned} utenti di livello 3 riassegnati all'admin CDM86</li>`
+                : `<li>${level1Reassigned + level2Reassigned + level3Reassigned} utenti totali riassegnati all'admin CDM86</li>`;
+
+            const modal = document.createElement('div');
+            modal.id = 'abandonRoleResultModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.6); z-index: 9999;
+                display: flex; align-items: center; justify-content: center;
+                padding: 1rem;
+            `;
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 480px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 60px; height: 60px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.8rem;">🚪</div>
+                        <h2 style="font-size: 1.25rem; font-weight: 800; color: #1f2937; margin: 0 0 0.25rem;">Ruolo Abbandonato</h2>
+                        <p style="color: #6b7280; font-size: 0.875rem; margin: 0;">
+                            ${isReiscritto ? 'Rete riassegnata al nuovo utente (L3 → admin)' : 'Tutta la rete riassegnata all\'admin CDM86'}
+                        </p>
+                    </div>
+
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">📋 Nuove Credenziali</div>
+
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px;">Email</div>
+                            <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">${email}</div>
+                        </div>
+
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px;">Password generata</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <code style="background: #1e293b; color: #f8fafc; padding: 6px 14px; border-radius: 8px; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em;">${password}</code>
+                                <button onclick="navigator.clipboard.writeText('${password}').then(()=>alert('Copiata!'))" style="background: #e2e8f0; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.75rem; color: #475569;">📋 Copia</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px;">Codice Referral</div>
+                            <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">${referralCode || '—'}</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f0fdf4; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; border: 1px solid #bbf7d0;">
+                        <div style="font-size: 0.8rem; color: #16a34a; font-weight: 600; margin-bottom: 0.5rem;">✅ Migrazione completata</div>
+                        <ul style="margin: 0; padding: 0 0 0 1rem; font-size: 0.8rem; color: #166534; line-height: 1.8;">
+                            ${networkLines}
+                            <li>Record collaboratore rimosso</li>
+                            <li>Nuovo accesso come utente normale</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fffbeb; border-radius: 10px; padding: 0.875rem; margin-bottom: 1.25rem; border: 1px solid #fde68a;">
+                        <div style="font-size: 0.78rem; color: #92400e; font-weight: 600;">⚠️ Importante</div>
+                        <div style="font-size: 0.78rem; color: #78350f; margin-top: 2px;">Comunica la password all'utente. Non sarà più visibile dopo la chiusura di questo avviso.</div>
+                    </div>
+
+                    <button onclick="document.getElementById('abandonRoleResultModal').remove()"
+                        style="width: 100%; background: linear-gradient(135deg, #1f2937, #374151); color: white; border: none; padding: 0.875rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer;">
+                        Chiudi
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
 
         window.deleteCollab = async function(id, name) {
             openCollabActionModal({
