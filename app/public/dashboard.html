@@ -1161,7 +1161,9 @@
     
     <script>
         let currentUser = null;
+        let currentUserPublicData = null; // public.users row (id diverso da auth UUID)
         window.getCurrentUser = () => currentUser;
+        window.getCurrentUserPublicData = () => currentUserPublicData;
         
         // Check authentication
         async function checkAuth() {
@@ -1257,6 +1259,9 @@
                 
                 // Fix: se userData è un array, prendi il primo elemento
                 const user = Array.isArray(userData) ? userData[0] : userData;
+                
+                // Salva il profilo pubblico globalmente (ha il vero public users.id)
+                currentUserPublicData = user;
                 
                 console.log('✅ User object:', user);
                 console.log('�📋 Referral code:', user.referral_code);
@@ -1556,12 +1561,14 @@
         // Load organization requests (segnalazioni aziende)
         async function loadOrganizationRequests() {
             try {
+                // Usa public.users.id (FK di company_reports.reported_by_user_id → public.users)
+                const publicUserId = currentUserPublicData?.id || currentUser?.id;
                 // Force fresh data by using a random query parameter (bypass cache)
                 const timestamp = Date.now();
                 const { data, error } = await window.supabaseClient
                     .from('company_reports')
                     .select('*')
-                    .eq('reported_by_user_id', currentUser.id)
+                    .eq('reported_by_user_id', publicUserId)
                     .order('created_at', { ascending: false })
                     // Force bypass Supabase cache
                     .limit(1000);
@@ -4490,7 +4497,11 @@
                 const user = window.getCurrentUser();
                 if (!user) return;
                 
-                console.log('🔍 Loading referral network for user:', user.id, user.email);
+                // Usa public.users.id (NON auth.users.id) per referred_by_id
+                const publicUser = window.getCurrentUserPublicData();
+                const publicUserId = publicUser?.id || user.id;
+                
+                console.log('🔍 Loading referral network for user:', user.id, user.email, '| publicId:', publicUserId);
                 
                 // NUOVO SISTEMA: Leggi diretti e indiretti da users.referred_by_id + organizations
                 
@@ -4498,7 +4509,7 @@
                 const { data: directReferrals, error: directError } = await window.supabaseClient
                     .from('users')
                     .select('id, email, first_name, last_name, referral_code, created_at')
-                    .eq('referred_by_id', user.id)
+                    .eq('referred_by_id', publicUserId)
                     .order('created_at', { ascending: true });
                 
                 console.log('📊 Direct referrals (users) found:', directReferrals?.length || 0, directReferrals);
@@ -4507,7 +4518,7 @@
                 const { data: directOrganizations, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .select('id, name, email, referral_code, active, created_at')
-                    .eq('referred_by_user_id', user.id)
+                    .eq('referred_by_user_id', publicUserId)
                     .eq('active', true)
                     .order('created_at', { ascending: true });
                 
@@ -4685,40 +4696,67 @@
         // Update transactions and network counts
         async function updateMLMCounts() {
             try {
-                const user = window.getCurrentUser();
-                if (!user) return;
+                const authUser = window.getCurrentUser();
+                if (!authUser) return;
                 
-                // Count transactions
+                // Usa l'ID pubblico (public.users.id) — diverso dall'auth UUID
+                // currentUserPublicData viene popolato da loadDashboardData
+                const publicUser = window.getCurrentUserPublicData();
+                const publicUserId = publicUser?.id;
+                const referralCode = publicUser?.referral_code;
+                
+                console.log('🔍 updateMLMCounts — authId:', authUser.id, '| publicId:', publicUserId, '| code:', referralCode);
+                
+                // Count transactions (usa auth user_id come in points_transactions)
                 const { count: txCount, error: txError } = await window.supabaseClient
                     .from('points_transactions')
                     .select('*', { count: 'exact', head: true })
-                    .eq('user_id', user.id);
+                    .eq('user_id', authUser.id);
                 
                 if (!txError && txCount !== null) {
                     document.getElementById('transactions-count').textContent = txCount;
                 }
                 
-                // Count network: utenti + aziende referenziate
-                // Utenti diretti
-                const { count: usersCount, error: usersError } = await window.supabaseClient
-                    .from('users')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('referred_by_id', user.id);
+                if (!publicUserId) {
+                    console.warn('⚠️ publicUserId not available yet, MLM count skipped');
+                    return;
+                }
                 
-                console.log('🔍 Network - Users count:', usersCount, 'Error:', usersError);
+                // Count network L1: diretti (referred_by_id = publicUserId)
+                const { data: l1Users, error: usersError } = await window.supabaseClient
+                    .from('users')
+                    .select('id')
+                    .eq('referred_by_id', publicUserId);
+                
+                const l1Count = l1Users?.length || 0;
+                console.log('🔍 Network - L1 diretti:', l1Count, 'Error:', usersError);
+                
+                // Count network L2: indiretti (referred_by_id IN (L1.id))
+                let l2Count = 0;
+                if (l1Users && l1Users.length > 0) {
+                    const l1Ids = l1Users.map(u => u.id);
+                    const { data: l2Users } = await window.supabaseClient
+                        .from('users')
+                        .select('id')
+                        .in('referred_by_id', l1Ids);
+                    l2Count = l2Users?.length || 0;
+                    console.log('🔍 Network - L2 indiretti:', l2Count);
+                }
+                
+                const usersTotal = l1Count + l2Count;
                 
                 // Organizations portate (solo quelle approvate e iscritte)
                 const { count: orgsCount, error: orgsError } = await window.supabaseClient
                     .from('organizations')
                     .select('*', { count: 'exact', head: true })
-                    .eq('referred_by_user_id', user.id)
+                    .eq('referred_by_user_id', publicUserId)
                     .eq('active', true);
                 
                 console.log('🏢 Network - Orgs count:', orgsCount, 'Error:', orgsError);
                 
                 // Somma totale
-                const totalNetworkCount = (usersCount || 0) + (orgsCount || 0);
-                console.log('📊 Network - Total:', totalNetworkCount, '(users:', usersCount, '+ orgs:', orgsCount, ')');
+                const totalNetworkCount = usersTotal + (orgsCount || 0);
+                console.log('📊 Network - Total:', totalNetworkCount, '(L1:', l1Count, '+ L2:', l2Count, '+ orgs:', orgsCount, ')');
                 document.getElementById('network-count').textContent = totalNetworkCount;
                 
             } catch (error) {

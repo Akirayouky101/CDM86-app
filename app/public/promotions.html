@@ -3096,5 +3096,68 @@
             if (e.target === this) closeQRModal();
         });
     </script>
+
+    <!-- ============================================================
+         VIDEO INTRO CDM86 — mostrato solo alla prima visita
+         ============================================================ -->
+    <div id="cdm86-video-intro" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+    ">
+        <video id="cdm86-intro-video" style="width:100%;height:100%;object-fit:cover;" autoplay muted playsinline>
+            <source src="/introcdm86.mp4" type="video/mp4">
+        </video>
+        <button id="cdm86-skip-btn" onclick="closeVideoIntro()" style="
+            position: absolute;
+            bottom: 40px;
+            right: 24px;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 20px;
+            padding: 9px 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            font-family: -apple-system, sans-serif;
+            letter-spacing: 0.03em;
+        ">Salta ›</button>
+    </div>
+    <script>
+        (function () {
+            var SEEN_KEY = 'cdm86_intro_seen';
+            var overlay = document.getElementById('cdm86-video-intro');
+            var video   = document.getElementById('cdm86-intro-video');
+
+            function closeVideoIntro() {
+                overlay.style.display = 'none';
+                video.pause();
+                try { localStorage.setItem(SEEN_KEY, '1'); } catch(e){}
+            }
+            window.closeVideoIntro = closeVideoIntro;
+
+            // Mostra solo se mai visto prima
+            var seen = false;
+            try { seen = !!localStorage.getItem(SEEN_KEY); } catch(e){}
+
+            if (!seen) {
+                overlay.style.display = 'flex';
+                // Al termine del video → chiudi
+                video.addEventListener('ended', closeVideoIntro);
+                // Se il video non si carica entro 2s → chiudi
+                video.addEventListener('error', closeVideoIntro);
+                setTimeout(function() {
+                    if (overlay.style.display !== 'none' && !video.duration) closeVideoIntro();
+                }, 2000);
+            }
+        })();
+    </script>
 </body>
 </html>

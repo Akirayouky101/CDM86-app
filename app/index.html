@@ -9,9 +9,57 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, 'SF Pro Display', sans-serif;
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            background: #000;
             min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        /* ── VIDEO INTRO ── */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #skip-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 24px;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            letter-spacing: 0.03em;
+            transition: background 0.2s;
+        }
+        #skip-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* ── SPLASH (visibile dopo il video) ── */
+        #splash-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            align-items: center;
+            justify-content: center;
+        }
+        #splash-screen.visible {
+            display: flex;
         }
         .splash {
             text-align: center;
@@ -45,10 +93,22 @@
     </style>
 </head>
 <body>
-    <div class="splash">
-        <div class="splash-logo">CDM86</div>
-        <div class="splash-sub">Promozioni Esclusive</div>
-        <div class="spinner"></div>
+
+    <!-- VIDEO INTRO -->
+    <div id="intro-overlay">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="/introcdm86.mp4" type="video/mp4">
+        </video>
+        <button id="skip-btn" onclick="skipIntro()">Salta ›</button>
+    </div>
+
+    <!-- SPLASH (mostrata mentre fa il check auth) -->
+    <div id="splash-screen">
+        <div class="splash">
+            <div class="splash-logo">CDM86</div>
+            <div class="splash-sub">Promozioni Esclusive</div>
+            <div class="spinner"></div>
+        </div>
     </div>
 
     <script>
@@ -56,25 +116,45 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5NzMzMzUsImV4cCI6MjA1NzU0OTMzNX0.y7PoGMTBpIwFMGFhhJn9nBcMwR2tsOzuCeFl1rkMpyA';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        (async () => {
+        let redirectDone = false;
+
+        // Avvia il check auth in parallelo al video
+        const authPromise = (async () => {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
-                // Controlla se è un collaboratore
                 const { data: collab } = await sb.from('collaborators')
                     .select('id')
                     .eq('user_id', session.user.id)
                     .single();
-
-                if (collab) {
-                    window.location.href = 'collaboratori/dashboard.html';
-                } else {
-                    window.location.href = 'public/promotions.html';
-                }
-            } else {
-                // Non loggato → pagina promozioni (visibile anche senza login)
-                window.location.href = 'public/promotions.html';
+                return collab ? 'collaboratori/dashboard.html' : 'public/promotions.html';
             }
+            return 'public/promotions.html';
         })();
+
+        async function doRedirect() {
+            if (redirectDone) return;
+            redirectDone = true;
+            document.getElementById('intro-overlay').style.display = 'none';
+            document.getElementById('splash-screen').classList.add('visible');
+            const dest = await authPromise;
+            window.location.href = dest;
+        }
+
+        function skipIntro() {
+            const video = document.getElementById('intro-video');
+            video.pause();
+            doRedirect();
+        }
+
+        // Quando il video finisce → redirect
+        document.getElementById('intro-video').addEventListener('ended', doRedirect);
+
+        // Fallback: se il video non si carica entro 1.5s → salta
+        document.getElementById('intro-video').addEventListener('error', doRedirect);
+        setTimeout(() => {
+            const video = document.getElementById('intro-video');
+            if (!video.duration && !redirectDone) doRedirect();
+        }, 1500);
     </script>
 </body>
 </html>

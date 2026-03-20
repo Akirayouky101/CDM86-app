@@ -7505,7 +7505,10 @@
                     <td>
                         <div style="font-weight:600;color:#0f172a;">${name}</div>
                         <div style="font-size:0.75rem;color:#94a3b8;">${c.email}</div>
-                        <div style="font-size:0.72rem;color:#cbd5e1;margin-top:2px;">Ref: ${c.referral_code || '—'}</div>
+                        <div style="font-size:0.72rem;color:#cbd5e1;margin-top:3px;display:flex;flex-direction:column;gap:2px;">
+                            <span title="Codice referral cdm86.it (utenti normali)">🌍 <strong style="color:#60a5fa;">${c.referral_code || '—'}</strong> <span style="color:#64748b;">.it</span></span>
+                            <span title="Codice referral cdm86.io (collaboratori)">🔷 <strong style="color:#a78bfa;">${c.referral_code_io || '—'}</strong> <span style="color:#64748b;">.io</span></span>
+                        </div>
                     </td>
                     <td>${statusHtml[c.status] || c.status}</td>
                     <td style="font-weight:600;">${network} <span style="font-size:0.75rem;color:#94a3b8;">(${c.users_count || 0} utenti, ${c.aziende_count || 0} az.)</span></td>
@@ -7595,6 +7598,14 @@
                 action: async () => {
                     // Se non ha referred_by_id, assegna l'admin (e8cde03d-2aa6-4ea6-a29f-43f290ae00ce)
                     const ADMIN_COLLAB_USER_ID = 'e8cde03d-2aa6-4ea6-a29f-43f290ae00ce';
+
+                    // Recupera il record attuale per avere il referral_code base
+                    const { data: collabData } = await window.supabaseClient
+                        .from('collaborators')
+                        .select('referral_code, referral_code_io')
+                        .eq('id', id)
+                        .single();
+
                     const update = {
                         status: 'active',
                         approved_at: new Date().toISOString()
@@ -7602,6 +7613,13 @@
                     if (!existingReferredById) {
                         update.referred_by_id = ADMIN_COLLAB_USER_ID;
                     }
+
+                    // Genera referral_code_io se non esiste ancora
+                    if (!collabData?.referral_code_io) {
+                        const baseCode = collabData?.referral_code || generateReferralCode();
+                        update.referral_code_io = baseCode.toUpperCase() + '_IO';
+                    }
+
                     const { error: updErr } = await window.supabaseClient
                         .from('collaborators').update(update).eq('id', id);
                     if (updErr) { showNotification('Errore', updErr.message, 'error'); return; }

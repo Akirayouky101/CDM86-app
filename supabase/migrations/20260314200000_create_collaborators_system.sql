@@ -94,7 +94,8 @@ SELECT
     c.total_pending,
     c.total_paid,
     c.users_count,
-    c.aziende_count
+    c.aziende_count,
+    c.referred_by_id
 FROM collaborators c;
 
 -- 6. RLS POLICIES
