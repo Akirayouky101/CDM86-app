@@ -7596,9 +7596,7 @@
                 confirmColor: '#16a34a',
                 showNote: false,
                 action: async () => {
-                    // Se non ha referred_by_id, assegna l'admin (e8cde03d-2aa6-4ea6-a29f-43f290ae00ce)
-                    const ADMIN_COLLAB_USER_ID = 'e8cde03d-2aa6-4ea6-a29f-43f290ae00ce';
-
+                    // referred_by_id punta a collaborators.id (self-ref FK), NON a users.id
                     // Recupera il record attuale per avere il referral_code base
                     const { data: collabData } = await window.supabaseClient
                         .from('collaborators')
@@ -7611,7 +7609,18 @@
                         approved_at: new Date().toISOString()
                     };
                     if (!existingReferredById) {
-                        update.referred_by_id = ADMIN_COLLAB_USER_ID;
+                        // Cerca il record collaboratore dell'admin tramite il suo users.id
+                        const ADMIN_PUBLIC_USER_ID = 'e8cde03d-2aa6-4ea6-a29f-43f290ae00ce';
+                        const { data: adminCollab } = await window.supabaseClient
+                            .from('collaborators')
+                            .select('id')
+                            .eq('user_id', ADMIN_PUBLIC_USER_ID)
+                            .maybeSingle();
+                        if (adminCollab?.id) {
+                            update.referred_by_id = adminCollab.id;
+                        }
+                        // Se l'admin non ha un record in collaborators, lasciamo referred_by_id NULL
+                        // per evitare la FK violation
                     }
 
                     // Genera referral_code_io se non esiste ancora
