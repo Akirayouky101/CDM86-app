@@ -222,14 +222,13 @@
             const { data: { user } } = await sb.auth.getUser();
             const { data: collab } = await sb.from('collaborators').select('id,status').eq('user_id', user.id).single();
 
-            if (collab) {
-                if (collab.status === 'suspended') {
-                    await sb.auth.signOut();
-                    alert.className = 'alert error';
-                    alert.textContent = 'Il tuo account collaboratore è sospeso.';
-                    return;
-                }
+            if (collab && collab.status === 'active') {
                 window.location.href = 'collaboratori/dashboard.html';
+            } else if (collab && collab.status !== 'active') {
+                await sb.auth.signOut();
+                alert.className = 'alert error';
+                alert.textContent = 'Il tuo account collaboratore non è attivo.';
+                return;
             } else {
                 // Utente normale → promozioni
                 window.location.href = 'public/promotions.html';

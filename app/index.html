@@ -123,9 +123,10 @@
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 const { data: collab } = await sb.from('collaborators')
-                    .select('id')
+                    .select('id, status')
                     .eq('user_id', session.user.id)
-                    .single();
+                    .eq('status', 'active')
+                    .maybeSingle();
                 return collab ? 'collaboratori/dashboard.html' : 'public/promotions.html';
             }
             return 'public/promotions.html';

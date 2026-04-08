@@ -502,11 +502,12 @@ async function handleLogin(event) {
                 .eq('auth_user_id', data.user.id)
                 .maybeSingle();
 
-            // Check if user is a collaborator — redirect to cdm86.io
+            // Check if user is an active collaborator — redirect to cdm86.io
             const { data: collabData } = await sb
                 .from('collaborators')
-                .select('id')
+                .select('id, status')
                 .eq('auth_user_id', data.user.id)
+                .eq('status', 'active')
                 .maybeSingle();
 
             // Redirect based on user type
