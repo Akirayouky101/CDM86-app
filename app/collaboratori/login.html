@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Accedi — CDM86</title>
+    <title>Portale Collaboratori — CDM86</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -35,6 +35,19 @@
         .logo-icon i { font-size: 2rem; color: #fbbf24; }
         .logo-title { font-size: 2rem; font-weight: 900; color: white; letter-spacing: 0.05em; }
         .logo-sub { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+
+        .badge-io {
+            display: inline-block;
+            background: rgba(251,191,36,0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.4);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-top: 8px;
+        }
 
         .card {
             background: rgba(255,255,255,0.05);
@@ -112,6 +125,7 @@
             display: none;
         }
         .alert.error { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); display: block; }
+        .alert.success { background: rgba(34,197,94,0.15); color: #86efac; border: 1px solid rgba(34,197,94,0.3); display: block; }
 
         .forgot {
             text-align: center;
@@ -146,12 +160,12 @@
     <div class="logo-area">
         <div class="logo-icon"><i class="fas fa-handshake"></i></div>
         <div class="logo-title">CDM86</div>
-        <div class="logo-sub">Promozioni Esclusive</div>
+        <div class="badge-io">PORTALE COLLABORATORI</div>
     </div>
 
     <div class="card">
-        <h2>Bentornato 👋</h2>
-        <p>Accedi al tuo account collaboratore</p>
+        <h2>Accedi al portale 🤝</h2>
+        <p>Inserisci le credenziali del tuo account collaboratore</p>
 
         <div class="alert" id="alertBox"></div>
 
@@ -169,9 +183,6 @@
         </button>
 
         <div class="forgot" onclick="doForgot()">Password dimenticata?</div>
-        <div style="text-align:center; margin-top:12px; font-size:0.82rem; color:#64748b;">
-            Non hai un account? <a href="public/register.html" style="color:#fbbf24; text-decoration:none; font-weight:600;">Registrati</a>
-        </div>
     </div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -183,23 +194,36 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHJqbG5nZnpmaWJjcGR4dGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5NzMzMzUsImV4cCI6MjA1NzU0OTMzNX0.y7PoGMTBpIwFMGFhhJn9nBcMwR2tsOzuCeFl1rkMpyA';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Enter per login
+        // Se già loggato come collaboratore attivo → redirect diretto
+        (async () => {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return;
+            const { data: collab } = await sb
+                .from('collaborators')
+                .select('id, status')
+                .eq('auth_user_id', session.user.id)
+                .maybeSingle();
+            if (collab && collab.status === 'active') {
+                window.location.href = 'dashboard.html';
+            }
+        })();
+
         document.getElementById('pwdInput').addEventListener('keydown', e => {
             if (e.key === 'Enter') doLogin();
         });
 
         async function doLogin() {
-            const email = document.getElementById('emailInput').value.trim();
-            const pwd   = document.getElementById('pwdInput').value;
-            const alert = document.getElementById('alertBox');
-            const btn   = document.getElementById('loginBtn');
+            const email   = document.getElementById('emailInput').value.trim();
+            const pwd     = document.getElementById('pwdInput').value;
+            const alertEl = document.getElementById('alertBox');
+            const btn     = document.getElementById('loginBtn');
 
-            alert.className = 'alert';
-            alert.textContent = '';
+            alertEl.className = 'alert';
+            alertEl.textContent = '';
 
             if (!email || !pwd) {
-                alert.className = 'alert error';
-                alert.textContent = 'Inserisci email e password.';
+                alertEl.className = 'alert error';
+                alertEl.textContent = 'Inserisci email e password.';
                 return;
             }
 
@@ -212,29 +236,54 @@
             btn.disabled = false;
 
             if (error) {
-                alert.className = 'alert error';
-                alert.textContent = 'Email o password non corretti.';
+                alertEl.className = 'alert error';
+                alertEl.textContent = 'Email o password non corretti.';
                 return;
             }
 
-            // Sul .it tutti gli utenti vanno alle promozioni (collaboratori accedono da cdm86.io)
-            window.location.href = 'public/promotions.html';
+            // Verifica che sia un collaboratore attivo
+            const { data: { user } } = await sb.auth.getUser();
+            const { data: collab } = await sb
+                .from('collaborators')
+                .select('id, status')
+                .eq('auth_user_id', user.id)
+                .maybeSingle();
+
+            if (!collab) {
+                await sb.auth.signOut();
+                alertEl.className = 'alert error';
+                alertEl.textContent = 'Nessun account collaboratore trovato per questa email.';
+                return;
+            }
+
+            if (collab.status !== 'active') {
+                await sb.auth.signOut();
+                alertEl.className = 'alert error';
+                const msg = {
+                    pending:   'La tua richiesta è ancora in approvazione.',
+                    suspended: 'Il tuo account è sospeso. Contatta l\'amministratore.',
+                    banned:    'Il tuo account è stato disattivato.'
+                };
+                alertEl.textContent = msg[collab.status] || 'Account non attivo.';
+                return;
+            }
+
+            window.location.href = 'dashboard.html';
         }
 
         async function doForgot() {
             const email = document.getElementById('emailInput').value.trim();
+            const alertEl = document.getElementById('alertBox');
             if (!email) {
-                document.getElementById('alertBox').className = 'alert error';
-                document.getElementById('alertBox').textContent = 'Inserisci prima la tua email.';
+                alertEl.className = 'alert error';
+                alertEl.textContent = 'Inserisci prima la tua email.';
                 return;
             }
             await sb.auth.resetPasswordForEmail(email, {
                 redirectTo: 'https://cdm86.it/collaboratori/profilo.html'
             });
-            document.getElementById('alertBox').className = 'alert error';
-            document.getElementById('alertBox').style.background = 'rgba(34,197,94,0.15)';
-            document.getElementById('alertBox').style.color = '#86efac';
-            document.getElementById('alertBox').textContent = 'Email inviata! Controlla la tua casella.';
+            alertEl.className = 'alert success';
+            alertEl.textContent = 'Email inviata! Controlla la tua casella.';
         }
     </script>
 </body>

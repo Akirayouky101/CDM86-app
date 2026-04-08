@@ -121,15 +121,8 @@
         // Avvia il check auth in parallelo al video
         const authPromise = (async () => {
             const { data: { session } } = await sb.auth.getSession();
-            if (session) {
-                const { data: collab } = await sb.from('collaborators')
-                    .select('id, status')
-                    .eq('user_id', session.user.id)
-                    .eq('status', 'active')
-                    .maybeSingle();
-                return collab ? 'collaboratori/dashboard.html' : 'public/promotions.html';
-            }
-            return 'public/promotions.html';
+            // I collaboratori accedono solo da cdm86.io, qui trattiamo tutti come utenti normali
+            return session ? 'public/promotions.html' : 'public/promotions.html';
         })();
 
         async function doRedirect() {

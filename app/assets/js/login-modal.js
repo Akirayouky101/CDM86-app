@@ -502,21 +502,9 @@ async function handleLogin(event) {
                 .eq('auth_user_id', data.user.id)
                 .maybeSingle();
 
-            // Check if user is an active collaborator — redirect to cdm86.io
-            const { data: collabData } = await sb
-                .from('collaborators')
-                .select('id, status')
-                .eq('auth_user_id', data.user.id)
-                .eq('status', 'active')
-                .maybeSingle();
-
-            // Redirect based on user type
+            // Redirect based on user type (collaboratori accedono solo da cdm86.io)
             setTimeout(() => {
-                if (collabData) {
-                    // It's a collaborator — send to dedicated portal
-                    console.log('✅ Collaborator login — redirecting to collaborator dashboard');
-                    window.location.href = '/public/collaborator-dashboard.html';
-                } else if (orgData) {
+                if (orgData) {
                     // It's an organization
                     console.log('✅ Organization login:', orgData.name);
                     window.location.href = '/public/dashboard.html';
