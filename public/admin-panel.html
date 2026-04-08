@@ -45,54 +45,251 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: var(--dark);
+            display: flex;
         }
 
-        /* Navbar */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 200;
+            transform: translateX(0);
+            transition: transform 0.3s ease, width 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed { width: 64px; min-width: 64px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            min-height: 70px;
+            overflow: hidden;
+        }
+
+        .sidebar-logo-icon {
+            width: 36px; height: 36px;
+            min-width: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(220,38,38,0.3);
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: white;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(220,178,0,0.13);
+            border: 1px solid rgba(220,178,0,0.35);
+            border-radius: 6px;
+            padding: 2px 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .sidebar-badge:hover { background: rgba(220,178,0,0.22); }
+        .sidebar-badge i { color: #b8860b; font-size: 0.65rem; }
+        .sidebar-badge span { font-size: 0.72rem; font-weight: 700; color: #92700a; letter-spacing: 0.06em; font-family: monospace; }
+
+        .sidebar-labels { transition: opacity 0.2s; }
+        .sidebar.collapsed .sidebar-labels { opacity: 0; pointer-events: none; }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            position: relative;
+            font-family: inherit;
+        }
+
+        .nav-item i { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+        .nav-item .nav-label { transition: opacity 0.2s; overflow: hidden; }
+        .sidebar.collapsed .nav-item .nav-label { opacity: 0; width: 0; }
+
+        .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+        .nav-item.active {
+            background: rgba(220,38,38,0.18);
+            color: #f87171;
+        }
+        .nav-item.active i { color: #dc2626; }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            width: 18px; height: 18px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed .nav-badge { display: none; }
+
+        /* Tooltip on collapsed */
+        .sidebar.collapsed .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 56px;
+            background: #1e293b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 12px 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+        .sidebar-user-icon {
+            width: 34px; height: 34px; min-width: 34px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; font-size: 0.9rem;
+        }
+        .sidebar-user-info { overflow: hidden; }
+        .sidebar-user-info .name { font-size: 0.78rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+        .sidebar-user-info .role { font-size: 0.68rem; color: #64748b; }
+        .sidebar.collapsed .sidebar-user-info,
+        .sidebar.collapsed .sidebar-labels { opacity: 0; overflow: hidden; width: 0; }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .btn-logout i { width: 18px; text-align: center; flex-shrink: 0; }
+        .btn-logout .nav-label { transition: opacity 0.2s; }
+        .sidebar.collapsed .btn-logout .nav-label { opacity: 0; width: 0; overflow: hidden; }
+        .btn-logout:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        /* Toggle button */
+        .sidebar-toggle {
+            position: fixed;
+            top: 16px;
+            left: 248px;
+            z-index: 300;
+            width: 28px; height: 28px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            color: var(--gray-600);
+            transition: left 0.3s ease, transform 0.3s ease;
+            font-size: 0.75rem;
+        }
+        .sidebar-toggle.collapsed { left: 72px; }
+
+        /* Overlay mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+        }
+
+        /* Main content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: 240px;
+            transition: margin-left 0.3s ease;
+            min-width: 0;
+        }
+        .main-wrapper.expanded { margin-left: 64px; }
+
+        /* Top bar (sostituisce navbar) */
+        .topbar {
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 0.875rem 1.5rem;
             position: sticky;
             top: 0;
-            z-index: 1000;
-        }
-
-        .navbar-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .brand-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.25rem;
-            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
-        }
-
-        .brand h1 {
-            font-size: 1.5rem;
+        .topbar-title {
+            font-size: 1.1rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+        .topbar-title i { color: var(--primary); }
 
         .user-info {
             display: flex;
@@ -171,50 +368,8 @@
         /* Main Container */
         .container {
             max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem 2rem;
-        }
-
-        /* Tabs */
-        .tabs {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 0.5rem;
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
-        }
-
-        .tab {
-            flex: 1;
-            min-width: 150px;
-            background: transparent;
-            border: none;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            color: var(--gray-600);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .tab:hover {
-            background: var(--gray-100);
-            color: var(--gray-900);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
-        }
-
-        .tab i {
-            margin-right: 0.5rem;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem 2rem;
         }
 
         /* Tab Content */
@@ -680,21 +835,27 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
+            .sidebar {
+                transform: translateX(-100%);
+                width: 240px !important;
+                min-width: 240px !important;
             }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar.collapsed { width: 240px !important; min-width: 240px !important; }
+            .sidebar.collapsed .sidebar-labels,
+            .sidebar.collapsed .nav-item .nav-label,
+            .sidebar.collapsed .btn-logout .nav-label,
+            .sidebar.collapsed .sidebar-user-info { opacity: 1; width: auto; overflow: visible; }
+            .sidebar.collapsed .nav-badge { display: flex; }
+            .sidebar-overlay.active { display: block; }
+            .sidebar-toggle { display: none; }
+
+            .main-wrapper { margin-left: 0 !important; }
+            .topbar { padding: 0.75rem 1rem; }
 
             .container {
                 padding: 0 1rem 1rem;
                 margin: 1rem auto;
-            }
-
-            .tabs {
-                overflow-x: auto;
-            }
-
-            .tab {
-                min-width: 120px;
             }
 
             .stats-grid {
@@ -704,7 +865,22 @@
             .modal-dialog {
                 margin: 0.5rem;
             }
+
+            /* hamburger nel topbar */
+            .topbar-hamburger { display: flex !important; }
         }
+
+        .topbar-hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        .topbar-hamburger:hover { background: var(--gray-100); }
 
         /* ========== REPORT DETAILS MODAL ========== */
         .report-details-modal {
@@ -1281,72 +1457,113 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-content">
-            <div class="brand">
-                <div class="brand-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <h1>CDM86</h1>
-                    <div id="adminReferralBadge" title="Codice referral admin — clicca per copiare"
-                         onclick="copyAdminReferral(this)"
-                         style="display:flex;align-items:center;gap:0.35rem;background:rgba(220,178,0,0.13);border:1px solid rgba(220,178,0,0.35);border-radius:8px;padding:3px 10px;cursor:pointer;transition:background 0.15s;">
-                        <i class="fas fa-tag" style="color:#b8860b;font-size:0.7rem;"></i>
-                        <span id="adminReferralCode" style="font-size:0.75rem;font-weight:700;color:#92700a;letter-spacing:0.06em;font-family:monospace;">274EB3F4</span>
-                    </div>
-                </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon">
+                <i class="fas fa-shield-alt"></i>
             </div>
-            <div class="user-info">
-                <span class="user-badge" id="adminEmail">
-                    <i class="fas fa-user-shield"></i> Admin
-                </span>
-                <button class="btn btn-secondary btn-sm" onclick="handleLogout()">
-                    <i class="fas fa-sign-out-alt"></i> Esci
-                </button>
+            <div class="sidebar-labels">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="sidebar-title">CDM86</span>
+                </div>
+                <div class="sidebar-badge" id="adminReferralBadge" onclick="copyAdminReferral(this)" title="Codice referral admin — clicca per copiare" style="margin-top:4px;">
+                    <i class="fas fa-tag"></i>
+                    <span id="adminReferralCode">274EB3F4</span>
+                </div>
             </div>
         </div>
-    </nav>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="switchTab('users')" data-tab="users" data-tooltip="Utenti">
+                <i class="fas fa-users"></i>
+                <span class="nav-label">Utenti</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('reports')" data-tab="reports" data-tooltip="Segnalazioni">
+                <i class="fas fa-flag"></i>
+                <span class="nav-label">Segnalazioni</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('requests')" data-tab="requests" data-tooltip="Richieste">
+                <i class="fas fa-building"></i>
+                <span class="nav-label">Richieste</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('contracts')" data-tab="contracts" data-tooltip="Contratti">
+                <i class="fas fa-file-contract"></i>
+                <span class="nav-label">Contratti</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('points')" data-tab="points" data-tooltip="Sistema Punti">
+                <i class="fas fa-trophy"></i>
+                <span class="nav-label">Sistema Punti</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('analytics')" data-tab="analytics" data-tooltip="Analytics">
+                <i class="fas fa-chart-line"></i>
+                <span class="nav-label">Analytics</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('promotions')" data-tab="promotions" data-tooltip="Promozioni">
+                <i class="fas fa-tags"></i>
+                <span class="nav-label">Promozioni</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('zones')" data-tab="zones" data-tooltip="Zone CAP">
+                <i class="fas fa-map-marked-alt"></i>
+                <span class="nav-label">Zone CAP</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('collaboratori')" data-tab="collaboratori" id="tabCollaboratori" data-tooltip="Collaboratori">
+                <i class="fas fa-handshake"></i>
+                <span class="nav-label">Collaboratori</span>
+                <span class="nav-badge" id="cfCountPending">0</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('scansioni')" data-tab="scansioni" data-tooltip="Scansioni">
+                <i class="fas fa-qrcode"></i>
+                <span class="nav-label">Scansioni</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="sidebar-user-info sidebar-labels">
+                    <div class="name" id="adminEmail">Admin</div>
+                    <div class="role">Amministratore</div>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-label">Esci</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Toggle button (desktop) -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Comprimi/Espandi menu">
+        <i class="fas fa-chevron-left" id="toggleIcon"></i>
+    </button>
+
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+    <!-- Main wrapper -->
+    <div class="main-wrapper" id="mainWrapper">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <button class="topbar-hamburger" id="topbarHamburger" onclick="openMobileSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="topbar-title" id="topbarTitle">
+                    <i class="fas fa-users"></i> Utenti
+                </span>
+            </div>
+            <div class="user-info">
+                <span class="user-badge" style="display:none;" id="adminEmailBadge">
+                    <i class="fas fa-user-shield"></i> Admin
+                </span>
+            </div>
+        </div>
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('users')">
-                <i class="fas fa-users"></i> Utenti
-            </button>
-            <button class="tab" onclick="switchTab('reports')">
-                <i class="fas fa-flag"></i> Segnalazioni
-            </button>
-            <button class="tab" onclick="switchTab('requests')">
-                <i class="fas fa-building"></i> Richieste
-            </button>
-            <button class="tab" onclick="switchTab('contracts')">
-                <i class="fas fa-file-contract"></i> Contratti
-            </button>
-            <button class="tab" onclick="switchTab('points')">
-                <i class="fas fa-trophy"></i> Sistema Punti
-            </button>
-            <button class="tab" onclick="switchTab('analytics')">
-                <i class="fas fa-chart-line"></i> Analytics
-            </button>
-            <button class="tab" onclick="switchTab('promotions')">
-                <i class="fas fa-tags"></i> Promozioni
-            </button>
-            <button class="tab" onclick="switchTab('zones')">
-                <i class="fas fa-map-marked-alt"></i> Zone CAP
-            </button>
-            <button class="tab" onclick="switchTab('collaboratori')" id="tabCollaboratori">
-                <i class="fas fa-handshake"></i> Collaboratori
-                <span id="cfCountPending" style="background:#dc2626;color:white;border-radius:50%;width:18px;height:18px;font-size:0.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span>
-            </button>
-            <button class="tab" onclick="switchTab('scansioni')">
-                <i class="fas fa-qrcode"></i> Scansioni
-            </button>
-
-        </div>
-
         <!-- USERS TAB -->
         <div id="usersTab" class="tab-content active">
             <!-- Stats -->
@@ -3141,7 +3358,7 @@
                     return false;
                 }
 
-                document.getElementById('adminEmail').innerHTML = `<i class="fas fa-user-shield"></i> ${userData.email}`;
+                document.getElementById('adminEmail').textContent = userData.email;
                 return true;
             } catch (error) {
                 console.error('Error:', error);
@@ -3292,15 +3509,63 @@
             renderUsers(filtered);
         };
 
+        // ── Sidebar toggle (desktop collapse) ──────────────────────────
+        const SIDEBAR_TITLES = {
+            users: 'Utenti', reports: 'Segnalazioni', requests: 'Richieste',
+            contracts: 'Contratti', points: 'Sistema Punti', analytics: 'Analytics',
+            promotions: 'Promozioni', zones: 'Zone CAP', collaboratori: 'Collaboratori', scansioni: 'Scansioni'
+        };
+        const SIDEBAR_ICONS = {
+            users: 'fa-users', reports: 'fa-flag', requests: 'fa-building',
+            contracts: 'fa-file-contract', points: 'fa-trophy', analytics: 'fa-chart-line',
+            promotions: 'fa-tags', zones: 'fa-map-marked-alt', collaboratori: 'fa-handshake', scansioni: 'fa-qrcode'
+        };
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const wrapper = document.getElementById('mainWrapper');
+            const toggle  = document.getElementById('sidebarToggle');
+            const icon    = document.getElementById('toggleIcon');
+            sidebar.classList.toggle('collapsed');
+            wrapper.classList.toggle('expanded');
+            if (sidebar.classList.contains('collapsed')) {
+                toggle.classList.add('collapsed');
+                icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+            } else {
+                toggle.classList.remove('collapsed');
+                icon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+            }
+        }
+
+        function openMobileSidebar() {
+            document.getElementById('adminSidebar').classList.add('mobile-open');
+            document.getElementById('sidebarOverlay').classList.add('active');
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('adminSidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
         // Tab Switching
         window.switchTab = function(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            // Update sidebar nav items
+            document.querySelectorAll('.nav-item[data-tab]').forEach(t => t.classList.remove('active'));
+            const activeBtn = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Update topbar title
+            const topbarTitle = document.getElementById('topbarTitle');
+            if (topbarTitle) {
+                topbarTitle.innerHTML = `<i class="fas ${SIDEBAR_ICONS[tabName] || 'fa-circle'}"></i> ${SIDEBAR_TITLES[tabName] || tabName}`;
+            }
 
             // Update content
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Close mobile sidebar after selection
+            closeMobileSidebar();
 
             // Load data if needed
             if (tabName === 'users') {
@@ -8210,5 +8475,9 @@
         if (window.supabaseClient) loadPendingCollabBadge();
 
     </script>
+
+</div><!-- /container -->
+</div><!-- /main-wrapper -->
+
 </body>
 </html>
